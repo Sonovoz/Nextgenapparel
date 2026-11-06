@@ -8,7 +8,7 @@ Entorno local del equipo: **Herd (gratuito)** para PHP y el servidor web, y **XA
 - **XAMPP**: solo se usa el módulo **MySQL**. **No arranques Apache**: ocupa el puerto 80, el mismo que Herd.
 - **Git para Windows**.
 
-Todos los comandos se escriben en **PowerShell**.
+Los comandos sirven tanto en **Símbolo del sistema (cmd)** como en **PowerShell**, salvo donde se indica.
 
 ## 1. Arrancar la base de datos
 
@@ -16,7 +16,7 @@ Todos los comandos se escriben en **PowerShell**.
 2. Pulsa **Start** solo en **MySQL**.
 3. Crea la base de datos (una sola vez):
 
-```powershell
+```bat
 C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE IF NOT EXISTS nextgenapparel CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 ```
 
@@ -24,33 +24,44 @@ C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE IF NOT EXISTS nextgenap
 
 ## 2. Descargar el proyecto (una sola vez)
 
-Herd sirve automáticamente las carpetas que hay dentro de `C:\Users\<tu usuario>\Herd`.
+Puedes clonarlo en la carpeta que quieras, por ejemplo en tu carpeta de usuario:
 
-```powershell
-cd $HOME\Herd
-git clone https://github.com/Sonovoz/Nextgenapparel.git nextgenapparel
+```bat
+cd %USERPROFILE%
+git clone -b fase-1-base https://github.com/Sonovoz/Nextgenapparel.git nextgenapparel
 cd nextgenapparel
-git checkout fase-1-base
 ```
+
+> En PowerShell, usa `cd $HOME` en lugar de `cd %USERPROFILE%`.
 
 ## 3. Instalar y preparar
 
-```powershell
+```bat
 composer install
 copy .env.example .env
 php artisan key:generate
 php artisan migrate
 ```
 
-## 4. Abrirlo en el navegador
+## 4. Enlazarlo con Herd (una sola vez)
+
+Herd solo sirve automáticamente las carpetas que están dentro de `C:\Users\<tu usuario>\Herd`. Si el proyecto está en otra carpeta, enlázalo desde la carpeta del proyecto:
+
+```bat
+herd link nextgenapparel
+```
+
+Si el comando `herd` no se reconoce: Herd → **Sites** → **Add** (enlazar un proyecto existente), elige la carpeta del proyecto y ponle de nombre `nextgenapparel`.
+
+## 5. Abrirlo en el navegador
 
 - Portada: <http://nextgenapparel.test> (redirige a `/es`)
 - En inglés: <http://nextgenapparel.test/en>
 
 ## Cada vez que haya un paso nuevo
 
-```powershell
-cd $HOME\Herd\nextgenapparel
+```bat
+cd %USERPROFILE%\nextgenapparel
 git pull
 composer install
 php artisan migrate
@@ -60,8 +71,9 @@ php artisan migrate
 
 | Síntoma | Solución |
 |---|---|
-| `nextgenapparel.test` no carga | Comprueba que Apache de XAMPP está **parado** y que Herd está abierto |
+| `nextgenapparel.test` no carga | Comprueba que el proyecto está enlazado (paso 4), que Apache de XAMPP está **parado** y que Herd está abierto |
+| «El sistema no puede encontrar la ruta especificada» con `$HOME` | Estás en cmd: usa `%USERPROFILE%` (o abre PowerShell) |
 | `SQLSTATE[HY000] [2002]` al migrar | El módulo MySQL de XAMPP no está arrancado |
-| `Unknown database 'nextgenapparel'` | Repite el paso 1.3 |
+| `Unknown database 'nextgenapparel'` | Repite el punto 3 del paso 1 |
 | Error de versión de PHP en `composer install` | En Herd → *PHP*, activa la 8.3 o superior |
 | Página en blanco o error 500 | Revisa `storage\logs\laravel.log` |
