@@ -22,10 +22,12 @@ RUN apk add --no-cache \
         icu-dev libzip-dev libpng-dev libjpeg-turbo-dev freetype-dev libwebp-dev imagemagick-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j"$(nproc)" pdo_mysql intl zip bcmath gd exif opcache pcntl \
-    && pecl install redis imagick \
+    && curl -fsSL -o /tmp/redis.tgz https://pecl.php.net/get/redis-6.1.0.tgz \
+    && curl -fsSL -o /tmp/imagick.tgz https://pecl.php.net/get/imagick-3.8.0.tgz \
+    && pecl install /tmp/redis.tgz /tmp/imagick.tgz \
     && docker-php-ext-enable redis imagick \
     && apk del .compilacion \
-    && rm -rf /tmp/pear
+    && rm -rf /tmp/pear /tmp/*.tgz
 
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/zz-nextgenapparel.ini
 COPY --from=composer /usr/bin/composer /usr/bin/composer
