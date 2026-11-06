@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Dominio\Sistema\Acceso\Rol;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -11,13 +11,19 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'activo'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
+
+    /** @var array<string, mixed> */
+    protected $attributes = [
+        'activo' => true,
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -29,18 +35,28 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'activo' => 'boolean',
         ];
     }
 
     /**
-     * Acceso al backend.
-     *
-     * De momento solo existen usuarios del equipo (no hay registro de
-     * clientes), así que todos pueden entrar. En el paso 1.3 se limita a los
-     * cuatro roles del backend, antes de que existan cuentas de clientes.
+     * Solo entran en el backend los usuarios activos con uno de los cuatro
+     * roles del equipo. Los futuros clientes no tendrán ninguno.
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->activo && $this->hasAnyRole(Rol::valores());
+    }
+
+    public function rol(): ?Rol
+    {
+        $nombre = $this->getRoleNames()->first();
+
+        return $nombre !== null ? Rol::tryFrom($nombre) : null;
+    }
+
+    public function esSuperadministrador(): bool
+    {
+        return $this->hasRole(Rol::Superadministrador->value);
     }
 }

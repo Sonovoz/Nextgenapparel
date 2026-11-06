@@ -306,4 +306,4 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 | Fase | Estado | Fecha |
 |---|---|---|
 | Planteamiento | Completado | 2026-11-06 |
-| 1. Base | En curso — pasos 1.1 (Laravel, idiomas, portada) y 1.2 (backend Filament, menú tipo WooCommerce) completados y verificados por el cliente en Herd | 2026-11-06 |
+| 1. Base | En curso — pasos 1.1 y 1.2 verificados en Herd; paso 1.3 (roles y permisos, gestión de usuarios) completado, pendiente de verificar en Herd | 2026-11-06 |

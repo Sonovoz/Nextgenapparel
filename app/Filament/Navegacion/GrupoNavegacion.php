@@ -21,6 +21,12 @@ enum GrupoNavegacion: string implements HasLabel
     case Herramientas = 'herramientas';
     case UsuariosYRoles = 'usuarios';
 
+    /** Permiso que da acceso a todas las secciones del grupo. */
+    public function permiso(): string
+    {
+        return 'seccion.'.$this->value;
+    }
+
     public function getLabel(): string
     {
         return match ($this) {

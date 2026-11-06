@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Pendientes;
 
+use App\Filament\Navegacion\GrupoNavegacion;
 use Filament\Pages\Page;
 
 /**
@@ -23,6 +24,15 @@ abstract class PaginaPendiente extends Page
 
     /** Equivalente en WooCommerce, si lo hay. */
     protected static ?string $equivalenteWooCommerce = null;
+
+    /** Solo la ven los roles que tienen acceso a su grupo del menú. */
+    public static function canAccess(): bool
+    {
+        $grupo = static::getNavigationGroup();
+
+        return $grupo instanceof GrupoNavegacion
+            && (bool) auth()->user()?->can($grupo->permiso());
+    }
 
     public function getTitle(): string
     {

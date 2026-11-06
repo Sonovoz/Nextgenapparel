@@ -68,6 +68,8 @@ php artisan nga:crear-administrador
 
 Después entra en <http://nextgenapparel.test/admin> con ese correo y contraseña.
 
+El comando crea un **Superadministrador**. El resto de usuarios se crean desde el backend, en **Usuarios y roles → Usuarios**. También se puede indicar el rol en el comando con `--rol=administrador`, `--rol=gestor-tienda` o `--rol=produccion`.
+
 ## Cada vez que haya un paso nuevo
 
 ```bat

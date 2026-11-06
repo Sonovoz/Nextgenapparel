@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Consola;
 
+use App\Dominio\Sistema\Acceso\Rol;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -24,6 +25,31 @@ class CrearAdministradorTest extends TestCase
         $this->assertSame('Ana Pérez', $usuario->name);
         $this->assertNotSame('una-clave-larga-123', $usuario->password);
         $this->assertTrue(Hash::check('una-clave-larga-123', $usuario->password));
+        $this->assertTrue($usuario->esSuperadministrador());
+    }
+
+    public function test_crea_un_usuario_con_otro_rol(): void
+    {
+        $this->artisan('nga:crear-administrador', [
+            '--nombre' => 'Luis',
+            '--email' => 'luis@ejemplo.es',
+            '--password' => 'una-clave-larga-123',
+            '--rol' => 'produccion',
+        ])->assertSuccessful();
+
+        $this->assertSame(Rol::Produccion, User::where('email', 'luis@ejemplo.es')->firstOrFail()->rol());
+    }
+
+    public function test_rechaza_un_rol_que_no_existe(): void
+    {
+        $this->artisan('nga:crear-administrador', [
+            '--nombre' => 'Luis',
+            '--email' => 'luis@ejemplo.es',
+            '--password' => 'una-clave-larga-123',
+            '--rol' => 'jefe',
+        ])->assertFailed();
+
+        $this->assertDatabaseCount('users', 0);
     }
 
     public function test_pregunta_los_datos_si_no_se_indican(): void

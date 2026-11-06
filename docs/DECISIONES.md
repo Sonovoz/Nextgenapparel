@@ -62,3 +62,13 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D44 | Alta de administradores con el comando en español `php artisan nga:crear-administrador` (contraseña de 12 caracteres como mínimo) | El comando de Filament pregunta en inglés |
 | D45 | En el panel, solo `IdiomaBackend` se declara como middleware persistente de Livewire | Declarar persistentes las cookies o la sesión las procesa dos veces en cada petición de Livewire y provoca el error 419 al entrar (detectado en Herd). Cubierto por un test |
 | D46 | Las comprobaciones en navegador se hacen con un dominio `http://*.test`, no con `127.0.0.1` | En `localhost` el navegador envía `Sec-Fetch-Site` y Laravel 13 no llega a comprobar la sesión, lo que ocultó el error anterior |
+
+## 2026-11-06 — Fase 1, paso 1.3
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D47 | Cuatro **roles fijos** definidos en el código (`Rol`): Superadministrador, Administrador, Gestor de la tienda y Producción. `php artisan migrate` los crea o actualiza; la página «Roles y permisos» los muestra, no los edita | Roles estables y probados; cambiar un rol es una decisión, no un clic |
+| D48 | Un permiso por grupo del menú (`seccion.<grupo>`). Gestor de la tienda: pedidos, producción, clientes, productos, marketing y **analíticas**; sin ajustes ni herramientas, como en WooCommerce | Respuesta del cliente: el gestor ve y muestra las analíticas |
+| D49 | Solo entran en el backend usuarios **activos** con uno de los cuatro roles. Los usuarios no se borran: se desactivan | Los futuros clientes no tendrán rol; conservar historial |
+| D50 | Nadie puede cambiar su propio rol ni desactivarse, y siempre queda al menos un superadministrador activo | Evitar quedarse sin acceso al backend |
+| D51 | Los usuarios creados antes de los roles pasan a Superadministrador al migrar | Eran del equipo; nadie se queda fuera |

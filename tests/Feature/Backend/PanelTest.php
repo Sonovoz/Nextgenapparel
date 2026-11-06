@@ -39,7 +39,7 @@ class PanelTest extends TestCase
 
     public function test_un_usuario_entra_con_su_correo_y_contrasena(): void
     {
-        $usuario = User::factory()->create(['password' => 'clave-segura-123']);
+        $usuario = $this->usuarioConRol(atributos: ['password' => 'clave-segura-123']);
 
         Livewire::test(Login::class)
             ->set('data.email', $usuario->email)
@@ -53,7 +53,7 @@ class PanelTest extends TestCase
 
     public function test_una_contrasena_incorrecta_no_entra(): void
     {
-        $usuario = User::factory()->create(['password' => 'clave-segura-123']);
+        $usuario = $this->usuarioConRol(atributos: ['password' => 'clave-segura-123']);
 
         Livewire::test(Login::class)
             ->set('data.email', $usuario->email)
@@ -66,7 +66,7 @@ class PanelTest extends TestCase
 
     public function test_el_escritorio_se_muestra_al_entrar(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->usuarioConRol())
             ->get('/admin')
             ->assertOk()
             ->assertSee('Escritorio');
@@ -76,7 +76,7 @@ class PanelTest extends TestCase
     {
         $etiquetas = array_map(fn (GrupoNavegacion $g) => $g->getLabel(), GrupoNavegacion::cases());
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->usuarioConRol())
             ->get('/admin')
             ->assertSeeInOrder(['Escritorio', ...$etiquetas]);
     }
@@ -84,7 +84,7 @@ class PanelTest extends TestCase
     #[DataProvider('paginasPendientes')]
     public function test_cada_seccion_pendiente_explica_cuando_llega(string $clase): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->usuarioConRol())
             ->get($clase::getUrl(panel: 'admin'))
             ->assertOk()
             ->assertSee($clase::getNavigationLabel())
@@ -95,7 +95,7 @@ class PanelTest extends TestCase
     {
         $paginas = self::clasesPendientes();
 
-        $this->assertCount(24, $paginas);
+        $this->assertCount(22, $paginas);
 
         foreach ($paginas as $clase) {
             $this->assertInstanceOf(GrupoNavegacion::class, $clase::getNavigationGroup(), $clase);
@@ -106,7 +106,7 @@ class PanelTest extends TestCase
 
     public function test_el_backend_no_carga_nada_de_servidores_externos(): void
     {
-        $html = $this->actingAs(User::factory()->create(['name' => 'Ana Pérez']))
+        $html = $this->actingAs($this->usuarioConRol(atributos: ['name' => 'Ana Pérez']))
             ->get('/admin')
             ->assertOk()
             ->getContent();
