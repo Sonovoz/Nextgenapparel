@@ -37,7 +37,7 @@ class Colas implements Comprobacion
 
             return Resultado::fallo('La cola no procesa trabajos'.$desde.'. '.(app()->isLocal()
                 ? 'En local se procesa sola mientras esté abierto «php artisan schedule:work».'
-                : 'Revisa el contenedor «horizon».'));
+                : 'Revisa el contenedor «cola».'));
         }
 
         $fallidos = rescue(fn () => DB::table(config('queue.failed.table', 'failed_jobs'))->count(), 0, report: false);

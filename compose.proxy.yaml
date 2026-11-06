@@ -1,0 +1,14 @@
+# Conecta el servidor web del entorno con Caddy (docker/caddy), que recibe
+# el tráfico de los dominios y gestiona el SSL.
+services:
+  web:
+    networks:
+      default:
+      proxy:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME:?}-web
+
+networks:
+  proxy:
+    external: true
+    name: proxy

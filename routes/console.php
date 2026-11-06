@@ -26,7 +26,7 @@ Schedule::job(new LatidoCola)
     ->description('Latido de la cola')
     ->everyMinute();
 
-// En local no hay Horizon: la propia tarea programada procesa la cola.
+// En local no hay contenedor de cola: la propia tarea programada la procesa.
 Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')
     ->description('Procesar la cola (solo en local)')
     ->everyMinute()

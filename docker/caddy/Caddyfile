@@ -1,0 +1,15 @@
+{
+	email {$CORREO_SSL}
+}
+
+{$DOMINIO_PRODUCCION} {
+	encode gzip
+	reverse_proxy nga-produccion-web:80
+}
+
+{$DOMINIO_PRUEBAS} {
+	encode gzip
+	# El entorno de pruebas no debe aparecer en Google.
+	header X-Robots-Tag "noindex, nofollow"
+	reverse_proxy nga-pruebas-web:80
+}

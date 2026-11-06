@@ -39,11 +39,36 @@ copy /Y RUTA\copias-temp\base-de-datos.sqlite %USERPROFILE%\nextgenapparel\datab
 
 ## Servidor (Docker, MariaDB)
 
-Se completará en el paso 1.7 con los nombres de los contenedores. Esquema:
+Ejemplo para producción (para pruebas, cambia `nga-produccion` por `nga-pruebas`).
 
-1. Activar el modo mantenimiento: `php artisan down`.
-2. Descomprimir el ZIP con la contraseña de las copias.
-3. Importar la base de datos: `mariadb -u USUARIO -p BASE < db-dumps/mariadb-BASE.sql`.
-4. Copiar `app/` sobre `storage/app`.
-5. `php artisan migrate --force`, `php artisan optimize:clear` y `php artisan up`.
-6. Comprobar **Herramientas → Estado del sistema**.
+1. Descarga la copia desde el backend o cópiala del volumen y descomprímela en `/tmp/restaurar` con la contraseña de las copias (`7z x copia.zip -o/tmp/restaurar`).
+2. Para la aplicación sin parar la base de datos:
+
+```bash
+docker compose -p nga-produccion exec app php artisan down
+docker compose -p nga-produccion stop cola tareas
+```
+
+3. Importa la base de datos (usuario y contraseña del `.env` del entorno):
+
+```bash
+docker compose -p nga-produccion exec -T mariadb mariadb -u nextgenapparel -p nextgenapparel < /tmp/restaurar/db-dumps/mariadb-nextgenapparel.sql
+```
+
+4. Restaura los archivos:
+
+```bash
+docker compose -p nga-produccion cp /tmp/restaurar/app/. app:/var/www/html/storage/app/
+```
+
+5. Vuelve a ponerla en marcha y comprueba:
+
+```bash
+docker compose -p nga-produccion exec app php artisan migrate --force
+docker compose -p nga-produccion exec app php artisan optimize:clear
+docker compose -p nga-produccion start cola tareas
+docker compose -p nga-produccion exec app php artisan up
+docker compose -p nga-produccion exec app php artisan nga:comprobar-salud --sin-avisos
+```
+
+6. Borra `/tmp/restaurar`: contiene datos personales.

@@ -24,6 +24,6 @@ Portal de pedidos de prendas personalizadas con impresión DTF (camisetas, polos
 ## Pila técnica
 
 - PHP 8.x, Laravel (última versión estable), Filament (backend), Livewire (frontend).
-- MariaDB/MySQL, Redis (colas, caché), Laravel Horizon, Scheduler.
+- MariaDB/MySQL, Redis (colas, caché, sesiones), contenedores de cola (`queue:work`) y de tareas programadas (`schedule:work`).
 - Imagick (análisis de PNG y maquetas), generación de PDF, ZIP nativo.
-- Docker Compose con entornos de **pruebas** y **producción** en el mismo dedicado.
+- Local: Herd + SQLite. Servidor: Docker Compose con entornos de **pruebas** y **producción** en el mismo dedicado, detrás de Caddy (`docs/DESPLIEGUE_OVH.md`).

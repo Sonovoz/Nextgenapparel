@@ -104,3 +104,12 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D66 | Sin los correos del paquete (en inglés): un fallo de copia o de la prueba de restauración va al log de errores como crítico y avisa; el estado del sistema vigila que haya copia de menos de 26 horas | Un solo canal de avisos, en español |
 | D67 | Se copian la base de datos y `storage/app` (archivos subidos); el `.env` no | El `.env` contiene contraseñas: se guarda aparte |
 | D68 | Copia diaria a las 01:30, limpieza a la 01:00 y **prueba de restauración automática** los domingos; también con botón y con `nga:copia-seguridad --probar`. Descarga solo para el Superadministrador, con registro en la actividad | Una copia que no se prueba no garantiza nada (D26) |
+
+## 2026-11-06 — Fase 1, paso 1.7
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D69 | Sin **Laravel Horizon**: la cola la procesa un contenedor `cola` con `queue:work`, que Docker reinicia si se cae | Horizon exige extensiones de PHP que no existen en Windows y rompería `composer install` en Herd; para el volumen previsto basta `queue:work` |
+| D70 | Un solo `compose.yaml` para pruebas y producción (proyectos `nga-pruebas` y `nga-produccion`, cada uno con su `.env`, base de datos y volúmenes) y **Caddy** delante, compartido, con SSL automático. Mailpit solo en pruebas | Mismo código y configuración en los dos entornos; certificados sin mantenimiento |
+| D71 | Imagen PHP 8.4 (Alpine) con las extensiones del proyecto (Imagick, Redis, intl, gd, bcmath, zip, pdo_mysql) y `mariadb-client` para las copias; Nginx en otra imagen con los archivos públicos; contenedores sin root, con reinicio automático, comprobación de salud y logs limitados | Seguridad y autosuficiencia (D25) |
+| D72 | Despliegue con un comando: `./docker/desplegar.sh pruebas|produccion` construye, arranca y espera a que todo esté sano; las migraciones se aplican al arrancar `app` | Criterio de aceptación de la fase 1 |
