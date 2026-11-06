@@ -1,5 +1,6 @@
 <?php
 
+use App\Dominio\Sistema\Errores\RegistrarError;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,6 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Herramientas → Log de errores (paso 1.4). Laravel sigue escribiendo
+        // además cada error en storage/logs.
+        $exceptions->report(function (Throwable $error): void {
+            app(RegistrarError::class)($error);
+        });
+
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

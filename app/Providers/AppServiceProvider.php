@@ -2,9 +2,15 @@
 
 namespace App\Providers;
 
+use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\User;
+use App\Policies\ActividadPolicy;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Activitylog\Models\Activity;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,5 +32,21 @@ class AppServiceProvider extends ServiceProvider
         // quedarse sin superadministradores) están en UserPolicy y no se
         // saltan: la política se consulta antes que este atajo.
         Gate::after(fn (User $usuario, string $habilidad, ?bool $resultado) => $resultado ?? ($usuario->esSuperadministrador() ? true : null));
+
+        Gate::policy(Activity::class, ActividadPolicy::class);
+
+        // Registro de actividad: accesos al backend.
+        Event::listen(Login::class, function (Login $evento): void {
+            if ($evento->user instanceof User) {
+                Actividad::apuntar('accesos', 'Inicio de sesión', $evento->user, quien: $evento->user);
+            }
+        });
+
+        Event::listen(Failed::class, function (Failed $evento): void {
+            Actividad::apuntar('accesos', 'Intento de acceso fallido', $evento->user instanceof User ? $evento->user : null, [
+                'email' => mb_substr((string) ($evento->credentials['email'] ?? ''), 0, 255),
+                'ip' => request()->ip(),
+            ]);
+        });
     }
 }

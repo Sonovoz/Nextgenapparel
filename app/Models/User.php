@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'password', 'activo'])]
@@ -18,7 +20,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory, HasRoles, LogsActivity, Notifiable;
 
     /** @var array<string, mixed> */
     protected $attributes = [
@@ -58,5 +60,24 @@ class User extends Authenticatable implements FilamentUser
     public function esSuperadministrador(): bool
     {
         return $this->hasRole(Rol::Superadministrador->value);
+    }
+
+    /**
+     * Registro de actividad: altas y cambios de nombre, correo y estado. La
+     * contraseña nunca se registra; los cambios de rol se apuntan aparte.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('usuarios')
+            ->logOnly(['name', 'email', 'activo'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn (string $evento): string => match ($evento) {
+                'created' => 'Usuario creado',
+                'updated' => 'Usuario modificado',
+                'deleted' => 'Usuario eliminado',
+                default => $evento,
+            });
     }
 }

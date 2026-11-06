@@ -70,6 +70,20 @@ Después entra en <http://nextgenapparel.test/admin> con ese correo y contraseñ
 
 El comando crea un **Superadministrador**. El resto de usuarios se crean desde el backend, en **Usuarios y roles → Usuarios**. También se puede indicar el rol en el comando con `--rol=administrador`, `--rol=gestor-tienda` o `--rol=produccion`.
 
+## 7. Alertas de errores (opcional en local)
+
+Para probar las alertas de errores críticos, añade al final de tu `.env`:
+
+```
+ALERTAS_EMAIL=asanchezdelolmo1971@gmail.com
+```
+
+En local el correo **no se envía**: se escribe al final de `storage\logs\laravel.log`. Para provocar un error de prueba: en el backend, **Herramientas → Log de errores → Provocar error de prueba**, o en la consola:
+
+```bat
+php artisan nga:error-prueba
+```
+
 ## Cada vez que haya un paso nuevo
 
 ```bat

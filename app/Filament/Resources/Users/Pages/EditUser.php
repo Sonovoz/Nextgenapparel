@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Dominio\Sistema\Acceso\ReglasUsuarios;
 use App\Dominio\Sistema\Acceso\Rol;
+use App\Dominio\Sistema\Actividad\Actividad;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use Filament\Resources\Pages\EditRecord;
@@ -44,8 +45,14 @@ class EditUser extends EditRecord
         return DB::transaction(function () use ($record, $data, $rol): User {
             $record->update($data);
 
-            if ($rol !== null) {
+            $rolAnterior = $record->rol();
+
+            if ($rol !== null && $rol !== $rolAnterior) {
                 $record->syncRoles([$rol->value]);
+                Actividad::apuntar('usuarios', 'Rol cambiado', $record, [
+                    'old' => ['rol' => $rolAnterior?->getLabel()],
+                    'attributes' => ['rol' => $rol->getLabel()],
+                ]);
             }
 
             return $record;

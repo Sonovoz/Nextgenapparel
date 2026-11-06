@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Dominio\Sistema\Acceso\Rol;
+use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
@@ -62,6 +63,7 @@ class CrearAdministrador extends Command
             'password' => $datos['password'],
         ]);
         $usuario->assignRole($datos['rol']);
+        Actividad::apuntar('usuarios', 'Rol asignado desde la consola', $usuario, ['attributes' => ['rol' => Rol::from($datos['rol'])->getLabel()]]);
 
         $rol = Rol::from($datos['rol'])->getLabel();
         $this->components->info("Usuario creado con el rol {$rol}. Entra en ".url('/admin')." con {$datos['email']}.");

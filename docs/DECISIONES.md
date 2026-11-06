@@ -72,3 +72,15 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D49 | Solo entran en el backend usuarios **activos** con uno de los cuatro roles. Los usuarios no se borran: se desactivan | Los futuros clientes no tendrán rol; conservar historial |
 | D50 | Nadie puede cambiar su propio rol ni desactivarse, y siempre queda al menos un superadministrador activo | Evitar quedarse sin acceso al backend |
 | D51 | Los usuarios creados antes de los roles pasan a Superadministrador al migrar | Eran del equipo; nadie se queda fuera |
+
+## 2026-11-06 — Fase 1, paso 1.4
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D52 | **Log de errores propio** (tabla `registro_errores`): un error por huella (tipo + archivo + línea), con contador, primera y última vez, página, usuario y traza resumida. Laravel sigue escribiendo además en `storage/logs` | Autosuficiente y sin enviar datos a servicios externos |
+| D53 | Son **críticos** los errores internos de PHP y los de base de datos, conexión y archivos (lista en `config/errores.php`). Solo los críticos avisan por correo, como máximo uno por hora y error, salvo que se resuelva y vuelva | Avisar de lo importante sin saturar el correo |
+| D54 | La alerta se envía en el momento (sin cola). Si la base de datos no responde, se envía igualmente y la repetición se controla con un archivo | El caso más grave es justo cuando falla la base de datos o la cola |
+| D55 | No se guardan la parte `?…` de las URL ni contraseñas; en las acciones del backend se guarda la página del usuario, no la ruta interna de Livewire | Datos personales y tokens fuera del log; información útil para corregir |
+| D56 | Los errores resueltos se borran a los 90 días; un error resuelto que vuelve se reabre solo | Log limpio y sin perder reincidencias |
+| D57 | **Registro de actividad** con spatie/laravel-activitylog: altas y cambios de usuarios (sin contraseñas), cambios de rol con antes y después, inicios de sesión, intentos fallidos (correo e IP) y errores resueltos o reabiertos. Solo lectura, para quien tiene Herramientas | Saber quién cambió qué y cuándo, y detectar intentos de acceso |
+| D58 | Botón «Provocar error de prueba» (solo Superadministrador) y comando `nga:error-prueba` | Comprobar en cualquier entorno que el log y la alerta funcionan (criterio de aceptación de la fase 1) |

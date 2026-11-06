@@ -109,11 +109,13 @@ class RolesTest extends TestCase
 
     public function test_la_migracion_hace_superadministradores_a_los_usuarios_anteriores(): void
     {
-        $this->artisan('migrate:rollback', ['--step' => 1])->assertSuccessful();
+        $migracion = 'database/migrations/2026_11_06_161400_sincronizar_roles_y_permisos.php';
+        $this->artisan('migrate:rollback', ['--path' => $migracion])->assertSuccessful();
+        Role::query()->delete();
 
         $anterior = User::factory()->create();
 
-        $this->artisan('migrate')->assertSuccessful();
+        $this->artisan('migrate', ['--path' => $migracion])->assertSuccessful();
 
         $this->assertTrue($anterior->fresh()->esSuperadministrador());
     }

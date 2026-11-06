@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Dominio\Sistema\Acceso\Rol;
+use App\Dominio\Sistema\Actividad\Actividad;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use Filament\Resources\Pages\CreateRecord;
@@ -26,6 +27,7 @@ class CreateUser extends CreateRecord
         return DB::transaction(function () use ($data, $rol): User {
             $usuario = User::create($data);
             $usuario->syncRoles([$rol->value]);
+            Actividad::apuntar('usuarios', 'Rol asignado', $usuario, ['attributes' => ['rol' => $rol->getLabel()]]);
 
             return $usuario;
         });
