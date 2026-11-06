@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('archivo', 500)->nullable();
             $table->unsignedInteger('linea')->nullable();
             $table->unsignedInteger('ocurrencias')->default(1);
-            $table->timestamp('primera_vez');
-            $table->timestamp('ultima_vez')->index();
+            $table->dateTime('primera_vez');
+            $table->dateTime('ultima_vez')->index();
             $table->string('url', 2000)->nullable();
             $table->string('metodo', 10)->nullable();
             $table->foreignId('usuario_id')->nullable()->constrained('users')->nullOnDelete();
