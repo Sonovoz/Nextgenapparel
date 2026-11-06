@@ -36,3 +36,16 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D28 | Sin Klarna ni mensajes de financiación; pagos solo con Redsys (tarjeta y Bizum) | Klarna aparecía solo en la captura de referencia. |
 | D29 | Las cantidades por talla se eligen en el configurador, no en la ficha de producto | Ficha limpia y parte operativa en un solo sitio. |
 | D30 | Fotos de origen manual y/o API de proveedor, conviviendo; fotos con modelo opcionales | El cliente las subirá o vendrán de un proveedor, quizá ambas. |
+
+## 2026-11-06 — Fase 1, paso 1.1
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D31 | Desarrollo local en Windows con **Herd (gratuito)** y la **MariaDB de XAMPP** (solo el módulo MySQL; Apache apagado). Docker se usa solo en el servidor de OVH | Entorno que ya tiene el equipo. En local, colas y caché en base de datos y correo al log |
+| D32 | **Laravel 13** (13.40 al instalar), PHP 8.3 como mínimo | Última versión estable disponible |
+| D33 | Backend solo en **español**; frontend en español e inglés con prefijo en la URL (`/es`, `/en`) y redirección según el idioma del navegador | Respuesta del cliente; URLs por idioma necesarias para el SEO (hreflang) |
+| D34 | Zona horaria **Europe/Madrid** | Fechas de pedidos, plazos y facturas en hora peninsular |
+| D35 | Fuentes del sistema, sin cargar Google Fonts desde los servidores de Google; si más adelante se usa una fuente propia, se aloja en el servidor | Evitar enviar la IP de los visitantes a terceros (RGPD) |
+| D36 | Las alertas del sistema se envían al correo facilitado por el cliente, configurado en el `.env` del servidor (no en el repositorio) | Datos personales fuera del código |
+| D37 | Retención de copias provisional 7 diarias, 4 semanales y 12 mensuales; copia externa (OVH Object Storage) preparada pero desactivada hasta que se contrate | Respuesta del cliente: se decide más adelante |
+| D38 | Dominios provisionales hasta que el cliente los confirme | Respuesta del cliente |
