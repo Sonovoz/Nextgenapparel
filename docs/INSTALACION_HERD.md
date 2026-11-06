@@ -100,6 +100,7 @@ php artisan migrate
 | `nextgenapparel.test` no carga | Comprueba que el proyecto está enlazado (paso 4), que Apache de XAMPP está **parado** y que Herd está abierto |
 | «El sistema no puede encontrar la ruta especificada» con `$HOME` | Estás en cmd: usa `%USERPROFILE%` (o abre PowerShell) |
 | `SQLSTATE[HY000] [2002]` al migrar | El módulo MySQL de XAMPP no está arrancado |
+| `Base table or view not found` / `doesn't exist` | Falta ejecutar `php artisan migrate` tras el `git pull` |
 | `Unknown database 'nextgenapparel'` | Repite el punto 3 del paso 1 |
 | Error de versión de PHP en `composer install` | En Herd → *PHP*, activa la 8.3 o superior |
 | Página en blanco o error 500 | Revisa `storage\logs\laravel.log` |

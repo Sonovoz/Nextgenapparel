@@ -34,10 +34,18 @@ class RegistroErrorResource extends Resource
 
     protected static ?string $slug = 'log-errores';
 
-    /** Número de errores pendientes junto al enlace del menú. */
+    /**
+     * Número de errores pendientes junto al enlace del menú. Si no se puede
+     * contar (tabla sin crear, base de datos caída), no se muestra: el menú
+     * nunca debe impedir usar el backend.
+     */
     public static function getNavigationBadge(): ?string
     {
-        $pendientes = RegistroError::where('estado', EstadoError::Pendiente)->count();
+        $pendientes = rescue(
+            fn (): int => RegistroError::where('estado', EstadoError::Pendiente)->count(),
+            0,
+            report: false,
+        );
 
         return $pendientes > 0 ? (string) $pendientes : null;
     }

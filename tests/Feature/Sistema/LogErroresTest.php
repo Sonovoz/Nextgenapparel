@@ -200,6 +200,13 @@ class LogErroresTest extends TestCase
         Notification::assertSentOnDemand(AlertaErrorCritico::class, fn (AlertaErrorCritico $n) => ! $n->registro->exists);
     }
 
+    public function test_el_backend_se_abre_aunque_falte_la_tabla_de_errores(): void
+    {
+        Schema::drop('registro_errores');
+
+        $this->actingAs($this->usuarioConRol())->get('/admin')->assertOk();
+    }
+
     public function test_registrar_nunca_lanza_excepciones(): void
     {
         Schema::drop('registro_errores');
