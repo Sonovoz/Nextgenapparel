@@ -38,6 +38,27 @@ return [
             'report' => false,
         ],
 
+        // Copias de seguridad en el propio servidor (fuera de storage/app).
+        'copias' => [
+            'driver' => 'local',
+            'root' => storage_path('copias'),
+            'throw' => true,
+            'report' => false,
+        ],
+
+        // Copia fuera del servidor: OVH Object Storage (compatible con S3).
+        'copias_externas' => [
+            'driver' => 's3',
+            'key' => env('COPIAS_EXTERNAS_KEY'),
+            'secret' => env('COPIAS_EXTERNAS_SECRET'),
+            'region' => env('COPIAS_EXTERNAS_REGION', 'gra'),
+            'bucket' => env('COPIAS_EXTERNAS_BUCKET'),
+            'endpoint' => env('COPIAS_EXTERNAS_ENDPOINT'),
+            'use_path_style_endpoint' => true,
+            'throw' => true,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

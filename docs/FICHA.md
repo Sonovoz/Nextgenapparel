@@ -306,4 +306,4 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 | Fase | Estado | Fecha |
 |---|---|---|
 | Planteamiento | Completado | 2026-11-06 |
-| 1. Base | En curso — pasos 1.1 a 1.4 verificados en Herd; paso 1.5 (estado del sistema y tareas programadas) completado, pendiente de verificar | 2026-11-06 |
+| 1. Base | En curso — pasos 1.1 a 1.5 verificados en Herd; paso 1.6 (copias de seguridad) completado, pendiente de verificar | 2026-11-06 |

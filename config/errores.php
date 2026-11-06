@@ -1,5 +1,6 @@
 <?php
 
+use App\Dominio\Sistema\Errores\ErrorDeCopia;
 use App\Dominio\Sistema\Errores\ErrorDePrueba;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\LostConnectionException;
@@ -28,6 +29,7 @@ return [
         LostConnectionException::class,
         FileNotFoundException::class,
         ErrorDePrueba::class,
+        ErrorDeCopia::class,
     ],
 
     // Los errores resueltos se eliminan pasados estos días.

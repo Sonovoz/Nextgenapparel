@@ -7,6 +7,7 @@ use App\Dominio\Sistema\Salud\Comprobaciones\Cache;
 use App\Dominio\Sistema\Salud\Comprobaciones\Colas;
 use App\Dominio\Sistema\Salud\Comprobaciones\Comprobacion;
 use App\Dominio\Sistema\Salud\Comprobaciones\Configuracion;
+use App\Dominio\Sistema\Salud\Comprobaciones\CopiasSeguridad;
 use App\Dominio\Sistema\Salud\Comprobaciones\Correo;
 use App\Dominio\Sistema\Salud\Comprobaciones\ErroresCriticos;
 use App\Dominio\Sistema\Salud\Comprobaciones\EspacioDisco;
@@ -35,6 +36,7 @@ class ComprobarSalud
             Colas::class,
             Correo::class,
             EspacioDisco::class,
+            CopiasSeguridad::class,
             ErroresCriticos::class,
             Configuracion::class,
         ];

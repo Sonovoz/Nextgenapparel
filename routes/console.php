@@ -51,3 +51,18 @@ Schedule::command('activitylog:clean --force')
 Schedule::command('queue:prune-failed --hours=720')
     ->description('Borrar trabajos fallidos de hace más de 30 días')
     ->dailyAt('03:30');
+
+// Copias de seguridad (paso 1.6): limpieza según la retención, copia diaria
+// y prueba de restauración semanal.
+Schedule::command('backup:clean --disable-notifications')
+    ->description('Borrar copias antiguas (7 diarias, 4 semanales, 12 mensuales)')
+    ->dailyAt('01:00');
+
+Schedule::command('nga:copia-seguridad')
+    ->description('Copia de seguridad de la base de datos y los archivos')
+    ->dailyAt('01:30')
+    ->withoutOverlapping();
+
+Schedule::command('nga:copia-seguridad --probar')
+    ->description('Probar que la última copia se puede restaurar')
+    ->weeklyOn(0, '04:00');

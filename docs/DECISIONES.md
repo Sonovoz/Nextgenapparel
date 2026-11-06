@@ -95,3 +95,12 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D62 | Se comprueba cada 5 minutos. Aviso por correo al fallar algo, al fallar algo más, si sigue fallando pasada una hora, y cuando todo vuelve a funcionar | Saber cuándo actuar y cuándo está resuelto, sin saturar |
 | D63 | «Latidos» de tareas programadas y cola en archivos (`storage/framework/latidos`) | Detectar procesos parados aunque fallen la base de datos o la caché |
 | D64 | En local, `php artisan schedule:work` ejecuta las tareas y procesa la cola (no hay Horizon en Windows). Limpiezas nocturnas: errores resueltos (90 días), actividad (1 año), trabajos fallidos (30 días) | Un solo comando en local; base de datos limpia sola |
+
+## 2026-11-06 — Fase 1, paso 1.6
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D65 | Copias con **spatie/laravel-backup** (comprime, cifra con AES-256, reparte entre discos y aplica la retención 7/4/12). La base de datos SQLite se copia con `VACUUM INTO` | El paquete necesita el programa `sqlite3` para SQLite, que no existe en Windows |
+| D66 | Sin los correos del paquete (en inglés): un fallo de copia o de la prueba de restauración va al log de errores como crítico y avisa; el estado del sistema vigila que haya copia de menos de 26 horas | Un solo canal de avisos, en español |
+| D67 | Se copian la base de datos y `storage/app` (archivos subidos); el `.env` no | El `.env` contiene contraseñas: se guarda aparte |
+| D68 | Copia diaria a las 01:30, limpieza a la 01:00 y **prueba de restauración automática** los domingos; también con botón y con `nga:copia-seguridad --probar`. Descarga solo para el Superadministrador, con registro en la actividad | Una copia que no se prueba no garantiza nada (D26) |

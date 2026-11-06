@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Dominio\Sistema\Actividad\Actividad;
+use App\Dominio\Sistema\Errores\ErrorDeCopia;
 use App\Models\User;
 use App\Policies\ActividadPolicy;
 use Illuminate\Auth\Events\Failed;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\Backup\Events\BackupHasFailed;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,6 +36,12 @@ class AppServiceProvider extends ServiceProvider
         Gate::after(fn (User $usuario, string $habilidad, ?bool $resultado) => $resultado ?? ($usuario->esSuperadministrador() ? true : null));
 
         Gate::policy(Activity::class, ActividadPolicy::class);
+
+        // Una copia de seguridad fallida va al log de errores como crítica
+        // (y avisa por correo).
+        Event::listen(BackupHasFailed::class, function (BackupHasFailed $evento): void {
+            report(new ErrorDeCopia('La copia de seguridad ha fallado: '.$evento->exception->getMessage(), previous: $evento->exception));
+        });
 
         // Registro de actividad: accesos al backend.
         Event::listen(Login::class, function (Login $evento): void {
