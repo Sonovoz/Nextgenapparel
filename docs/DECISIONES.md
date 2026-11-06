@@ -49,3 +49,14 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D36 | Las alertas del sistema se envían al correo facilitado por el cliente, configurado en el `.env` del servidor (no en el repositorio) | Datos personales fuera del código |
 | D37 | Retención de copias provisional 7 diarias, 4 semanales y 12 mensuales; copia externa (OVH Object Storage) preparada pero desactivada hasta que se contrate | Respuesta del cliente: se decide más adelante |
 | D38 | Dominios provisionales hasta que el cliente los confirme | Respuesta del cliente |
+
+## 2026-11-06 — Fase 1, paso 1.2
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D39 | **Filament 5** (5.11 al instalar) con **Livewire 4**, panel en `/admin`, color gris neutro | Última versión estable; sobrio y coherente con el frontend |
+| D40 | El menú del backend se define con una enumeración (`GrupoNavegacion`) en el orden de WooCommerce. Las secciones aún no construidas aparecen con su descripción y la fase en que llegan | El equipo ve desde el principio dónde estará cada cosa |
+| D41 | Grupo **Producción** propio (órdenes de trabajo y hoja de compra), separado de Pedidos | El rol Producción solo verá ese grupo (paso 1.3) |
+| D42 | Avatar de iniciales generado en el servidor, en lugar del servicio externo ui-avatars.com que trae Filament | No enviar nombres de administradores a terceros (D35) |
+| D43 | Traducciones de Laravel al español (laravel-lang) publicadas en `lang/` dentro del repositorio; el paquete solo se usa en desarrollo | Mensajes de validación y error en español sin dependencias en producción |
+| D44 | Alta de administradores con el comando en español `php artisan nga:crear-administrador` (contraseña de 12 caracteres como mínimo) | El comando de Filament pregunta en inglés |
