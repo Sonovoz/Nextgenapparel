@@ -86,3 +86,12 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D58 | Botón «Provocar error de prueba» (solo Superadministrador) y comando `nga:error-prueba` | Comprobar en cualquier entorno que el log y la alerta funcionan (criterio de aceptación de la fase 1) |
 | D59 | Fechas obligatorias con `dateTime()`, no con `timestamp()`; las pruebas con MariaDB se hacen con la configuración de XAMPP (`explicit_defaults_for_timestamp` desactivado y modo estricto). Un test revisa las migraciones | La MariaDB de XAMPP rechazaba la tabla del log de errores («Invalid default value for 'ultima_vez'») |
 | D60 | En local, **SQLite** (un archivo, `database/database.sqlite`) en lugar de la MariaDB de XAMPP; sustituye a la parte de base de datos de D31. En el servidor, MariaDB. Cada paso se sigue probando contra MariaDB en modo estricto y con la configuración de XAMPP antes de entregarlo | Como en Clave de Alma: sin XAMPP ni servidores que arrancar en local |
+
+## 2026-11-06 — Fase 1, paso 1.5
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D61 | **Comprobación de salud propia** (no spatie/laravel-health): base de datos, caché, tareas programadas, colas, correo SMTP, espacio en disco, errores críticos pendientes y configuración. Estado en un archivo (`storage/framework/salud.json`) | El paquete usaba la caché (en base de datos) para no repetir avisos: con la base de datos caída no habría avisado. Además, mensajes en español |
+| D62 | Se comprueba cada 5 minutos. Aviso por correo al fallar algo, al fallar algo más, si sigue fallando pasada una hora, y cuando todo vuelve a funcionar | Saber cuándo actuar y cuándo está resuelto, sin saturar |
+| D63 | «Latidos» de tareas programadas y cola en archivos (`storage/framework/latidos`) | Detectar procesos parados aunque fallen la base de datos o la caché |
+| D64 | En local, `php artisan schedule:work` ejecuta las tareas y procesa la cola (no hay Horizon en Windows). Limpiezas nocturnas: errores resueltos (90 días), actividad (1 año), trabajos fallidos (30 días) | Un solo comando en local; base de datos limpia sola |

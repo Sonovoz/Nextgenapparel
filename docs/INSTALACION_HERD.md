@@ -75,6 +75,16 @@ En local el correo **no se envía**: se escribe al final de `storage\logs\larave
 php artisan nga:error-prueba
 ```
 
+## 7. Tareas automáticas
+
+En el servidor se ejecutan solas. En tu ordenador, cuando quieras que funcionen (comprobación de salud, colas, limpiezas), deja abierta una ventana de comandos con:
+
+```bat
+php artisan schedule:work
+```
+
+Para comprobar el estado del sistema desde la consola: `php artisan nga:comprobar-salud`.
+
 ## Cada vez que haya un paso nuevo
 
 ```bat
