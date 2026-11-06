@@ -55,6 +55,11 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+            ])
+            // Solo el idioma se repite en las peticiones internas de Livewire.
+            // Marcar como persistentes las cookies o la sesión las procesaría
+            // dos veces y rompería la sesión (error 419 al entrar).
+            ->middleware([
                 IdiomaBackend::class,
             ], isPersistent: true)
             ->authMiddleware([

@@ -60,3 +60,5 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D42 | Avatar de iniciales generado en el servidor, en lugar del servicio externo ui-avatars.com que trae Filament | No enviar nombres de administradores a terceros (D35) |
 | D43 | Traducciones de Laravel al español (laravel-lang) publicadas en `lang/` dentro del repositorio; el paquete solo se usa en desarrollo | Mensajes de validación y error en español sin dependencias en producción |
 | D44 | Alta de administradores con el comando en español `php artisan nga:crear-administrador` (contraseña de 12 caracteres como mínimo) | El comando de Filament pregunta en inglés |
+| D45 | En el panel, solo `IdiomaBackend` se declara como middleware persistente de Livewire | Declarar persistentes las cookies o la sesión las procesa dos veces en cada petición de Livewire y provoca el error 419 al entrar (detectado en Herd). Cubierto por un test |
+| D46 | Las comprobaciones en navegador se hacen con un dominio `http://*.test`, no con `127.0.0.1` | En `localhost` el navegador envía `Sec-Fetch-Site` y Laravel 13 no llega a comprobar la sesión, lo que ocultó el error anterior |

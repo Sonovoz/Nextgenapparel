@@ -5,10 +5,16 @@ namespace Tests\Feature\Backend;
 use App\Filament\AvatarIniciales;
 use App\Filament\Navegacion\GrupoNavegacion;
 use App\Filament\Pages\Pendientes\PaginaPendiente;
+use App\Http\Middleware\IdiomaBackend;
 use App\Models\User;
 use Filament\Auth\Pages\Login;
 use Filament\Facades\Filament;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -118,6 +124,31 @@ class PanelTest extends TestCase
 
         $this->assertStringStartsWith('data:image/svg+xml;base64,', $avatar);
         $this->assertStringContainsString('>AP</text>', base64_decode(substr($avatar, 26)));
+    }
+
+    /**
+     * Regresión del error 419 al entrar en Herd (http://nextgenapparel.test).
+     *
+     * Livewire repite el middleware persistente en sus peticiones internas,
+     * que ya pasan por el grupo «web». Si las cookies o la sesión fueran
+     * persistentes se procesarían dos veces y la sesión se perdería. En los
+     * tests no se ve como 419 porque Laravel no comprueba el token CSRF.
+     */
+    public function test_solo_el_idioma_es_middleware_persistente_de_livewire(): void
+    {
+        $persistentes = Livewire::getPersistentMiddleware();
+
+        $this->assertContains(IdiomaBackend::class, $persistentes);
+
+        foreach ([
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ShareErrorsFromSession::class,
+            PreventRequestForgery::class,
+        ] as $middleware) {
+            $this->assertNotContains($middleware, $persistentes, $middleware.' no debe ser persistente');
+        }
     }
 
     public function test_el_frontend_no_se_ve_afectado(): void
