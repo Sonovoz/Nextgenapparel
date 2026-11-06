@@ -32,3 +32,7 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D24 | «Repetir pedido» se adelanta a la versión 1 | Coste bajo y ventas repetidas desde el primer mes. |
 | D25 | Docker con entorno de pruebas y de producción en el dedicado de OVH | Ningún cambio llega a producción sin probarse. |
 | D26 | Copias de seguridad fuera del servidor y con prueba de restauración periódica | Una copia no probada no garantiza nada. |
+| D27 | Sin precios tachados ni porcentajes de descuento; la ficha muestra solo «Desde X €/ud. · IVA incluido» | Decisión del cliente. Las ofertas se explican en el configurador. |
+| D28 | Sin Klarna ni mensajes de financiación; pagos solo con Redsys (tarjeta y Bizum) | Klarna aparecía solo en la captura de referencia. |
+| D29 | Las cantidades por talla se eligen en el configurador, no en la ficha de producto | Ficha limpia y parte operativa en un solo sitio. |
+| D30 | Fotos de origen manual y/o API de proveedor, conviviendo; fotos con modelo opcionales | El cliente las subirá o vendrán de un proveedor, quizá ambas. |

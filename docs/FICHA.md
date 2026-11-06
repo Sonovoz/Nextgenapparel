@@ -45,7 +45,8 @@ Portal web para **calcular, vender y gestionar pedidos de prendas personalizadas
 
 | Tarea | Necesaria para | Estado |
 |---|---|---|
-| Fotos frontal y trasera de cada prenda y color, con encuadre uniforme | Fase 5 (maqueta) | Pendiente |
+| Fotos frontal y trasera de cada prenda y color, con encuadre uniforme (manual y/o API de proveedor); fotos con modelo opcionales | Fase 5 (maqueta) | Pendiente |
+| Tabla de medidas por talla de cada prenda | Fase 2 (guía de tallas) | Pendiente |
 | Medidas máximas de impresión: frontal, pecho, espalda grande | Fase 3 (precios) y fase 4 (calidad) | Pendiente |
 | Comercio Redsys con claves de pruebas; solicitar Bizum | Fase 7 | Pendiente |
 | Proveedor SMTP y dominio con SPF, DKIM y DMARC | Fase 6 | Pendiente |
@@ -89,6 +90,8 @@ Importes en céntimos (enteros). Campos traducibles marcados con *(es/en)*.
 - **zonas_impresion**: id, nombre *(es/en)* (frontal, pecho, espalda grande), ancho_max_cm, alto_max_cm, cara (delantera/trasera).
 - **prenda_zona**: prenda_id, zona_id, precio_zona, coste_zona — zonas disponibles por prenda.
 - **fotos_maqueta**: prenda_id, color_id, cara, imagen, rectangulo_zona (x, y, ancho, alto por zona).
+- **fotos_galeria**: prenda_id, color_id (opcional), tipo (modelo / detalle / plana), imagen, orden, origen (manual / api).
+- **tabla_medidas**: prenda_id, talla_id, largo_cm, ancho_cm, manga_cm (para la guía de tallas).
 - **proveedores**: id, nombre, tipo_conector (manual / api), configuracion.
 
 ### Clientes
@@ -209,6 +212,21 @@ Línea de progreso con fechas, maquetas, resumen del pedido, factura en PDF, seg
 - **Orden de trabajo** en PDF por pedido.
 - **Paquete ZIP**: diseños originales (`PED-0042_L1_frontal.png`), orden de trabajo y maquetas.
 - **Hoja de compra**: agrupa las variantes necesarias de todos los pedidos pagados, descontando el stock.
+
+---
+
+## 8 bis. Ficha de producto
+
+Referencia de estilo: elegante y limpia, con mucho espacio en blanco, fotos grandes y tipografía cuidada. Prototipo visual en el canvas «NextGen Apparel — Ficha de producto».
+
+- **Galería:** vista delantera y trasera que cambia con el color elegido, botón para mostrar las **zonas de impresión** sobre la prenda y miniaturas (delantera, trasera, foto con modelo, detalle del tejido).
+- **Información:** familia, nombre, precio **«Desde X €/ud. · IVA incluido»**, aviso del pedido mínimo, colores, tallas disponibles (solo informativas), enlace a la guía de tallas y zonas de impresión con su medida máxima.
+- **Acciones:** «Personalizar con mi diseño» (abre el configurador) y «Solicitar presupuesto».
+- **Pasos:** sube tu diseño → elige tallas y cantidades → lo imprimimos y sigues tu pedido.
+- **Acordeones:** detalles de la prenda, zonas de impresión y calidad, plazos y envío, personalización y garantía.
+- **Solo precios:** sin precios tachados, sin porcentajes de descuento y sin mensajes de financiación. Las ofertas y tramos se explican en el configurador.
+- **Cantidades por talla:** se eligen **en el configurador**, no en la ficha.
+- **Fotos:** las sube el equipo y/o llegan de una API de proveedor; ambos orígenes conviven. Cada prenda necesita fotos planas (delantera y trasera, por color) para la maqueta; las fotos con modelo son opcionales. Si no hay, la galería usa las planas.
 
 ---
 
