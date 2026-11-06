@@ -38,8 +38,14 @@ FROM base AS app
 
 COPY --chown=www-data:www-data . .
 
+# Si el contexto ya trae vendor/ (construcción sin acceso a GitHub), solo se
+# regenera el autoload; en el servidor vendor/ no se copia y se instala aquí.
 RUN --mount=type=cache,target=/root/.composer/cache \
-    composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist \
+    if [ -d vendor/laravel ]; then \
+        composer dump-autoload --optimize --no-dev --no-interaction && php artisan package:discover && php artisan filament:upgrade; \
+    else \
+        composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist; \
+    fi \
     && rm -f .env \
     && chown -R www-data:www-data storage bootstrap/cache
 
