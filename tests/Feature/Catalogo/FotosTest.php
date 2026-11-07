@@ -65,6 +65,39 @@ class FotosTest extends TestCase
         $this->assertSame(ZonasPorDefecto::POSICIONES['frontal'][2], $foto->zonas()->whereHas('zona', fn ($q) => $q->where('clave', 'frontal'))->value('ancho'));
     }
 
+    public function test_las_zonas_de_partida_guardan_la_proporcion_real_y_empiezan_bajo_el_cuello(): void
+    {
+        // Foto de 1000 × 1200 a ≈ 8,8 px/cm: ancho% = cm × 0,88 y alto% = cm × 0,733.
+        foreach (['frontal' => [28, 38], 'pecho' => [9, 9], 'espalda' => [30, 40]] as $clave => [$anchoCm, $altoCm]) {
+            [$x, $y, $ancho, $alto] = ZonasPorDefecto::POSICIONES[$clave];
+            $this->assertEqualsWithDelta($anchoCm * 88, $ancho, 30, "Ancho de {$clave}");
+            $this->assertEqualsWithDelta($altoCm * 73.3, $alto, 30, "Alto de {$clave}");
+            $this->assertLessThanOrEqual(2300, $y, "{$clave} empieza demasiado abajo");
+        }
+
+        // El frontal y la espalda, centrados; el pecho, a la derecha de la foto (izquierda de quien la lleva).
+        $this->assertEqualsWithDelta(5000, ZonasPorDefecto::POSICIONES['frontal'][0] + ZonasPorDefecto::POSICIONES['frontal'][2] / 2, 10);
+        $this->assertEqualsWithDelta(5000, ZonasPorDefecto::POSICIONES['espalda'][0] + ZonasPorDefecto::POSICIONES['espalda'][2] / 2, 10);
+        $this->assertGreaterThan(5000, ZonasPorDefecto::POSICIONES['pecho'][0]);
+    }
+
+    public function test_recolocar_mueve_solo_las_zonas_que_siguen_en_la_posicion_anterior(): void
+    {
+        $this->subir(['tipo' => 'maqueta', 'color_id' => $this->negro->id, 'cara' => 'delantera']);
+        $foto = Foto::sole();
+        $frontal = $foto->zonas()->whereHas('zona', fn ($q) => $q->where('clave', 'frontal'))->sole();
+        $pecho = $foto->zonas()->whereHas('zona', fn ($q) => $q->where('clave', 'pecho'))->sole();
+
+        [$x, $y, $ancho, $alto] = ZonasPorDefecto::ANTERIORES['frontal'];
+        $frontal->update(compact('x', 'y', 'ancho', 'alto'));
+        $pecho->update(['x' => 6000, 'y' => 2000, 'ancho' => 800, 'alto' => 700]); // ajustada a mano
+
+        $this->artisan('catalogo:recolocar-zonas')->expectsOutputToContain('Zonas recolocadas: 1')->assertSuccessful();
+
+        $this->assertSame(ZonasPorDefecto::POSICIONES['frontal'], [$frontal->fresh()->x, $frontal->fresh()->y, $frontal->fresh()->ancho, $frontal->fresh()->alto]);
+        $this->assertSame([6000, 2000, 800, 700], [$pecho->fresh()->x, $pecho->fresh()->y, $pecho->fresh()->ancho, $pecho->fresh()->alto]);
+    }
+
     public function test_la_maqueta_trasera_solo_marca_la_espalda(): void
     {
         $this->subir(['tipo' => 'maqueta', 'color_id' => $this->negro->id, 'cara' => 'trasera']);

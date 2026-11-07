@@ -99,6 +99,12 @@ Para que se vean las fotos subidas, una sola vez:
 php artisan storage:link
 ```
 
+Si subiste maquetas antes del 7-11-2026, sus zonas quedaron en la posición de partida antigua (demasiado bajas). Este comando las mueve a la nueva y no toca las que hayas ajustado a mano:
+
+```bat
+php artisan catalogo:recolocar-zonas
+```
+
 ## Cada vez que haya un paso nuevo
 
 ```bat

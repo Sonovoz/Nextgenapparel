@@ -146,7 +146,7 @@
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(cadena, c.width / 2, c.height / 2);
-        return c;
+        return recortarMargenes(c);
     }
 
     /**
@@ -171,10 +171,11 @@
             var d = document.createElement('canvas');
             d.width = zw; d.height = zh;
             var dctx = d.getContext('2d');
+            // Centrado en horizontal y arriba del todo: las impresiones se colocan
+            // midiendo desde el cuello, no centradas en la zona (D99).
             var escala = Math.min(zw / diseno.width, zh / diseno.height);
             var w = diseno.width * escala, h = diseno.height * escala;
-            var y = zh > zw * 1.1 ? zh * 0.04 : (zh - h) / 2;
-            dctx.drawImage(diseno, (zw - w) / 2, Math.min(y, zh - h), w, h);
+            dctx.drawImage(diseno, (zw - w) / 2, 0, w, h);
 
             // 2. La tela de esa zona.
             var t = document.createElement('canvas');
@@ -262,6 +263,33 @@
             }
         }
         return out;
+    }
+
+    /**
+     * Quita los márgenes transparentes (o casi) del logo: lo que cuenta para
+     * colocarlo es lo que se imprime, no el lienzo del archivo.
+     */
+    function recortarMargenes(c) {
+        var datos;
+        try { datos = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; } catch (e) { return c; }
+        var minX = c.width, minY = c.height, maxX = -1, maxY = -1;
+        for (var y = 0; y < c.height; y++) {
+            for (var x = 0; x < c.width; x++) {
+                if (datos[(y * c.width + x) * 4 + 3] > 8) {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+        if (maxX < 0) return c; // totalmente transparente: se deja tal cual
+        var w = maxX - minX + 1, h = maxY - minY + 1;
+        if (w === c.width && h === c.height) return c;
+        var r = document.createElement('canvas');
+        r.width = w; r.height = h;
+        r.getContext('2d').drawImage(c, minX, minY, w, h, 0, 0, w, h);
+        return r;
     }
 
     /* ---------- Escena: foto + zonas + diseño ---------- */
@@ -520,7 +548,7 @@
             c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
             URL.revokeObjectURL(url);
 
-            estado.logo = c;
+            estado.logo = recortarMargenes(c);
             estado.version++;
             if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
             soltar.classList.add('con-logo');

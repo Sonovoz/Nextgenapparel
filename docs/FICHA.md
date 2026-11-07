@@ -112,7 +112,7 @@ Importes en céntimos (enteros). Campos traducibles marcados con *(es/en)*.
 - **carritos / lineas_carrito**: persistentes para clientes registrados, restaurables.
 - **pedidos**: numero, cliente_id, estado_interno, idioma, direcciones (copia), subtotal, descuentos, envio, impuestos, total, desglose_calculo (JSON: cada paso del motor de precios), fecha_estimada_entrega, transportista, numero_seguimiento.
 - **lineas_pedido**: pedido_id, prenda_id, color_id, reparto_tallas, precio_unitario, total.
-- **impresiones_linea**: linea_pedido_id, zona_id, diseno_id, ancho_cm, alto_cm, posicion, ppp_efectivo, estado_revision.
+- **impresiones_linea**: linea_pedido_id, zona_id, diseno_id, ancho_cm, alto_cm, posicion (mm desde el cuello y desde el centro de la prenda, D99), ppp_efectivo, estado_revision.
 - **maquetas_linea**: linea_pedido_id, cara (delantera / trasera), ruta, generada_en. Una imagen por cara con todos sus diseños compuestos sobre la prenda y el color del pedido (D98). Se congela al pagar y se regenera si el equipo aprueba un cambio de diseño.
 - **historial_estados**: pedido_id, estado, usuario_id, fecha, nota, notificado_cliente.
 - **notas_pedido**: pedido_id, tipo (privada / cliente), texto, autor.
