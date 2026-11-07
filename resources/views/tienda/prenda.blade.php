@@ -205,7 +205,7 @@
                         <div class="precio">
                             <span class="suave">{{ __('tienda.desde') }}</span>
                             <strong>{{ $precio }}</strong>
-                            <span class="suave">{{ __('tienda.por_unidad') }} · {{ __('tienda.iva_incluido') }}</span>
+                            <span class="suave">{{ __('tienda.por_unidad') }} · {{ __('tienda.con_impresion') }} · {{ __('tienda.iva_incluido') }}</span>
                         </div>
                     @endif
                     @if ($prenda->descripcion)

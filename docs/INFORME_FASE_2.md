@@ -96,7 +96,7 @@ Además se corrigió un test de la fase 1: el de copias, que solo vale con SQLit
 | `APP_URL` mal escrito en el servidor: la web respondería con error 400 | Media | Documentado en `docs/DESPLIEGUE_OVH.md`; se comprueba al desplegar |
 | Las posiciones de partida de las zonas están medidas sobre las fotos de muestra; con otro encuadre habrá que ajustarlas | Baja | El equipo las ajusta con la vista previa del diseño de ejemplo (D115) |
 | El aviso de calidad del visor y el análisis del servidor (fase 4) deben medir igual | Baja | Decidido en D114: los dos recortan los márgenes transparentes |
-| El precio «Desde» es el de la prenda sin imprimir | Baja | Pregunta abierta al cliente: si debe incluir la zona más barata |
+| El precio «Desde» no tiene en cuenta los descuentos por cantidad de la fase 3 | Baja | Resuelto con el cliente: incluye la impresión más barata (D118); los descuentos por cantidad se anunciarán aparte |
 | Las variaciones aún no tienen su clase de impuesto (regla 7) | Baja | Se añade en la fase 3, con Ajustes → Impuestos |
 
 ## Despliegue

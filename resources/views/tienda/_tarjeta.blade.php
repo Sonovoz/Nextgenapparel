@@ -9,6 +9,6 @@
     </div>
     <p class="tarjeta-nombre">{{ $titulo }}</p>
     @if ($precio)
-        <p class="tarjeta-precio">{{ __('tienda.desde') }} {{ $precio }} {{ __('tienda.por_unidad') }} · {{ __('tienda.iva_incluido') }}</p>
+        <p class="tarjeta-precio">{{ __('tienda.desde') }} {{ $precio }} {{ __('tienda.por_unidad') }} · {{ __('tienda.con_impresion') }} · {{ __('tienda.iva_incluido') }}</p>
     @endif
 </a>

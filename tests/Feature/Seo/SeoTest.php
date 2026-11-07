@@ -173,7 +173,8 @@ class SeoTest extends TestCase
         $this->assertSame('Product', $producto['@type']);
         $this->assertSame('Camiseta Essential', $producto['name']);
         $this->assertSame('EUR', $producto['offers']['priceCurrency']);
-        $this->assertSame('5.08', $producto['offers']['lowPrice']); // 4,20 € + 21 %, igual que en la página
+        $this->assertSame('7.26', $producto['offers']['lowPrice']); // (4,20 + pecho 1,80) + 21 %, igual que en la página
+        $this->assertSame('9.32', $producto['offers']['highPrice']); // (4,20 + espalda 3,50) + 21 % = 9,317
         $this->assertSame(Prenda::where('slug->es', 'camiseta-essential')->sole()->variantes()->where('activa', true)->count(), $producto['offers']['offerCount']);
 
         $this->assertSame('BreadcrumbList', $migas['@type']);

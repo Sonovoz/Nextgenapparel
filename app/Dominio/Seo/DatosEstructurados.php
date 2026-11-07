@@ -62,7 +62,8 @@ final class DatosEstructurados
     /** @return array<string, mixed> */
     public static function producto(Prenda $prenda, Familia $familia, string $url): array
     {
-        $precios = $prenda->variantes()->aLaVenta()->pluck('precio_base');
+        $desde = Escaparate::desdeSinIva($prenda);
+        $hasta = Escaparate::hastaSinIva($prenda);
         $imagenes = $prenda->fotos->sortBy(fn ($f) => $f->tipo === TipoFoto::Maqueta ? 0 : 1)->map->url()->values()->all();
 
         $producto = [
@@ -79,13 +80,14 @@ final class DatosEstructurados
             $producto['image'] = $imagenes;
         }
 
-        if ($precios->isNotEmpty()) {
+        // Los mismos importes que la página: prenda + impresión, con IVA (D118).
+        if ($desde !== null) {
             $producto['offers'] = [
                 '@type' => 'AggregateOffer',
                 'priceCurrency' => 'EUR',
-                'lowPrice' => self::importe(Iva::conIva((int) $precios->min())),
-                'highPrice' => self::importe(Iva::conIva((int) $precios->max())),
-                'offerCount' => $precios->count(),
+                'lowPrice' => self::importe(Iva::conIva($desde)),
+                'highPrice' => self::importe(Iva::conIva($hasta)),
+                'offerCount' => $prenda->variantes()->aLaVenta()->count(),
                 'availability' => 'https://schema.org/InStock',
                 'url' => $url,
                 'seller' => ['@id' => url('/').'#organizacion'],

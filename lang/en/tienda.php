@@ -5,6 +5,7 @@ return [
     'ver_coleccion' => 'See :familia',
     'desde' => 'From',
     'iva_incluido' => 'VAT included',
+    'con_impresion' => 'printed',
     'por_unidad' => '/unit',
     'sin_prendas' => 'Garments in this range are coming soon.',
     'inicio' => 'Home',

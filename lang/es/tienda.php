@@ -5,6 +5,7 @@ return [
     'ver_coleccion' => 'Ver :familia',
     'desde' => 'Desde',
     'iva_incluido' => 'IVA incluido',
+    'con_impresion' => 'con impresión',
     'por_unidad' => '/ud.',
     'sin_prendas' => 'Pronto tendremos prendas en esta familia.',
     'inicio' => 'Inicio',
