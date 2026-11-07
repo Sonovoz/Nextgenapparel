@@ -360,3 +360,4 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 | Planteamiento | Completado | 2026-11-06 |
 | 1. Base | **Completada con limitaciones** (informe: `docs/INFORME_FASE_1.md`). Criterios de aceptación cumplidos en Docker; pendiente desplegar en OVH y verificar el paso 1.6 en Herd | 2026-11-06 |
 | 2. Catálogo | **Completada con limitaciones** (informe: `docs/INFORME_FASE_2.md`). Criterio de aceptación cumplido con un test de principio a fin, en SQLite y en MariaDB estricta; pendiente la revisión del cliente en Herd de los últimos pasos y el despliegue en OVH | 2026-11-07 |
+| 3. Motor de precios | En curso — pasos 3.1 a 3.3 completados (modelo, motor con tests P1–P7, K1–K4, E1–E5 y C, backend de impuestos, envíos, ofertas, mínimos, cupones y packs, simulador); pendiente la revisión en Herd y el cierre con el Gauntlet | 2026-11-08 |
