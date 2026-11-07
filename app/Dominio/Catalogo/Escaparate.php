@@ -3,6 +3,7 @@
 namespace App\Dominio\Catalogo;
 
 use App\Dominio\Precios\Formato;
+use App\Dominio\Precios\Impuestos;
 use App\Dominio\Precios\Iva;
 use App\Models\Color;
 use App\Models\Familia;
@@ -89,7 +90,7 @@ class Escaparate
     {
         $sinIva = self::desdeSinIva($prenda);
 
-        return $sinIva === null ? null : Formato::euros(Iva::conIva($sinIva));
+        return $sinIva === null ? null : Formato::euros(Iva::conIva($sinIva, Impuestos::tipoIva($prenda->clase_impuesto_id)));
     }
 
     /** Foto principal: maqueta delantera de un color a la venta; si no, la primera foto que no sea de un color retirado. */

@@ -2,7 +2,6 @@
 
 namespace App\Dominio\Precios;
 
-use App\Models\Ajuste;
 use InvalidArgumentException;
 
 /**
@@ -11,9 +10,10 @@ use InvalidArgumentException;
  */
 class Iva
 {
+    /** IVA de la clase por defecto (Ajustes → Impuestos). */
     public static function general(): int
     {
-        return (int) Ajuste::obtener('impuestos.iva_general');
+        return Impuestos::tipoIva(null);
     }
 
     public static function conIva(int $centimosSinIva, ?int $tipo = null): int
