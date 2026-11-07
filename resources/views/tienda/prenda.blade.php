@@ -5,16 +5,87 @@
     $cm = fn (?int $mm) => $mm === null ? '—' : $numero($mm).' cm';
     $primerColor = $colores[0] ?? null;
     $fotoInicial = $primerColor['caras']['delantera'] ?? $primerColor['caras']['trasera'] ?? null;
+    // «Tu marca, aquí» solo tiene sentido si hay alguna maqueta con zonas colocadas.
+    $conTuMarca = collect($colores)->contains(fn ($c) => collect($c['caras'])->contains(fn ($cara) => ! empty($cara['zonas'])));
+    $textosVisor = [
+        'prenda' => $prenda->nombre,
+        'sin_foto' => __('tienda.sin_foto'),
+        'listo' => __('tienda.listo'),
+        'listo_2' => __('tienda.listo_2'),
+        'ver_coleccion' => __('tienda.ver_tu_coleccion'),
+        'ocultar_coleccion' => __('tienda.ocultar_coleccion'),
+        'coleccion_texto' => __('tienda.coleccion_texto'),
+        'ver_en_grande' => __('tienda.ver_en_grande'),
+        'error_archivo' => __('tienda.error_archivo'),
+        'error_grande' => __('tienda.error_grande'),
+    ];
 @endphp
 
 @push('estilos')
     <style>
         .ficha { display: flex; flex-wrap: wrap; gap: 48px 64px; align-items: flex-start; }
         .galeria { flex: 1 1 520px; min-width: 0; }
-        .visor { position: relative; background: var(--fondo-suave); border-radius: 4px; aspect-ratio: 5 / 6; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .visor-lienzo { position: relative; width: 86%; }
-        .visor-lienzo img { width: 100%; height: auto; }
+        .visor { position: relative; background: radial-gradient(120% 90% at 50% 40%, #FAF9F7 0%, var(--fondo-suave) 70%); border-radius: 4px; aspect-ratio: 5 / 6; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: box-shadow .25s ease; }
+        .visor.soltando { box-shadow: inset 0 0 0 2px var(--tinta); }
+        .visor-lienzo { position: relative; width: 86%; aspect-ratio: 5 / 6; transform: perspective(1400px) rotateY(0deg); transition: transform .19s ease-in; touch-action: pan-y; }
+        .visor-lienzo.girando { transform: perspective(1400px) rotateY(90deg); }
+        .visor-lienzo.volviendo { transform: perspective(1400px) rotateY(-90deg); transition: none; }
+        .visor-lienzo img { width: 100%; height: auto; user-select: none; }
+        .capa { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transition: opacity .35s ease; }
+        .capa.entrando { opacity: 0; }
+        .capa img { position: absolute; inset: 0; }
+        .diseno { position: absolute; pointer-events: none; }
+        .diseno.estampar { animation: estampar .6s cubic-bezier(.2, .8, .2, 1) both; }
+        @keyframes estampar { 0% { opacity: 0; transform: scale(1.18); filter: blur(6px); } 55% { opacity: 1; transform: scale(.97); filter: blur(0); } 100% { opacity: 1; transform: scale(1); } }
         .zona-marca { position: absolute; border: 2px dashed currentColor; background: color-mix(in srgb, currentColor 8%, transparent); }
+        .zona-marca.elegida { border-style: solid; }
+        .lupa { position: absolute; width: 170px; height: 170px; border-radius: 999px; overflow: hidden; pointer-events: none; background: #fff; box-shadow: 0 0 0 3px #fff, 0 14px 36px rgba(22,22,26,.35); z-index: 3; }
+        .lupa .capa { position: absolute; }
+        .lupa .capa img { width: 100%; height: 100%; }
+        .tu-marca { margin-top: 24px; padding: 28px; background: #16161A; color: #fff; border-radius: 4px; display: flex; flex-direction: column; gap: 20px; }
+        .tu-marca .etiqueta { color: #B9B7B0; margin: 0 0 6px; }
+        .tu-marca h2 { margin: 0; font-size: clamp(26px, 3vw, 32px); line-height: 1.15; }
+        .tu-marca p { margin: 0; }
+        .tu-marca .claro { color: #C9C7C0; font-size: 14px; }
+        .pestanas { display: flex; gap: 4px; background: rgba(255,255,255,.08); border-radius: 999px; padding: 4px; align-self: flex-start; flex-wrap: wrap; }
+        .pestanas [role="tab"] { min-height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: 14px; cursor: pointer; }
+        .pestanas [aria-selected="true"] { background: #fff; color: var(--tinta); }
+        .tu-marca button:focus-visible, .tu-marca input:focus-visible, .soltar:focus-within { outline: 2px solid #fff; outline-offset: 3px; }
+        .soltar { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 140px; padding: 20px; border: 1.5px dashed rgba(255,255,255,.45); border-radius: 4px; text-align: center; cursor: pointer; transition: background .2s ease, border-color .2s ease; }
+        .soltar:hover, .soltar.soltando { background: rgba(255,255,255,.06); border-color: #fff; }
+        .soltar strong { font-weight: 500; }
+        .soltar .nombre-logo { display: none; font-size: 13px; color: #C9C7C0; }
+        .soltar.con-logo .nombre-logo { display: block; }
+        .oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+        .campo-marca { width: 100%; min-height: 52px; padding: 0 16px; border: 1px solid rgba(255,255,255,.35); border-radius: 4px; background: transparent; color: #fff; font: inherit; font-size: 18px; }
+        .campo-marca::placeholder { color: #8F8D87; }
+        .grupo { display: flex; flex-direction: column; gap: 10px; }
+        .grupo > span { font-size: 13px; color: #C9C7C0; }
+        .opciones { display: flex; flex-wrap: wrap; gap: 6px; }
+        .boton-pildora.borde { border: 1px solid rgba(255,255,255,.35); color: #fff; min-height: 40px; }
+        .boton-pildora.borde[aria-checked="true"] { background: #fff; color: var(--tinta); border-color: #fff; }
+        .fuente-muestra { font-size: 18px; min-width: 56px; }
+        .tinta-muestra { width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(255,255,255,.35); padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; background: transparent; color: #fff; font: inherit; font-size: 11px; }
+        .tinta-muestra[aria-checked="true"] { box-shadow: 0 0 0 2px #16161A, 0 0 0 4px #fff; }
+        .tinta-muestra span { width: 26px; height: 26px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+        .tu-marca-estado:empty { display: none; }
+        .tu-marca-estado { font-size: 15px; animation: aparecer .5s ease both; }
+        .tu-marca-error { color: #FFB4A9; font-size: 14px; }
+        .acciones-marca { display: flex; flex-wrap: wrap; gap: 8px; }
+        .boton-claro { min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #fff; color: var(--tinta); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .boton-texto { min-height: 48px; padding: 0 12px; border: 0; background: transparent; color: #C9C7C0; font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
+        .coleccion { margin-top: 72px; }
+        .coleccion h2 { font-size: clamp(30px, 4vw, 40px); margin: 0; }
+        .coleccion-rejilla { margin-top: 28px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .coleccion-tarjeta { border: 0; padding: 0; background: transparent; font: inherit; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 10px; animation: aparecer .6s cubic-bezier(.2, .8, .2, 1) both; }
+        .coleccion-foto { background: var(--fondo-suave); border-radius: 4px; aspect-ratio: 5 / 6; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .coleccion-tarjeta:hover .coleccion-foto .visor-lienzo { transform: scale(1.03); transition: transform .4s ease; }
+        .coleccion-nombre { font-size: 14px; }
+        @keyframes aparecer { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        @media (prefers-reduced-motion: reduce) {
+            .visor-lienzo, .capa, .soltar { transition: none; }
+            .diseno.estampar, .coleccion-tarjeta, .tu-marca-estado { animation: none; }
+        }
         .zona-marca span { position: absolute; left: 0; top: -20px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
         .visor-controles { position: absolute; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
         .segmento { display: flex; background: #fff; border-radius: 999px; padding: 4px; gap: 2px; }
@@ -54,49 +125,7 @@
 @endpush
 
 @push('scripts')
-    <script>
-        // Visor: color, cara y zonas de impresión sobre la maqueta (sin librerías).
-        (function () {
-            var visor = document.getElementById('visor');
-            if (!visor) return;
-            var colores = JSON.parse(visor.dataset.colores || '[]');
-            var estado = { color: 0, cara: 'delantera', zonas: false };
-            var lienzo = document.getElementById('lienzo');
-
-            function pintar() {
-                var color = colores[estado.color];
-                if (!color) return;
-                var datos = color.caras[estado.cara];
-                lienzo.innerHTML = '';
-                if (datos) {
-                    var img = document.createElement('img');
-                    img.src = datos.url; img.alt = datos.alt || color.nombre; img.width = 1000; img.height = 1200;
-                    lienzo.appendChild(img);
-                    if (estado.zonas) {
-                        var tinta = /^#(0|1|2|3)/i.test(color.hex) ? '#FFFFFF' : '#16161A';
-                        datos.zonas.forEach(function (z) {
-                            var marca = document.createElement('div');
-                            marca.className = 'zona-marca';
-                            marca.style.cssText = 'left:' + z.x + '%;top:' + z.y + '%;width:' + z.ancho + '%;height:' + z.alto + '%;color:' + tinta;
-                            var etiqueta = document.createElement('span'); etiqueta.textContent = z.nombre || '';
-                            marca.appendChild(etiqueta); lienzo.appendChild(marca);
-                        });
-                    }
-                } else {
-                    var vacio = document.createElement('p'); vacio.className = 'sin-foto'; vacio.textContent = @json(__('tienda.sin_foto'));
-                    lienzo.appendChild(vacio);
-                }
-                document.getElementById('nombre-color').textContent = color.nombre;
-                document.querySelectorAll('.muestra').forEach(function (b) { b.setAttribute('aria-checked', String(Number(b.dataset.color) === estado.color)); });
-                document.querySelectorAll('[data-cara]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cara === estado.cara)); });
-                document.getElementById('ver-zonas').setAttribute('aria-pressed', String(estado.zonas));
-            }
-
-            document.querySelectorAll('.muestra').forEach(function (b) { b.addEventListener('click', function () { estado.color = Number(b.dataset.color); pintar(); }); });
-            document.querySelectorAll('[data-cara]').forEach(function (b) { b.addEventListener('click', function () { estado.cara = b.dataset.cara; pintar(); }); });
-            document.getElementById('ver-zonas').addEventListener('click', function () { estado.zonas = !estado.zonas; pintar(); });
-        })();
-    </script>
+    <script src="{{ asset('js/visor.js') }}?v={{ @filemtime(public_path('js/visor.js')) }}" defer></script>
 @endpush
 
 <x-tienda :titulo="($prenda->seo_titulo ?: $prenda->nombre).' · NextGen Apparel'" :descripcion="$prenda->seo_descripcion ?: \Illuminate\Support\Str::limit((string) $prenda->descripcion, 155)" :alternos="$alternos">
@@ -109,7 +138,7 @@
 
         <div class="ficha">
             <section class="galeria" aria-label="{{ $prenda->nombre }}">
-                <div class="visor" id="visor" data-colores='@json($colores)'>
+                <div class="visor" id="visor" data-colores='@json($colores)' data-textos='@json($textosVisor)'>
                     <div class="visor-controles">
                         <div class="segmento" role="group" aria-label="{{ __('tienda.delantera') }} / {{ __('tienda.trasera') }}">
                             <button type="button" class="boton-pildora" data-cara="delantera" aria-pressed="true">{{ __('tienda.delantera') }}</button>
@@ -118,14 +147,21 @@
                         <button type="button" class="boton-borde" id="ver-zonas" aria-pressed="false">{{ __('tienda.ver_zonas') }}</button>
                     </div>
                     <div class="visor-lienzo" id="lienzo">
-                        @if ($fotoInicial)
-                            <img id="foto" src="{{ $fotoInicial['url'] }}" alt="{{ $fotoInicial['alt'] ?? $prenda->nombre }}" width="1000" height="1200">
-                        @else
-                            <p class="sin-foto" id="foto-vacia">{{ __('tienda.sin_foto') }}</p>
-                        @endif
+                        <div class="capa">
+                            @if ($fotoInicial)
+                                <img id="foto" src="{{ $fotoInicial['url'] }}" alt="{{ $fotoInicial['alt'] ?? $prenda->nombre }}" width="1000" height="1200">
+                            @else
+                                <p class="sin-foto" id="foto-vacia">{{ __('tienda.sin_foto') }}</p>
+                            @endif
+                        </div>
                     </div>
+                    <div class="lupa" id="lupa" hidden></div>
                     <p class="visor-nota">{{ __('tienda.vista_orientativa') }}</p>
                 </div>
+
+                @if ($conTuMarca)
+                    @include('tienda._tu-marca')
+                @endif
             </section>
 
             <section class="info" aria-label="{{ __('tienda.detalles') }}">
@@ -232,5 +268,14 @@
                 <p class="suave" style="font-size: 13px;">{{ __('tienda.pago_seguro') }}</p>
             </section>
         </div>
+
+        @if ($conTuMarca)
+            <section class="coleccion" id="coleccion" aria-labelledby="coleccion-titulo" hidden>
+                <p class="etiqueta">{{ __('tienda.tu_marca_etiqueta') }}</p>
+                <h2 id="coleccion-titulo">{{ __('tienda.coleccion_titulo') }}</h2>
+                <p class="suave" id="coleccion-texto" style="margin-top: 8px;"></p>
+                <div class="coleccion-rejilla" id="coleccion-rejilla"></div>
+            </section>
+        @endif
     </div>
 </x-tienda>

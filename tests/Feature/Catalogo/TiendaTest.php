@@ -165,13 +165,43 @@ class TiendaTest extends TestCase
 
         $negroEnVisor = collect($colores)->firstWhere('nombre', 'Negro');
         $this->assertStringEndsWith('catalogo/1/negro.webp', $negroEnVisor['caras']['delantera']['url']);
-        $this->assertSame(['nombre' => 'Frontal', 'x' => 30, 'y' => 26, 'ancho' => 40, 'alto' => 42], $negroEnVisor['caras']['delantera']['zonas'][0]);
+        $zonaFrontal = $camiseta->zonas()->where('clave', 'frontal')->value('zonas_impresion.id');
+        $this->assertSame(['id' => $zonaFrontal, 'nombre' => 'Frontal', 'x' => 30, 'y' => 26, 'ancho' => 40, 'alto' => 42], $negroEnVisor['caras']['delantera']['zonas'][0]);
         $this->assertNull($negroEnVisor['caras']['trasera']);
     }
 
-    public function test_la_ficha_incluye_el_codigo_del_visor(): void
+    public function test_la_ficha_carga_el_visor_y_el_archivo_existe(): void
     {
-        $this->get('/es/camisetas/camiseta-essential')->assertSee("document.getElementById('visor')", false);
+        $this->get('/es/camisetas/camiseta-essential')->assertSee('js/visor.js?v=', false);
+        $this->assertStringContainsString("document.getElementById('visor')", file_get_contents(public_path('js/visor.js')));
+    }
+
+    public function test_tu_marca_aparece_solo_si_hay_maquetas_con_zonas(): void
+    {
+        $this->get('/es/camisetas/camiseta-essential')->assertDontSee('id="tu-marca"', false);
+
+        $camiseta = $this->camiseta();
+        $color = $camiseta->variantes()->first()->color_id;
+        $foto = Foto::create(['prenda_id' => $camiseta->id, 'color_id' => $color, 'tipo' => TipoFoto::Maqueta, 'cara' => Cara::Delantera, 'ruta' => 'catalogo/1/x.webp']);
+        $this->get('/es/camisetas/camiseta-essential')->assertDontSee('id="tu-marca"', false);
+
+        FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $camiseta->zonas()->first()->id, 'x' => 3000, 'y' => 2600, 'ancho' => 4000, 'alto' => 4200]);
+        $this->get('/es/camisetas/camiseta-essential')
+            ->assertSee('id="tu-marca"', false)
+            ->assertSee('id="coleccion"', false)
+            ->assertSee('¿Tienes logo? Míralo puesto.')
+            ->assertSee('no lo subimos ni lo guardamos');
+        $this->get('/en/t-shirts/essential-t-shirt')->assertSee('Got a logo? See it on.');
+    }
+
+    public function test_los_textos_de_la_tienda_existen_en_los_dos_idiomas(): void
+    {
+        $es = require lang_path('es/tienda.php');
+        $en = require lang_path('en/tienda.php');
+
+        $this->assertSame(array_keys($es), array_keys($en));
+        $this->assertNotContains('', $es);
+        $this->assertNotContains('', $en);
     }
 
     public function test_familias_y_prendas_inexistentes_dan_404(): void
