@@ -51,6 +51,27 @@
         <div class="opciones" id="zonas-diseno" role="radiogroup" aria-label="{{ __('tienda.donde') }}"></div>
     </div>
 
+    <div class="ajustador" id="ajustador" hidden>
+        <div class="calidad" id="calidad" role="status" aria-live="polite">
+            <div class="calidad-cabecera"><strong id="calidad-etiqueta"></strong><span class="claro" id="calidad-ppp"></span></div>
+            <p id="calidad-mensaje"></p>
+            <p class="claro" id="calidad-consejo"></p>
+            <p id="calidad-fondo"></p>
+        </div>
+
+        <h3>{{ __('tienda.ajusta') }}</h3>
+        <div class="fila-tamano">
+            <label for="tamano-diseno" class="oculto">{{ __('tienda.tamano') }}</label>
+            <input type="range" id="tamano-diseno" min="20" max="100" step="1" value="100">
+            <output id="medida-diseno" for="tamano-diseno"></output>
+        </div>
+        <p class="claro" style="font-size: 13px;">{{ __('tienda.arrastra') }}</p>
+        <div class="opciones">
+            <button type="button" class="boton-pildora borde" id="centrar-diseno">{{ __('tienda.centrar') }}</button>
+            <button type="button" class="boton-pildora borde" id="arriba-diseno">{{ __('tienda.subir') }}</button>
+        </div>
+    </div>
+
     <p class="tu-marca-error" id="tu-marca-error" role="alert" hidden></p>
     <p class="tu-marca-estado" id="tu-marca-estado" aria-live="polite"></p>
 

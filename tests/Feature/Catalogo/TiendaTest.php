@@ -4,6 +4,7 @@ namespace Tests\Feature\Catalogo;
 
 use App\Dominio\Catalogo\Cara;
 use App\Dominio\Catalogo\TipoFoto;
+use App\Dominio\Disenos\Calidad;
 use App\Dominio\Precios\Formato;
 use App\Dominio\Precios\Iva;
 use App\Dominio\Sistema\Acceso\Rol;
@@ -82,6 +83,26 @@ class TiendaTest extends TestCase
         $this->assertSame(1000, Ajuste::obtener('impuestos.iva_general'));
         $this->assertSame('IVA general cambiado', Activity::latest('id')->value('description'));
         $this->get('/es/camisetas')->assertSee('4,62 €'); // 4,20 + 10 %
+    }
+
+    public function test_los_umbrales_de_calidad_se_cambian_en_ajustes_y_deben_ir_en_orden(): void
+    {
+        Filament::setCurrentPanel('admin');
+        $this->actingAs($this->usuarioConRol(Rol::Administrador));
+
+        Livewire::test(AjustesGenerales::class)
+            ->assertSchemaStateSet(['correcto' => 300, 'aceptable' => 200, 'minimo' => 150])
+            ->fillForm(['correcto' => 200, 'aceptable' => 250])
+            ->callAction('guardar')
+            ->assertHasFormErrors(['correcto']);
+
+        Livewire::test(AjustesGenerales::class)
+            ->fillForm(['correcto' => 280, 'aceptable' => 180, 'minimo' => 120])
+            ->callAction('guardar')
+            ->assertNotified('Ajustes guardados');
+
+        $this->assertSame(['correcto' => 280, 'aceptable' => 180, 'minimo' => 120], Calidad::umbrales());
+        $this->assertSame('Umbrales de calidad cambiados', Activity::latest('id')->value('description'));
     }
 
     public function test_el_gestor_no_entra_en_ajustes(): void
@@ -166,7 +187,7 @@ class TiendaTest extends TestCase
         $negroEnVisor = collect($colores)->firstWhere('nombre', 'Negro');
         $this->assertStringEndsWith('catalogo/1/negro.webp', $negroEnVisor['caras']['delantera']['url']);
         $zonaFrontal = $camiseta->zonas()->where('clave', 'frontal')->value('zonas_impresion.id');
-        $this->assertSame(['id' => $zonaFrontal, 'nombre' => 'Frontal', 'x' => 30, 'y' => 26, 'ancho' => 40, 'alto' => 42], $negroEnVisor['caras']['delantera']['zonas'][0]);
+        $this->assertSame(['id' => $zonaFrontal, 'nombre' => 'Frontal', 'ancho_mm' => 280, 'alto_mm' => 380, 'x' => 30, 'y' => 26, 'ancho' => 40, 'alto' => 42], $negroEnVisor['caras']['delantera']['zonas'][0]);
         $this->assertNull($negroEnVisor['caras']['trasera']);
     }
 
@@ -194,14 +215,31 @@ class TiendaTest extends TestCase
         $this->get('/en/t-shirts/essential-t-shirt')->assertSee('Got a logo? See it on.');
     }
 
+    public function test_el_visor_recibe_los_umbrales_de_calidad_de_ajustes(): void
+    {
+        Ajuste::guardar('disenos.ppp_correcto', 280);
+        $camiseta = $this->camiseta();
+        $foto = Foto::create(['prenda_id' => $camiseta->id, 'color_id' => $camiseta->variantes()->first()->color_id, 'tipo' => TipoFoto::Maqueta, 'cara' => Cara::Delantera, 'ruta' => 'catalogo/1/x.webp']);
+        FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $camiseta->zonas()->first()->id, 'x' => 3000, 'y' => 2600, 'ancho' => 4000, 'alto' => 4200]);
+
+        $html = $this->get('/es/camisetas/camiseta-essential')->assertSee('id="ajustador"', false)->assertSee('Ajusta tu diseño')->getContent();
+        preg_match("/data-calidad='([^']+)'/", $html, $coincidencia);
+        $calidad = json_decode(html_entity_decode($coincidencia[1]), true);
+
+        $this->assertSame(['correcto' => 280, 'aceptable' => 200, 'minimo' => 150], $calidad['umbrales']);
+        $this->assertSame('Calidad baja', $calidad['textos']['nivel_baja']);
+    }
+
     public function test_los_textos_de_la_tienda_existen_en_los_dos_idiomas(): void
     {
-        $es = require lang_path('es/tienda.php');
-        $en = require lang_path('en/tienda.php');
+        foreach (['tienda', 'disenos'] as $archivo) {
+            $es = require lang_path("es/{$archivo}.php");
+            $en = require lang_path("en/{$archivo}.php");
 
-        $this->assertSame(array_keys($es), array_keys($en));
-        $this->assertNotContains('', $es);
-        $this->assertNotContains('', $en);
+            $this->assertSame(array_keys($es), array_keys($en), $archivo);
+            $this->assertNotContains('', $es);
+            $this->assertNotContains('', $en);
+        }
     }
 
     public function test_familias_y_prendas_inexistentes_dan_404(): void

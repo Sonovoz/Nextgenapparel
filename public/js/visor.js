@@ -20,6 +20,7 @@
 
     var colores = JSON.parse(visor.dataset.colores || '[]');
     var textos = JSON.parse(visor.dataset.textos || '{}');
+    var calidad = JSON.parse(visor.dataset.calidad || '{}');
     var lienzo = document.getElementById('lienzo');
     var sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var conRaton = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -47,6 +48,9 @@
         zonaId: null,
         zonaElegida: false,    // el cliente eligió zona: no se cambia sola
         coleccion: false,
+        ajustes: {},           // por zona: { escala (0,2–1), cx, cy (0–1 del hueco libre) }
+        logoPx: null,          // píxeles reales del logo (sin márgenes transparentes)
+        logoTipo: null,        // 'transparente' | 'fondo' | 'fondo_blanco' | 'vectorial'
         version: 0             // cambia con cada diseño nuevo (invalida la caché)
     };
 
@@ -149,6 +153,24 @@
         return recortarMargenes(c);
     }
 
+    function ajusteDe(zonaId) {
+        if (!estado.ajustes[zonaId]) estado.ajustes[zonaId] = { escala: 1, cx: 0.5, cy: 0 };
+        return estado.ajustes[zonaId];
+    }
+
+    /** Posición y tamaño del diseño dentro de la zona, en fracciones de la zona (0–1). */
+    function geometria(diseno, zona) {
+        var aj = ajusteDe(zona.id);
+        // Proporción de la zona en la foto (ancho/alto en % de una foto 5:6).
+        var proporcionZona = (zona.ancho * 5) / (zona.alto * 6);
+        var proporcionDiseno = diseno.width / diseno.height;
+        var w, h;
+        if (proporcionDiseno > proporcionZona) { w = 1; h = proporcionZona / proporcionDiseno; }
+        else { h = 1; w = proporcionDiseno / proporcionZona; }
+        w *= aj.escala; h *= aj.escala;
+        return { x: (1 - w) * aj.cx, y: (1 - h) * aj.cy, w: w, h: h };
+    }
+
     /**
      * Capa del diseño «impreso» sobre la zona de una foto: un canvas del tamaño
      * de la zona (en píxeles de la foto) que toma las luces, sombras y pliegues
@@ -157,7 +179,8 @@
     function capaImpresa(color, cara, zona) {
         var datos = color.caras[cara];
         var diseno = disenoPara(color);
-        var clave = [estado.version, estado.modo, estado.fuente, tintaPara(color), estado.texto, datos.url, zona.id].join('|');
+        var aj = ajusteDe(zona.id);
+        var clave = [estado.version, estado.modo, estado.fuente, tintaPara(color), estado.texto, datos.url, zona.id, aj.escala, aj.cx, aj.cy].join('|');
         if (cacheCapas[clave]) return cacheCapas[clave];
 
         cacheCapas[clave] = cargarFoto(datos.url).then(function (foto) {
@@ -171,11 +194,10 @@
             var d = document.createElement('canvas');
             d.width = zw; d.height = zh;
             var dctx = d.getContext('2d');
-            // Centrado en horizontal y arriba del todo: las impresiones se colocan
-            // midiendo desde el cuello, no centradas en la zona (D99).
-            var escala = Math.min(zw / diseno.width, zh / diseno.height);
-            var w = diseno.width * escala, h = diseno.height * escala;
-            dctx.drawImage(diseno, (zw - w) / 2, 0, w, h);
+            // Por defecto, centrado en horizontal y arriba del todo: las impresiones
+            // se colocan midiendo desde el cuello (D99). El ajustador lo cambia.
+            var g = geometria(diseno, zona);
+            dctx.drawImage(diseno, g.x * zw, g.y * zh, g.w * zw, g.h * zh);
 
             // 2. La tela de esa zona.
             var t = document.createElement('canvas');
@@ -292,6 +314,21 @@
         return r;
     }
 
+    /** ¿Tiene el logo fondo transparente, un fondo opaco o un fondo blanco? */
+    function tipoDeFondo(c) {
+        var d;
+        try { d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; } catch (e) { return 'transparente'; }
+        var transparentes = 0;
+        for (var i = 3; i < d.length; i += 16) if (d[i] < 250) transparentes++;
+        if (transparentes / (d.length / 16) > 0.002) return 'transparente';
+        // Opaco: ¿el borde es blanco?
+        var blancos = 0, total = 0;
+        function mirar(x, y) { var k = (y * c.width + x) * 4; total++; if (d[k] > 235 && d[k + 1] > 235 && d[k + 2] > 235) blancos++; }
+        for (var x = 0; x < c.width; x += 4) { mirar(x, 0); mirar(x, c.height - 1); }
+        for (var y = 0; y < c.height; y += 4) { mirar(0, y); mirar(c.width - 1, y); }
+        return blancos / total > 0.9 ? 'fondo_blanco' : 'fondo';
+    }
+
     /* ---------- Escena: foto + zonas + diseño ---------- */
 
     function construirEscena(indiceColor, cara, opciones) {
@@ -313,7 +350,7 @@
         if (opciones.marcas) {
             var tinta = esOscuro(color.hex) ? '#FFFFFF' : '#16161A';
             datos.zonas.forEach(function (z) {
-                var marca = el('div', 'zona-marca' + (z.id === estado.zonaId && hayDiseno() ? ' elegida' : ''));
+                var marca = el('div', 'zona-marca' + (hayDiseno() ? ' con-diseno' : '') + (z.id === estado.zonaId && hayDiseno() ? ' elegida' : ''));
                 marca.style.cssText = 'left:' + z.x + '%;top:' + z.y + '%;width:' + z.ancho + '%;height:' + z.alto + '%;color:' + tinta;
                 marca.appendChild(el('span', '', z.nombre || ''));
                 escena.appendChild(marca);
@@ -321,9 +358,15 @@
         }
 
         var zona = hayDiseno() ? zonaEn(color, cara) : null;
+        if (zona && opciones.movible) {
+            var guia = el('div', 'zona-guia');
+            guia.style.cssText = 'left:' + zona.x + '%;top:' + zona.y + '%;width:' + zona.ancho + '%;height:' + zona.alto + '%';
+            escena.appendChild(guia);
+        }
         if (zona) {
             capaImpresa(color, cara, zona).then(function (capa) {
-                var c = el('canvas', 'diseno' + (opciones.estampar && !sinMovimiento ? ' estampar' : ''));
+                var c = el('canvas', 'diseno' + (opciones.estampar && !sinMovimiento ? ' estampar' : '') + (opciones.movible ? ' movible' : ''));
+                if (opciones.movible) { c.dataset.zona = zona.id; c.dataset.color = indiceColor; }
                 c.width = capa.width; c.height = capa.height;
                 c.getContext('2d').drawImage(capa, 0, 0);
                 c.setAttribute('aria-hidden', 'true');
@@ -341,7 +384,7 @@
         var color = colores[estado.color];
         if (!color) return;
 
-        var nueva = construirEscena(estado.color, estado.cara, { marcas: estado.zonas, estampar: estampar });
+        var nueva = construirEscena(estado.color, estado.cara, { marcas: estado.zonas, estampar: estampar, movible: true });
         estampar = false;
 
         var cambiar = function () {
@@ -394,7 +437,9 @@
 
     // Deslizar para girar (móvil): horizontal y decidido; el desplazamiento vertical sigue funcionando.
     var inicio = null;
-    lienzo.addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse') inicio = { x: e.clientX, y: e.clientY }; });
+    lienzo.addEventListener('pointerdown', function (e) {
+        if (e.pointerType !== 'mouse' && !e.target.classList.contains('movible')) inicio = { x: e.clientX, y: e.clientY };
+    });
     lienzo.addEventListener('pointerup', function (e) {
         if (!inicio) return;
         var dx = e.clientX - inicio.x, dy = e.clientY - inicio.y;
@@ -406,12 +451,14 @@
     /* ---------- Lupa (ratón) ---------- */
 
     var lupa = document.getElementById('lupa');
+    var arrastre = null;
     var lupaSucia = true;
     var AUMENTO = 2.4;
 
     if (lupa && conRaton) {
         lienzo.addEventListener('pointermove', function (e) {
             if (e.pointerType !== 'mouse' || !lienzo.querySelector('img')) return;
+            if (arrastre || e.target.classList.contains('movible')) { lupa.hidden = true; return; }
             var r = lienzo.getBoundingClientRect();
             var v = visor.getBoundingClientRect();
             if (lupaSucia) {
@@ -454,15 +501,28 @@
         b.setAttribute('aria-checked', 'false');
         b.dataset.zona = z.id;
         b.addEventListener('click', function () {
+            apagarMarcas();
             estado.zonaId = z.id;
             estado.zonaElegida = true;
             marcarZona();
             if (z.cara !== estado.cara) { estado.cara = z.cara; estampar = true; pintar('giro'); }
             else { estampar = true; pintar(); }
+            avisarListo();
             refrescarColeccion();
         });
         grupoZonas.appendChild(b);
     });
+
+    /** Con un diseño puesto, las marcas de zona estorban: se apagan solas. */
+    function apagarMarcas() { estado.zonas = false; }
+
+    /** Muestra un momento la guía de la zona mientras se ajusta el diseño. */
+    var esperaGuia = null;
+    function mostrarGuia() {
+        lienzo.classList.add('ajustando');
+        clearTimeout(esperaGuia);
+        esperaGuia = setTimeout(function () { if (!arrastre) lienzo.classList.remove('ajustando'); }, 1200);
+    }
 
     function marcarZona() {
         grupoZonas.querySelectorAll('[data-zona]').forEach(function (b) {
@@ -484,6 +544,7 @@
     }
 
     function colocarDiseno() {
+        apagarMarcas();
         var zona = zonaPorDefecto();
         var cara = zona ? zona.cara : null;
         if (!cara) {
@@ -498,6 +559,7 @@
     }
 
     function avisarListo() {
+        actualizarAjustador();
         if (!hayDiseno()) { estadoMarca.textContent = ''; return; }
         var color = colores[estado.color];
         estadoMarca.replaceChildren(
@@ -548,7 +610,10 @@
             c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
             URL.revokeObjectURL(url);
 
+            estado.logoTipo = archivo.type === 'image/svg+xml' ? 'vectorial' : tipoDeFondo(c);
             estado.logo = recortarMargenes(c);
+            estado.logoPx = { w: Math.round(estado.logo.width / escala), h: Math.round(estado.logo.height / escala) };
+            estado.ajustes = {};
             estado.version++;
             if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
             soltar.classList.add('con-logo');
@@ -609,6 +674,9 @@
     // Quitar el diseño
     document.getElementById('quitar-diseno').addEventListener('click', function () {
         estado.logo = null;
+        estado.logoPx = null;
+        estado.logoTipo = null;
+        estado.ajustes = {};
         estado.texto = '';
         campoTexto.value = '';
         estado.zonaElegida = false;
@@ -622,6 +690,136 @@
         avisarListo();
         pintar();
     });
+
+    /* ---------- Ajustador y calidad ---------- */
+
+    var ajustador = document.getElementById('ajustador');
+    var tamano = document.getElementById('tamano-diseno');
+    var bloqueCalidad = document.getElementById('calidad');
+
+    function zonaActual() {
+        var color = colores[estado.color];
+        var z = zonaEn(color, estado.cara);
+        if (z) return z;
+        var caras = ['delantera', 'trasera'];
+        for (var i = 0; i < caras.length; i++) { z = zonaEn(color, caras[i]); if (z) return z; }
+        return null;
+    }
+
+    function cm(mm) {
+        return (Math.round(mm) / 10).toFixed(1).replace('.', textos.decimal || ',').replace(/[.,]0$/, '');
+    }
+
+    /** Misma fórmula y umbrales que App\Dominio\Disenos\Calidad (ficha § 7). */
+    function ppp(px, mm) { return Math.round(px * 25.4 / mm); }
+    function nivel(valor) {
+        var u = calidad.umbrales;
+        if (valor >= u.correcto) return 'correcta';
+        if (valor >= u.aceptable) return 'buena';
+        if (valor >= u.minimo) return 'justa';
+        return 'baja';
+    }
+
+    function actualizarAjustador() {
+        var zona = hayDiseno() ? zonaActual() : null;
+        ajustador.hidden = !zona;
+        if (!zona) return;
+
+        var color = colores[estado.color];
+        var g = geometria(disenoPara(color), zona);
+        var anchoMm = zona.ancho_mm * g.w, altoMm = zona.alto_mm * g.h;
+        tamano.value = Math.round(ajusteDe(zona.id).escala * 100);
+        document.getElementById('medida-diseno').textContent = texto('medida_impresion', { medida: cm(anchoMm) + ' × ' + cm(altoMm) + ' cm' });
+
+        var t = calidad.textos;
+        var etiqueta = document.getElementById('calidad-etiqueta');
+        var detalle = document.getElementById('calidad-ppp');
+        var mensaje = document.getElementById('calidad-mensaje');
+        var consejo = document.getElementById('calidad-consejo');
+        var fondo = document.getElementById('calidad-fondo');
+        fondo.textContent = ''; consejo.textContent = ''; detalle.textContent = '';
+
+        if (estado.modo === 'texto' || estado.logoTipo === 'vectorial') {
+            bloqueCalidad.dataset.nivel = 'correcta';
+            etiqueta.textContent = t.nivel_correcta;
+            mensaje.textContent = estado.modo === 'texto' ? t.texto : t.vectorial;
+            if (estado.logoTipo === 'vectorial' && estado.modo === 'logo') fondo.textContent = t.formato_pedido;
+            return;
+        }
+
+        var valor = Math.min(ppp(estado.logoPx.w, anchoMm), ppp(estado.logoPx.h, altoMm));
+        var n = nivel(valor);
+        bloqueCalidad.dataset.nivel = n;
+        etiqueta.textContent = t['nivel_' + n];
+        detalle.textContent = t.ppp.replace(':ppp', valor);
+        mensaje.textContent = t['mensaje_' + n];
+        var maximoMm = Math.min(estado.logoPx.w * 25.4 / calidad.umbrales.correcto, zona.ancho_mm);
+        if (n === 'correcta' || n === 'buena') {
+            consejo.textContent = t.consejo.replace(':medida', cm(Math.min(estado.logoPx.w * 25.4 / calidad.umbrales.correcto, 99999)) + ' cm');
+            if (maximoMm >= zona.ancho_mm && n === 'correcta') consejo.textContent = '';
+        } else {
+            consejo.textContent = t.consejo_mejorar.replace(':px', Math.ceil(anchoMm / 25.4 * calidad.umbrales.correcto));
+        }
+        if (estado.logoTipo === 'fondo') fondo.textContent = t.fondo;
+        if (estado.logoTipo === 'fondo_blanco') fondo.textContent = t.fondo_blanco;
+    }
+
+    var esperaTamano = null;
+    tamano.addEventListener('input', function () {
+        var zona = zonaActual();
+        if (!zona) return;
+        ajusteDe(zona.id).escala = Number(tamano.value) / 100;
+        mostrarGuia();
+        actualizarAjustador();
+        clearTimeout(esperaTamano);
+        esperaTamano = setTimeout(function () { pintar(); refrescarColeccion(); }, 60);
+    });
+
+    function moverA(cambios) {
+        var zona = zonaActual();
+        if (!zona) return;
+        var aj = ajusteDe(zona.id);
+        Object.keys(cambios).forEach(function (k) { aj[k] = cambios[k]; });
+        mostrarGuia();
+        pintar(); actualizarAjustador(); refrescarColeccion();
+    }
+    document.getElementById('centrar-diseno').addEventListener('click', function () { moverA({ cx: 0.5 }); });
+    document.getElementById('arriba-diseno').addEventListener('click', function () { moverA({ cy: 0 }); });
+
+    // Arrastrar el diseño sobre la prenda (ratón o dedo), sin salir de su zona.
+    lienzo.addEventListener('pointerdown', function (e) {
+        var c = e.target;
+        if (!c.classList || !c.classList.contains('movible')) return;
+        var zona = zonaActual();
+        if (!zona || String(zona.id) !== c.dataset.zona) return;
+        e.preventDefault();
+        c.setPointerCapture(e.pointerId);
+        var g = geometria(disenoPara(colores[estado.color]), zona);
+        var r = c.getBoundingClientRect();
+        var aj = ajusteDe(zona.id);
+        arrastre = { c: c, x: e.clientX, y: e.clientY, cx: aj.cx, cy: aj.cy, libreX: (1 - g.w) * r.width, libreY: (1 - g.h) * r.height, aj: aj };
+        c.classList.add('arrastrando');
+        lienzo.classList.add('ajustando');
+    });
+    lienzo.addEventListener('pointermove', function (e) {
+        if (!arrastre) return;
+        var a = arrastre;
+        var limitar = function (v) { return Math.min(1, Math.max(0, v)); };
+        var cx = a.libreX > 1 ? limitar(a.cx + (e.clientX - a.x) / a.libreX) : a.cx;
+        var cy = a.libreY > 1 ? limitar(a.cy + (e.clientY - a.y) / a.libreY) : a.cy;
+        a.c.style.transform = 'translate(' + ((cx - a.cx) * a.libreX) + 'px,' + ((cy - a.cy) * a.libreY) + 'px)';
+        a.nuevo = { cx: cx, cy: cy };
+    });
+    function soltarArrastre() {
+        if (!arrastre) return;
+        var a = arrastre;
+        arrastre = null;
+        mostrarGuia();
+        if (a.nuevo) { a.aj.cx = a.nuevo.cx; a.aj.cy = a.nuevo.cy; pintar(); refrescarColeccion(); }
+        else a.c.classList.remove('arrastrando');
+    }
+    lienzo.addEventListener('pointerup', soltarArrastre);
+    lienzo.addEventListener('pointercancel', soltarArrastre);
 
     /* ---------- Tu colección ---------- */
 

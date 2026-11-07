@@ -93,6 +93,7 @@ class Escaparate
                     'alt' => $foto->texto_alternativo ?: null,
                     'zonas' => $foto->zonas->map(fn ($z) => [
                         'id' => $z->zona_impresion_id, 'nombre' => $z->zona?->nombre,
+                        'ancho_mm' => $z->zona?->ancho_max_mm, 'alto_mm' => $z->zona?->alto_max_mm,
                         'x' => $z->x / 100, 'y' => $z->y / 100, 'ancho' => $z->ancho / 100, 'alto' => $z->alto / 100,
                     ])->values()->all(),
                 ];

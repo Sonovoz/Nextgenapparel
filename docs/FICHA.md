@@ -178,7 +178,9 @@ Supuestos: camiseta 4,00 €; polo 7,00 €; sudadera 12,00 €; frontal 3,00 �
 | 150–199 | Aviso: «Ojo, tu diseño no tiene la calidad que buscas», con consejos para mejorarlo |
 | < 150 | Aviso fuerte; se recomienda no continuar sin mejorarlo |
 
-*(Umbrales de ejemplo, configurables.)* Se comprueba también: transparencia, fondo blanco no deseado, perfil de color y medidas mínimas.
+*(Umbrales configurables en Ajustes → General, D101.)* Se comprueba también: transparencia, fondo blanco no deseado, perfil de color y medidas mínimas.
+
+- **Aviso inmediato en la ficha (D100):** el visor ya calcula la calidad al tamaño elegido con el ajustador, sin subir el diseño. La vista previa admite también JPG, SVG o WebP para probar, pero avisa de que el pedido necesita un PNG con fondo transparente.
 
 - **Revisión humana** tras el pago: aprobado / requiere cambios (con enlace para subir otro diseño) / rechazado por derechos de autor o marca (con reembolso).
 
@@ -314,4 +316,4 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 |---|---|---|
 | Planteamiento | Completado | 2026-11-06 |
 | 1. Base | **Completada con limitaciones** (informe: `docs/INFORME_FASE_1.md`). Criterios de aceptación cumplidos en Docker; pendiente desplegar en OVH y verificar el paso 1.6 en Herd | 2026-11-06 |
-| 2. Catálogo | En curso — pasos 2.1 a 2.5b completados (modelo, backend de productos, fotos, tienda con ficha de producto, IVA en Ajustes, visor «Tu marca, aquí» con colección, lupa y giro); pendiente el 2.6 (SEO) y la revisión en Herd | 2026-11-07 |
+| 2. Catálogo | En curso — pasos 2.1 a 2.5b completados (modelo, backend de productos, fotos, tienda con ficha de producto, IVA en Ajustes, visor «Tu marca, aquí» con colección, lupa, giro, ajustador y aviso de calidad; zonas medidas desde el cuello); pendiente el 2.6 (SEO) y la revisión en Herd | 2026-11-07 |

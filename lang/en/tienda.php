@@ -73,4 +73,10 @@ return [
     'privacidad' => "Your design never leaves your device: we don't upload or store it. Indicative preview; the quality check happens when you customise.",
     'error_archivo' => "That file isn't an image we can show. Try PNG, JPG, SVG or WebP.",
     'error_grande' => 'The file is larger than 20 MB. Try a lighter version.',
+    'ajusta' => 'Adjust your design',
+    'tamano' => 'Design size',
+    'medida_impresion' => 'Prints at :medida',
+    'arrastra' => 'Drag the design on the garment to place it. It stays inside its area.',
+    'centrar' => 'Centre',
+    'subir' => 'Up to the collar',
 ];

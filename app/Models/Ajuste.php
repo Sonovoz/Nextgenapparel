@@ -19,6 +19,10 @@ class Ajuste extends Model
         'tienda.correo_contacto' => null,
         // IVA general provisional hasta la fase 3, en centésimas de % (2100 = 21 %) (D75).
         'impuestos.iva_general' => 2100,
+        // Calidad de los diseños: ppp efectivo mínimos de cada nivel (ficha § 7).
+        'disenos.ppp_correcto' => 300,
+        'disenos.ppp_aceptable' => 200,
+        'disenos.ppp_minimo' => 150,
     ];
 
     protected $table = 'ajustes';

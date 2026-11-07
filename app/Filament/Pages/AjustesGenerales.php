@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Dominio\Disenos\Calidad;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Filament\Navegacion\GrupoNavegacion;
 use App\Models\Ajuste;
@@ -50,6 +51,7 @@ class AjustesGenerales extends Page implements HasSchemas
             'nombre' => Ajuste::obtener('tienda.nombre'),
             'correo_contacto' => Ajuste::obtener('tienda.correo_contacto'),
             'iva_general' => Ajuste::obtener('impuestos.iva_general') / 100,
+            ...Calidad::umbrales(),
         ]);
     }
 
@@ -65,6 +67,14 @@ class AjustesGenerales extends Page implements HasSchemas
                 ->schema([
                     TextInput::make('iva_general')->label('IVA general')->numeric()->minValue(0)->maxValue(100)->step(0.01)->suffix('%')->required(),
                 ]),
+            Section::make('Calidad de los diseños')
+                ->description('ppp efectivo mínimo de cada nivel, al tamaño al que se imprime. Por debajo del último, el aviso es fuerte y se recomienda no continuar.')
+                ->columns(3)
+                ->schema([
+                    TextInput::make('correcto')->label('Calidad excelente desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required()->gt('aceptable'),
+                    TextInput::make('aceptable')->label('Buena calidad desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required()->gt('minimo'),
+                    TextInput::make('minimo')->label('Calidad justa desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required(),
+                ]),
         ]);
     }
 
@@ -79,6 +89,16 @@ class AjustesGenerales extends Page implements HasSchemas
                 Ajuste::guardar('tienda.nombre', $datos['nombre']);
                 Ajuste::guardar('tienda.correo_contacto', $datos['correo_contacto']);
                 Ajuste::guardar('impuestos.iva_general', $ivaNuevo);
+
+                $umbralesAnteriores = Calidad::umbrales();
+                $umbralesNuevos = ['correcto' => (int) $datos['correcto'], 'aceptable' => (int) $datos['aceptable'], 'minimo' => (int) $datos['minimo']];
+                foreach ($umbralesNuevos as $nivel => $ppp) {
+                    Ajuste::guardar('disenos.ppp_'.$nivel, $ppp);
+                }
+
+                if ($umbralesAnteriores !== $umbralesNuevos) {
+                    Actividad::apuntar('ajustes', 'Umbrales de calidad cambiados', propiedades: ['old' => $umbralesAnteriores, 'attributes' => $umbralesNuevos]);
+                }
 
                 if ($ivaAnterior !== $ivaNuevo) {
                     Actividad::apuntar('ajustes', 'IVA general cambiado', propiedades: ['old' => ['iva' => $ivaAnterior / 100 .' %'], 'attributes' => ['iva' => $ivaNuevo / 100 .' %']]);

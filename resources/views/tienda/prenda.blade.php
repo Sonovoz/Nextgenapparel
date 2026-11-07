@@ -18,6 +18,13 @@
         'ver_en_grande' => __('tienda.ver_en_grande'),
         'error_archivo' => __('tienda.error_archivo'),
         'error_grande' => __('tienda.error_grande'),
+        'medida_impresion' => __('tienda.medida_impresion'),
+        'decimal' => $idioma === 'en' ? '.' : ',',
+    ];
+    // Misma regla que App\Dominio\Disenos\Calidad: umbrales de Ajustes y textos de aviso.
+    $calidadVisor = [
+        'umbrales' => \App\Dominio\Disenos\Calidad::umbrales(),
+        'textos' => trans('disenos'),
     ];
 @endphp
 
@@ -39,6 +46,25 @@
         @keyframes estampar { 0% { opacity: 0; transform: scale(1.18); filter: blur(6px); } 55% { opacity: 1; transform: scale(.97); filter: blur(0); } 100% { opacity: 1; transform: scale(1); } }
         .zona-marca { position: absolute; border: 2px dashed currentColor; background: color-mix(in srgb, currentColor 8%, transparent); }
         .zona-marca.elegida { border-style: solid; }
+        .zona-marca.con-diseno { background: transparent; border-width: 1px; opacity: .7; }
+        .diseno { z-index: 1; }
+        .diseno.movible { pointer-events: auto; cursor: grab; touch-action: none; }
+        .diseno.arrastrando { cursor: grabbing; }
+        .zona-guia { position: absolute; border: 1px dashed rgba(22,22,26,.45); border-radius: 2px; opacity: 0; transition: opacity .2s ease; pointer-events: none; z-index: 2; }
+        .visor-lienzo.ajustando .zona-guia { opacity: 1; }
+        .ajustador { display: flex; flex-direction: column; gap: 14px; padding-top: 4px; border-top: 1px solid rgba(255,255,255,.14); }
+        .ajustador h3 { margin: 12px 0 0; font-size: 15px; font-weight: 500; }
+        .fila-tamano { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .fila-tamano input[type=range] { flex: 1 1 180px; accent-color: #fff; min-height: 32px; }
+        .fila-tamano output { font-size: 14px; min-width: 150px; }
+        .calidad { border-radius: 4px; padding: 14px 16px; background: rgba(255,255,255,.06); border-left: 4px solid #8F8D87; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+        .calidad[data-nivel="correcta"] { border-left-color: #3DBE7A; }
+        .calidad[data-nivel="buena"] { border-left-color: #A6CF4F; }
+        .calidad[data-nivel="justa"] { border-left-color: #F2B33D; }
+        .calidad[data-nivel="baja"] { border-left-color: #F0624D; background: rgba(240,98,77,.12); }
+        .calidad-cabecera { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+        .calidad-cabecera strong { font-size: 15px; font-weight: 600; }
+        .calidad p:empty, .calidad span:empty { display: none; }
         .lupa { position: absolute; width: 170px; height: 170px; border-radius: 999px; overflow: hidden; pointer-events: none; background: #fff; box-shadow: 0 0 0 3px #fff, 0 14px 36px rgba(22,22,26,.35); z-index: 3; }
         .lupa .capa { position: absolute; }
         .lupa .capa img { width: 100%; height: 100%; }
@@ -138,7 +164,7 @@
 
         <div class="ficha">
             <section class="galeria" aria-label="{{ $prenda->nombre }}">
-                <div class="visor" id="visor" data-colores='@json($colores)' data-textos='@json($textosVisor)'>
+                <div class="visor" id="visor" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
                     <div class="visor-controles">
                         <div class="segmento" role="group" aria-label="{{ __('tienda.delantera') }} / {{ __('tienda.trasera') }}">
                             <button type="button" class="boton-pildora" data-cara="delantera" aria-pressed="true">{{ __('tienda.delantera') }}</button>

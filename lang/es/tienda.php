@@ -73,4 +73,10 @@ return [
     'privacidad' => 'Tu diseño no sale de tu dispositivo: no lo subimos ni lo guardamos. Vista previa orientativa; la revisión de calidad se hace al personalizar.',
     'error_archivo' => 'Ese archivo no es una imagen que podamos mostrar. Prueba con PNG, JPG, SVG o WebP.',
     'error_grande' => 'El archivo pesa más de 20 MB. Prueba con una versión más ligera.',
+    'ajusta' => 'Ajusta tu diseño',
+    'tamano' => 'Tamaño del diseño',
+    'medida_impresion' => 'Se imprime a :medida',
+    'arrastra' => 'Arrastra el diseño sobre la prenda para colocarlo. No sale de su zona.',
+    'centrar' => 'Centrar',
+    'subir' => 'Pegar al cuello',
 ];
