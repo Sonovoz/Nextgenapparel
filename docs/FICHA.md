@@ -112,7 +112,8 @@ Importes en céntimos (enteros). Campos traducibles marcados con *(es/en)*.
 - **carritos / lineas_carrito**: persistentes para clientes registrados, restaurables.
 - **pedidos**: numero, cliente_id, estado_interno, idioma, direcciones (copia), subtotal, descuentos, envio, impuestos, total, desglose_calculo (JSON: cada paso del motor de precios), fecha_estimada_entrega, transportista, numero_seguimiento.
 - **lineas_pedido**: pedido_id, prenda_id, color_id, reparto_tallas, precio_unitario, total.
-- **impresiones_linea**: linea_pedido_id, zona_id, diseno_id, ancho_cm, alto_cm, posicion, ppp_efectivo, estado_revision, imagen_maqueta.
+- **impresiones_linea**: linea_pedido_id, zona_id, diseno_id, ancho_cm, alto_cm, posicion, ppp_efectivo, estado_revision.
+- **maquetas_linea**: linea_pedido_id, cara (delantera / trasera), ruta, generada_en. Una imagen por cara con todos sus diseños compuestos sobre la prenda y el color del pedido (D98). Se congela al pagar y se regenera si el equipo aprueba un cambio de diseño.
 - **historial_estados**: pedido_id, estado, usuario_id, fecha, nota, notificado_cliente.
 - **notas_pedido**: pedido_id, tipo (privada / cliente), texto, autor.
 - **presupuestos**: numero, cliente_id, contenido, validez, estado.
@@ -208,8 +209,14 @@ Fecha estimada = plazo base de la familia + días extra por tramo de unidades + 
 ### Visor del cliente
 Línea de progreso con fechas, maquetas, resumen del pedido, factura en PDF, seguimiento del envío, fecha estimada, botón cancelar (si procede), botón **repetir pedido** y apertura de **incidencias** con fotos.
 
+### Maquetas del pedido (D98)
+- Al confirmar el pedido, el servidor compone con Imagick **una imagen por cara** (delantera y trasera) de cada línea: la foto de la prenda en el color pedido con todos sus diseños en la posición y tamaño elegidos, con el mismo fundido con la tela que el visor.
+- Se adjuntan en el **PDF de confirmación del pedido** que recibe el cliente y en la **orden de trabajo** del equipo, y se muestran en el visor del cliente y en la ficha del pedido del backend.
+- Es la referencia de **lo que el cliente aprobó**: si hay un cambio de diseño, se genera una versión nueva y la anterior queda en el historial.
+- Se generan en la cola con reintentos; si fallan, el pedido sigue adelante y se avisa por la alerta de errores.
+
 ### Producción
-- **Orden de trabajo** en PDF por pedido.
+- **Orden de trabajo** en PDF por pedido, con las maquetas de cada cara y las medidas de cada impresión.
 - **Paquete ZIP**: diseños originales (`PED-0042_L1_frontal.png`), orden de trabajo y maquetas.
 - **Hoja de compra**: agrupa las variantes necesarias de todos los pedidos pagados, descontando el stock.
 
@@ -293,7 +300,7 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 | 3. Motor de precios | Tramos, ofertas, mínimos, cupones, envíos, impuestos, recargo de equivalencia, desglose | Los casos P1–P7 y los de envío pasan como tests automáticos |
 | 4. Diseños | Subida PNG, cálculo de ppp efectivo, avisos, declaración de derechos, biblioteca de diseños | Tests con PNG reales de distintas resoluciones dan el aviso correcto según el tamaño de impresión |
 | 5. Configurador y área de cliente | Configurador, maqueta 2D, carrito persistente, registro, área de cliente, visor de pedido, repetir pedido | Un cliente configura un pedido con dos zonas y ve la maqueta y el precio correctos en móvil y escritorio |
-| 6. Pedidos y documentos | Estados, notas, acciones en bloque, plazos, cancelación, incidencias, presupuesto, factura, rectificativa, orden de trabajo, ZIP, hoja de compra, correos SMTP | El ciclo completo de un pedido genera todos los documentos y correos en el idioma del cliente |
+| 6. Pedidos y documentos | Estados, notas, acciones en bloque, plazos, cancelación, incidencias, presupuesto, factura, rectificativa, orden de trabajo, maquetas del pedido por cara, ZIP, hoja de compra, correos SMTP | El ciclo completo de un pedido genera todos los documentos y correos en el idioma del cliente; el PDF del cliente y la orden de trabajo llevan la maqueta de cada cara |
 | 7. Pagos | Redsys (y Bizum) en pruebas, verificación de firma, cuadre de pagos, reembolsos | Pagos, fallos y reembolsos en el entorno de pruebas de Redsys funcionan y quedan registrados |
 | 8. Panel de ventas y legal | Panel de ventas, exportación, páginas legales, banner de cookies | Los datos del panel cuadran con los pedidos de prueba |
 | 9. Auditoría Gauntlet | Revisión adversarial según `docs/GAUNTLET.md` | Sin defectos críticos ni altos abiertos |
