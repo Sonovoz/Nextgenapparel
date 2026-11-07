@@ -373,3 +373,33 @@ body.estudio-abierto { overflow: hidden; }
     .estudio.activo #ver-zonas { display: none; }  /* en el móvil, la pestaña «Zona» */
 }
 @media (prefers-reduced-motion: reduce) { .estudio.activo { animation: none; } .estudio.activo .pista.visible { animation: none; opacity: 1; } }
+
+/* Varios diseños: capas y zonas */
+.capas { display: flex; flex-direction: column; gap: 8px; }
+.capas:empty { display: none; }
+.capas-titulo { margin: 0; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #A7A2B5; }
+.capa-diseno { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .04); color: #fff; font: 14px var(--sans); text-align: left; cursor: pointer; transition: border-color .2s ease, background .2s ease; }
+.capa-diseno strong { font-weight: 500; letter-spacing: .12em; text-transform: uppercase; font-size: 12px; }
+.capa-diseno span { color: #C9C5D6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
+.capa-diseno[aria-pressed="true"] { border-color: #8EA0FF; background: rgba(142, 160, 255, .14); }
+.capas .anadir { align-self: flex-start; }
+.aviso-zona { margin: 0; color: #8EA0FF; font-size: 14px; }
+.aviso-zona:empty { display: none; }
+#zonas-diseno .boton-pildora { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; min-height: 52px; line-height: 1.15; }
+#zonas-diseno .boton-pildora small { font-size: 11px; opacity: .75; }
+#zonas-diseno .boton-pildora.con-diseno span::after { content: " ●"; color: #8EA0FF; }
+#zonas-diseno .boton-pildora:disabled { opacity: .35; cursor: not-allowed; }
+.estudio.activo .diseno.movible:not(.activo) { opacity: .92; }
+
+/* Luz de fondo del escenario: dos halos que flotan muy despacio (solo CSS, en GPU). */
+.estudio.activo .estudio-escena::before { content: ""; position: absolute; inset: -20%; pointer-events: none; z-index: 0;
+    background: radial-gradient(32% 30% at 30% 40%, rgba(31, 59, 255, .28), transparent 70%), radial-gradient(28% 26% at 72% 58%, rgba(214, 160, 110, .16), transparent 70%);
+    filter: blur(20px); will-change: transform; animation: halos 22s ease-in-out infinite alternate; }
+@keyframes halos {
+    0% { transform: translate3d(-4%, -2%, 0) rotate(0deg) scale(1); }
+    50% { transform: translate3d(3%, 2%, 0) rotate(8deg) scale(1.08); }
+    100% { transform: translate3d(-2%, 4%, 0) rotate(-6deg) scale(1.02); }
+}
+.estudio.activo .marco-visor, .estudio.activo .pieles, .estudio.activo .girar, .estudio.activo .boton-lupa { position: relative; z-index: 1; }
+.estudio.activo .girar, .estudio.activo .boton-lupa { position: absolute; z-index: 3; }
+@media (prefers-reduced-motion: reduce) { .estudio.activo .estudio-escena::before { animation: none; } }

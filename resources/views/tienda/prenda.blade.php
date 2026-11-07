@@ -20,6 +20,12 @@
         'error_grande' => __('tienda.error_grande'),
         'medida_impresion' => __('tienda.medida_impresion'),
         'calidad_sin_diseno' => __('tienda.calidad_sin_diseno'),
+        'tus_disenos' => __('tienda.tus_disenos'),
+        'anadir_diseno' => __('tienda.anadir_diseno'),
+        'elige_zona_nuevo' => __('tienda.elige_zona_nuevo'),
+        'solapa' => __('tienda.solapa'),
+        'listo_varios' => __('tienda.listo_varios'),
+        'pestana_logo' => __('tienda.pestana_logo'),
         'decimal' => $idioma === 'en' ? '.' : ',',
     ];
     // Misma regla que App\Dominio\Disenos\Calidad: umbrales de Ajustes y textos de aviso.

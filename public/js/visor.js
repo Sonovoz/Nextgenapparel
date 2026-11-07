@@ -40,19 +40,45 @@
         color: 0,
         cara: 'delantera',
         zonas: false,
-        modo: 'logo',          // 'logo' | 'texto'
-        logo: null,            // canvas con el logo del cliente
-        texto: '',
-        fuente: 0,
-        tinta: 'auto',
-        zonaId: null,
+        disenos: {},           // un diseño por zona: { zonaId: {modo, logo, texto, fuente, tinta, logoPx, logoTipo, nombre} }
+        anadiendo: false,      // eligiendo la zona de un diseño nuevo
+        zonaId: null,          // zona activa: la del diseño que se edita
         zonaElegida: false,    // el cliente eligió zona: no se cambia sola
         lupa: false,           // en el estudio, la lupa se activa a mano
         ajustes: {},           // por zona: { escala (0,2–1), cx, cy (0–1 del hueco libre) }
-        logoPx: null,          // píxeles reales del logo (sin márgenes transparentes)
-        logoTipo: null,        // 'transparente' | 'fondo' | 'fondo_blanco' | 'vectorial'
         version: 0             // cambia con cada diseño nuevo (invalida la caché)
     };
+
+    // estado.modo, estado.logo, estado.texto… son los del diseño de la zona activa
+    // (o un borrador mientras aún no hay zona). Así cada zona lleva su propio diseño.
+    function nuevoDiseno() { return { modo: 'logo', logo: null, texto: '', fuente: 0, tinta: 'auto', logoPx: null, logoTipo: null, nombre: '' }; }
+    var borrador = nuevoDiseno();
+    function actual() {
+        if (estado.zonaId === null) return borrador;
+        if (!estado.disenos[estado.zonaId]) estado.disenos[estado.zonaId] = nuevoDiseno();
+        return estado.disenos[estado.zonaId];
+    }
+    ['modo', 'logo', 'texto', 'fuente', 'tinta', 'logoPx', 'logoTipo', 'nombre'].forEach(function (campo) {
+        Object.defineProperty(estado, campo, { get: function () { return actual()[campo]; }, set: function (v) { actual()[campo] = v; } });
+    });
+    function disenoValido(d) { return !!d && (d.modo === 'logo' ? !!d.logo : d.texto.trim() !== ''); }
+    function zonasConDiseno() {
+        return Object.keys(estado.disenos).map(Number).filter(function (id) { return disenoValido(estado.disenos[id]); });
+    }
+    /** Ejecuta fn como si la zona activa fuera zonaId (para pintar los diseños de otras zonas). */
+    function conDiseno(zonaId, fn) {
+        var antes = estado.zonaId;
+        estado.zonaId = zonaId;
+        try { return fn(); } finally { estado.zonaId = antes; }
+    }
+    /** Activa una zona. Si se estaba preparando un diseño sin zona, pasa a esa zona. */
+    function fijarZona(id) {
+        if (estado.zonaId === null && disenoValido(borrador) && !disenoValido(estado.disenos[id])) {
+            estado.disenos[id] = borrador;
+            borrador = nuevoDiseno();
+        }
+        estado.zonaId = id;
+    }
 
     var cacheFotos = {};
     var cacheCapas = {};
@@ -103,7 +129,7 @@
                 (datos ? datos.zonas : []).forEach(function (z) {
                     if (z.id && !vistas[z.id]) {
                         vistas[z.id] = true;
-                        lista.push({ id: z.id, nombre: z.nombre, cara: cara, area: z.ancho * z.alto });
+                        lista.push({ id: z.id, nombre: z.nombre, cara: cara, area: z.ancho * z.alto, precio: z.precio || '', rect: z });
                     }
                 });
             });
@@ -357,15 +383,16 @@
             });
         }
 
-        var zona = hayDiseno() ? zonaEn(color, cara) : null;
-        if (zona && opciones.movible) {
-            var guia = el('div', 'zona-guia');
-            guia.style.cssText = 'left:' + zona.x + '%;top:' + zona.y + '%;width:' + zona.ancho + '%;height:' + zona.alto + '%';
-            escena.appendChild(guia);
-        }
-        if (zona) {
-            capaImpresa(color, cara, zona).then(function (capa) {
-                var c = el('canvas', 'diseno' + (opciones.estampar && !sinMovimiento ? ' estampar' : '') + (opciones.movible ? ' movible' : ''));
+        datos.zonas.forEach(function (zona) {
+            if (!disenoValido(estado.disenos[zona.id])) return;
+            var activa = zona.id === estado.zonaId;
+            if (activa && opciones.movible) {
+                var guia = el('div', 'zona-guia');
+                guia.style.cssText = 'left:' + zona.x + '%;top:' + zona.y + '%;width:' + zona.ancho + '%;height:' + zona.alto + '%';
+                escena.appendChild(guia);
+            }
+            conDiseno(zona.id, function () { return capaImpresa(color, cara, zona); }).then(function (capa) {
+                var c = el('canvas', 'diseno' + (activa && opciones.estampar && !sinMovimiento ? ' estampar' : '') + (opciones.movible ? ' movible' : '') + (activa ? ' activo' : ''));
                 if (opciones.movible) { c.dataset.zona = zona.id; c.dataset.color = indiceColor; }
                 c.width = capa.width; c.height = capa.height;
                 c.getContext('2d').drawImage(capa, 0, 0);
@@ -373,7 +400,7 @@
                 c.style.cssText = 'left:' + zona.x + '%;top:' + zona.y + '%;width:' + zona.ancho + '%;height:' + zona.alto + '%';
                 escena.appendChild(c);
             });
-        }
+        });
 
         return escena;
     }
@@ -503,13 +530,25 @@
         b.setAttribute('aria-checked', 'false');
         b.dataset.zona = z.id;
         b.addEventListener('click', function () {
+            if (b.disabled) return;
             apagarMarcas();
-            estado.zonaId = z.id;
+            var ocupada = disenoValido(estado.disenos[z.id]);
+            if (!estado.anadiendo && !ocupada && hayDiseno() && estado.zonaId !== null) {
+                // Mover el diseño actual a esta zona.
+                estado.disenos[z.id] = estado.disenos[estado.zonaId];
+                delete estado.disenos[estado.zonaId];
+                delete estado.ajustes[z.id];
+                estado.zonaId = z.id;
+                estado.version++;
+            } else {
+                fijarZona(z.id); // editar el de esta zona o empezar uno nuevo aquí
+            }
+            estado.anadiendo = false;
             estado.zonaElegida = true;
-            marcarZona();
+            sincronizar();
             if (z.cara !== estado.cara) { estado.cara = z.cara; estampar = true; pintar('giro'); }
             else { estampar = true; pintar(); }
-            avisarListo();
+            if (!hayDiseno()) elegirHerramienta('diseno');
             refrescarColeccion();
         });
         grupoZonas.appendChild(b);
@@ -526,10 +565,84 @@
         esperaGuia = setTimeout(function () { if (!arrastre) lienzo.classList.remove('ajustando'); }, 1200);
     }
 
+    /** ¿Se pisan dos zonas en la prenda? (misma cara y rectángulos que se cruzan) */
+    function solapan(a, b) {
+        if (a.id === b.id || a.cara !== b.cara) return false;
+        var r = a.rect, q = b.rect;
+        return r.x < q.x + q.ancho && q.x < r.x + r.ancho && r.y < q.y + q.alto && q.y < r.y + r.alto;
+    }
+
     function marcarZona() {
+        var usadas = zonasConDiseno();
         grupoZonas.querySelectorAll('[data-zona]').forEach(function (b) {
-            b.setAttribute('aria-checked', String(Number(b.dataset.zona) === estado.zonaId));
+            var z = zonas.filter(function (o) { return o.id === Number(b.dataset.zona); })[0];
+            // Bloqueada si se pisa con otra zona que ya tiene diseño (salvo la que se está moviendo).
+            var choca = zonas.filter(function (o) {
+                return usadas.indexOf(o.id) !== -1 && (estado.anadiendo || o.id !== estado.zonaId) && solapan(z, o);
+            })[0];
+            b.disabled = !!choca;
+            b.title = choca ? texto('solapa', { zona: z.nombre, otra: choca.nombre }) : '';
+            b.setAttribute('aria-checked', String(z.id === estado.zonaId && !estado.anadiendo));
+            b.classList.toggle('con-diseno', usadas.indexOf(z.id) !== -1);
+            b.replaceChildren(el('span', '', z.nombre), el('small', '', z.precio ? '+' + z.precio : ''));
         });
+        var aviso = document.getElementById('aviso-zona');
+        if (aviso) aviso.textContent = estado.anadiendo ? textos.elige_zona_nuevo : '';
+    }
+
+    /** Lista de capas: cada zona con su diseño, y añadir otro. */
+    function pintarCapas() {
+        var caja = document.getElementById('capas');
+        if (!caja) return;
+        var usadas = zonasConDiseno();
+        caja.replaceChildren();
+        if (usadas.length === 0) return;
+        caja.appendChild(el('p', 'capas-titulo', textos.tus_disenos));
+        zonas.filter(function (z) { return usadas.indexOf(z.id) !== -1; }).forEach(function (z) {
+            var d = estado.disenos[z.id];
+            var b = el('button', 'capa-diseno');
+            b.type = 'button';
+            b.setAttribute('aria-pressed', String(z.id === estado.zonaId));
+            b.appendChild(el('strong', '', z.nombre));
+            b.appendChild(el('span', '', d.modo === 'logo' ? (d.nombre || textos.pestana_logo) : '«' + d.texto.trim() + '»'));
+            b.addEventListener('click', function () {
+                fijarZona(z.id);
+                estado.anadiendo = false;
+                sincronizar();
+                if (z.cara !== estado.cara) { estado.cara = z.cara; pintar('giro'); } else { pintar(); }
+            });
+            caja.appendChild(b);
+        });
+        var libres = zonas.filter(function (z) { return usadas.indexOf(z.id) === -1 && !zonas.some(function (o) { return usadas.indexOf(o.id) !== -1 && solapan(z, o); }); });
+        if (libres.length) {
+            var mas = el('button', 'boton-pildora borde anadir', '+ ' + textos.anadir_diseno);
+            mas.type = 'button';
+            mas.addEventListener('click', function () {
+                estado.anadiendo = true;
+                marcarZona();
+                elegirHerramienta('zona');
+            });
+            caja.appendChild(mas);
+        }
+    }
+
+    /** Lleva los controles del panel al diseño de la zona activa. */
+    function sincronizar() {
+        pestanas.forEach(function (o) {
+            var activa = o.dataset.modo === estado.modo;
+            o.setAttribute('aria-selected', String(activa));
+            o.tabIndex = activa ? 0 : -1;
+            document.getElementById(o.getAttribute('aria-controls')).hidden = !activa;
+        });
+        campoTexto.value = estado.texto;
+        document.querySelectorAll('#fuentes [role="radio"]').forEach(function (b) { b.setAttribute('aria-checked', String(Number(b.dataset.valor) === estado.fuente)); });
+        document.querySelectorAll('#tintas [role="radio"]').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.valor === estado.tinta)); });
+        soltar.classList.toggle('con-logo', !!estado.logo);
+        document.getElementById('nombre-logo').textContent = estado.logo ? estado.nombre : '';
+        acciones.hidden = !hayDiseno();
+        marcarZona();
+        pintarCapas();
+        avisarListo();
     }
 
     /** Zona de partida: el pecho para un logo; la más grande de delante para un texto. */
@@ -540,7 +653,7 @@
         var elegida = candidatas.reduce(function (a, b) {
             return estado.modo === 'logo' ? (b.area < a.area ? b : a) : (b.area > a.area ? b : a);
         });
-        estado.zonaId = elegida.id;
+        fijarZona(elegida.id);
         marcarZona();
         return elegida;
     }
@@ -556,6 +669,8 @@
         estampar = true;
         if (cara !== estado.cara) { estado.cara = cara; pintar('giro'); } else { pintar(); }
         acciones.hidden = !hayDiseno();
+        marcarZona();
+        pintarCapas();
         avisarListo();
         if (hayDiseno()) {
             abrirEstudio();
@@ -568,9 +683,10 @@
         actualizarAjustador();
         if (!hayDiseno()) { estadoMarca.textContent = ''; return; }
         var color = colores[estado.color];
+        var n = zonasConDiseno().length;
         estadoMarca.replaceChildren(
             el('strong', '', texto('listo', { prenda: textos.prenda, color: color.nombre })),
-            document.createTextNode(' ' + textos.listo_2)
+            document.createTextNode(' ' + (n > 1 ? texto('listo_varios', { n: n }) : textos.listo_2))
         );
     }
 
@@ -623,12 +739,12 @@
             // Si llega reducido desde la portada, la calidad se mide con los píxeles del original.
             var factor = original && original.ancho ? original.ancho / w : 1;
             estado.logoPx = { w: Math.round(estado.logo.width / escala * factor), h: Math.round(estado.logo.height / escala * factor) };
-            estado.ajustes = {};
+            estado.nombre = original ? original.nombre : archivo.name;
+            if (estado.zonaId !== null) delete estado.ajustes[estado.zonaId];
             estado.version++;
             if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
             elegirHerramienta('ajustar'); // el logo ya está: toca colocarlo
-            soltar.classList.add('con-logo');
-            document.getElementById('nombre-logo').textContent = original ? original.nombre : archivo.name;
+            sincronizar();
         };
         img.onerror = function () { URL.revokeObjectURL(url); mostrarError(textos.error_archivo); };
         img.src = url;
@@ -684,18 +800,13 @@
 
     // Quitar el diseño
     document.getElementById('quitar-diseno').addEventListener('click', function () {
-        estado.logo = null;
-        estado.logoPx = null;
-        estado.logoTipo = null;
-        estado.ajustes = {};
-        estado.texto = '';
-        campoTexto.value = '';
-        estado.zonaElegida = false;
+        if (estado.zonaId !== null) { delete estado.disenos[estado.zonaId]; delete estado.ajustes[estado.zonaId]; } else { borrador = nuevoDiseno(); }
         estado.version++;
-        soltar.classList.remove('con-logo');
-        acciones.hidden = true;
-        avisarListo();
-        pintar();
+        var resto = zonasConDiseno();
+        if (resto.length) { fijarZona(resto[0]); } else { estado.zonaElegida = false; }
+        sincronizar();
+        var z = zonas.filter(function (o) { return o.id === estado.zonaId; })[0];
+        if (z && z.cara !== estado.cara) { estado.cara = z.cara; pintar('giro'); } else { pintar(); }
         refrescarColeccion();
     });
 
@@ -809,7 +920,14 @@
         var c = e.target;
         if (!c.classList || !c.classList.contains('movible') || !enEstudio() || estado.lupa) return;
         var zona = zonaActual();
-        if (!zona || String(zona.id) !== c.dataset.zona) return;
+        if (!zona || String(zona.id) !== c.dataset.zona) {
+            // Pulsar otro de tus diseños sobre la prenda lo elige para editarlo.
+            fijarZona(Number(c.dataset.zona));
+            estado.anadiendo = false;
+            sincronizar();
+            pintar();
+            return;
+        }
         e.preventDefault();
         c.setPointerCapture(e.pointerId);
         var g = geometria(disenoPara(colores[estado.color]), zona);

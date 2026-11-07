@@ -95,4 +95,9 @@ return [
     'herramienta_zona' => 'Area',
     'herramienta_ajustar' => 'Adjust',
     'ajustar_vacio' => 'First upload your logo or type your brand.',
+    'tus_disenos' => 'Your designs',
+    'anadir_diseno' => 'Add another design',
+    'elige_zona_nuevo' => 'Choose where your new design goes.',
+    'solapa' => ':zona overlaps :otra, which already has a design.',
+    'listo_varios' => 'It has :n designs: check the front and the back.',
 ];

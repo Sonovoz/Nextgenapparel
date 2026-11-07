@@ -22,6 +22,7 @@
     </div>
 
     <div id="hp-diseno" role="tabpanel" aria-labelledby="h-diseno" class="herramienta-panel">
+    <div class="capas" id="capas"></div>
 
     <div class="pestanas" role="tablist" aria-label="{{ __('tienda.tu_marca_etiqueta') }}">
         <button type="button" role="tab" id="pestana-logo" aria-selected="true" aria-controls="panel-logo" data-modo="logo">{{ __('tienda.pestana_logo') }}</button>
@@ -66,6 +67,7 @@
     </div>
 
     <div id="hp-zona" role="tabpanel" aria-labelledby="h-zona" class="herramienta-panel" hidden>
+        <p class="aviso-zona" id="aviso-zona" aria-live="polite"></p>
         <div class="grupo">
             <span>{{ __('tienda.donde') }}</span>
             <div class="opciones" id="zonas-diseno" role="radiogroup" aria-label="{{ __('tienda.donde') }}"></div>

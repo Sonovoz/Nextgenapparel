@@ -95,4 +95,9 @@ return [
     'herramienta_zona' => 'Zona',
     'herramienta_ajustar' => 'Ajustar',
     'ajustar_vacio' => 'Primero sube tu logo o escribe tu marca.',
+    'tus_disenos' => 'Tus diseños',
+    'anadir_diseno' => 'Añadir otro diseño',
+    'elige_zona_nuevo' => 'Elige dónde va tu nuevo diseño.',
+    'solapa' => ':zona se pisa con :otra, que ya tiene diseño.',
+    'listo_varios' => 'Lleva :n diseños: míralo por delante y por detrás.',
 ];

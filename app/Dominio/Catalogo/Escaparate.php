@@ -113,11 +113,15 @@ class Escaparate
     {
         $idsColores = $prenda->variantes()->aLaVenta()->distinct()->pluck('color_id');
         // Solo las zonas que la prenda ofrece ahora (con su precio) y activas.
-        $zonasOfrecidas = $prenda->zonas()->where('zonas_impresion.activa', true)->pluck('zonas_impresion.id')->all();
+        $ofrecidas = $prenda->zonas()->where('zonas_impresion.activa', true)->get();
+        $zonasOfrecidas = $ofrecidas->pluck('id')->all();
+        $tipo = Impuestos::tipoIva($prenda->clase_impuesto_id);
+        // Lo que suma cada zona por prenda, con IVA (calculado aquí, nunca en el navegador).
+        $precioZona = $ofrecidas->mapWithKeys(fn ($z) => [$z->id => Formato::euros(Iva::conIva((int) $z->pivot->precio, $tipo))]);
         $maquetas = $prenda->fotos()->where('tipo', TipoFoto::Maqueta->value)
             ->with(['zonas' => fn ($q) => $q->whereIn('zona_impresion_id', $zonasOfrecidas), 'zonas.zona'])->get();
 
-        return Color::whereIn('id', $idsColores)->orderBy('orden')->get()->map(function (Color $color) use ($maquetas): array {
+        return Color::whereIn('id', $idsColores)->orderBy('orden')->get()->map(function (Color $color) use ($maquetas, $precioZona): array {
             $caras = [];
 
             foreach (Cara::cases() as $cara) {
@@ -126,6 +130,7 @@ class Escaparate
                     'url' => $foto->url(),
                     'alt' => $foto->texto_alternativo ?: null,
                     'zonas' => $foto->zonas->map(fn ($z) => [
+                        'precio' => $precioZona[$z->zona_impresion_id] ?? null,
                         'id' => $z->zona_impresion_id, 'nombre' => $z->zona?->nombre,
                         'ancho_mm' => $z->zona?->ancho_max_mm, 'alto_mm' => $z->zona?->alto_max_mm,
                         'x' => $z->x / 100, 'y' => $z->y / 100, 'ancho' => $z->ancho / 100, 'alto' => $z->alto / 100,
