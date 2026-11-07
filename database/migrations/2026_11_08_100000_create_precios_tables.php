@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -22,6 +23,16 @@ return new class extends Migration
             $table->unsignedSmallInteger('orden')->default(0);
             $table->timestamps();
         });
+
+        // Clases de partida (España, editables en Ajustes → Impuestos). La general
+        // conserva el IVA provisional que se hubiera configurado en la fase 2 (D75).
+        $general = DB::table('ajustes')->where('clave', 'impuestos.iva_general')->value('valor');
+        $ahora = now();
+        DB::table('clases_impuesto')->insert([
+            ['clave' => 'general', 'nombre' => json_encode(['es' => 'General', 'en' => 'Standard']), 'tipo_iva' => $general !== null ? (int) json_decode($general) : 2100, 'recargo' => 520, 'por_defecto' => true, 'orden' => 0, 'created_at' => $ahora, 'updated_at' => $ahora],
+            ['clave' => 'reducido', 'nombre' => json_encode(['es' => 'Reducido', 'en' => 'Reduced']), 'tipo_iva' => 1000, 'recargo' => 140, 'por_defecto' => false, 'orden' => 1, 'created_at' => $ahora, 'updated_at' => $ahora],
+            ['clave' => 'superreducido', 'nombre' => json_encode(['es' => 'Superreducido', 'en' => 'Super-reduced']), 'tipo_iva' => 400, 'recargo' => 50, 'por_defecto' => false, 'orden' => 2, 'created_at' => $ahora, 'updated_at' => $ahora],
+        ]);
 
         Schema::table('prendas', function (Blueprint $table) {
             // Null: la clase por defecto (como «Estándar» en WooCommerce).

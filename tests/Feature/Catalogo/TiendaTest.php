@@ -10,12 +10,15 @@ use App\Dominio\Precios\Formato;
 use App\Dominio\Precios\Iva;
 use App\Dominio\Sistema\Acceso\Rol;
 use App\Filament\Pages\AjustesGenerales;
+use App\Filament\Resources\Precios\Pages\ManageClaseImpuesto;
 use App\Models\Ajuste;
+use App\Models\ClaseImpuesto;
 use App\Models\Color;
 use App\Models\Foto;
 use App\Models\FotoZona;
 use App\Models\Prenda;
 use Database\Seeders\EjemplosCatalogoSeeder;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -71,19 +74,18 @@ class TiendaTest extends TestCase
 
     // ── Ajustes → General ─────────────────────────────────────────────
 
-    public function test_el_iva_se_cambia_en_ajustes_y_queda_en_la_actividad(): void
+    public function test_el_iva_se_cambia_en_ajustes_impuestos_y_queda_en_la_actividad(): void
     {
         Filament::setCurrentPanel('admin');
         $this->actingAs($this->usuarioConRol(Rol::Administrador));
+        $general = ClaseImpuesto::where('clave', 'general')->sole();
 
-        Livewire::test(AjustesGenerales::class)
-            ->assertSchemaStateSet(['iva_general' => 21])
-            ->fillForm(['nombre' => 'NextGen Apparel', 'iva_general' => 10])
-            ->callAction('guardar')
-            ->assertNotified('Ajustes guardados');
+        Livewire::test(ManageClaseImpuesto::class)
+            ->callAction(TestAction::make('edit')->table($general), ['tipo_iva' => '10', 'recargo' => '1,4'])
+            ->assertHasNoFormErrors();
 
-        $this->assertSame(1000, Ajuste::obtener('impuestos.iva_general'));
-        $this->assertSame('IVA general cambiado', Activity::latest('id')->value('description'));
+        $this->assertSame([1000, 140], [$general->fresh()->tipo_iva, $general->fresh()->recargo]);
+        $this->assertSame('Impuestos cambiados', Activity::latest('id')->value('description'));
         $this->get('/es/camisetas')->assertSee('6,60 €'); // (4,20 + pecho 1,80) + 10 %
     }
 

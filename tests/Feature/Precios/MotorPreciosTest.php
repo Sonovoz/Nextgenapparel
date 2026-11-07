@@ -53,7 +53,8 @@ class MotorPreciosTest extends TestCase
     {
         parent::setUp();
 
-        ClaseImpuesto::create(['clave' => 'general', 'nombre' => ['es' => 'General'], 'tipo_iva' => 2100, 'recargo' => 520, 'por_defecto' => true]);
+        // La clase general (21 % + 5,2 %) la crea la migración.
+        $this->assertSame([2100, 520], [ClaseImpuesto::porDefecto()->tipo_iva, ClaseImpuesto::porDefecto()->recargo]);
         $this->negro = Color::factory()->create(['nombre' => ['es' => 'Negro']]);
         foreach (['S', 'M', 'L', 'XL', 'XXL'] as $orden => $nombre) {
             $this->tallas[$nombre] = Talla::factory()->create(['nombre' => $nombre, 'orden' => $orden])->id;

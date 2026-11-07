@@ -105,6 +105,12 @@ Si subiste maquetas antes del 7-11-2026, sus zonas quedaron en la posición de p
 php artisan catalogo:recolocar-zonas
 ```
 
+Reglas de precio, envíos y un pack de ejemplo (fase 3), para probarlos en Marketing → Simulador de precios:
+
+```bat
+php artisan db:seed --class=EjemplosPreciosSeeder
+```
+
 ## Cada vez que haya un paso nuevo
 
 ```bat

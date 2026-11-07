@@ -95,7 +95,7 @@ class PanelTest extends TestCase
     {
         $paginas = self::clasesPendientes();
 
-        $this->assertCount(13, $paginas);
+        $this->assertCount(9, $paginas); // Impuestos, Envío, Cupones y Reglas de precio ya existen (fase 3)
 
         foreach ($paginas as $clase) {
             $this->assertInstanceOf(GrupoNavegacion::class, $clase::getNavigationGroup(), $clase);

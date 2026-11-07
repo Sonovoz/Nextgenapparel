@@ -1,0 +1,186 @@
+<?php
+
+namespace App\Filament\Resources\Precios;
+
+use App\Dominio\Precios\Impuestos;
+use App\Dominio\Precios\Iva;
+use App\Dominio\Precios\RepartoPack;
+use App\Filament\Concerns\CampoDinero;
+use App\Filament\Concerns\CamposTraducibles;
+use App\Filament\Navegacion\GrupoNavegacion;
+use App\Models\ClaseImpuesto;
+use App\Models\Color;
+use App\Models\Pack;
+use App\Models\Prenda;
+use App\Models\Talla;
+use App\Models\Variante;
+use App\Models\ZonaImpresion;
+use BackedEnum;
+use Closure;
+use Filament\Actions\RestoreAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
+
+/** Productos → Packs: ofertas cerradas con precio fijo (ficha § 6 bis). */
+class PackResource extends RecursoPrecios
+{
+    protected static ?string $model = Pack::class;
+
+    protected static string|UnitEnum|null $navigationGroup = GrupoNavegacion::Productos;
+
+    protected static ?string $navigationLabel = 'Packs';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGift;
+
+    protected static ?int $navigationSort = 7;
+
+    protected static ?string $modelLabel = 'pack';
+
+    protected static ?string $pluralModelLabel = 'packs';
+
+    protected static ?string $slug = 'packs';
+
+    private static function esFijo(Get $get, string $ruta = 'reparto'): bool
+    {
+        $valor = $get($ruta);
+
+        return ($valor instanceof RepartoPack ? $valor : RepartoPack::tryFrom((string) $valor)) !== RepartoPack::Libre;
+    }
+
+    /** @return list<array{talla_id: int, unidades: int}> */
+    private static function filasReparto(?array $reparto): array
+    {
+        return collect($reparto ?? [])->map(fn ($unidades, $talla) => ['talla_id' => (int) $talla, 'unidades' => (int) $unidades])->values()->all();
+    }
+
+    private static function guardarReparto(array $data): array
+    {
+        $filas = $data['reparto_tallas'] ?? [];
+        $data['reparto_tallas'] = $filas === [] ? null : collect($filas)->filter(fn ($f) => filled($f['talla_id'] ?? null))
+            ->mapWithKeys(fn ($f) => [(int) $f['talla_id'] => (int) $f['unidades']])->all();
+
+        return $data;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema->columns(1)->components([
+            Section::make('Pack')->schema([
+                CamposTraducibles::texto('nombre', 'Nombre', obligatorio: true, slugDe: 'slug'),
+                CamposTraducibles::urls(Pack::class, 160),
+                CamposTraducibles::texto('descripcion', 'Descripción', largo: true),
+                Grid::make(3)->schema([
+                    CampoDinero::make('precio', 'Precio cerrado (sin IVA)')->required()->live(onBlur: true)
+                        ->helperText(fn (Get $get) => filled($get('precio'))
+                            ? 'Con IVA: '.CampoDinero::formatear(Iva::conIva(CampoDinero::aCentimos($get('precio')), Impuestos::tipoIva(filled($get('clase_impuesto_id')) ? (int) $get('clase_impuesto_id') : null)))
+                            : 'Incluye las prendas y la impresión de las zonas incluidas.'),
+                    Select::make('clase_impuesto_id')->label('Clase de impuesto')->native(false)->live()
+                        ->options(fn () => ClaseImpuesto::orderBy('orden')->get()->pluck('nombre', 'id'))
+                        ->placeholder('La de por defecto'),
+                    ToggleButtons::make('reparto')->label('Tallas y color')->options(RepartoPack::class)->inline()->required()->live()->default(RepartoPack::Fijo),
+                ]),
+                Select::make('zonas')->label('Impresión incluida')->relationship('zonas', 'id')->multiple()->preload()->required()
+                    ->getOptionLabelFromRecordUsing(fn (ZonaImpresion $record) => $record->nombre)
+                    ->helperText('Otras zonas se cobran aparte con la tarifa de cada prenda.')
+                    ->rule(fn (Get $get) => function (string $atributo, $valor, Closure $fallo) use ($get): void {
+                        foreach ($get('lineas') ?? [] as $linea) {
+                            $prenda = Prenda::find($linea['prenda_id'] ?? null);
+                            $ofrecidas = $prenda?->zonas()->where('zonas_impresion.activa', true)->pluck('zonas_impresion.id')->all() ?? [];
+                            if ($prenda && array_diff(array_map('intval', $valor ?? []), $ofrecidas) !== []) {
+                                $fallo("{$prenda->nombre} no ofrece todas esas zonas.");
+
+                                return;
+                            }
+                        }
+                    }),
+            ]),
+            Section::make('Prendas del pack')->schema([
+                Repeater::make('lineas')->hiddenLabel()->relationship('lineas')->minItems(1)->defaultItems(1)->columns(3)
+                    ->addActionLabel('Añadir prenda')
+                    // Reparto en la base de datos: {talla_id: unidades}; en el formulario, filas talla + unidades.
+                    ->mutateRelationshipDataBeforeFillUsing(fn (array $data) => [...$data, 'reparto_tallas' => self::filasReparto($data['reparto_tallas'] ?? null)])
+                    ->mutateRelationshipDataBeforeCreateUsing(fn (array $data) => self::guardarReparto($data))
+                    ->mutateRelationshipDataBeforeSaveUsing(fn (array $data) => self::guardarReparto($data))
+                    ->schema([
+                        Select::make('prenda_id')->label('Prenda')->required()->native(false)->live()
+                            ->options(fn () => Prenda::where('activa', true)->orderBy('id')->get()->pluck('nombre', 'id')),
+                        TextInput::make('unidades')->label('Unidades')->integer()->minValue(1)->required()
+                            ->rule(fn (Get $get) => function (string $atributo, $valor, Closure $fallo) use ($get): void {
+                                if (self::esFijo($get, '../../reparto')) {
+                                    $repartidas = array_sum(array_map(fn ($f) => (int) ($f['unidades'] ?? 0), $get('reparto_tallas') ?? []));
+                                    if ($repartidas !== (int) $valor) {
+                                        $fallo("El reparto de tallas suma {$repartidas}, no {$valor}.");
+                                    }
+                                }
+                            }),
+                        Select::make('colores')->label(fn (Get $get) => self::esFijo($get, '../../reparto') ? 'Color' : 'Colores que puede elegir')
+                            ->multiple()->required()->native(false)
+                            ->maxItems(fn (Get $get) => self::esFijo($get, '../../reparto') ? 1 : null)
+                            ->options(fn (Get $get) => Color::whereIn('id', Variante::where('prenda_id', $get('prenda_id'))->aLaVenta()->pluck('color_id'))->orderBy('orden')->get()->pluck('nombre', 'id'))
+                            ->dehydrateStateUsing(fn ($state) => array_values(array_map('intval', $state ?? []))),
+                        Repeater::make('reparto_tallas')->label('Reparto de tallas')->columnSpanFull()->columns(2)->defaultItems(1)
+                            ->visible(fn (Get $get) => self::esFijo($get, '../../reparto'))
+                            ->addActionLabel('Añadir talla')
+                            ->schema([
+                                Select::make('talla_id')->label('Talla')->required()->native(false)->distinct()
+                                    ->options(fn () => Talla::orderBy('orden')->pluck('nombre', 'id')),
+                                TextInput::make('unidades')->label('Unidades')->integer()->minValue(1)->required(),
+                            ]),
+                        Select::make('tallas_permitidas')->label('Tallas que puede elegir')->multiple()->native(false)->columnSpanFull()
+                            ->visible(fn (Get $get) => ! self::esFijo($get, '../../reparto'))
+                            ->required(fn (Get $get) => ! self::esFijo($get, '../../reparto'))
+                            ->options(fn () => Talla::orderBy('orden')->pluck('nombre', 'id'))
+                            ->dehydrateStateUsing(fn ($state) => array_values(array_map('intval', $state ?? []))),
+                    ]),
+            ]),
+            Section::make('Publicación')->columns(3)->schema([
+                DateTimePicker::make('desde')->label('Desde')->seconds(false),
+                DateTimePicker::make('hasta')->label('Hasta')->seconds(false)->after('desde'),
+                Toggle::make('activo')->label('Activo')->default(true)->inline(false),
+            ]),
+        ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table->defaultSort('orden')->reorderable('orden')
+            ->description('Precio cerrado: no se combina con cupones ni ofertas y cumple por sí solo el pedido mínimo.')
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['lineas', 'zonas']))
+            ->columns([
+                TextColumn::make('nombre')->label('Pack')->searchable(),
+                TextColumn::make('unidades')->label('Prendas')->state(fn (Pack $record) => $record->unidades()),
+                TextColumn::make('precio')->label('Precio con IVA')->formatStateUsing(fn ($state, Pack $record) => CampoDinero::formatear(Iva::conIva((int) $state, Impuestos::tipoIva($record->clase_impuesto_id)))),
+                TextColumn::make('reparto')->label('Tallas')->badge(),
+                TextColumn::make('hasta')->label('Hasta')->dateTime('d/m/Y')->placeholder('Sin fin'),
+                IconColumn::make('activo')->label('Activo')->boolean(),
+            ])
+            ->filters([TrashedFilter::make()])
+            ->recordActions([static::accionEditar()->slideOver(), static::accionBorrar()->modalDescription('El pack va a la papelera y deja de venderse.'), RestoreAction::make()]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->withoutGlobalScopes([SoftDeletingScope::class]);
+    }
+
+    public static function getPages(): array
+    {
+        return ['index' => Pages\ManagePacks::route('/')];
+    }
+}
