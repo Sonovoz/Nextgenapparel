@@ -12,6 +12,7 @@ use Exception;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -51,6 +52,14 @@ class CopiasTest extends TestCase
         $this->app->forgetScopedInstances();
     }
 
+    /** Estas pruebas miran el archivo de la copia SQLite; con MariaDB la copia la hace mariadb-dump. */
+    private function soloConSqlite(): void
+    {
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            $this->markTestSkipped('Comprueba la copia de SQLite; con MariaDB se usa mariadb-dump (verificado en Docker en la fase 1).');
+        }
+    }
+
     /** @return list<string> */
     private function contenidoDeLaUltima(): array
     {
@@ -69,6 +78,7 @@ class CopiasTest extends TestCase
 
     public function test_hace_una_copia_con_la_base_de_datos_y_los_archivos(): void
     {
+        $this->soloConSqlite();
         Storage::disk('local')->put('disenos/prueba.png', 'imagen');
 
         $this->assertNull(app(Copias::class)->hacer());
@@ -100,6 +110,7 @@ class CopiasTest extends TestCase
 
     public function test_con_contrasena_la_copia_va_cifrada_y_se_restaura_con_ella(): void
     {
+        $this->soloConSqlite();
         $this->conContrasena('clave-de-las-copias');
         app(Copias::class)->hacer();
 

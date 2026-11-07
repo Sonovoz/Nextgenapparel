@@ -2,10 +2,13 @@
 
 namespace Tests\Feature\Idiomas;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class IdiomasTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_la_raiz_redirige_al_espanol_si_el_navegador_no_indica_idioma(): void
     {
         // El cliente de pruebas envía «en-us» por defecto: se vacía para simular

@@ -120,3 +120,71 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | # | Decisión | Motivo |
 |---|---|---|
 | D74 | **Instructor del proyecto** (`.claude/agents/instructor.md`): planifica cada fase, asigna a cada paso un nivel de verificación N1, N2 o N3 según su riesgo y hace la revisión adversarial al cerrarla. Una sola verificación al final de cada paso; revisión del cliente en Herd cada 2 o 3 pasos; Gauntlet completo solo al cerrar fase | En la fase 1 la suite de tests tardaba 17 s; las vueltas venían de capturas y comprobaciones intermedias, de verificarlo todo al mismo nivel y de revisar en Herd tras cada paso |
+
+## 2026-11-07 — Fase 2, paso 2.1
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D75 | Hasta la fase 3, la ficha muestra «Desde X € IVA incluido» con un **IVA del 21 %**, configurable en Ajustes | Respuesta del cliente; los impuestos completos llegan en la fase 3 |
+| D76 | **SKU automático** de cada variación (formato `CAM-ESSENTIAL-NEGRO-M`) | Respuesta del cliente |
+| D77 | Catálogo con enteros: precios y costes en céntimos sin IVA, pesos en gramos, medidas en milímetros y posición de las zonas sobre la foto en centésimas de porcentaje (0–10000). Textos traducibles en JSON con el español como respaldo | Sin redondeos (regla 7); las zonas no dependen del tamaño de la foto |
+| D78 | Prendas en papelera (borrado recuperable); no se puede borrar una familia, un color o una talla en uso; las claves de API de los proveedores se guardan cifradas | Como en WooCommerce; datos protegidos |
+| D79 | La alerta de respaldo de errores críticos se construye sin consultar la base de datos | Con la conexión caída no salía: el modelo consultaba la estructura de la tabla (fallo de la fase 1 detectado en esta sesión) |
+
+## 2026-11-07 — Fase 2, paso 2.2
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D80 | En Productos, **Colores** y **Tallas** como secciones propias en lugar del «Atributos» genérico de WooCommerce | Los atributos de las prendas son siempre color y talla: más directo |
+| D81 | Secciones sencillas con lista y edición en ventana; textos en español e inglés lado a lado (el inglés es opcional); medidas de las zonas en cm en pantalla y en mm en la base de datos | Rapidez de uso y sin decimales guardados |
+| D82 | Datos iniciales opcionales para probar en local (`php artisan db:seed --class=CatalogoInicialSeeder`): 3 familias, 7 tallas, blanco y negro, y 3 zonas con medidas de ejemplo | Empezar a probar sin teclear todo; se cambian en el backend |
+
+## 2026-11-07 — Fase 2, paso 2.3
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D83 | Los importes se escriben en euros con **coma o punto** decimal (máx. 2 decimales) y se guardan en céntimos; se muestran en formato español («1.234,50 €») | En España se escribe la coma; sin errores de redondeo (probado con 0,29 y 19,99) |
+| D84 | El SKU se genera al crear la variación y **no cambia** aunque se renombre la prenda o el color | Un SKU estable no rompe pedidos, etiquetas ni referencias externas |
+| D85 | Las prendas van a la papelera y se recuperan; el borrado definitivo no está disponible en el backend. Los cambios de precio, coste, SKU y estado quedan en el registro de actividad | Los pedidos futuros guardarán referencias; trazabilidad de precios |
+
+## 2026-11-07 — Fase 2, paso 2.4 y ejemplos
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D86 | Fotos en el disco `public` (`storage/app/public/catalogo/<prenda>`), PNG, JPG o WebP de hasta 5 MB; el archivo se borra al borrar la foto. Una maqueta por prenda, color y cara | Servidas directamente por Nginx; sin archivos huérfanos |
+| D87 | Al subir una maqueta, las zonas de impresión de esa cara se colocan solas en una posición de partida (frontal, pecho, espalda) y se ajustan en % con vista previa | Ahorra trabajo: la mayoría de prendas tienen las zonas en el mismo sitio |
+| D88 | Las maquetas de muestra se preparan con **fondo transparente**, mismo encuadre (1000 × 1200) y misma escala por prenda | Aspecto premium uniforme y se pueden poner sobre cualquier fondo |
+| D89 | Tres prendas de ejemplo con datos inventados (`php artisan db:seed --class=EjemplosCatalogoSeeder`): Camiseta Essential, Polo Classic y Sudadera Urban, sin fotos | Probar en local con datos realistas; las fotos se suben desde el backend (D30) |
+
+## 2026-11-07 — Fase 2, paso 2.5
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D90 | **Ajustes → General** con nombre de la tienda, correo de contacto e **IVA general** (21 % por defecto); los ajustes se guardan en la tabla `ajustes` con caché y, si la base de datos no responde, se usa el valor por defecto. El cambio de IVA queda en la actividad | Regla 4 (configurable en el backend) y D75 |
+| D91 | IVA calculado con enteros: tipo en centésimas de % y redondeo al céntimo, medio hacia arriba (7,50 € → 9,08 €) | Sin coma flotante en el dinero (regla 7) |
+| D92 | URLs de la tienda traducidas: `/es/camisetas/camiseta-essential` y `/en/t-shirts/essential-t-shirt`; si una prenda no tiene URL en inglés, se usa la española. El selector de idioma lleva a la misma página en el otro idioma | SEO por idioma (hreflang) y navegación coherente |
+| D93 | Ficha con visor propio en JavaScript sin librerías (color, cara y zonas sobre la maqueta), apartados con `<details>` nativos y el botón de personalizar desactivado hasta el configurador | Ligero, accesible y sin dependencias |
+| D94 | Solo se muestran prendas visibles, fuera de la papelera y con al menos una variación activa; la portada y el menú se muestran aunque la base de datos no responda | Nada a medias en la tienda; autosuficiencia |
+| D95 | «Tu marca, aquí» en la ficha: el cliente suelta su logo o escribe su marca y lo ve impreso en la zona elegida, en todos los colores («Tu colección»). Todo ocurre en su navegador: no se sube ni se guarda nada | El momento emocional que vende («esto es mío») antes de pedir datos; sin datos personales ni almacenamiento; la misma pieza será la vista previa del configurador |
+| D96 | El diseño se funde con la tela usando la propia maqueta como mapa (luces, sombras y pliegues suavizados, sin el grano), a doble resolución; sin WebGL ni modelos 3D ni IA | Aspecto de impresión real con un archivo JavaScript sin librerías; rápido y sin coste por visita. El 3D queda para la versión 2 si hace falta |
+| D97 | El visor vive en `public/js/visor.js` (sin compilar con Vite), cargado con versión por fecha del archivo | En Herd y en Docker funciona sin `npm run build`; la caché del navegador se renueva al cambiar el archivo |
+| D98 | Las maquetas del pedido (una por cara, con todos los diseños) las genera el **servidor con Imagick** a partir del diseño original y la posición guardada, no una captura del navegador. Se adjuntan al PDF de confirmación del cliente y a la orden de trabajo | Es un documento del pedido: debe ser reproducible, igual en cualquier navegador, a buena resolución y sin depender de lo que envíe el cliente. El visor sigue siendo solo vista previa (D95) |
+| D99 | Las impresiones se colocan **midiendo desde el cuello**, no centradas en la zona: frontal y pecho a 7,5 cm bajo el cuello delantero, espalda a 10 cm bajo el trasero; frontal y espalda centrados, pecho a 10 cm del centro en el lado izquierdo de quien la lleva. Las zonas de partida guardan la proporción real en cm. El visor alinea el diseño arriba de la zona y recorta los márgenes transparentes del logo. En el pedido, `posicion` se guarda en mm desde el cuello y desde el centro | Con las zonas de la primera versión los diseños salían bajos y demasiado grandes: en producción eso es un pedido mal impreso. Las medidas desde el cuello son las que usa el taller |
+| D100 | **Ajustador** en el visor: el cliente cambia el tamaño (20–100 % de la zona) y arrastra el diseño dentro de su zona; ve el tamaño real de impresión en cm y la **calidad al momento**: nivel, ppp efectivo, mensaje, consejo (tamaño máximo con calidad excelente o píxeles necesarios) y aviso si la imagen tiene fondo o fondo blanco. Al colocar un diseño, las marcas de zona se apagan solas | Decirle la verdad sobre su imagen antes de pagar evita pedidos borrosos y reclamaciones; ver los cm reales evita sorpresas en el tamaño |
+| D101 | La calidad se calcula en `App\Dominio\Disenos\Calidad` (aritmética entera, tests) con umbrales en **Ajustes → General** (300/200/150 ppp por defecto, en orden obligatorio y con registro de actividad). El visor repite la misma fórmula con los umbrales que le da el servidor; la comprobación que vale para el pedido es la del servidor (fase 4) | Regla de negocio en PHP y configurable (reglas 2 y 4); aviso inmediato sin subir el diseño (D95) |
+| D102 | La tienda solo se indexa **en producción y con el interruptor de Ajustes → General encendido** (apagado por defecto). En cualquier otro caso: `noindex` en las páginas y `robots.txt` con `Disallow: /`. `robots.txt` y los sitemaps (`/sitemap.xml` con uno por idioma, con `hreflang`, `lastmod` e imagen) se generan en Laravel; el backend lleva `X-Robots-Tag: noindex` | Que pruebas o una copia de la base de datos nunca acaben en Google; el equipo decide el día del lanzamiento sin tocar código (regla 4) |
+| D103 | Cada página lleva `canonical` (su URL en su idioma), Open Graph (con `og:locale` y alternativa) y JSON-LD: Organization y WebSite en la portada, BreadcrumbList en listado y ficha, y Product con `AggregateOffer` (precio mínimo y máximo con IVA del catálogo) en la ficha | Resultados enriquecidos y enlaces bonitos al compartir; el precio de los datos estructurados es el mismo que ve el cliente |
+| D104 | En móvil, la cabecera ocupa dos filas compactas: marca e idioma (ES/EN) arriba y el menú de familias en una fila deslizable debajo | La cabecera apilada ocupaba un tercio de la pantalla |
+| D105 | La compra se propone en **3 pasos**: Sube tu diseño · Escoge las prendas · Cierra el pedido. Se añade un **selector de Packs** (ofertas cerradas) como segunda vía de venta | Decisión del cliente: sencillez para el comprador joven y una vía de captación con precio cerrado |
+| D106 | Pack: reparto **configurable por pack** (fijo o el cliente reparte tallas y color permitido); precio cerrado que incluye prendas y **zonas fijadas**; otras zonas se cobran con su tarifa; **público** en la tienda con fechas opcionales | Respuestas del cliente; flexible sin complicar al comprador |
+| D107 | Los packs **nunca** se combinan con cupones, tramos ni ofertas combinadas; cumplen el mínimo por sí solos. El modelo, el backend y el precio van en la fase 3 (motor de precios, con tests K1–K4) y el selector en la tienda en la fase 5 | El precio del pack ya es la oferta; lógica antes que interfaz (regla 2) y versión 1 antes que la 2 (regla 8) |
+| D108 | Laravel confía en las cabeceras `X-Forwarded-*` del proxy (`trustProxies(at: '*')`): Caddy termina el HTTPS y el contenedor de la aplicación no se publica fuera de la red de Docker | Sin esto, canonical, sitemap, JSON-LD y el JavaScript del visor saldrían en `http://` en producción (Gauntlet fase 2, ronda 1) |
+| D109 | Catálogo a prueba de pedidos: las variaciones **no se borran** (se desactivan); un color con variaciones o fotos no se borra; la tienda solo muestra variaciones **a la venta** (activas y de color activo); el visor solo ofrece zonas que la prenda tiene activas, y al quitar una zona de la prenda se quita también de sus maquetas | Lo que se vende debe existir siempre con su precio; nada visible sin precio (Gauntlet fase 2, ronda 1) |
+| D110 | Las URL se comprueban por su valor **efectivo** en cada idioma (la inglesa o, si falta, la española): dos registros nunca responden a la misma dirección. Las familias no pueden usar palabras reservadas (`config/tienda.php`) | Evita que una URL inglesa abra otra prenda y que una familia choque con rutas futuras (carrito, cuenta, packs…) |
+| D111 | Vaciar un texto en inglés en el backend lo **borra** y vuelve a usarse el español (rasgo `Traducible` en los modelos) | Spatie solo añadía traducciones: una URL inglesa equivocada no se podía quitar |
+| D112 | Las fotos no dejan archivos huérfanos al cambiar la imagen; si una maqueta pasa a ser foto de modelo o detalle, pierde la cara y sus zonas. Las zonas no pueden salirse de la foto (aviso en el campo) | Coherencia de datos y del disco (D86) |
+| D113 | Disponibilidad en los datos estructurados: siempre `InStock`, porque se imprime bajo pedido y la prenda lisa se repone del proveedor. Se revisará si en la fase 6 se decide bloquear la venta sin stock | Aclara el defecto 10 de la ronda 1 sin inventar una regla de stock |
+| D114 | La calidad se mide sobre lo que se imprime: el diseño **sin sus márgenes transparentes**. El análisis del servidor de la fase 4 (`App\Dominio\Disenos\Calidad` con Imagick) aplicará el mismo recorte para que el aviso de la ficha y el del pedido coincidan | Un logo con mucho margen no debe parecer de peor calidad de la que tiene |
+| D115 | En el backend, la vista previa de cada maqueta coloca un **diseño de ejemplo** (logo cuadrado, texto horizontal o cartel vertical) con la misma regla que la tienda y se actualiza al cambiar las zonas, sin guardar | Petición del cliente: ajustar a ojo la posición correcta de cada zona según el tipo de imagen |
+| D116 | Solo se atienden peticiones para el dominio de `APP_URL` y sus subdominios (`trustHosts`), más `127.0.0.1` para la comprobación de salud del contenedor web. No actúa en local ni en tests | Con `trustProxies('*')`, otro proceso del servidor podría colar un host falso en los enlaces de los correos (Gauntlet fase 2, ronda 2) |
+| D117 | Las URL del catálogo son siempre minúsculas, números y guiones; las zonas se validan en centésimas, como se guardan; los archivos de fotos se borran tras confirmar la transacción; al añadir una zona a la prenda, sus maquetas la reciben en la posición de partida | Defectos bajos de la ronda 2, corregidos antes de cerrar |

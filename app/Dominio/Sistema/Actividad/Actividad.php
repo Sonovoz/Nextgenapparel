@@ -2,8 +2,10 @@
 
 namespace App\Dominio\Sistema\Actividad;
 
+use App\Models\Prenda;
 use App\Models\RegistroError;
 use App\Models\User;
+use App\Models\Variante;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Activity;
@@ -20,12 +22,20 @@ class Actividad
         'email' => 'Correo electrónico',
         'activo' => 'Activo',
         'rol' => 'Rol',
+        'precio_base' => 'Precio sin IVA',
+        'coste' => 'Coste',
+        'sku' => 'SKU',
+        'familia_id' => 'Familia',
+        'activa' => 'Activa',
+        'iva' => 'IVA',
     ];
 
     /** Nombre legible de cada tipo de elemento. */
     public const ELEMENTOS = [
         User::class => 'Usuario',
         RegistroError::class => 'Error',
+        Prenda::class => 'Prenda',
+        Variante::class => 'Variación',
     ];
 
     public static function apuntar(string $registro, string $descripcion, ?Model $sobre = null, array $propiedades = [], ?User $quien = null): void
@@ -54,6 +64,8 @@ class Actividad
         $tipo = self::ELEMENTOS[$actividad->subject_type] ?? class_basename($actividad->subject_type);
         $nombre = $actividad->subject?->getAttribute('name')
             ?? ($actividad->subject instanceof RegistroError ? Str::limit($actividad->subject->mensaje, 60) : null)
+            ?? ($actividad->subject instanceof Prenda ? $actividad->subject->nombre : null)
+            ?? ($actividad->subject instanceof Variante ? $actividad->subject->sku : null)
             ?? '#'.$actividad->subject_id;
 
         return $tipo.': '.$nombre;
@@ -71,7 +83,7 @@ class Actividad
         $cambios = [];
 
         foreach ($nuevos as $campo => $valor) {
-            $cambios[self::CAMPOS[$campo] ?? $campo] = [self::valor($antiguos[$campo] ?? null), self::valor($valor)];
+            $cambios[self::CAMPOS[$campo] ?? $campo] = [self::valor($antiguos[$campo] ?? null, $campo), self::valor($valor, $campo)];
         }
 
         return $cambios;
@@ -92,9 +104,10 @@ class Actividad
             ->join(' · ');
     }
 
-    private static function valor(mixed $valor): string
+    private static function valor(mixed $valor, ?string $campo = null): string
     {
         return match (true) {
+            in_array($campo, ['precio_base', 'coste'], true) && is_numeric($valor) => number_format($valor / 100, 2, ',', '.').' €',
             $valor === null => '—',
             is_bool($valor) => $valor ? 'Sí' : 'No',
             default => (string) $valor,

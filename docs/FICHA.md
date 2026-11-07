@@ -9,6 +9,8 @@
 
 Portal web para **calcular, vender y gestionar pedidos de prendas personalizadas con impresión DTF** (camisetas, polos y sudaderas). Va dirigido a **pequeños diseñadores** que quieren producir sus colecciones: suben uno o varios diseños en PNG, eligen prenda, color, zonas de impresión y tallas, y el portal calcula el precio, cobra por Redsys, genera la factura y la orden de trabajo. NextGen Apparel imprime y envía.
 
+**Compra en 3 pasos (D105):** 1) Sube tu diseño · 2) Escoge las prendas · 3) Cierra el pedido. Además, un **selector de Packs** con ofertas cerradas (§ 6 bis) como segunda vía de venta.
+
 **Clientes:** particulares, autónomos y empresas.
 **Idiomas:** español e inglés.
 **Servidor:** dedicado de OVH (6+ núcleos, 8 GB+ de RAM), con Docker.
@@ -22,7 +24,8 @@ Portal web para **calcular, vender y gestionar pedidos de prendas personalizadas
 - Catálogo con productos variables, stock y SEO técnico.
 - Motor de precios: prendas, zonas, tramos, ofertas, mínimos, envío e impuestos (incluido el recargo de equivalencia).
 - Diseños: subida de PNG, comprobación de calidad, declaración de derechos, revisión humana.
-- Configurador y maqueta 2D.
+- Configurador y maqueta 2D, con el flujo de 3 pasos.
+- **Packs**: ofertas configurables desde el backend con selector en la tienda (§ 6 bis).
 - Pedidos: estados, visor de seguimiento, plazos estimados, cancelación, incidencias, hoja de compra, **repetir pedido**.
 - Documentos: presupuesto, factura, factura rectificativa, orden de trabajo, paquete ZIP de producción.
 - Pagos: Redsys y Bizum.
@@ -93,6 +96,9 @@ Importes en céntimos (enteros). Campos traducibles marcados con *(es/en)*.
 - **fotos_galeria**: prenda_id, color_id (opcional), tipo (modelo / detalle / plana), imagen, orden, origen (manual / api).
 - **tabla_medidas**: prenda_id, talla_id, largo_cm, ancho_cm, manga_cm (para la guía de tallas).
 - **proveedores**: id, nombre, tipo_conector (manual / api), configuracion.
+- **packs**: id, nombre *(es/en)*, slug *(es/en)*, descripcion *(es/en)*, precio (céntimos, sin IVA) + tipo de impuesto, reparto (fijo / el cliente reparte), activo, desde / hasta (opcional), orden, imagen, campos SEO *(es/en)*.
+- **lineas_pack**: pack_id, prenda_id, unidades, colores_permitidos (uno fijo o varios a elegir), reparto_tallas (si es fijo: talla → unidades; si no, tallas permitidas).
+- **pack_zona**: pack_id, zona_id — zonas cuya impresión incluye el precio.
 
 ### Clientes
 - **clientes**: id, usuario_id, tipo (particular / autónomo / empresa), nombre o razón social, nif, recargo_equivalencia (sí/no), idioma, consentimiento_marketing (fecha y origen).
@@ -112,7 +118,8 @@ Importes en céntimos (enteros). Campos traducibles marcados con *(es/en)*.
 - **carritos / lineas_carrito**: persistentes para clientes registrados, restaurables.
 - **pedidos**: numero, cliente_id, estado_interno, idioma, direcciones (copia), subtotal, descuentos, envio, impuestos, total, desglose_calculo (JSON: cada paso del motor de precios), fecha_estimada_entrega, transportista, numero_seguimiento.
 - **lineas_pedido**: pedido_id, prenda_id, color_id, reparto_tallas, precio_unitario, total.
-- **impresiones_linea**: linea_pedido_id, zona_id, diseno_id, ancho_cm, alto_cm, posicion, ppp_efectivo, estado_revision, imagen_maqueta.
+- **impresiones_linea**: linea_pedido_id, zona_id, diseno_id, ancho_cm, alto_cm, posicion (mm desde el cuello y desde el centro de la prenda, D99), ppp_efectivo, estado_revision.
+- **maquetas_linea**: linea_pedido_id, cara (delantera / trasera), ruta, generada_en. Una imagen por cara con todos sus diseños compuestos sobre la prenda y el color del pedido (D98). Se congela al pagar y se regenera si el equipo aprueba un cambio de diseño.
 - **historial_estados**: pedido_id, estado, usuario_id, fecha, nota, notificado_cliente.
 - **notas_pedido**: pedido_id, tipo (privada / cliente), texto, autor.
 - **presupuestos**: numero, cliente_id, contenido, validez, estado.
@@ -165,6 +172,27 @@ Supuestos: camiseta 4,00 €; polo 7,00 €; sudadera 12,00 €; frontal 3,00 �
 
 ---
 
+## 6 bis. Packs (D105–D107)
+
+Ofertas cerradas que el equipo crea en **Productos → Packs** y el cliente elige en el **selector de Packs** de la tienda. *Ejemplo:* «Pack joven»: 10 camisetas negras (2 L, 5 XL, 3 XXL) con impresión frontal por **99,00 €**.
+
+- **Composición:** una o varias prendas con sus unidades. En cada pack se decide si el reparto es **fijo** (colores y tallas cerrados) o si **el cliente reparte** las unidades entre las tallas (y elige color entre los permitidos). El total de unidades no cambia.
+- **Precio:** importe cerrado (en céntimos, sin IVA, con su tipo de impuesto; se muestra con IVA). Incluye las prendas y la impresión de las **zonas fijadas** en el pack. Añadir otra zona se cobra aparte con la tarifa normal de esa zona × unidades.
+- **Visibilidad:** público en la tienda, con fechas opcionales de inicio y fin.
+- **Ofertas:** el precio del pack ya es la oferta: **no admite cupones, tramos ni ofertas combinadas**. Si en el mismo carrito hay otras prendas sueltas, a esas sí se les aplican sus reglas.
+- **Mínimos:** un pack cumple por sí solo el pedido mínimo.
+- **Flujo:** el cliente elige el pack, sube su diseño (con el ajustador y el aviso de calidad), reparte tallas si el pack lo permite y cierra el pedido.
+- **Motor de precios:** el pack es una línea con precio cerrado; el motor suma los extras de zona y aplica envío e impuestos como al resto. Se prueba con casos propios (K1–K4) en la fase 3.
+
+| # | Caso (*ejemplo*, precios sin IVA) | Resultado esperado |
+|---|---|---|
+| K1 | «Pack joven» 81,82 € (99,00 € con IVA), reparto fijo | **81,82 €**; el reparto de tallas no se puede cambiar |
+| K2 | K1 + espalda grande (4,00 €) | 81,82 + 10 × 4,00 = **121,82 €** |
+| K3 | K1 con un cupón del 10 % | El cupón **no se aplica** al pack; mensaje «Los packs ya tienen su precio especial» |
+| K4 | Pack con reparto libre de 10 unidades; el cliente reparte 9 | **No confirmable**: «Te falta repartir 1 prenda» |
+
+---
+
 ## 7. Diseños y calidad
 
 - Solo **PNG**. Al subirlo se exige marcar: «Declaro que tengo los derechos sobre este diseño».
@@ -177,7 +205,9 @@ Supuestos: camiseta 4,00 €; polo 7,00 €; sudadera 12,00 €; frontal 3,00 �
 | 150–199 | Aviso: «Ojo, tu diseño no tiene la calidad que buscas», con consejos para mejorarlo |
 | < 150 | Aviso fuerte; se recomienda no continuar sin mejorarlo |
 
-*(Umbrales de ejemplo, configurables.)* Se comprueba también: transparencia, fondo blanco no deseado, perfil de color y medidas mínimas.
+*(Umbrales configurables en Ajustes → General, D101.)* Se comprueba también: transparencia, fondo blanco no deseado, perfil de color y medidas mínimas.
+
+- **Aviso inmediato en la ficha (D100):** el visor ya calcula la calidad al tamaño elegido con el ajustador, sin subir el diseño. La vista previa admite también JPG, SVG o WebP para probar, pero avisa de que el pedido necesita un PNG con fondo transparente.
 
 - **Revisión humana** tras el pago: aprobado / requiere cambios (con enlace para subir otro diseño) / rechazado por derechos de autor o marca (con reembolso).
 
@@ -208,8 +238,14 @@ Fecha estimada = plazo base de la familia + días extra por tramo de unidades + 
 ### Visor del cliente
 Línea de progreso con fechas, maquetas, resumen del pedido, factura en PDF, seguimiento del envío, fecha estimada, botón cancelar (si procede), botón **repetir pedido** y apertura de **incidencias** con fotos.
 
+### Maquetas del pedido (D98)
+- Al confirmar el pedido, el servidor compone con Imagick **una imagen por cara** (delantera y trasera) de cada línea: la foto de la prenda en el color pedido con todos sus diseños en la posición y tamaño elegidos, con el mismo fundido con la tela que el visor.
+- Se adjuntan en el **PDF de confirmación del pedido** que recibe el cliente y en la **orden de trabajo** del equipo, y se muestran en el visor del cliente y en la ficha del pedido del backend.
+- Es la referencia de **lo que el cliente aprobó**: si hay un cambio de diseño, se genera una versión nueva y la anterior queda en el historial.
+- Se generan en la cola con reintentos; si fallan, el pedido sigue adelante y se avisa por la alerta de errores.
+
 ### Producción
-- **Orden de trabajo** en PDF por pedido.
+- **Orden de trabajo** en PDF por pedido, con las maquetas de cada cara y las medidas de cada impresión.
 - **Paquete ZIP**: diseños originales (`PED-0042_L1_frontal.png`), orden de trabajo y maquetas.
 - **Hoja de compra**: agrupa las variantes necesarias de todos los pedidos pagados, descontando el stock.
 
@@ -228,6 +264,8 @@ Referencia de estilo: elegante y limpia, con mucho espacio en blanco, fotos gran
 - **Cantidades por talla:** se eligen **en el configurador**, no en la ficha.
 - **Fotos:** las sube el equipo y/o llegan de una API de proveedor; ambos orígenes conviven. Cada prenda necesita fotos planas (delantera y trasera, por color) para la maqueta; las fotos con modelo son opcionales. Si no hay, la galería usa las planas.
 
+
+> «Solicitar presupuesto» en la ficha llega en la fase 6, con los presupuestos en PDF.
 ---
 
 ## 9. Documentos y pagos
@@ -290,10 +328,10 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 |---|---|---|
 | 1. Base | Laravel, Filament, Docker (pruebas y producción), roles, idiomas, log de errores, registro de actividad, copias de seguridad, comprobación de salud, alertas | Los contenedores arrancan desde cero con un comando; se hace y se restaura una copia; un error provocado aparece en el log y genera alerta |
 | 2. Catálogo | Familias, prendas, variantes, zonas, fotos de maqueta, proveedores (manual), stock, SEO técnico | Se crea una prenda variable completa desde el backend y se ve en el frontend en es/en con su sitemap y datos estructurados |
-| 3. Motor de precios | Tramos, ofertas, mínimos, cupones, envíos, impuestos, recargo de equivalencia, desglose | Los casos P1–P7 y los de envío pasan como tests automáticos |
+| 3. Motor de precios | Tramos, ofertas, mínimos, cupones, envíos, impuestos, recargo de equivalencia, desglose, **packs (modelo, backend y precio)** | Los casos P1–P7, K1–K4 y los de envío pasan como tests automáticos |
 | 4. Diseños | Subida PNG, cálculo de ppp efectivo, avisos, declaración de derechos, biblioteca de diseños | Tests con PNG reales de distintas resoluciones dan el aviso correcto según el tamaño de impresión |
-| 5. Configurador y área de cliente | Configurador, maqueta 2D, carrito persistente, registro, área de cliente, visor de pedido, repetir pedido | Un cliente configura un pedido con dos zonas y ve la maqueta y el precio correctos en móvil y escritorio |
-| 6. Pedidos y documentos | Estados, notas, acciones en bloque, plazos, cancelación, incidencias, presupuesto, factura, rectificativa, orden de trabajo, ZIP, hoja de compra, correos SMTP | El ciclo completo de un pedido genera todos los documentos y correos en el idioma del cliente |
+| 5. Configurador y área de cliente | Flujo de 3 pasos, configurador, **selector de Packs**, maqueta 2D, carrito persistente, registro, área de cliente, visor de pedido, repetir pedido | Un cliente configura un pedido con dos zonas y ve la maqueta y el precio correctos en móvil y escritorio |
+| 6. Pedidos y documentos | Estados, notas, acciones en bloque, plazos, cancelación, incidencias, presupuesto, factura, rectificativa, orden de trabajo, maquetas del pedido por cara, ZIP, hoja de compra, correos SMTP | El ciclo completo de un pedido genera todos los documentos y correos en el idioma del cliente; el PDF del cliente y la orden de trabajo llevan la maqueta de cada cara |
 | 7. Pagos | Redsys (y Bizum) en pruebas, verificación de firma, cuadre de pagos, reembolsos | Pagos, fallos y reembolsos en el entorno de pruebas de Redsys funcionan y quedan registrados |
 | 8. Panel de ventas y legal | Panel de ventas, exportación, páginas legales, banner de cookies | Los datos del panel cuadran con los pedidos de prueba |
 | 9. Auditoría Gauntlet | Revisión adversarial según `docs/GAUNTLET.md` | Sin defectos críticos ni altos abiertos |
@@ -307,3 +345,4 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 |---|---|---|
 | Planteamiento | Completado | 2026-11-06 |
 | 1. Base | **Completada con limitaciones** (informe: `docs/INFORME_FASE_1.md`). Criterios de aceptación cumplidos en Docker; pendiente desplegar en OVH y verificar el paso 1.6 en Herd | 2026-11-06 |
+| 2. Catálogo | **Completada con limitaciones** (informe: `docs/INFORME_FASE_2.md`). Criterio de aceptación cumplido con un test de principio a fin, en SQLite y en MariaDB estricta; pendiente la revisión del cliente en Herd de los últimos pasos y el despliegue en OVH | 2026-11-07 |

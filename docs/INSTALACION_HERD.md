@@ -85,6 +85,26 @@ php artisan schedule:work
 
 Para comprobar el estado del sistema desde la consola: `php artisan nga:comprobar-salud`.
 
+## 8. Catálogo de ejemplo y fotos
+
+Para tener tres prendas de ejemplo (camiseta, polo y sudadera) con sus variaciones, zonas y guía de tallas:
+
+```bat
+php artisan db:seed --class=EjemplosCatalogoSeeder
+```
+
+Para que se vean las fotos subidas, una sola vez:
+
+```bat
+php artisan storage:link
+```
+
+Si subiste maquetas antes del 7-11-2026, sus zonas quedaron en la posición de partida antigua (demasiado bajas). Este comando las mueve a la nueva y no toca las que hayas ajustado a mano:
+
+```bat
+php artisan catalogo:recolocar-zonas
+```
+
 ## Cada vez que haya un paso nuevo
 
 ```bat

@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\AvatarIniciales;
 use App\Filament\Pages\Escritorio;
 use App\Http\Middleware\IdiomaBackend;
+use App\Http\Middleware\NoIndexar;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -55,6 +56,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                NoIndexar::class,
             ])
             // Solo el idioma se repite en las peticiones internas de Livewire.
             // Marcar como persistentes las cookies o la sesión las procesaría

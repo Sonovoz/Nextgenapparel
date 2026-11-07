@@ -168,7 +168,8 @@ class RegistrarError
                     return;
                 }
 
-                $registro = new RegistroError([
+                // forceFill: sin consultar la estructura de la tabla (la base de datos no responde).
+                $registro = (new RegistroError)->forceFill([
                     'nivel' => NivelError::Critico,
                     'clase' => get_class($error),
                     'mensaje' => mb_substr($error->getMessage(), 0, self::MAX_MENSAJE),

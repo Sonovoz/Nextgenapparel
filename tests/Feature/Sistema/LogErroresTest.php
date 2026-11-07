@@ -14,6 +14,7 @@ use App\Notifications\AlertaErrorCritico;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Route;
@@ -205,6 +206,25 @@ class LogErroresTest extends TestCase
         Schema::drop('registro_errores');
 
         $this->actingAs($this->usuarioConRol())->get('/admin')->assertOk();
+    }
+
+    public function test_con_la_conexion_caida_avisa_igualmente(): void
+    {
+        // Conexión que no responde (no solo la tabla borrada).
+        $original = config('database.default');
+        config([
+            'database.connections.caida' => ['driver' => 'sqlite', 'database' => '/no/existe/nextgenapparel.sqlite'],
+            'database.default' => 'caida',
+        ]);
+
+        try {
+            report(new ErrorDePrueba('Prueba con la conexión caída'));
+        } finally {
+            config(['database.default' => $original]);
+            DB::purge('caida');
+        }
+
+        $this->assertSame(1, $this->alertasEnviadas());
     }
 
     public function test_registrar_nunca_lanza_excepciones(): void
