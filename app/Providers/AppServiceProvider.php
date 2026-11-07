@@ -6,9 +6,11 @@ use App\Dominio\Sistema\Actividad\Actividad;
 use App\Dominio\Sistema\Errores\ErrorDeCopia;
 use App\Models\Color;
 use App\Models\Familia;
+use App\Models\Prenda;
 use App\Models\Proveedor;
 use App\Models\Talla;
 use App\Models\User;
+use App\Models\Variante;
 use App\Models\ZonaImpresion;
 use App\Policies\ActividadPolicy;
 use App\Policies\CatalogoPolicy;
@@ -44,7 +46,7 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Activity::class, ActividadPolicy::class);
 
-        foreach ([Familia::class, Color::class, Talla::class, ZonaImpresion::class, Proveedor::class] as $modelo) {
+        foreach ([Familia::class, Color::class, Talla::class, ZonaImpresion::class, Proveedor::class, Prenda::class, Variante::class] as $modelo) {
             Gate::policy($modelo, CatalogoPolicy::class);
         }
 

@@ -8,6 +8,6 @@ class TallaFactory extends Factory
 {
     public function definition(): array
     {
-        return ['nombre' => fake()->unique()->randomElement(['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL']), 'orden' => 0];
+        return ['nombre' => fake()->unique()->bothify('T-###'), 'orden' => 0];
     }
 }

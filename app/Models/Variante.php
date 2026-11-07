@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /** Variación de WooCommerce: una prenda en un color y una talla. */
 class Variante extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $table = 'variantes';
 
@@ -40,6 +42,22 @@ class Variante extends Model
     public function talla(): BelongsTo
     {
         return $this->belongsTo(Talla::class);
+    }
+
+    /** Registro de actividad: cambios de variación. */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('catalogo')
+            ->logOnly(['sku', 'precio_base', 'coste', 'activa'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn (string $evento): string => match ($evento) {
+                'created' => 'Variación creada',
+                'updated' => 'Variación modificada',
+                'deleted' => 'Variación borrada',
+                default => $evento,
+            });
     }
 
     public function stockBajo(): bool

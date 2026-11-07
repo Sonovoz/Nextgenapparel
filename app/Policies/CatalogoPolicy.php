@@ -48,6 +48,18 @@ class CatalogoPolicy
         return false;
     }
 
+    /** Recuperar de la papelera. */
+    public function restore(User $usuario, Model $registro): bool
+    {
+        return $this->viewAny($usuario);
+    }
+
+    /** Borrado definitivo: nunca desde el backend (los pedidos guardarán su referencia). */
+    public function forceDelete(User $usuario, Model $registro): bool
+    {
+        return false;
+    }
+
     public static function enUso(Model $registro): bool
     {
         return match (true) {

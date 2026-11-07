@@ -138,3 +138,11 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D80 | En Productos, **Colores** y **Tallas** como secciones propias en lugar del «Atributos» genérico de WooCommerce | Los atributos de las prendas son siempre color y talla: más directo |
 | D81 | Secciones sencillas con lista y edición en ventana; textos en español e inglés lado a lado (el inglés es opcional); medidas de las zonas en cm en pantalla y en mm en la base de datos | Rapidez de uso y sin decimales guardados |
 | D82 | Datos iniciales opcionales para probar en local (`php artisan db:seed --class=CatalogoInicialSeeder`): 3 familias, 7 tallas, blanco y negro, y 3 zonas con medidas de ejemplo | Empezar a probar sin teclear todo; se cambian en el backend |
+
+## 2026-11-07 — Fase 2, paso 2.3
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D83 | Los importes se escriben en euros con **coma o punto** decimal (máx. 2 decimales) y se guardan en céntimos; se muestran en formato español («1.234,50 €») | En España se escribe la coma; sin errores de redondeo (probado con 0,29 y 19,99) |
+| D84 | El SKU se genera al crear la variación y **no cambia** aunque se renombre la prenda o el color | Un SKU estable no rompe pedidos, etiquetas ni referencias externas |
+| D85 | Las prendas van a la papelera y se recuperan; el borrado definitivo no está disponible en el backend. Los cambios de precio, coste, SKU y estado quedan en el registro de actividad | Los pedidos futuros guardarán referencias; trazabilidad de precios |

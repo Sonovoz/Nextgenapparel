@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Translatable\HasTranslations;
 
 /** Producto variable: sus variaciones son las combinaciones color × talla. */
 class Prenda extends Model
 {
-    use HasFactory, HasTranslations, SoftDeletes;
+    use HasFactory, HasTranslations, LogsActivity, SoftDeletes;
 
     protected $table = 'prendas';
 
@@ -59,6 +61,22 @@ class Prenda extends Model
     public function fotos(): HasMany
     {
         return $this->hasMany(Foto::class)->orderBy('orden');
+    }
+
+    /** Registro de actividad: cambios de prenda. */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('catalogo')
+            ->logOnly(['familia_id', 'activa'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn (string $evento): string => match ($evento) {
+                'created' => 'Prenda creada',
+                'updated' => 'Prenda modificada',
+                'deleted' => 'Prenda borrada',
+                default => $evento,
+            });
     }
 
     /** Precio más bajo de sus variaciones activas, en céntimos sin IVA (para «Desde…»). */
