@@ -307,4 +307,4 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 |---|---|---|
 | Planteamiento | Completado | 2026-11-06 |
 | 1. Base | **Completada con limitaciones** (informe: `docs/INFORME_FASE_1.md`). Criterios de aceptación cumplidos en Docker; pendiente desplegar en OVH y verificar el paso 1.6 en Herd | 2026-11-06 |
-| 2. Catálogo | En curso — paso 2.1 (modelo de datos) completado | 2026-11-07 |
+| 2. Catálogo | En curso — pasos 2.1 (modelo de datos) y 2.2 (familias, colores, tallas, zonas y proveedores) completados | 2026-11-07 |

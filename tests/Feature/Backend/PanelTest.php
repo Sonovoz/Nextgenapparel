@@ -95,7 +95,7 @@ class PanelTest extends TestCase
     {
         $paginas = self::clasesPendientes();
 
-        $this->assertCount(18, $paginas);
+        $this->assertCount(15, $paginas);
 
         foreach ($paginas as $clase) {
             $this->assertInstanceOf(GrupoNavegacion::class, $clase::getNavigationGroup(), $clase);

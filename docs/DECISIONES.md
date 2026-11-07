@@ -130,3 +130,11 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D77 | Catálogo con enteros: precios y costes en céntimos sin IVA, pesos en gramos, medidas en milímetros y posición de las zonas sobre la foto en centésimas de porcentaje (0–10000). Textos traducibles en JSON con el español como respaldo | Sin redondeos (regla 7); las zonas no dependen del tamaño de la foto |
 | D78 | Prendas en papelera (borrado recuperable); no se puede borrar una familia, un color o una talla en uso; las claves de API de los proveedores se guardan cifradas | Como en WooCommerce; datos protegidos |
 | D79 | La alerta de respaldo de errores críticos se construye sin consultar la base de datos | Con la conexión caída no salía: el modelo consultaba la estructura de la tabla (fallo de la fase 1 detectado en esta sesión) |
+
+## 2026-11-07 — Fase 2, paso 2.2
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D80 | En Productos, **Colores** y **Tallas** como secciones propias en lugar del «Atributos» genérico de WooCommerce | Los atributos de las prendas son siempre color y talla: más directo |
+| D81 | Secciones sencillas con lista y edición en ventana; textos en español e inglés lado a lado (el inglés es opcional); medidas de las zonas en cm en pantalla y en mm en la base de datos | Rapidez de uso y sin decimales guardados |
+| D82 | Datos iniciales opcionales para probar en local (`php artisan db:seed --class=CatalogoInicialSeeder`): 3 familias, 7 tallas, blanco y negro, y 3 zonas con medidas de ejemplo | Empezar a probar sin teclear todo; se cambian en el backend |

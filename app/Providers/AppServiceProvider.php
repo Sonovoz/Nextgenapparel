@@ -4,8 +4,14 @@ namespace App\Providers;
 
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Dominio\Sistema\Errores\ErrorDeCopia;
+use App\Models\Color;
+use App\Models\Familia;
+use App\Models\Proveedor;
+use App\Models\Talla;
 use App\Models\User;
+use App\Models\ZonaImpresion;
 use App\Policies\ActividadPolicy;
+use App\Policies\CatalogoPolicy;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Event;
@@ -37,6 +43,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::after(fn (User $usuario, string $habilidad, ?bool $resultado) => $resultado ?? ($usuario->esSuperadministrador() ? true : null));
 
         Gate::policy(Activity::class, ActividadPolicy::class);
+
+        foreach ([Familia::class, Color::class, Talla::class, ZonaImpresion::class, Proveedor::class] as $modelo) {
+            Gate::policy($modelo, CatalogoPolicy::class);
+        }
 
         // Textos del catálogo: si falta la traducción, se muestra en español.
         Translatable::fallback(fallbackLocale: 'es', fallbackAny: true);
