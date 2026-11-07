@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Backup\Events\BackupHasFailed;
+use Spatie\Translatable\Facades\Translatable;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +37,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::after(fn (User $usuario, string $habilidad, ?bool $resultado) => $resultado ?? ($usuario->esSuperadministrador() ? true : null));
 
         Gate::policy(Activity::class, ActividadPolicy::class);
+
+        // Textos del catálogo: si falta la traducción, se muestra en español.
+        Translatable::fallback(fallbackLocale: 'es', fallbackAny: true);
 
         // Una copia de seguridad fallida va al log de errores como crítica
         // (y avisa por correo).

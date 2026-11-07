@@ -120,3 +120,13 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | # | Decisión | Motivo |
 |---|---|---|
 | D74 | **Instructor del proyecto** (`.claude/agents/instructor.md`): planifica cada fase, asigna a cada paso un nivel de verificación N1, N2 o N3 según su riesgo y hace la revisión adversarial al cerrarla. Una sola verificación al final de cada paso; revisión del cliente en Herd cada 2 o 3 pasos; Gauntlet completo solo al cerrar fase | En la fase 1 la suite de tests tardaba 17 s; las vueltas venían de capturas y comprobaciones intermedias, de verificarlo todo al mismo nivel y de revisar en Herd tras cada paso |
+
+## 2026-11-07 — Fase 2, paso 2.1
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D75 | Hasta la fase 3, la ficha muestra «Desde X € IVA incluido» con un **IVA del 21 %**, configurable en Ajustes | Respuesta del cliente; los impuestos completos llegan en la fase 3 |
+| D76 | **SKU automático** de cada variación (formato `CAM-ESSENTIAL-NEGRO-M`) | Respuesta del cliente |
+| D77 | Catálogo con enteros: precios y costes en céntimos sin IVA, pesos en gramos, medidas en milímetros y posición de las zonas sobre la foto en centésimas de porcentaje (0–10000). Textos traducibles en JSON con el español como respaldo | Sin redondeos (regla 7); las zonas no dependen del tamaño de la foto |
+| D78 | Prendas en papelera (borrado recuperable); no se puede borrar una familia, un color o una talla en uso; las claves de API de los proveedores se guardan cifradas | Como en WooCommerce; datos protegidos |
+| D79 | La alerta de respaldo de errores críticos se construye sin consultar la base de datos | Con la conexión caída no salía: el modelo consultaba la estructura de la tabla (fallo de la fase 1 detectado en esta sesión) |
