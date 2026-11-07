@@ -6,7 +6,7 @@
     </style>
 @endpush
 
-<x-tienda :titulo="$familia->nombre.' · NextGen Apparel'" :descripcion="$familia->descripcion ?: __('portada.descripcion')" :alternos="$alternos">
+<x-tienda :titulo="$familia->nombre.' · NextGen Apparel'" :descripcion="$familia->descripcion ?: __('portada.descripcion')" :alternos="$alternos" :seo="$seo">
     <div class="contenedor familia">
         <nav class="ruta" aria-label="Ruta">
             <a href="{{ route('portada') }}">{{ __('tienda.inicio') }}</a><span aria-hidden="true">/</span><span>{{ $familia->nombre }}</span>

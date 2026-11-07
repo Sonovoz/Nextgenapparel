@@ -11,7 +11,7 @@
     </style>
 @endpush
 
-<x-tienda :titulo="__('portada.titulo_pagina')" :descripcion="__('portada.descripcion')" :alternos="$alternos">
+<x-tienda :titulo="__('portada.titulo_pagina')" :descripcion="__('portada.descripcion')" :alternos="$alternos" :seo="$seo">
     <div class="contenedor portada">
         <p class="etiqueta">{{ __('portada.etiqueta') }}</p>
         <h1>{{ __('portada.titular') }}</h1>

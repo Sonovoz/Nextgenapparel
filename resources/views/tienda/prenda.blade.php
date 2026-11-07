@@ -146,7 +146,14 @@
         details ul, details table { margin: 0 0 20px; font-size: 14px; color: #3A3A42; }
         table { border-collapse: collapse; width: 100%; }
         th, td { text-align: left; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--linea); }
-        @media (max-width: 600px) { .pasos-ficha { grid-template-columns: 1fr; } }
+        .visor-controles { z-index: 4; }
+        @media (max-width: 600px) {
+            .pasos-ficha { grid-template-columns: 1fr; }
+            .visor-controles { top: 10px; left: 10px; right: 10px; flex-wrap: nowrap; }
+            .boton-pildora { min-height: 34px; padding: 0 12px; font-size: 12px; }
+            .boton-borde { min-height: 42px; padding: 0 12px; font-size: 12px; white-space: nowrap; }
+            .tu-marca { padding: 22px 18px; }
+        }
     </style>
 @endpush
 
@@ -154,7 +161,7 @@
     <script src="{{ asset('js/visor.js') }}?v={{ @filemtime(public_path('js/visor.js')) }}" defer></script>
 @endpush
 
-<x-tienda :titulo="($prenda->seo_titulo ?: $prenda->nombre).' · NextGen Apparel'" :descripcion="$prenda->seo_descripcion ?: \Illuminate\Support\Str::limit((string) $prenda->descripcion, 155)" :alternos="$alternos">
+<x-tienda :titulo="($prenda->seo_titulo ?: $prenda->nombre).' · NextGen Apparel'" :descripcion="$prenda->seo_descripcion ?: \Illuminate\Support\Str::limit((string) $prenda->descripcion, 155)" :alternos="$alternos" :seo="$seo">
     <div class="contenedor">
         <nav class="ruta" aria-label="Ruta">
             <a href="{{ route('portada') }}">{{ __('tienda.inicio') }}</a><span aria-hidden="true">/</span>
@@ -175,7 +182,7 @@
                     <div class="visor-lienzo" id="lienzo">
                         <div class="capa">
                             @if ($fotoInicial)
-                                <img id="foto" src="{{ $fotoInicial['url'] }}" alt="{{ $fotoInicial['alt'] ?? $prenda->nombre }}" width="1000" height="1200">
+                                <img id="foto" fetchpriority="high" src="{{ $fotoInicial['url'] }}" alt="{{ $fotoInicial['alt'] ?? $prenda->nombre }}" width="1000" height="1200">
                             @else
                                 <p class="sin-foto" id="foto-vacia">{{ __('tienda.sin_foto') }}</p>
                             @endif

@@ -9,6 +9,7 @@ use App\Models\Ajuste;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
@@ -52,6 +53,7 @@ class AjustesGenerales extends Page implements HasSchemas
             'correo_contacto' => Ajuste::obtener('tienda.correo_contacto'),
             'iva_general' => Ajuste::obtener('impuestos.iva_general') / 100,
             ...Calidad::umbrales(),
+            'indexar' => (bool) Ajuste::obtener('seo.indexar'),
         ]);
     }
 
@@ -75,6 +77,13 @@ class AjustesGenerales extends Page implements HasSchemas
                     TextInput::make('aceptable')->label('Buena calidad desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required()->gt('minimo'),
                     TextInput::make('minimo')->label('Calidad justa desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required(),
                 ]),
+            Section::make('Buscadores')
+                ->description(app()->environment('production')
+                    ? 'Mientras esté apagado, la tienda queda fuera de Google y del resto de buscadores. Enciéndelo al abrir la tienda al público.'
+                    : 'Este entorno no es el de producción: la tienda nunca se indexa aquí, aunque lo enciendas.')
+                ->schema([
+                    Toggle::make('indexar')->label('Permitir que los buscadores indexen la tienda'),
+                ]),
         ]);
     }
 
@@ -89,6 +98,12 @@ class AjustesGenerales extends Page implements HasSchemas
                 Ajuste::guardar('tienda.nombre', $datos['nombre']);
                 Ajuste::guardar('tienda.correo_contacto', $datos['correo_contacto']);
                 Ajuste::guardar('impuestos.iva_general', $ivaNuevo);
+
+                $indexarAnterior = (bool) Ajuste::obtener('seo.indexar');
+                Ajuste::guardar('seo.indexar', (bool) $datos['indexar']);
+                if ($indexarAnterior !== (bool) $datos['indexar']) {
+                    Actividad::apuntar('ajustes', $datos['indexar'] ? 'Indexación en buscadores activada' : 'Indexación en buscadores desactivada');
+                }
 
                 $umbralesAnteriores = Calidad::umbrales();
                 $umbralesNuevos = ['correcto' => (int) $datos['correcto'], 'aceptable' => (int) $datos['aceptable'], 'minimo' => (int) $datos['minimo']];

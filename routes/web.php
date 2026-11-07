@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TiendaController;
 use App\Http\Middleware\EstablecerIdioma;
 use Illuminate\Http\Request;
@@ -15,6 +16,13 @@ Route::get('/', function (Request $request) {
 
     return redirect()->route('portada', ['idioma' => $idioma]);
 });
+
+// SEO técnico (D102): antes de las rutas de la tienda.
+Route::get('/robots.txt', [SeoController::class, 'robots']);
+Route::get('/sitemap.xml', [SeoController::class, 'indice'])->name('sitemap');
+Route::get('/sitemap-{idioma}.xml', [SeoController::class, 'sitemap'])
+    ->where(['idioma' => implode('|', array_keys(config('idiomas.disponibles')))])
+    ->middleware(EstablecerIdioma::class);
 
 Route::prefix('{idioma}')
     ->where(['idioma' => implode('|', array_keys(config('idiomas.disponibles')))])

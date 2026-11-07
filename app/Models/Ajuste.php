@@ -23,6 +23,8 @@ class Ajuste extends Model
         'disenos.ppp_correcto' => 300,
         'disenos.ppp_aceptable' => 200,
         'disenos.ppp_minimo' => 150,
+        // Buscadores: apagado hasta la puesta en marcha; solo cuenta en producción (D102).
+        'seo.indexar' => false,
     ];
 
     protected $table = 'ajustes';
