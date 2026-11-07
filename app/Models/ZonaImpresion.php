@@ -3,15 +3,15 @@
 namespace App\Models;
 
 use App\Dominio\Catalogo\Cara;
+use App\Models\Concerns\Traducible;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Spatie\Translatable\HasTranslations;
 
 /** Frontal, pecho, espalda grande… con su medida máxima de impresión. */
 class ZonaImpresion extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, Traducible;
 
     protected $table = 'zonas_impresion';
 

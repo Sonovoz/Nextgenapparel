@@ -62,7 +62,7 @@ final class DatosEstructurados
     /** @return array<string, mixed> */
     public static function producto(Prenda $prenda, Familia $familia, string $url): array
     {
-        $precios = $prenda->variantes()->where('activa', true)->pluck('precio_base');
+        $precios = $prenda->variantes()->aLaVenta()->pluck('precio_base');
         $imagenes = $prenda->fotos->sortBy(fn ($f) => $f->tipo === TipoFoto::Maqueta ? 0 : 1)->map->url()->values()->all();
 
         $producto = [

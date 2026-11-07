@@ -56,12 +56,7 @@ class PrendaResource extends Resource
                     TextInput::make('referencia_proveedor')->label('Referencia del proveedor')->maxLength(100),
                 ]),
                 CamposTraducibles::texto('nombre', 'Nombre', obligatorio: true, slugDe: 'slug'),
-                Grid::make(2)->schema([
-                    TextInput::make('slug.es')->label('URL (español)')->required()->alphaDash()->maxLength(160)
-                        ->unique(table: 'prendas', column: 'slug->es', ignoreRecord: true),
-                    TextInput::make('slug.en')->label('URL (inglés)')->alphaDash()->maxLength(160)
-                        ->unique(table: 'prendas', column: 'slug->en', ignoreRecord: true),
-                ]),
+                CamposTraducibles::urls(Prenda::class, 160),
                 CamposTraducibles::texto('descripcion', 'Descripción', largo: true),
             ]),
             Section::make('Detalles técnicos')->schema([

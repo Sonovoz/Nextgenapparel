@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Traducible;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,12 +11,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Translatable\HasTranslations;
 
 /** Producto variable: sus variaciones son las combinaciones color × talla. */
 class Prenda extends Model
 {
-    use HasFactory, HasTranslations, LogsActivity, SoftDeletes;
+    use HasFactory, LogsActivity, SoftDeletes, Traducible;
 
     protected $table = 'prendas';
 
@@ -82,7 +82,7 @@ class Prenda extends Model
     /** Precio más bajo de sus variaciones activas, en céntimos sin IVA (para «Desde…»). */
     public function precioDesde(): ?int
     {
-        $minimo = $this->variantes()->where('activa', true)->min('precio_base');
+        $minimo = $this->variantes()->aLaVenta()->min('precio_base');
 
         return $minimo === null ? null : (int) $minimo;
     }

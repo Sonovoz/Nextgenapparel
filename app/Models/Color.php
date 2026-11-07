@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\Dominio\Catalogo\DatoCatalogoInvalido;
+use App\Models\Concerns\Traducible;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Translatable\HasTranslations;
 
 class Color extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, Traducible;
 
     protected $table = 'colores';
 

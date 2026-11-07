@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,9 +14,19 @@ class Variante extends Model
 {
     use HasFactory, LogsActivity;
 
+    /** A la venta: activa y con su color activo (lo único que ve la tienda). Las tallas no se desactivan. */
+    public function scopeALaVenta(Builder $consulta): Builder
+    {
+        return $consulta->where('variantes.activa', true)
+            ->whereHas('color', fn (Builder $q) => $q->where('activo', true));
+    }
+
     protected $table = 'variantes';
 
     protected $guarded = ['id'];
+
+    /** Al cambiar, se actualiza la fecha de la prenda (lastmod del sitemap). */
+    protected $touches = ['prenda'];
 
     protected function casts(): array
     {

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Catalogo\Prendas\RelationManagers;
 
 use App\Filament\Concerns\CampoDinero;
+use App\Models\FotoZona;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\EditAction;
@@ -51,6 +52,9 @@ class ZonasRelationManager extends RelationManager
                         CampoDinero::make('coste', 'Coste de impresión')->required(),
                     ]),
             ])
-            ->recordActions([EditAction::make(), DetachAction::make()->label('Quitar')]);
+            ->recordActions([EditAction::make(), DetachAction::make()->label('Quitar')
+                // Fuera también de las maquetas: el visor no debe ofrecer una zona sin precio.
+                ->after(fn ($record) => FotoZona::where('zona_impresion_id', $record->id)
+                    ->whereIn('foto_id', $this->getOwnerRecord()->fotos()->select('id'))->delete())]);
     }
 }

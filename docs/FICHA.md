@@ -264,6 +264,8 @@ Referencia de estilo: elegante y limpia, con mucho espacio en blanco, fotos gran
 - **Cantidades por talla:** se eligen **en el configurador**, no en la ficha.
 - **Fotos:** las sube el equipo y/o llegan de una API de proveedor; ambos orígenes conviven. Cada prenda necesita fotos planas (delantera y trasera, por color) para la maqueta; las fotos con modelo son opcionales. Si no hay, la galería usa las planas.
 
+
+> «Solicitar presupuesto» en la ficha llega en la fase 6, con los presupuestos en PDF.
 ---
 
 ## 9. Documentos y pagos

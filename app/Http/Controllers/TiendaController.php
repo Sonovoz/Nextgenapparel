@@ -51,7 +51,7 @@ class TiendaController
             'familia' => $familia,
             'prenda' => $prenda,
             'colores' => Escaparate::colores($prenda),
-            'tallas' => Talla::whereIn('id', $prenda->variantes()->where('activa', true)->distinct()->pluck('talla_id'))->orderBy('orden')->pluck('nombre'),
+            'tallas' => Talla::whereIn('id', $prenda->variantes()->aLaVenta()->distinct()->pluck('talla_id'))->orderBy('orden')->pluck('nombre'),
             'medidas' => $prenda->medidas->sortBy(fn ($m) => $m->talla->orden)->values(),
             'precio' => Escaparate::precioDesde($prenda),
             'alternos' => $alternos,

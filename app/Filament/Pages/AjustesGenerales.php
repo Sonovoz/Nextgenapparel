@@ -67,7 +67,11 @@ class AjustesGenerales extends Page implements HasSchemas
             Section::make('Impuestos')
                 ->description('IVA provisional para mostrar los precios con IVA en la tienda. En la fase 3 se sustituirá por las clases de impuesto de Ajustes → Impuestos.')
                 ->schema([
-                    TextInput::make('iva_general')->label('IVA general')->numeric()->minValue(0)->maxValue(100)->step(0.01)->suffix('%')->required(),
+                    TextInput::make('iva_general')->label('IVA general')->suffix('%')->required()
+                        // Como los importes: coma o punto y hasta 2 decimales, sin redondeos silenciosos.
+                        ->rule('regex:/^\d{1,2}([.,]\d{1,2})?$/')
+                        ->validationMessages(['regex' => 'Escribe el tipo con hasta 2 decimales, por ejemplo 21 o 10,5.'])
+                        ->formatStateUsing(fn ($state) => $state === null ? null : str_replace('.', ',', (string) $state)),
                 ]),
             Section::make('Calidad de los diseños')
                 ->description('ppp efectivo mínimo de cada nivel, al tamaño al que se imprime. Por debajo del último, el aviso es fuerte y se recomienda no continuar.')
@@ -93,7 +97,7 @@ class AjustesGenerales extends Page implements HasSchemas
             Action::make('guardar')->label('Guardar cambios')->action(function (): void {
                 $datos = $this->form->getState();
                 $ivaAnterior = Ajuste::obtener('impuestos.iva_general');
-                $ivaNuevo = (int) round(((float) $datos['iva_general']) * 100);
+                $ivaNuevo = (int) round(((float) str_replace(',', '.', (string) $datos['iva_general'])) * 100);
 
                 Ajuste::guardar('tienda.nombre', $datos['nombre']);
                 Ajuste::guardar('tienda.correo_contacto', $datos['correo_contacto']);

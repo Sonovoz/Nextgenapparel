@@ -13,7 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Caddy termina el HTTPS y reenvía a Nginx dentro de la red de Docker:
+        // hay que fiarse de sus cabeceras X-Forwarded-* para que las URL
+        // (canonical, sitemap, recursos) salgan en https (D108). El contenedor
+        // de la aplicación no se publica fuera de esa red.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Herramientas → Log de errores (paso 1.4). Laravel sigue escribiendo

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Catalogo;
 
 use App\Dominio\Catalogo\Cara;
+use App\Dominio\Catalogo\TipoFoto;
 use App\Dominio\Catalogo\ZonasPorDefecto;
 use App\Dominio\Sistema\Acceso\Rol;
 use App\Filament\Resources\Catalogo\Prendas\Pages\EditPrenda;
@@ -145,6 +146,79 @@ class FotosTest extends TestCase
             ->assertHasNoFormErrors();
 
         $this->assertSame([3150, 2700, 3700, 4000], [$frontal->fresh()->x, $frontal->fresh()->y, $frontal->fresh()->ancho, $frontal->fresh()->alto]);
+    }
+
+    public function test_una_zona_que_se_sale_de_la_foto_da_un_aviso_y_no_un_error(): void
+    {
+        $this->subir(['tipo' => 'maqueta', 'color_id' => $this->negro->id, 'cara' => 'delantera']);
+        $foto = Foto::sole();
+        $frontal = $foto->zonas()->whereHas('zona', fn ($q) => $q->where('clave', 'frontal'))->sole();
+
+        $this->tabla()
+            ->mountAction(TestAction::make('edit')->table($foto))
+            ->fillForm(['zonas' => ["record-{$frontal->id}" => ['x' => 90, 'y' => 20, 'ancho' => 20, 'alto' => 30]]])
+            ->callMountedAction()
+            ->assertHasFormErrors(["zonas.record-{$frontal->id}.ancho"]);
+
+        $this->assertNotSame(9000, $frontal->fresh()->x);
+    }
+
+    public function test_la_vista_previa_muestra_el_diseno_de_ejemplo_con_los_valores_sin_guardar(): void
+    {
+        $this->subir(['tipo' => 'maqueta', 'color_id' => $this->negro->id, 'cara' => 'delantera']);
+        $foto = Foto::sole();
+        $frontal = $foto->zonas()->whereHas('zona', fn ($q) => $q->where('clave', 'frontal'))->sole();
+
+        // El formulario acepta el ejemplo y los valores sin guardarlos.
+        $this->tabla()
+            ->mountAction(TestAction::make('edit')->table($foto))
+            ->fillForm(['ejemplo' => 'vertical', 'zonas' => ["record-{$frontal->id}" => ['x' => 33.3, 'y' => 21, 'ancho' => 30, 'alto' => 30]]])
+            ->assertHasNoFormErrors();
+        $this->assertSame(ZonasPorDefecto::POSICIONES['frontal'][0], $frontal->fresh()->x);
+
+        // La vista previa dibuja el ejemplo con esos valores.
+        $html = view('filament.fotos.vista-previa', [
+            'getRecord' => fn () => $foto,
+            'zonasFormulario' => [['zona_impresion_id' => $frontal->zona_impresion_id, 'x' => 33.3, 'y' => 21, 'ancho' => 30, 'alto' => 30]],
+            'ejemplo' => 'vertical',
+        ])->render();
+
+        $this->assertStringContainsString('Vista previa con un diseño de ejemplo', $html);
+        $this->assertStringContainsString('data-ejemplo="vertical"', $html);
+        $this->assertStringContainsString('left: 33.3%', $html);
+        $this->assertStringContainsString('preserveAspectRatio="xMidYMin meet"', $html); // centrado y arriba, como la tienda
+    }
+
+    public function test_al_cambiar_la_imagen_se_borra_el_archivo_anterior(): void
+    {
+        $this->subir(['tipo' => 'modelo']);
+        $foto = Foto::sole();
+        $anterior = $foto->ruta;
+        Storage::disk(Foto::DISCO)->put('catalogo/nueva.webp', 'x');
+
+        $foto->update(['ruta' => 'catalogo/nueva.webp']);
+
+        Storage::disk(Foto::DISCO)->assertMissing($anterior);
+        Storage::disk(Foto::DISCO)->assertExists('catalogo/nueva.webp');
+    }
+
+    public function test_si_una_maqueta_pasa_a_foto_de_modelo_pierde_cara_y_zonas(): void
+    {
+        $this->subir(['tipo' => 'maqueta', 'color_id' => $this->negro->id, 'cara' => 'delantera']);
+        $foto = Foto::sole();
+        $this->assertGreaterThan(0, $foto->zonas()->count());
+
+        $foto->update(['tipo' => TipoFoto::Modelo]);
+
+        $this->assertNull($foto->fresh()->cara);
+        $this->assertSame(0, $foto->zonas()->count());
+    }
+
+    public function test_un_color_con_fotos_no_se_puede_borrar(): void
+    {
+        $this->subir(['tipo' => 'maqueta', 'color_id' => $this->negro->id, 'cara' => 'delantera']);
+
+        $this->assertFalse(auth()->user()->can('delete', $this->negro));
     }
 
     public function test_al_borrar_la_foto_se_borra_el_archivo(): void

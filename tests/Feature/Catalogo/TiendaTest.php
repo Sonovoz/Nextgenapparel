@@ -10,6 +10,7 @@ use App\Dominio\Precios\Iva;
 use App\Dominio\Sistema\Acceso\Rol;
 use App\Filament\Pages\AjustesGenerales;
 use App\Models\Ajuste;
+use App\Models\Color;
 use App\Models\Foto;
 use App\Models\FotoZona;
 use App\Models\Prenda;
@@ -240,6 +241,39 @@ class TiendaTest extends TestCase
             $this->assertNotContains('', $es);
             $this->assertNotContains('', $en);
         }
+    }
+
+    public function test_un_color_desactivado_desaparece_de_la_ficha_y_del_precio(): void
+    {
+        $camiseta = $this->camiseta();
+        $blanco = Color::where('codigo_hex', '#FFFFFF')->first() ?? $camiseta->variantes()->with('color')->get()->firstWhere('color.nombre', 'Blanco')->color;
+        // El blanco pasa a ser el más barato y luego se desactiva.
+        $camiseta->variantes()->where('color_id', $blanco->id)->update(['precio_base' => 100]);
+        $this->assertSame(100, $camiseta->precioDesde());
+
+        $blanco->update(['activo' => false]);
+
+        $this->assertSame(420, $camiseta->precioDesde());
+        $html = $this->get('/es/camisetas/camiseta-essential')->assertOk()->getContent();
+        preg_match("/data-colores='([^']+)'/", $html, $coincidencia);
+        $this->assertSame(['Negro'], array_column(json_decode(html_entity_decode($coincidencia[1]), true), 'nombre'));
+        $this->assertStringNotContainsString('aria-label="Blanco"', $html);
+    }
+
+    public function test_el_visor_solo_ofrece_las_zonas_activas_de_la_prenda(): void
+    {
+        $camiseta = $this->camiseta();
+        $foto = Foto::create(['prenda_id' => $camiseta->id, 'color_id' => $camiseta->variantes()->first()->color_id, 'tipo' => TipoFoto::Maqueta, 'cara' => Cara::Delantera, 'ruta' => 'catalogo/1/x.webp']);
+        foreach ($camiseta->zonas()->where('cara', 'delantera')->get() as $zona) {
+            FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $zona->id, 'x' => 3000, 'y' => 2600, 'ancho' => 2000, 'alto' => 2000]);
+        }
+        $camiseta->zonas()->where('clave', 'pecho')->first()->update(['activa' => false]);
+
+        $html = $this->get('/es/camisetas/camiseta-essential')->getContent();
+        preg_match("/data-colores='([^']+)'/", $html, $coincidencia);
+        $zonas = collect(json_decode(html_entity_decode($coincidencia[1]), true))->pluck('caras.delantera.zonas')->filter()->flatten(1);
+
+        $this->assertSame(['Frontal'], $zonas->pluck('nombre')->unique()->values()->all());
     }
 
     public function test_familias_y_prendas_inexistentes_dan_404(): void

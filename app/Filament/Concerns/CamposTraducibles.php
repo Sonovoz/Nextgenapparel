@@ -2,9 +2,12 @@
 
 namespace App\Filament\Concerns;
 
+use App\Dominio\Catalogo\Escaparate;
+use Closure;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -15,6 +18,46 @@ use Illuminate\Support\Str;
  */
 class CamposTraducibles
 {
+    /**
+     * URL en español e inglés. Comprueba la URL «efectiva» de cada idioma (la
+     * inglesa o, si falta, la española), que es la que usa la tienda para
+     * encontrar la página: dos registros nunca pueden responder a la misma.
+     *
+     * @param  class-string<Model>  $modelo
+     */
+    public static function urls(string $modelo, int $largo, bool $reservadas = false): Grid
+    {
+        $campo = fn (string $idioma, string $nombre) => TextInput::make("slug.{$idioma}")->label("URL ({$nombre})")
+            ->alphaDash()->maxLength($largo)
+            ->rule(fn (Get $get, ?Model $record) => function (string $atributo, $valor, Closure $fallo) use ($modelo, $idioma, $get, $record, $reservadas): void {
+                if (blank($valor)) {
+                    return;
+                }
+                if ($reservadas && in_array($valor, config('tienda.urls_reservadas'), true)) {
+                    $fallo('Esta URL está reservada para otra página de la tienda.');
+
+                    return;
+                }
+
+                // Idiomas en los que este valor es la URL efectiva del registro.
+                $idiomas = $idioma === 'es' && blank($get('slug.en')) ? ['es', 'en'] : [$idioma];
+                foreach ($idiomas as $i) {
+                    $consulta = method_exists($modelo, 'bootSoftDeletes') ? $modelo::withTrashed() : $modelo::query();
+                    $otro = Escaparate::porSlug($consulta, $valor, $i)->when($record, fn ($q) => $q->whereKeyNot($record->getKey()))->exists();
+                    if ($otro) {
+                        $fallo($i === $idioma ? 'Esta URL ya la usa otro registro.' : 'Esta URL ya la usa otro registro en inglés: escribe una URL en inglés para este.');
+
+                        return;
+                    }
+                }
+            });
+
+        return Grid::make(2)->schema([
+            $campo('es', 'español')->required(),
+            $campo('en', 'inglés'),
+        ]);
+    }
+
     public static function texto(string $campo, string $etiqueta, bool $obligatorio = false, bool $largo = false, ?string $slugDe = null): Grid
     {
         $crear = fn (string $idioma, string $nombre) => ($largo ? Textarea::make("{$campo}.{$idioma}")->rows(3) : TextInput::make("{$campo}.{$idioma}")->maxLength(255))
@@ -53,7 +96,9 @@ class CamposTraducibles
     }
 
     /**
-     * Quita idiomas vacíos para que se use el español de respaldo.
+     * Los idiomas vacíos pasan a null: el modelo (Traducible) los borra al
+     * guardar y se usa el español de respaldo. Si solo se quitaran del array,
+     * Spatie conservaría el valor anterior y no se podrían borrar.
      *
      * @param  array<string, mixed>  $datos
      * @param  list<string>  $campos
@@ -63,7 +108,7 @@ class CamposTraducibles
     {
         foreach ($campos as $campo) {
             if (is_array($datos[$campo] ?? null)) {
-                $datos[$campo] = array_filter($datos[$campo], fn ($valor) => filled($valor));
+                $datos[$campo] = array_map(fn ($valor) => filled($valor) ? $valor : null, $datos[$campo]);
             }
         }
 

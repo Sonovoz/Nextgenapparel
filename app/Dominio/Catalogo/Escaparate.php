@@ -40,14 +40,14 @@ class Escaparate
     public static function prendas(Familia $familia): Collection
     {
         return $familia->prendas()->where('activa', true)
-            ->whereHas('variantes', fn ($q) => $q->where('activa', true))
+            ->whereHas('variantes', fn ($q) => $q->aLaVenta())
             ->with('fotos')->orderBy('id')->get();
     }
 
     public static function prenda(Familia $familia, string $slug, string $idioma): Prenda
     {
         return self::porSlug($familia->prendas()->where('activa', true)->getQuery(), $slug, $idioma)
-            ->whereHas('variantes', fn ($q) => $q->where('activa', true))
+            ->whereHas('variantes', fn ($q) => $q->aLaVenta())
             ->firstOrFail();
     }
 
@@ -80,8 +80,11 @@ class Escaparate
      */
     public static function colores(Prenda $prenda): array
     {
-        $idsColores = $prenda->variantes()->where('activa', true)->distinct()->pluck('color_id');
-        $maquetas = $prenda->fotos()->where('tipo', TipoFoto::Maqueta->value)->with('zonas.zona')->get();
+        $idsColores = $prenda->variantes()->aLaVenta()->distinct()->pluck('color_id');
+        // Solo las zonas que la prenda ofrece ahora (con su precio) y activas.
+        $zonasOfrecidas = $prenda->zonas()->where('zonas_impresion.activa', true)->pluck('zonas_impresion.id')->all();
+        $maquetas = $prenda->fotos()->where('tipo', TipoFoto::Maqueta->value)
+            ->with(['zonas' => fn ($q) => $q->whereIn('zona_impresion_id', $zonasOfrecidas), 'zonas.zona'])->get();
 
         return Color::whereIn('id', $idsColores)->orderBy('orden')->get()->map(function (Color $color) use ($maquetas): array {
             $caras = [];

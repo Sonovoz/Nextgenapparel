@@ -10,7 +10,6 @@ use App\Models\Talla;
 use App\Models\Variante;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TextInput;
@@ -74,7 +73,8 @@ class VariantesRelationManager extends RelationManager
                 SelectFilter::make('color_id')->label('Color')->options(fn () => Color::orderBy('orden')->get()->pluck('nombre', 'id')),
             ])
             ->headerActions([$this->accionGenerar()])
-            ->recordActions([EditAction::make(), DeleteAction::make()])
+            // Sin borrar: los pedidos guardarán la variación. Para retirarla, se desactiva (D109).
+            ->recordActions([EditAction::make()])
             ->toolbarActions([$this->accionCambiarPrecio()]);
     }
 

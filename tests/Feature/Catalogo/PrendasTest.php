@@ -5,6 +5,7 @@ namespace Tests\Feature\Catalogo;
 use App\Dominio\Catalogo\DatoCatalogoInvalido;
 use App\Dominio\Catalogo\GenerarVariantes;
 use App\Dominio\Catalogo\Sku;
+use App\Dominio\Catalogo\TipoFoto;
 use App\Dominio\Sistema\Acceso\Rol;
 use App\Filament\Concerns\CampoDinero;
 use App\Filament\Resources\Catalogo\Prendas\Pages\CreatePrenda;
@@ -15,6 +16,8 @@ use App\Filament\Resources\Catalogo\Prendas\RelationManagers\VariantesRelationMa
 use App\Filament\Resources\Catalogo\Prendas\RelationManagers\ZonasRelationManager;
 use App\Models\Color;
 use App\Models\Familia;
+use App\Models\Foto;
+use App\Models\FotoZona;
 use App\Models\Prenda;
 use App\Models\Talla;
 use App\Models\Variante;
@@ -146,7 +149,47 @@ class PrendasTest extends TestCase
         Livewire::test(CreatePrenda::class)
             ->fillForm(['familia_id' => $this->prenda->familia_id, 'nombre' => ['es' => 'Otra'], 'slug' => ['es' => $this->prenda->getTranslation('slug', 'es')]])
             ->call('create')
-            ->assertHasFormErrors(['slug.es' => 'unique']);
+            ->assertHasFormErrors(['slug.es']);
+    }
+
+    public function test_una_url_no_puede_responder_por_dos_prendas_en_ingles(): void
+    {
+        $this->prenda->forgetTranslation('slug', 'en')->setTranslation('slug', 'es', 'camiseta-essential')->save(); // sin URL inglesa
+        // B usa «camiseta-basica» como URL inglesa.
+        Prenda::factory()->for($this->prenda->familia)->create(['slug' => ['es' => 'basica', 'en' => 'camiseta-basica']]);
+
+        // A sin URL inglesa usaría «camiseta-basica» también en /en: no se permite.
+        Livewire::test(CreatePrenda::class)
+            ->fillForm(['familia_id' => $this->prenda->familia_id, 'nombre' => ['es' => 'Otra'], 'slug' => ['es' => 'camiseta-basica']])
+            ->call('create')
+            ->assertHasFormErrors(['slug.es']);
+
+        // Con su propia URL inglesa, sí.
+        Livewire::test(CreatePrenda::class)
+            ->fillForm(['familia_id' => $this->prenda->familia_id, 'nombre' => ['es' => 'Otra'], 'slug' => ['es' => 'camiseta-basica', 'en' => 'basic-tee']])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        // Y una URL inglesa no puede ser la española de otra prenda sin inglés.
+        Livewire::test(CreatePrenda::class)
+            ->fillForm(['familia_id' => $this->prenda->familia_id, 'nombre' => ['es' => 'Tercera'], 'slug' => ['es' => 'tercera', 'en' => 'camiseta-essential']])
+            ->call('create')
+            ->assertHasFormErrors(['slug.en']);
+    }
+
+    public function test_vaciar_un_texto_en_ingles_lo_borra_y_vuelve_el_espanol(): void
+    {
+        $this->prenda->update(['slug' => ['es' => 'camiseta-essential', 'en' => 'url-equivocada'], 'descripcion' => ['es' => 'Básica', 'en' => 'Basic']]);
+
+        Livewire::test(EditPrenda::class, ['record' => $this->prenda->getRouteKey()])
+            ->fillForm(['slug' => ['es' => 'camiseta-essential', 'en' => ''], 'descripcion' => ['es' => 'Básica', 'en' => '']])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $prenda = $this->prenda->fresh();
+        $this->assertSame(['es' => 'camiseta-essential'], $prenda->getTranslations('slug'));
+        $this->assertSame(['es' => 'Básica'], $prenda->getTranslations('descripcion'));
+        $this->assertSame('Básica', $prenda->getTranslation('descripcion', 'en'));
     }
 
     public function test_generar_variaciones_desde_el_backend_guarda_centimos(): void
@@ -210,6 +253,19 @@ class PrendasTest extends TestCase
 
         $pivote = $this->prenda->zonas()->sole()->pivot;
         $this->assertSame([300, 120], [$pivote->precio, $pivote->coste]);
+    }
+
+    public function test_quitar_una_zona_la_quita_tambien_de_las_maquetas(): void
+    {
+        $zona = ZonaImpresion::factory()->create();
+        $this->prenda->zonas()->attach($zona, ['precio' => 300]);
+        $foto = Foto::create(['prenda_id' => $this->prenda->id, 'color_id' => $this->negro->id, 'tipo' => TipoFoto::Maqueta, 'cara' => $zona->cara, 'ruta' => 'catalogo/x.webp']);
+        FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $zona->id, 'x' => 3000, 'y' => 2000, 'ancho' => 2000, 'alto' => 2000]);
+
+        Livewire::test(ZonasRelationManager::class, ['ownerRecord' => $this->prenda, 'pageClass' => EditPrenda::class])
+            ->callTableAction('detach', $zona);
+
+        $this->assertSame(0, FotoZona::count());
     }
 
     public function test_la_guia_de_tallas_se_escribe_en_cm_y_no_repite_talla(): void

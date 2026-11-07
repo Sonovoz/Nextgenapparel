@@ -75,6 +75,19 @@ class SeoTest extends TestCase
         }
     }
 
+    public function test_detras_de_caddy_las_urls_salen_en_https(): void
+    {
+        $cabeceras = ['X-Forwarded-Proto' => 'https', 'X-Forwarded-Host' => 'nextgenapparel.es', 'X-Forwarded-Port' => '443'];
+
+        $html = $this->get('/es/camisetas/camiseta-essential', $cabeceras)->getContent();
+        $this->assertStringContainsString('<link rel="canonical" href="https://nextgenapparel.es/es/camisetas/camiseta-essential">', $html);
+        $this->assertStringContainsString('src="https://nextgenapparel.es/js/visor.js', $html);
+        // En el sitemap, ninguna URL en http (salvo los espacios de nombres XML).
+        $sitemap = preg_replace('#xmlns(:\w+)?="http://[^"]+"#', '', $this->get('/sitemap-es.xml', $cabeceras)->getContent());
+        $this->assertStringContainsString('<loc>https://nextgenapparel.es/es/camisetas/camiseta-essential</loc>', $sitemap);
+        $this->assertStringNotContainsString('http://', $sitemap);
+    }
+
     public function test_el_backend_queda_fuera_de_los_buscadores(): void
     {
         $this->get('/admin/login')->assertOk()->assertHeader('X-Robots-Tag', 'noindex, nofollow');

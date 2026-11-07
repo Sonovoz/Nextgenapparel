@@ -35,12 +35,7 @@ class FamiliaResource extends RecursoCatalogo
     {
         return $schema->columns(1)->components([
             CamposTraducibles::texto('nombre', 'Nombre', obligatorio: true, slugDe: 'slug'),
-            Grid::make(2)->schema([
-                TextInput::make('slug.es')->label('URL (español)')->required()->alphaDash()->maxLength(120)
-                    ->unique(table: 'familias', column: 'slug->es', ignoreRecord: true),
-                TextInput::make('slug.en')->label('URL (inglés)')->alphaDash()->maxLength(120)
-                    ->unique(table: 'familias', column: 'slug->en', ignoreRecord: true),
-            ]),
+            CamposTraducibles::urls(Familia::class, 120, reservadas: true),
             CamposTraducibles::texto('descripcion', 'Descripción', largo: true),
             Grid::make(3)->schema([
                 TextInput::make('plazo_base_dias')->label('Plazo de producción (días laborables)')->numeric()->integer()->minValue(0)->maxValue(60)->default(2)->required(),

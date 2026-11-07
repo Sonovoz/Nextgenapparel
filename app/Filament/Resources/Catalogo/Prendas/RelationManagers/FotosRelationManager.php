@@ -9,6 +9,7 @@ use App\Filament\Concerns\CamposTraducibles;
 use App\Models\Color;
 use App\Models\Foto;
 use App\Models\ZonaImpresion;
+use Closure;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -16,6 +17,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\ViewField;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
@@ -44,9 +46,16 @@ class FotosRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         $esMaqueta = fn (Get $get): bool => $get('tipo') === TipoFoto::Maqueta->value || $get('tipo') === TipoFoto::Maqueta;
-        $porcentaje = fn (string $campo, string $etiqueta) => TextInput::make($campo)->label($etiqueta)->numeric()->minValue(0)->maxValue(100)->step(0.1)->suffix('%')->required()
+        $porcentaje = fn (string $campo, string $etiqueta) => TextInput::make($campo)->label($etiqueta)->numeric()->minValue(0)->maxValue(100)->step(0.1)->suffix('%')->required()->live(onBlur: true)
             ->formatStateUsing(fn ($state) => $state === null ? null : $state / 100)
             ->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 100));
+
+        // La zona no puede salirse de la foto (posición + tamaño ≤ 100 %).
+        $dentro = fn (string $posicion, string $etiqueta) => fn (Get $get) => function (string $atributo, $valor, Closure $fallo) use ($get, $posicion, $etiqueta): void {
+            if ((float) $get($posicion) + (float) $valor > 100) {
+                $fallo("La zona se sale de la foto: «{$etiqueta}» más este valor no puede pasar del 100 %.");
+            }
+        };
 
         return $schema->columns(1)->components([
             Grid::make(3)->schema([
@@ -72,7 +81,15 @@ class FotosRelationManager extends RelationManager
             CamposTraducibles::texto('texto_alternativo', 'Texto alternativo'),
             TextInput::make('orden')->label('Orden')->numeric()->integer()->minValue(0)->default(0),
 
+            ToggleButtons::make('ejemplo')->label('Diseño de ejemplo')
+                ->options(['cuadrado' => 'Logo cuadrado', 'horizontal' => 'Texto horizontal', 'vertical' => 'Cartel vertical'])
+                ->default('cuadrado')->inline()->live()->dehydrated(false)
+                ->afterStateHydrated(fn (ToggleButtons $component, $state) => $component->state($state ?: 'cuadrado'))
+                ->helperText('Se coloca como en la tienda: centrado y pegado arriba de la zona. Ajusta las zonas hasta que quede donde se imprime.')
+                ->visible(fn (string $operation, ?Foto $record) => $operation === 'edit' && $record?->tipo === TipoFoto::Maqueta),
             ViewField::make('vista_previa')->view('filament.fotos.vista-previa')->dehydrated(false)
+                // Con los valores del formulario: se actualiza sin guardar.
+                ->viewData(fn (Get $get) => ['zonasFormulario' => $get('zonas') ?? [], 'ejemplo' => $get('ejemplo') ?: 'cuadrado'])
                 ->visible(fn (string $operation, ?Foto $record) => $operation === 'edit' && $record?->tipo === TipoFoto::Maqueta),
             Repeater::make('zonas')->label('Zonas de impresión sobre la foto')
                 ->relationship('zonas')
@@ -85,10 +102,10 @@ class FotosRelationManager extends RelationManager
                 ->schema([
                     $porcentaje('x', 'Desde la izquierda'),
                     $porcentaje('y', 'Desde arriba'),
-                    $porcentaje('ancho', 'Ancho'),
-                    $porcentaje('alto', 'Alto'),
+                    $porcentaje('ancho', 'Ancho')->rule($dentro('x', 'Desde la izquierda')),
+                    $porcentaje('alto', 'Alto')->rule($dentro('y', 'Desde arriba')),
                 ])
-                ->helperText('En % de la foto. Al guardar se actualiza la vista previa.'),
+                ->helperText('En % de la foto. La vista previa cambia al salir de cada casilla.'),
         ]);
     }
 

@@ -85,7 +85,14 @@ class BackendCatalogoTest extends TestCase
 
         Livewire::test(ManageFamilias::class)
             ->callAction('create', ['nombre' => ['es' => 'Otra'], 'slug' => ['es' => 'camisetas'], 'plazo_base_dias' => 2])
-            ->assertHasFormErrors(['slug.es' => 'unique']);
+            ->assertHasFormErrors(['slug.es']);
+    }
+
+    public function test_una_familia_no_puede_usar_una_url_reservada(): void
+    {
+        Livewire::test(ManageFamilias::class)
+            ->callAction('create', ['nombre' => ['es' => 'Carrito'], 'slug' => ['es' => 'carrito'], 'plazo_base_dias' => 2])
+            ->assertHasFormErrors(['slug.es']);
     }
 
     public function test_al_editar_aparecen_los_dos_idiomas(): void
