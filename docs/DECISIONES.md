@@ -114,3 +114,9 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D71 | Imagen PHP 8.4 (Alpine) con las extensiones del proyecto (Imagick, Redis, intl, gd, bcmath, zip, pdo_mysql) y `mariadb-client` para las copias; Nginx en otra imagen con los archivos públicos; contenedores sin root, con reinicio automático, comprobación de salud y logs limitados | Seguridad y autosuficiencia (D25) |
 | D72 | Despliegue con un comando: `./docker/desplegar.sh pruebas|produccion` construye, arranca y espera a que todo esté sano; las migraciones se aplican al arrancar `app` | Criterio de aceptación de la fase 1 |
 | D73 | Nginx pasa a Laravel cualquier archivo estático (`.js`, `.css`…) que no exista en disco | El JavaScript de Livewire lo genera Laravel; con `=404` no se podía entrar en el backend (detectado al probar en Docker) |
+
+## 2026-11-07 — Forma de trabajar
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D74 | **Instructor del proyecto** (`.claude/agents/instructor.md`): planifica cada fase, asigna a cada paso un nivel de verificación N1, N2 o N3 según su riesgo y hace la revisión adversarial al cerrarla. Una sola verificación al final de cada paso; revisión del cliente en Herd cada 2 o 3 pasos; Gauntlet completo solo al cerrar fase | En la fase 1 la suite de tests tardaba 17 s; las vueltas venían de capturas y comprobaciones intermedias, de verificarlo todo al mismo nivel y de revisar en Herd tras cada paso |

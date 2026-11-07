@@ -21,6 +21,23 @@ Portal de pedidos de prendas personalizadas con impresión DTF (camisetas, polos
 10. **Secretos fuera del código:** claves de Redsys, SMTP e IA solo en variables de entorno.
 11. **Una sesión de trabajo por fase.** Al cerrar una fase, actualiza el estado en `docs/FICHA.md` (sección «Estado») y registra en `docs/DECISIONES.md` cualquier decisión nueva.
 
+## Protocolo del instructor (cómo se verifica, D74)
+
+El **instructor** (`.claude/agents/instructor.md`) planifica cada fase, asigna a cada paso un nivel de verificación y hace la revisión adversarial al cerrarla. La verificación es **proporcional al riesgo**:
+
+| Nivel | Cuándo | Qué se hace al terminar el paso |
+|---|---|---|
+| **N1 Ligero** | Textos, estilos, documentación, ajustes sin lógica | Tests afectados + Pint. Sin navegador |
+| **N2 Normal** | Pantallas y funciones nuevas sin dinero ni permisos | Suite completa + **una** pasada de navegador del flujo principal (dominio `.test`) |
+| **N3 Riguroso** | Dinero, impuestos, facturas, permisos, datos personales, migraciones, copias, despliegue | N2 + migraciones en MariaDB estricta (configuración de XAMPP) + revisión del instructor |
+
+Reglas:
+1. **Una sola verificación, al final del paso.** Nada de capturas ni comprobaciones intermedias. Si algo falla, se corrige y se repite solo lo afectado.
+2. **Tests útiles:** cada regla de negocio y cada fallo real encontrado tiene su test. No se prueba lo que ya garantiza el framework; los casos parecidos van juntos (proveedores de datos).
+3. **Revisión del cliente en Herd** solo cuando hay algo visible, agrupando 2 o 3 pasos, con un máximo de 3 puntos que comprobar.
+4. **Gauntlet completo** (dos rondas adversariales e informe de la sección 14) solo al cerrar la fase. Por paso basta el informe breve.
+5. **Informe breve por paso** (unas 10 líneas): qué incluye, nivel aplicado, qué no se ha podido probar y los comandos para verlo.
+
 ## Pila técnica
 
 - PHP 8.x, Laravel (última versión estable), Filament (backend), Livewire (frontend).
