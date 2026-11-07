@@ -1,0 +1,23 @@
+<?php
+
+use App\Http\Middleware\EstablecerIdioma;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+/*
+| La raíz redirige al idioma preferido del navegador, si es uno de los
+| disponibles; si no, al idioma predeterminado.
+*/
+Route::get('/', function (Request $request) {
+    $idioma = $request->getPreferredLanguage(array_keys(config('idiomas.disponibles')))
+        ?? config('idiomas.predeterminado');
+
+    return redirect()->route('portada', ['idioma' => $idioma]);
+});
+
+Route::prefix('{idioma}')
+    ->where(['idioma' => implode('|', array_keys(config('idiomas.disponibles')))])
+    ->middleware(EstablecerIdioma::class)
+    ->group(function () {
+        Route::view('/', 'portada')->name('portada');
+    });

@@ -1,0 +1,35 @@
+# Caddy: entrada única del servidor para pruebas y producción, con
+# certificados SSL automáticos y renovación sin intervención.
+#   docker compose -f docker/caddy/compose.yaml --env-file docker/caddy/.env up -d
+name: proxy
+
+services:
+  caddy:
+    image: caddy:2.8-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMINIO_PRODUCCION: ${DOMINIO_PRODUCCION:?}
+      DOMINIO_PRUEBAS: ${DOMINIO_PRUEBAS:?}
+      CORREO_SSL: ${CORREO_SSL:?}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - datos:/data
+      - config:/config
+    networks:
+      - proxy
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+networks:
+  proxy:
+    name: proxy
+
+volumes:
+  datos:
+  config:

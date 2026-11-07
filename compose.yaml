@@ -1,0 +1,124 @@
+# NextGen Apparel en el servidor (D25, D69). No se usa en local (Herd).
+#
+# Un mismo archivo para pruebas y producción: cada entorno tiene su propio
+# nombre de proyecto, su .env y sus volúmenes. Se arranca con:
+#   ./docker/desplegar.sh pruebas      o      ./docker/desplegar.sh produccion
+
+x-app: &app
+  image: nextgenapparel/app:${VERSION:-local}
+  build:
+    context: .
+    dockerfile: docker/php/Dockerfile
+    target: app
+  env_file: ${ENV_FILE:?Indica el .env del entorno}
+  volumes:
+    - storage:/var/www/html/storage
+  depends_on:
+    mariadb:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  restart: unless-stopped
+  logging: &logs
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+
+services:
+  app:
+    <<: *app
+    environment:
+      ROL: app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 9000) ? 0 : 1);"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  cola:
+    <<: *app
+    environment:
+      ROL: cola
+    command: ["php", "artisan", "queue:work", "--tries=3", "--max-time=3600", "--sleep=3"]
+    depends_on:
+      app:
+        condition: service_healthy
+
+  tareas:
+    <<: *app
+    environment:
+      ROL: tareas
+    command: ["php", "artisan", "schedule:work"]
+    depends_on:
+      app:
+        condition: service_healthy
+
+  web:
+    image: nextgenapparel/web:${VERSION:-local}
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: web
+    volumes:
+      - storage:/var/www/html/storage:ro
+    ports:
+      # Solo en local de este servidor; el tráfico público entra por Caddy.
+      - "127.0.0.1:${PUERTO_WEB:-8080}:80"
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/up"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    logging: *logs
+
+  mariadb:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:?}
+      MARIADB_USER: ${DB_USERNAME:?}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?}
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - mariadb:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    logging: *logs
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging: *logs
+
+  # Solo en pruebas: atrapa los correos para que no lleguen a nadie.
+  mailpit:
+    image: axllent/mailpit:v1.21
+    profiles: ["pruebas"]
+    ports:
+      - "127.0.0.1:${PUERTO_MAILPIT:-8025}:8025"
+    restart: unless-stopped
+    logging: *logs
+
+volumes:
+  storage:
+  mariadb:
+  redis:

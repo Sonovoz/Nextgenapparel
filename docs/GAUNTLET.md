@@ -29,6 +29,8 @@ Trabaja mediante un ciclo continuo:
 
 No entregues la primera versión como definitiva.
 
+> **Profundidad proporcional al riesgo:** la verificación de cada paso la fija el instructor con los niveles N1, N2 y N3 de `CLAUDE.md` (D74). Las dos rondas adversariales y el informe completo de la sección 14 se aplican al cerrar cada fase.
+
 Organiza el trabajo en fases verificables. En cada una debes comprobar si lo construido cumple los criterios funcionales, técnicos y visuales establecidos.
 
 Utiliza un auditor adversarial cuya misión sea encontrar defectos reales y oportunidades de mejora.
