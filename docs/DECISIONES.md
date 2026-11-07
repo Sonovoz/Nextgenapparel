@@ -146,3 +146,12 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D83 | Los importes se escriben en euros con **coma o punto** decimal (máx. 2 decimales) y se guardan en céntimos; se muestran en formato español («1.234,50 €») | En España se escribe la coma; sin errores de redondeo (probado con 0,29 y 19,99) |
 | D84 | El SKU se genera al crear la variación y **no cambia** aunque se renombre la prenda o el color | Un SKU estable no rompe pedidos, etiquetas ni referencias externas |
 | D85 | Las prendas van a la papelera y se recuperan; el borrado definitivo no está disponible en el backend. Los cambios de precio, coste, SKU y estado quedan en el registro de actividad | Los pedidos futuros guardarán referencias; trazabilidad de precios |
+
+## 2026-11-07 — Fase 2, paso 2.4 y ejemplos
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D86 | Fotos en el disco `public` (`storage/app/public/catalogo/<prenda>`), PNG, JPG o WebP de hasta 5 MB; el archivo se borra al borrar la foto. Una maqueta por prenda, color y cara | Servidas directamente por Nginx; sin archivos huérfanos |
+| D87 | Al subir una maqueta, las zonas de impresión de esa cara se colocan solas en una posición de partida (frontal, pecho, espalda) y se ajustan en % con vista previa | Ahorra trabajo: la mayoría de prendas tienen las zonas en el mismo sitio |
+| D88 | Las maquetas de muestra se preparan con **fondo transparente**, mismo encuadre (1000 × 1200) y misma escala por prenda | Aspecto premium uniforme y se pueden poner sobre cualquier fondo |
+| D89 | Tres prendas de ejemplo con datos inventados (`php artisan db:seed --class=EjemplosCatalogoSeeder`): Camiseta Essential, Polo Classic y Sudadera Urban, sin fotos | Probar en local con datos realistas; las fotos se suben desde el backend (D30) |

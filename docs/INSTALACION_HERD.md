@@ -85,6 +85,20 @@ php artisan schedule:work
 
 Para comprobar el estado del sistema desde la consola: `php artisan nga:comprobar-salud`.
 
+## 8. Catálogo de ejemplo y fotos
+
+Para tener tres prendas de ejemplo (camiseta, polo y sudadera) con sus variaciones, zonas y guía de tallas:
+
+```bat
+php artisan db:seed --class=EjemplosCatalogoSeeder
+```
+
+Para que se vean las fotos subidas, una sola vez:
+
+```bat
+php artisan storage:link
+```
+
 ## Cada vez que haya un paso nuevo
 
 ```bat

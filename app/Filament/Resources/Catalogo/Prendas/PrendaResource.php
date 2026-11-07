@@ -101,6 +101,7 @@ class PrendaResource extends Resource
             RelationManagers\VariantesRelationManager::class,
             RelationManagers\ZonasRelationManager::class,
             RelationManagers\MedidasRelationManager::class,
+            RelationManagers\FotosRelationManager::class,
         ];
     }
 

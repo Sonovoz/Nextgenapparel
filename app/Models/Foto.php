@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Translatable\HasTranslations;
 
 class Foto extends Model
@@ -32,14 +33,24 @@ class Foto extends Model
         ];
     }
 
+    public const DISCO = 'public';
+
     protected static function booted(): void
     {
+        // Al borrar la foto se borra también su archivo.
+        static::deleted(fn (Foto $foto) => Storage::disk(self::DISCO)->delete($foto->ruta));
+
         // Una maqueta es siempre de un color y una cara concretos.
         static::saving(function (Foto $foto): void {
             if ($foto->tipo === TipoFoto::Maqueta && ($foto->cara === null || $foto->color_id === null)) {
                 throw new DatoCatalogoInvalido('Una foto de maqueta necesita color y cara.');
             }
         });
+    }
+
+    public function url(): string
+    {
+        return Storage::disk(self::DISCO)->url($this->ruta);
     }
 
     public function prenda(): BelongsTo
