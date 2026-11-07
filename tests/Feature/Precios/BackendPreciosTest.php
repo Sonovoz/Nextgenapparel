@@ -10,6 +10,7 @@ use App\Filament\Pages\SimuladorPrecios;
 use App\Filament\Resources\Precios\Pages\ManageClaseImpuesto;
 use App\Filament\Resources\Precios\Pages\ManageCupon;
 use App\Filament\Resources\Precios\Pages\ManagePacks;
+use App\Filament\Resources\Precios\Pages\ManageReglaMinimo;
 use App\Filament\Resources\Precios\Pages\ManageReglaPrecio;
 use App\Filament\Resources\Precios\Pages\ManageZonaEnvio;
 use App\Models\ClaseImpuesto;
@@ -18,6 +19,7 @@ use App\Models\Cupon;
 use App\Models\Familia;
 use App\Models\Pack;
 use App\Models\Prenda;
+use App\Models\ReglaMinimo;
 use App\Models\ReglaPrecio;
 use App\Models\Talla;
 use App\Models\ZonaEnvio;
@@ -115,6 +117,50 @@ class BackendPreciosTest extends TestCase
         $this->assertSame(1250, $combinada->valor);
         $this->assertSame([$familias['polos'], $familias['sudaderas']], $combinada->condiciones['grupos'][1]['ids']);
         $this->assertSame(15, $combinada->condiciones['grupos'][1]['minimo']);
+    }
+
+    public function test_no_se_admiten_porcentajes_de_mas_del_100(): void
+    {
+        $this->actingAs($this->usuarioConRol(Rol::GestorTienda));
+
+        Livewire::test(ManageCupon::class)
+            ->callAction('create', ['codigo' => 'ERROR', 'tipo' => 'porcentaje', 'valor' => '150', 'activo' => true])
+            ->assertHasFormErrors(['valor']);
+        Livewire::test(ManageReglaPrecio::class)
+            ->callAction('create', ['nombre' => ['es' => 'Error'], 'tipo' => 'tramo_cantidad', 'efecto' => 'porcentaje', 'valor' => '150',
+                'aplica_a' => 'todo', 'ambito' => 'catalogo', 'condiciones' => ['minimo_unidades' => 1]])
+            ->assertHasFormErrors(['valor']);
+        // Un importe fijo sí puede ser 150 €.
+        Livewire::test(ManageCupon::class)
+            ->callAction('create', ['codigo' => 'MENOS150', 'tipo' => 'importe', 'valor' => '150', 'activo' => true])
+            ->assertHasNoFormErrors();
+        $this->assertSame(15000, Cupon::sole()->valor);
+    }
+
+    public function test_el_importe_minimo_se_escribe_en_euros(): void
+    {
+        $this->actingAs($this->usuarioConRol(Rol::GestorTienda));
+
+        Livewire::test(ManageReglaMinimo::class)
+            ->callAction('create', ['nombre' => ['es' => 'Importe'], 'tipo' => 'importe_minimo', 'valor' => '199,90', 'ambito' => 'catalogo', 'activa' => true])
+            ->assertHasNoFormErrors()
+            ->callAction('create', ['nombre' => ['es' => 'Unidades'], 'tipo' => 'unidades_total', 'valor' => '15', 'ambito' => 'catalogo', 'activa' => true])
+            ->assertHasNoFormErrors();
+
+        $this->assertSame([19990, 15], ReglaMinimo::orderBy('id')->pluck('valor')->all());
+    }
+
+    public function test_dos_tramos_de_envio_con_el_mismo_peso_dan_un_aviso(): void
+    {
+        $this->actingAs($this->usuarioConRol(Rol::Administrador));
+
+        Livewire::test(ManageZonaEnvio::class)
+            ->callAction('create', [
+                'nombre' => ['es' => 'Península'], 'paises' => ['ES'], 'plazo_dias' => 2, 'metodo' => 'por_kilo', 'prioridad' => 0, 'activa' => true,
+                'tarifas' => [['hasta_gramos' => 2000, 'precio' => '4,90'], ['hasta_gramos' => 2000, 'precio' => '5,90']],
+            ])
+            ->assertHasFormErrors();
+        $this->assertSame(0, ZonaEnvio::count());
     }
 
     public function test_el_codigo_de_cupon_se_guarda_en_mayusculas_y_no_se_repite(): void

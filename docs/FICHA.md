@@ -168,6 +168,8 @@ Supuestos: camiseta 4,00 €; polo 7,00 €; sudadera 12,00 €; frontal 3,00 �
 | P6 | 50 camisetas frontal + 15 sudaderas frontal (65 prendas) | Sin descuentos: prendas 380,00 + impresión 195,00 = 575,00 €. Tramo (−10 % en prendas): 342,00 + 195,00 = 537,00 €. Combinada (−12 % en todo): 575,00 × 0,88 = 506,00 €. Se aplica **la combinada (506,00 €)** por ser mejor para el cliente; mensaje «Cumples dos condiciones…» |
 | P7 | P1 para un autónomo con recargo de equivalencia | 105,00 + 22,05 (IVA 21 %) + 5,46 (recargo 5,2 %) = **132,51 €** |
 
+> **Fase 6:** en el pago, exigir el código postal cuando el país tenga zonas con prefijos (sin él se aplica la zona general).
+
 #### Envíos y cupones (*ejemplo*, sin IVA)
 
 Supuestos: Península (ES) por peso: hasta 2 kg 4,90 €, hasta 5 kg 6,90 €, hasta 10 kg 9,90 €, 0,80 € por kilo de más, gratis desde 500,00 €. Baleares (CP 07…) por cajas: 12,00 € por caja de 50 prendas o 20 kg. Pesos: camiseta 150 g, sudadera 480 g.
@@ -360,4 +362,4 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 | Planteamiento | Completado | 2026-11-06 |
 | 1. Base | **Completada con limitaciones** (informe: `docs/INFORME_FASE_1.md`). Criterios de aceptación cumplidos en Docker; pendiente desplegar en OVH y verificar el paso 1.6 en Herd | 2026-11-06 |
 | 2. Catálogo | **Completada con limitaciones** (informe: `docs/INFORME_FASE_2.md`). Criterio de aceptación cumplido con un test de principio a fin, en SQLite y en MariaDB estricta; pendiente la revisión del cliente en Herd de los últimos pasos y el despliegue en OVH | 2026-11-07 |
-| 3. Motor de precios | En curso — pasos 3.1 a 3.3 completados (modelo, motor con tests P1–P7, K1–K4, E1–E5 y C, backend de impuestos, envíos, ofertas, mínimos, cupones y packs, simulador); pendiente la revisión en Herd y el cierre con el Gauntlet | 2026-11-08 |
+| 3. Motor de precios | **Completada con limitaciones** (informe: `docs/INFORME_FASE_3.md`). Casos P1–P7, K1–K4 y E1–E5 como tests en SQLite y MariaDB estricta; pendiente el asesor (IVA del envío y recargo), la pregunta D127 y la revisión en Herd | 2026-11-08 |

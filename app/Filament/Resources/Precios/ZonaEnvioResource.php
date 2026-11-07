@@ -63,7 +63,7 @@ class ZonaEnvioResource extends RecursoPrecios
                 ->visible(fn (Get $get) => static::metodo($get) === MetodoEnvio::PorKilo)
                 ->orderColumn(false)->columns(2)->defaultItems(1)
                 ->schema([
-                    TextInput::make('hasta_gramos')->label('Hasta')->integer()->minValue(1)->suffix('g')->required(),
+                    TextInput::make('hasta_gramos')->label('Hasta')->integer()->minValue(1)->suffix('g')->required()->distinct(),
                     CampoDinero::make('precio', 'Precio')->required(),
                 ]),
             CampoDinero::make('precio_kg_extra', 'Por cada kilo más del último tramo')->nullable()

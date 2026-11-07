@@ -84,10 +84,34 @@ final class MotorPrecios
 
     // ── 1-2. Prendas e impresión ──────────────────────────────────────
 
+    /** Unidades por talla en la entrada: enteros de 1 a MAXIMO_UNIDADES (el 0 se ignora). */
+    public const MAXIMO_UNIDADES = 10000;
+
+    /** @return array<int, int>|null  null si hay alguna cantidad no válida */
+    private function cantidades(array $tallas): ?array
+    {
+        $limpias = [];
+        foreach ($tallas as $talla => $unidades) {
+            if (! is_int($unidades) || $unidades < 0 || $unidades > self::MAXIMO_UNIDADES || ! is_numeric($talla)) {
+                return null;
+            }
+            if ($unidades > 0) {
+                $limpias[(int) $talla] = $unidades;
+            }
+        }
+
+        return $limpias;
+    }
+
     private function valorarLinea(LineaCesta $linea): ?LineaCalculada
     {
         $prenda = Prenda::where('activa', true)->with('familia')->find($linea->prendaId);
-        $tallas = array_filter($linea->tallas, fn ($u) => $u > 0);
+        $tallas = $this->cantidades($linea->tallas);
+        if ($tallas === null) {
+            $this->impedimentos[] = new Mensaje('cantidad_no_valida', ['maximo' => self::MAXIMO_UNIDADES]);
+
+            return null;
+        }
         if ($prenda === null || $tallas === []) {
             $this->impedimentos[] = new Mensaje('linea_no_disponible');
 
@@ -137,13 +161,24 @@ final class MotorPrecios
         $extra = 0;
         $tallasTotales = [];
         foreach ($pack->lineas as $lineaPack) {
+            // Prenda en la papelera (null) o retirada: el pack deja de venderse.
+            if ($lineaPack->prenda === null || ! $lineaPack->prenda->activa) {
+                $this->impedimentos[] = new Mensaje('pack_no_disponible');
+
+                return null;
+            }
             $eleccion = $elegido->elecciones[$lineaPack->id] ?? [];
             if ($pack->reparto === RepartoPack::Fijo) {
                 $color = (int) ($lineaPack->colores[0] ?? 0);
                 $tallas = array_map('intval', $lineaPack->reparto_tallas ?? []);
             } else {
                 $color = (int) ($eleccion['color'] ?? ($lineaPack->colores[0] ?? 0));
-                $tallas = array_filter(array_map('intval', $eleccion['tallas'] ?? []), fn ($u) => $u > 0);
+                $tallas = $this->cantidades($eleccion['tallas'] ?? []);
+                if ($tallas === null) {
+                    $this->impedimentos[] = new Mensaje('cantidad_no_valida', ['maximo' => self::MAXIMO_UNIDADES]);
+
+                    return null;
+                }
                 $permitidas = array_map('intval', $lineaPack->tallas_permitidas ?? []);
                 $repartidas = array_sum($tallas);
                 if (! in_array($color, array_map('intval', $lineaPack->colores), true)
@@ -257,8 +292,12 @@ final class MotorPrecios
         $faltas = [];
         foreach ($grupos as $grupo) {
             $minimo = (int) ($grupo['minimo'] ?? 0);
-            $ambito = Ambito::from($grupo['ambito'] ?? 'catalogo');
-            $ids = array_map('intval', $grupo['ids'] ?? []);
+            $ambito = Ambito::tryFrom((string) ($grupo['ambito'] ?? 'catalogo'));
+            $ids = array_map('intval', (array) ($grupo['ids'] ?? []));
+            // Condición mal formada (p. ej. importada a mano): la oferta no se aplica.
+            if ($ambito === null || $minimo < 1 || ($ambito !== Ambito::Catalogo && $ids === [])) {
+                return [false, 0, []];
+            }
             $enGrupo = array_filter($sueltas, fn (LineaCalculada $l) => $this->enAmbito($l, $ambito, $ids));
             $unidades = array_sum(array_map(fn ($l) => $l->unidades, $enGrupo));
             $necesario += $minimo;
@@ -319,9 +358,23 @@ final class MotorPrecios
             }
         }
 
-        return $regla->efecto === Efecto::Porcentaje
-            ? array_map(fn (int $base) => Importe::porcentaje($base, $regla->valor), $bases)
-            : Importe::repartir($regla->valor, $bases);
+        return self::descontar($regla->efecto, $regla->valor, $bases);
+    }
+
+    /**
+     * Descuento sobre unas bases: el porcentaje se calcula sobre el total (un
+     * solo redondeo) y se reparte entre las líneas; nunca supera la base, así
+     * que ningún neto queda en negativo aunque se configure más del 100 %.
+     *
+     * @param  array<int, int>  $bases
+     * @return array<int, int>
+     */
+    private static function descontar(Efecto $efecto, int $valor, array $bases): array
+    {
+        $total = array_sum($bases);
+        $importe = $efecto === Efecto::Porcentaje ? Importe::porcentaje($total, min($valor, 10000)) : $valor;
+
+        return Importe::repartir(min($importe, $total), $bases);
     }
 
     // ── 5. Cupón ──────────────────────────────────────────────────────
@@ -358,9 +411,7 @@ final class MotorPrecios
         }
 
         $bases = array_map(fn (LineaCalculada $l) => $l->neto(), $sueltas);
-        $reparto = $cupon->tipo === Efecto::Porcentaje
-            ? array_map(fn (int $base) => Importe::porcentaje($base, $cupon->valor), $bases)
-            : Importe::repartir($cupon->valor, $bases);
+        $reparto = self::descontar($cupon->tipo, $cupon->valor, $bases);
         foreach ($reparto as $i => $importe) {
             $sueltas[$i]->cupon = $importe;
         }
@@ -376,8 +427,9 @@ final class MotorPrecios
     private function comprobarMinimos(array $sueltas, bool $hayPack, Cesta $cesta): void
     {
         foreach (ReglaMinimo::vigentes($cesta->ahora())->orderByDesc('prioridad')->orderBy('id')->get() as $regla) {
-            // Un pack cumple por sí solo el pedido mínimo general (D107).
-            if ($regla->ambito === Ambito::Catalogo && $hayPack) {
+            // Un pack cumple por sí solo el mínimo general de unidades e importe
+            // (D107); el mínimo por talla sigue valiendo para las sueltas (D127).
+            if ($regla->ambito === Ambito::Catalogo && $hayPack && $regla->tipo !== TipoMinimo::UnidadesPorTalla) {
                 continue;
             }
             $ids = array_filter([$regla->ambito_id]);
@@ -476,25 +528,32 @@ final class MotorPrecios
     /** @param  list<LineaCalculada>  $lineas */
     private function calcularImpuestos(array $lineas, ?array $envio, bool $conRecargo): array
     {
+        // Sin recargo se agrupa solo por tipo de IVA (un redondeo por tipo).
         $bases = [];
-        $sumar = function (int $tipo, int $recargo, int $base) use (&$bases): void {
-            $clave = $tipo.'|'.$recargo;
-            $bases[$clave] = ($bases[$clave] ?? 0) + $base;
-        };
         foreach ($lineas as $linea) {
-            $sumar($linea->tipoIva, $linea->recargo, $linea->neto());
+            $clave = $linea->tipoIva.'|'.($conRecargo ? $linea->recargo : 0);
+            $bases[$clave] = ($bases[$clave] ?? 0) + $linea->neto();
         }
-        if (($envio['importe'] ?? 0) > 0) {
-            // El envío sigue el tipo general (accesorio de la entrega).
-            [$tipo, $recargo] = Impuestos::tipos(null);
-            $sumar($tipo, $recargo, $envio['importe']);
+        $envioImporte = $envio['importe'] ?? 0;
+        if ($envioImporte > 0) {
+            // El envío sigue el tipo de la mercancía, repartido en proporción a
+            // cada base (D122); sin mercancía con base, el de la clase por defecto.
+            if (array_sum($bases) > 0) {
+                foreach (Importe::repartir($envioImporte, $bases) as $clave => $parte) {
+                    $bases[$clave] += $parte;
+                }
+            } else {
+                [$tipo, $recargo] = Impuestos::tipos(null);
+                $clave = $tipo.'|'.($conRecargo ? $recargo : 0);
+                $bases[$clave] = ($bases[$clave] ?? 0) + $envioImporte;
+            }
         }
 
         $impuestos = [];
         foreach ($bases as $clave => $base) {
             [$tipo, $recargo] = array_map('intval', explode('|', $clave));
             $impuestos[] = [
-                'tipo_iva' => $tipo, 'recargo' => $conRecargo ? $recargo : 0, 'base' => $base,
+                'tipo_iva' => $tipo, 'recargo' => $recargo, 'base' => $base,
                 'cuota' => Importe::porcentaje($base, $tipo),
                 'cuota_recargo' => $conRecargo ? Importe::porcentaje($base, $recargo) : 0,
             ];

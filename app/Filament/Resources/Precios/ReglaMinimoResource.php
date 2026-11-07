@@ -45,9 +45,15 @@ class ReglaMinimoResource extends RecursoPrecios
             CamposTraducibles::texto('nombre', 'Nombre', obligatorio: true),
             Grid::make(3)->schema([
                 Select::make('tipo')->label('Tipo')->options(TipoMinimo::class)->required()->native(false)->live(),
-                TextInput::make('valor')->label(fn (Get $get) => static::esImporte($get) ? 'Importe mínimo (sin IVA, en céntimos)' : 'Unidades')
-                    ->integer()->minValue(1)->required()
-                    ->helperText(fn (Get $get) => static::esImporte($get) ? 'Por ejemplo 20000 = 200,00 €.' : null),
+                // Unidades, o un importe en euros (se guarda en céntimos) si es importe mínimo.
+                TextInput::make('valor')->label(fn (Get $get) => static::esImporte($get) ? 'Importe mínimo (sin IVA)' : 'Unidades')
+                    ->required()->inputMode('decimal')
+                    ->prefix(fn (Get $get) => static::esImporte($get) ? '€' : null)
+                    ->rule(fn (Get $get) => static::esImporte($get) ? 'regex:/^\d{1,6}([.,]\d{1,2})?$/' : 'regex:/^[1-9]\d{0,4}$/')
+                    ->validationMessages(['regex' => 'Escribe unidades enteras o un importe en euros, por ejemplo 200 o 199,90.'])
+                    ->formatStateUsing(fn ($state, ?ReglaMinimo $record) => $state === null ? null
+                        : ($record?->tipo === TipoMinimo::ImporteMinimo ? number_format($state / 100, 2, ',', '') : (string) $state))
+                    ->dehydrateStateUsing(fn ($state, Get $get) => static::esImporte($get) ? CampoDinero::aCentimos($state) : (int) $state),
                 TextInput::make('prioridad')->label('Prioridad')->integer()->default(0),
             ]),
             ...static::camposAmbito(),

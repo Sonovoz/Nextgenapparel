@@ -5,6 +5,7 @@ return [
     'o' => 'or',
     'prendas' => 'garments',
     'el_pedido' => 'the order',
+    'cantidad_no_valida' => 'Check the quantities: each size takes 1 to :maximo units.',
     'cesta_vacia' => 'Add at least one garment or pack.',
     'linea_no_disponible' => 'One of the garments is no longer available.',
     'variante_no_disponible' => ':prenda in size :talla is no longer available in that colour.',

@@ -399,6 +399,130 @@ class MotorPreciosTest extends TestCase
         $this->assertSame(['prendas' => 38000, 'impresion' => 19500, 'oferta' => -6900, 'cupon' => 0, 'envio' => 0, 'impuestos' => 10626], $pasos);
     }
 
+    // ── Gauntlet de cierre (ronda única) ──────────────────────────────
+
+    public function test_un_porcentaje_de_mas_del_100_no_deja_netos_negativos_ni_tumba_el_motor(): void
+    {
+        ReglaPrecio::query()->delete();
+        ReglaPrecio::create(['nombre' => ['es' => 'Error de tecleo'], 'tipo' => 'tramo_cantidad', 'condiciones' => ['minimo_unidades' => 1],
+            'efecto' => 'porcentaje', 'valor' => 15000, 'aplica_a' => 'prendas', 'ambito' => 'catalogo']);
+
+        $r = $this->calcular([$this->linea('camiseta', 15, ['frontal'])]);
+
+        $this->assertSame(6000, $r->oferta['importe']); // como mucho, el 100 % de las prendas
+        $this->assertSame(4500, $r->subtotal()); // queda la impresión
+        $this->assertGreaterThanOrEqual(0, $r->total());
+    }
+
+    public function test_un_pack_con_una_prenda_en_la_papelera_o_retirada_deja_de_venderse(): void
+    {
+        $pack = $this->packJoven();
+
+        $this->prendas['camiseta']->update(['activa' => false]);
+        $this->assertSame(['Ese pack ya no está disponible.'], $this->calcular(packs: [new PackCesta($pack->id)])->textos('impedimentos', 'es'));
+
+        $this->prendas['camiseta']->update(['activa' => true]);
+        $this->prendas['camiseta']->delete();
+        $this->assertSame(['Ese pack ya no está disponible.'], $this->calcular(packs: [new PackCesta($pack->id)])->textos('impedimentos', 'es'));
+    }
+
+    /** @return array<string, array{mixed}> */
+    public static function cantidadesNoValidas(): array
+    {
+        return ['decimales' => [15.5], 'negativas' => [-3], 'enormes' => [PHP_INT_MAX], 'texto' => ['15']];
+    }
+
+    #[DataProvider('cantidadesNoValidas')]
+    public function test_las_cantidades_deben_ser_enteros_razonables(mixed $unidades): void
+    {
+        $linea = new LineaCesta($this->prendas['camiseta']->id, $this->negro->id, [$this->tallas['M'] => $unidades], [$this->zonas['frontal']]);
+
+        $r = $this->calcular([$linea]);
+
+        $this->assertFalse($r->confirmable());
+        $this->assertSame(['Revisa las cantidades: cada talla admite de 1 a 10000 unidades.'], $r->textos('impedimentos', 'es'));
+        $this->assertSame(0, $r->total());
+    }
+
+    public function test_el_porcentaje_se_redondea_una_vez_sobre_el_total(): void
+    {
+        Cupon::create(['codigo' => 'UNOYMEDIO', 'tipo' => 'porcentaje', 'valor' => 150]);
+        $lineas = array_map(fn () => $this->linea('camiseta', 3, ['frontal']), range(1, 5)); // 5 × 21,00 €
+
+        $r = $this->calcular($lineas, cupon: 'UNOYMEDIO');
+
+        $this->assertSame(158, $r->cupon['importe']); // 1,5 % de 105,00 € = 1,575 → 1,58 € (no 5 × 0,32)
+    }
+
+    public function test_el_envio_tributa_como_la_mercancia_cuando_hay_tipos_mezclados(): void
+    {
+        $this->zonasDeEnvio();
+        $this->prendas['polo']->update(['clase_impuesto_id' => ClaseImpuesto::where('clave', 'reducido')->value('id')]);
+
+        $r = $this->calcular([$this->linea('camiseta', 15, ['frontal']), $this->linea('polo', 15, ['pecho'])], destino: new Destino('ES', '28001'));
+
+        // Mercancía tras la combinada: 92,40 € al 21 % y 118,80 € al 10 %. Envío 9,90 € repartido: 4,33 + 5,57.
+        $this->assertSame(990, $r->envio['importe']);
+        $this->assertSame([
+            ['tipo_iva' => 2100, 'recargo' => 0, 'base' => 9673, 'cuota' => 2031, 'cuota_recargo' => 0],
+            ['tipo_iva' => 1000, 'recargo' => 0, 'base' => 12437, 'cuota' => 1244, 'cuota_recargo' => 0],
+        ], $r->impuestos);
+    }
+
+    public function test_pack_y_prendas_sueltas_juntos(): void
+    {
+        Cupon::create(['codigo' => 'VERANO10', 'tipo' => 'porcentaje', 'valor' => 1000]);
+        ReglaMinimo::create(['nombre' => ['es' => 'Tallas'], 'tipo' => 'unidades_por_talla', 'valor' => 3, 'ambito' => 'catalogo']);
+        $pack = new PackCesta($this->packJoven()->id);
+
+        // El pack cumple el mínimo de 15; el cupón va solo a la sudadera suelta.
+        $r = $this->calcular([$this->linea('sudadera', 3, ['frontal'])], [$pack], cupon: 'VERANO10');
+        $this->assertTrue($r->confirmable());
+        $this->assertSame(['codigo' => 'VERANO10', 'importe' => 450], $r->cupon); // 10 % de 45,00 €
+        $this->assertSame(8182 + 4050, $r->subtotal());
+        $this->assertContains('Cupón VERANO10 aplicado a las prendas sueltas (los packs ya tienen su precio especial): ahorras 4,50 €.', $r->textos('avisos', 'es'));
+
+        // …pero el mínimo por talla sigue valiendo para las sueltas (D127).
+        $r = $this->calcular([$this->linea('sudadera', 1, ['frontal'])], [$pack]);
+        $this->assertSame(['Cada talla necesita al menos 3 unidades: Sudadera en talla M lleva 1.'], $r->textos('impedimentos', 'es'));
+    }
+
+    public function test_una_oferta_de_importe_fijo_se_reparte(): void
+    {
+        ReglaPrecio::query()->delete();
+        ReglaPrecio::create(['nombre' => ['es' => '10 € menos'], 'tipo' => 'tramo_cantidad', 'condiciones' => ['minimo_unidades' => 15],
+            'efecto' => 'importe', 'valor' => 1000, 'aplica_a' => 'todo', 'ambito' => 'catalogo']);
+
+        $r = $this->calcular([$this->linea('camiseta', 10, ['frontal']), $this->linea('sudadera', 5, ['frontal'])]);
+
+        $this->assertSame(1000, $r->oferta['importe']);
+        $this->assertSame(14500 - 1000, $r->subtotal());
+    }
+
+    public function test_la_zona_con_prefijo_gana_aunque_otra_tenga_mas_prioridad(): void
+    {
+        $this->zonasDeEnvio();
+        ZonaEnvio::where('nombre->es', 'Península')->update(['prioridad' => 99]);
+
+        $r = $this->calcular([$this->linea('camiseta', 15, ['frontal'])], destino: new Destino('ES', '07 001'));
+
+        $this->assertSame('Baleares', $r->envio['zona']);
+    }
+
+    public function test_una_oferta_mal_formada_no_se_aplica_ni_rompe_el_calculo(): void
+    {
+        ReglaPrecio::query()->delete();
+        foreach ([[['ambito' => 'familia', 'ids' => [], 'minimo' => 0]], [['ambito' => 'desconocido', 'ids' => [1], 'minimo' => 1]]] as $grupos) {
+            ReglaPrecio::create(['nombre' => ['es' => 'Mal'], 'tipo' => 'combinada', 'condiciones' => ['grupos' => $grupos],
+                'efecto' => 'porcentaje', 'valor' => 5000, 'aplica_a' => 'todo', 'ambito' => 'catalogo']);
+        }
+
+        $r = $this->calcular([$this->linea('camiseta', 15, ['frontal'])]);
+
+        $this->assertNull($r->oferta);
+        $this->assertSame(10500, $r->subtotal());
+    }
+
     public function test_los_mensajes_existen_en_los_dos_idiomas(): void
     {
         $this->assertSame(array_keys(require lang_path('es/precios.php')), array_keys(require lang_path('en/precios.php')));

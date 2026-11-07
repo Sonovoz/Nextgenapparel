@@ -6,6 +6,7 @@ return [
     'o' => 'o',
     'prendas' => 'prendas',
     'el_pedido' => 'el pedido',
+    'cantidad_no_valida' => 'Revisa las cantidades: cada talla admite de 1 a :maximo unidades.',
     'cesta_vacia' => 'Añade al menos una prenda o un pack.',
     'linea_no_disponible' => 'Una de las prendas ya no está disponible.',
     'variante_no_disponible' => ':prenda en talla :talla ya no está disponible en ese color.',

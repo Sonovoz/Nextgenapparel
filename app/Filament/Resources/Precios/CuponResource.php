@@ -50,6 +50,11 @@ class CuponResource extends RecursoPrecios
             Select::make('tipo')->label('Descuento')->options(Efecto::class)->required()->native(false)->live()->default(Efecto::Porcentaje),
             TextInput::make('valor')->label(fn (Get $get) => $esPorcentaje($get) ? 'Porcentaje' : 'Importe')
                 ->required()->inputMode('decimal')->rule('regex:/^\d{1,6}([.,]\d{1,2})?$/')
+                ->rule(fn (Get $get) => function (string $atributo, $valor, \Closure $fallo) use ($esPorcentaje, $get): void {
+                    if ($esPorcentaje($get) && (float) str_replace(',', '.', (string) $valor) > 100) {
+                        $fallo('Un porcentaje no puede pasar del 100 %.');
+                    }
+                })
                 ->suffix(fn (Get $get) => $esPorcentaje($get) ? '%' : '€')
                 ->formatStateUsing(fn ($state) => $state === null ? null : str_replace('.', ',', (string) ($state / 100)))
                 ->dehydrateStateUsing(fn ($state) => (int) round(((float) str_replace(',', '.', (string) $state)) * 100)),
