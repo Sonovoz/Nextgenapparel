@@ -7,8 +7,8 @@ return [
     'titular' => 'Tu colección, impresa como la imaginas.',
     'texto' => 'Camisetas, polos y sudaderas personalizados con impresión DTF para pequeños diseñadores. Sube tu diseño, elige tus prendas y nosotros nos encargamos del resto.',
     'paso_1' => 'Sube tu diseño',
-    'paso_2' => 'Elige prendas y tallas',
-    'paso_3' => 'Lo imprimimos y te lo enviamos',
+    'paso_2' => 'Escoge las prendas',
+    'paso_3' => 'Cierra el pedido',
     'pie' => 'Portal en construcción.',
     'cambiar_idioma' => 'Idioma',
 ];
