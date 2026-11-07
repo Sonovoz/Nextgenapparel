@@ -593,7 +593,8 @@
         errorMarca.hidden = !mensaje;
     }
 
-    function leerLogo(archivo) {
+    /** @param original  datos del archivo original si llega reducido desde la portada */
+    function leerLogo(archivo, original) {
         mostrarError('');
         if (!archivo) return;
         if (!/^image\/(png|jpeg|webp|svg\+xml|gif)$/.test(archivo.type)) { mostrarError(textos.error_archivo); return; }
@@ -610,14 +611,17 @@
             c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
             URL.revokeObjectURL(url);
 
-            estado.logoTipo = archivo.type === 'image/svg+xml' ? 'vectorial' : tipoDeFondo(c);
+            var esVectorial = archivo.type === 'image/svg+xml' || (original && original.tipo === 'image/svg+xml');
+            estado.logoTipo = esVectorial ? 'vectorial' : tipoDeFondo(c);
             estado.logo = recortarMargenes(c);
-            estado.logoPx = { w: Math.round(estado.logo.width / escala), h: Math.round(estado.logo.height / escala) };
+            // Si llega reducido desde la portada, la calidad se mide con los píxeles del original.
+            var factor = original && original.ancho ? original.ancho / w : 1;
+            estado.logoPx = { w: Math.round(estado.logo.width / escala * factor), h: Math.round(estado.logo.height / escala * factor) };
             estado.ajustes = {};
             estado.version++;
             if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
             soltar.classList.add('con-logo');
-            document.getElementById('nombre-logo').textContent = archivo.name;
+            document.getElementById('nombre-logo').textContent = original ? original.nombre : archivo.name;
         };
         img.onerror = function () { URL.revokeObjectURL(url); mostrarError(textos.error_archivo); };
         img.src = url;
@@ -820,6 +824,19 @@
     }
     lienzo.addEventListener('pointerup', soltarArrastre);
     lienzo.addEventListener('pointercancel', soltarArrastre);
+
+    /* ---------- Logo traído desde la portada (paso 1) ---------- */
+
+    try {
+        var guardado = JSON.parse(sessionStorage.getItem('nga.logo') || 'null');
+        if (guardado && guardado.datos) {
+            sessionStorage.removeItem('nga.logo');
+            fetch(guardado.datos).then(function (r) { return r.blob(); }).then(function (b) {
+                leerLogo(new File([b], guardado.nombre || 'logo.png', { type: 'image/png' }), guardado);
+                visor.scrollIntoView({ behavior: sinMovimiento ? 'auto' : 'smooth', block: 'start' });
+            });
+        }
+    } catch (e) { /* sin sessionStorage: se sube desde la ficha */ }
 
     /* ---------- Tu colección ---------- */
 

@@ -6,7 +6,9 @@
     $descripcionMeta = $descripcion ?? __('portada.descripcion');
     $canonical = $alternos[$idiomaActual];
     $localesOg = ['es' => 'es_ES', 'en' => 'en_GB'];
-    $nombreTienda = rescue(fn () => \App\Models\Ajuste::obtener('tienda.nombre'), 'NextGen Apparel', report: false);
+    $nombreTienda = rescue(fn () => \App\Models\Ajuste::obtener('tienda.nombre'), 'Nextgenapparel', report: false);
+    $portada = route('portada');
+    $version = fn (string $ruta) => asset($ruta).'?v='.@filemtime(public_path($ruta));
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $idiomaActual }}">
@@ -40,85 +42,159 @@
     @foreach ($seo['esquemas'] ?? [] as $esquema)
         <script type="application/ld+json">{!! json_encode($esquema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
     @endforeach
-    <style>
-        :root {
-            --fondo: #FFFFFF; --fondo-suave: #F3F2EF; --tinta: #16161A; --tinta-suave: #5C5C66; --linea: #E7E5E0;
-            --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-            --sans: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-        * { box-sizing: border-box; }
-        body { margin: 0; background: var(--fondo); color: var(--tinta); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
-        a { color: var(--tinta); }
-        a:focus-visible, button:focus-visible { outline: 2px solid var(--tinta); outline-offset: 3px; }
-        img { max-width: 100%; display: block; }
-        .contenedor { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-        .cabecera { border-bottom: 1px solid var(--linea); }
-        .cabecera .contenedor { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px; min-height: 72px; }
-        .marca { font-family: var(--serif); font-size: 24px; text-decoration: none; }
-        .menu, .idiomas { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0; padding: 0; }
-        @media (max-width: 720px) {
-            .cabecera .contenedor { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "marca idiomas" "menu menu"; gap: 0 16px; min-height: 0; padding-top: 10px; }
-            .marca { grid-area: marca; font-size: 21px; align-self: center; }
-            .nav-idiomas { grid-area: idiomas; }
-            .nav-menu { grid-area: menu; margin: 0 -24px; padding: 0 24px; overflow-x: auto; scrollbar-width: none; border-top: 1px solid var(--linea); }
-            .nav-menu .menu { flex-wrap: nowrap; gap: 24px; }
-            .menu a { white-space: nowrap; }
-            .idiomas { gap: 12px; }
-            .idiomas a { font-size: 13px; }
-            .idiomas .nombre-largo { display: none; }
-            .contenedor { padding: 0 16px; }
-            .nav-menu { margin: 0 -16px; padding: 0 16px; }
-        }
-        @media (min-width: 721px) { .idiomas .nombre-corto { display: none; } }
-        .menu a, .idiomas a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; font-size: 14px; color: var(--tinta-suave); }
-        .menu a[aria-current="page"], .idiomas a[aria-current="page"] { color: var(--tinta); font-weight: 600; }
-        .pie { border-top: 1px solid var(--linea); margin-top: 96px; }
-        .pie .contenedor { padding-top: 24px; padding-bottom: 24px; font-size: 14px; color: var(--tinta-suave); }
-        .etiqueta { margin: 0 0 12px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--tinta-suave); }
-        h1, h2 { font-family: var(--serif); font-weight: 400; letter-spacing: -.02em; }
-        .ruta { font-size: 13px; color: var(--tinta-suave); display: flex; flex-wrap: wrap; gap: 8px; padding: 20px 0; }
-        .ruta a { color: var(--tinta-suave); text-decoration: none; }
-        .rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 32px 24px; }
-        .tarjeta { text-decoration: none; display: flex; flex-direction: column; gap: 12px; }
-        .tarjeta-foto { background: var(--fondo-suave); border-radius: 4px; aspect-ratio: 5 / 6; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .tarjeta-foto img { width: 86%; height: auto; transition: transform .4s ease; }
-        .tarjeta:hover .tarjeta-foto img { transform: scale(1.03); }
-        .tarjeta-nombre { font-family: var(--serif); font-size: 22px; margin: 0; }
-        .tarjeta-precio { margin: 0; font-size: 14px; color: var(--tinta-suave); }
-        .sin-foto { color: var(--tinta-suave); font-size: 13px; }
-        @media (prefers-reduced-motion: reduce) { .tarjeta-foto img { transition: none; } }
-    </style>
+    <link rel="icon" type="image/png" href="{{ asset('img/marca/favicon.png') }}">
+    <link rel="preload" href="{{ asset('fonts/bodoni-moda.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ asset('fonts/jost.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{ $version('css/tienda.css') }}">
+    <meta name="theme-color" content="#FBF8F4">
+    {{-- Con JavaScript, las animaciones de entrada; sin él, todo se ve igual. --}}
+    <script>document.documentElement.classList.add('js')</script>
     @stack('estilos')
 </head>
 <body>
-    <header class="cabecera">
+    <header class="cabecera" id="cabecera">
         <div class="contenedor">
-            <a class="marca" href="{{ route('portada') }}">NextGen Apparel</a>
-            <nav class="nav-menu" aria-label="{{ __('tienda.nuestras_prendas') }}">
-                <ul class="menu">
-                    @foreach ($familiasMenu as $f)
-                        @php $urlFamilia = route('tienda.familia', ['familia' => \App\Dominio\Catalogo\Escaparate::slug($f, $idiomaActual)]); @endphp
-                        <li><a href="{{ $urlFamilia }}" @if (url()->current() === $urlFamilia) aria-current="page" @endif>{{ $f->nombre }}</a></li>
-                    @endforeach
+            <a class="marca" href="{{ $portada }}" aria-label="{{ $nombreTienda }} — {{ __('portada.inicio') }}">
+                <img class="monograma" src="{{ asset('img/marca/monograma.png') }}" alt="" width="190" height="147">
+                <img class="palabra" src="{{ asset('img/marca/nextgenapparel.png') }}" alt="{{ $nombreTienda }}" width="510" height="80">
+            </a>
+
+            <nav class="navegacion" aria-label="{{ __('portada.menu') }}">
+                <ul>
+                    <li>
+                        <details>
+                            <summary>{{ __('portada.nav_prendas') }}</summary>
+                            <div class="desplegable">
+                                @foreach ($familiasMenu as $f)
+                                    @php $urlFamilia = route('tienda.familia', ['familia' => \App\Dominio\Catalogo\Escaparate::slug($f, $idiomaActual)]); @endphp
+                                    <a href="{{ $urlFamilia }}" @if (url()->current() === $urlFamilia) aria-current="page" @endif>{{ $f->nombre }}</a>
+                                @endforeach
+                            </div>
+                        </details>
+                    </li>
+                    <li><a href="{{ $portada }}#packs">{{ __('portada.nav_packs') }}</a></li>
+                    <li><a href="{{ $portada }}#pasos">{{ __('portada.nav_como') }}</a></li>
+                    <li><a href="{{ $portada }}#calidad">{{ __('portada.nav_calidad') }}</a></li>
                 </ul>
             </nav>
-            <nav class="nav-idiomas" aria-label="{{ __('portada.cambiar_idioma') }}">
-                <ul class="idiomas">
+
+            <div class="cabecera-acciones">
+                <ul class="idiomas" aria-label="{{ __('portada.cambiar_idioma') }}">
                     @foreach (config('idiomas.disponibles') as $codigo => $nombre)
-                        <li><a href="{{ $alternos[$codigo] }}" hreflang="{{ $codigo }}" lang="{{ $codigo }}" @if ($codigo === $idiomaActual) aria-current="page" @endif aria-label="{{ $nombre }}"><span class="nombre-largo">{{ $nombre }}</span><span class="nombre-corto" aria-hidden="true">{{ strtoupper($codigo) }}</span></a></li>
+                        <li><a href="{{ $alternos[$codigo] }}" hreflang="{{ $codigo }}" lang="{{ $codigo }}" @if ($codigo === $idiomaActual) aria-current="page" @endif>{{ strtoupper($codigo) }}<span class="oculto"> · {{ $nombre }}</span></a></li>
                     @endforeach
                 </ul>
-            </nav>
+                <a class="boton principal cabecera-cta" href="{{ $portada }}#pasos">{{ __('portada.cta_coleccion') }}</a>
+                <button class="boton-menu" type="button" aria-expanded="false" aria-controls="menu-movil" aria-label="{{ __('portada.menu') }}"><span></span></button>
+            </div>
         </div>
     </header>
 
-    <main>
+    <div class="menu-movil" id="menu-movil" role="dialog" aria-modal="true" aria-label="{{ __('portada.menu') }}">
+        <div class="menu-movil-cabecera">
+            <a class="marca" href="{{ $portada }}"><img class="monograma" src="{{ asset('img/marca/monograma.png') }}" alt="{{ $nombreTienda }}" width="190" height="147"></a>
+            <button class="boton-cerrar" type="button" aria-label="{{ __('portada.cerrar') }}">×</button>
+        </div>
+        <nav>
+            <p class="etiqueta">{{ __('portada.nav_prendas') }}</p>
+            <ul>
+                @foreach ($familiasMenu as $f)
+                    <li><a href="{{ route('tienda.familia', ['familia' => \App\Dominio\Catalogo\Escaparate::slug($f, $idiomaActual)]) }}">{{ $f->nombre }}</a></li>
+                @endforeach
+            </ul>
+            <p class="etiqueta">{{ $nombreTienda }}</p>
+            <ul>
+                <li><a href="{{ $portada }}#packs">{{ __('portada.nav_packs') }}</a></li>
+                <li><a href="{{ $portada }}#pasos">{{ __('portada.nav_como') }}</a></li>
+                <li><a href="{{ $portada }}#calidad">{{ __('portada.nav_calidad') }}</a></li>
+            </ul>
+        </nav>
+        <div class="acciones">
+            <a class="boton principal" href="{{ $portada }}#pasos">{{ __('portada.cta_coleccion') }}</a>
+            <a class="boton" href="{{ $portada }}#packs">{{ __('portada.cta_packs') }}</a>
+        </div>
+    </div>
+
+    <main id="contenido">
         {{ $slot }}
     </main>
 
     <footer class="pie">
-        <div class="contenedor">© {{ now()->year }} NextGen Apparel · {{ __('portada.pie') }}</div>
+        <div class="contenedor">
+            <div class="pie-rejilla">
+                <div>
+                    <a class="marca" href="{{ $portada }}">
+                        <img class="monograma" src="{{ asset('img/marca/monograma.png') }}" alt="" width="190" height="147">
+                        <img class="palabra" src="{{ asset('img/marca/nextgenapparel.png') }}" alt="{{ $nombreTienda }}" width="510" height="80">
+                    </a>
+                    <p style="max-width: 36ch; margin: 22px 0 0; color: #B8B1A9;">{{ __('portada.pie_texto') }}</p>
+                </div>
+                <div>
+                    <h3>{{ __('portada.nav_prendas') }}</h3>
+                    <ul>
+                        @foreach ($familiasMenu as $f)
+                            <li><a href="{{ route('tienda.familia', ['familia' => \App\Dominio\Catalogo\Escaparate::slug($f, $idiomaActual)]) }}">{{ $f->nombre }}</a></li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div>
+                    <h3>{{ __('portada.pie_estudio') }}</h3>
+                    <ul>
+                        <li><a href="{{ $portada }}#pasos">{{ __('portada.nav_como') }}</a></li>
+                        <li><a href="{{ $portada }}#packs">{{ __('portada.nav_packs') }}</a></li>
+                        <li><a href="{{ $portada }}#calidad">{{ __('portada.nav_calidad') }}</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>{{ __('portada.cambiar_idioma') }}</h3>
+                    <ul>
+                        @foreach (config('idiomas.disponibles') as $codigo => $nombre)
+                            <li><a href="{{ $alternos[$codigo] }}" hreflang="{{ $codigo }}" lang="{{ $codigo }}">{{ $nombre }}</a></li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+            <div class="pie-firma">
+                <span>© {{ now()->year }} {{ $nombreTienda }}</span>
+                <span>{{ __('portada.firma') }}</span>
+            </div>
+        </div>
     </footer>
+
+    <script>
+        // Cabecera con línea al bajar, menú móvil y apariciones suaves (sin librerías).
+        (function () {
+            var cabecera = document.getElementById('cabecera');
+            var marcar = function () { cabecera.classList.toggle('con-sombra', window.scrollY > 8); };
+            window.addEventListener('scroll', marcar, { passive: true }); marcar();
+
+            var menu = document.getElementById('menu-movil');
+            var abrir = document.querySelector('.boton-menu');
+            var cerrar = menu.querySelector('.boton-cerrar');
+            function estado(abierto) {
+                menu.classList.toggle('abierto', abierto);
+                document.body.classList.toggle('menu-abierto', abierto);
+                abrir.setAttribute('aria-expanded', String(abierto));
+                if (abierto) cerrar.focus(); else abrir.focus();
+            }
+            abrir.addEventListener('click', function () { estado(true); });
+            cerrar.addEventListener('click', function () { estado(false); });
+            menu.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', function () { estado(false); }); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menu.classList.contains('abierto')) estado(false); });
+
+            // El desplegable de Prendas se cierra al pulsar fuera.
+            document.addEventListener('click', function (e) {
+                document.querySelectorAll('.navegacion details[open]').forEach(function (d) { if (!d.contains(e.target)) d.removeAttribute('open'); });
+            });
+
+            var elementos = document.querySelectorAll('.aparece');
+            if (!('IntersectionObserver' in window)) { elementos.forEach(function (el) { el.classList.add('visible'); }); return; }
+            var observador = new IntersectionObserver(function (entradas) {
+                entradas.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('visible'); observador.unobserve(e.target); } });
+            }, { rootMargin: '0px 0px -8% 0px' });
+            elementos.forEach(function (el) { observador.observe(el); });
+        })();
+    </script>
     @stack('scripts')
 </body>
 </html>

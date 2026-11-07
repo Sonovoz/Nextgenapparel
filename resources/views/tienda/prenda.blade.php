@@ -161,7 +161,7 @@
     <script src="{{ asset('js/visor.js') }}?v={{ @filemtime(public_path('js/visor.js')) }}" defer></script>
 @endpush
 
-<x-tienda :titulo="($prenda->seo_titulo ?: $prenda->nombre).' · NextGen Apparel'" :descripcion="$prenda->seo_descripcion ?: \Illuminate\Support\Str::limit((string) $prenda->descripcion, 155)" :alternos="$alternos" :seo="$seo">
+<x-tienda :titulo="($prenda->seo_titulo ?: $prenda->nombre).' · Nextgenapparel'" :descripcion="$prenda->seo_descripcion ?: \Illuminate\Support\Str::limit((string) $prenda->descripcion, 155)" :alternos="$alternos" :seo="$seo">
     <div class="contenedor">
         <nav class="ruta" aria-label="Ruta">
             <a href="{{ route('portada') }}">{{ __('tienda.inicio') }}</a><span aria-hidden="true">/</span>
@@ -199,7 +199,7 @@
 
             <section class="info" aria-label="{{ __('tienda.detalles') }}">
                 <div>
-                    <p class="etiqueta">{{ $familia->nombre }} · DTF</p>
+                    <p class="etiqueta">{{ $familia->nombre }} · DTI Textil</p>
                     <h1>{{ $prenda->nombre }}</h1>
                     @if ($precio)
                         <div class="precio">

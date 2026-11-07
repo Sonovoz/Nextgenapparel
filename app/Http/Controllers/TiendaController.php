@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Dominio\Catalogo\Escaparate;
+use App\Dominio\Catalogo\Portada;
 use App\Dominio\Seo\DatosEstructurados;
 use App\Models\Talla;
 use Illuminate\View\View;
@@ -11,11 +12,16 @@ class TiendaController
 {
     public function portada(string $idioma): View
     {
+        // Si la base de datos no responde, la portada se muestra sin catálogo (autosuficiencia).
+        $datos = rescue(fn () => Portada::datos(), Portada::vacia(), report: false);
+
         return view('portada', [
-            // Si la base de datos no responde, la portada se muestra sin el catálogo.
-            'familias' => rescue(fn () => Escaparate::familias()->map(fn ($f) => ['familia' => $f, 'foto' => Escaparate::prendas($f)->map(fn ($p) => Escaparate::fotoPrincipal($p))->filter()->first()]), collect(), report: false),
+            ...$datos,
             'alternos' => $this->alternos(fn ($i) => route('portada', ['idioma' => $i])),
-            'seo' => ['esquemas' => rescue(fn () => [DatosEstructurados::organizacion(), DatosEstructurados::sitioWeb($idioma)], [], report: false)],
+            'seo' => [
+                'imagen' => asset('img/portada/pareja-1600.webp'),
+                'esquemas' => rescue(fn () => [DatosEstructurados::organizacion(), DatosEstructurados::sitioWeb($idioma)], [], report: false),
+            ],
         ]);
     }
 

@@ -18,6 +18,7 @@ use App\Models\Foto;
 use App\Models\FotoZona;
 use App\Models\Prenda;
 use Database\Seeders\EjemplosCatalogoSeeder;
+use Database\Seeders\EjemplosPreciosSeeder;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -118,8 +119,38 @@ class TiendaTest extends TestCase
 
     public function test_la_portada_muestra_las_familias(): void
     {
-        $this->get('/es')->assertOk()->assertSeeInOrder(['Nuestras prendas', 'Camisetas', 'Polos', 'Sudaderas']);
-        $this->get('/en')->assertOk()->assertSeeInOrder(['Our garments', 'T-shirts', 'Polo shirts', 'Sweatshirts']);
+        $this->get('/es')->assertOk()->assertSeeInOrder(['Elige la base de tu marca', 'Camisetas', 'Desde 7,26 € con impresión', 'Polos', 'Sudaderas']);
+        $this->get('/en')->assertOk()->assertSeeInOrder(['Choose the base of your brand', 'T-shirts', 'From €7.26 printed', 'Polo shirts', 'Sweatshirts']);
+    }
+
+    public function test_la_portada_presenta_los_dos_caminos_con_datos_reales(): void
+    {
+        $this->seed(EjemplosPreciosSeeder::class);
+
+        $this->get('/es')->assertOk()
+            ->assertSeeInOrder(['Creamos marcas que comunican', 'Crear mi colección', 'Elegir un pack'])
+            ->assertSee('Desde 15 prendas') // mínimo del backend
+            ->assertSee('Calidad DTI Textil')
+            ->assertSee('Pack joven (ejemplo)')
+            ->assertSee('99,00 €') // 81,82 + 21 %
+            ->assertSee('Tu marca en 3 pasos')
+            ->assertSee("sessionStorage.setItem('nga.logo'", false); // el script del paso 1 llega a la página
+    }
+
+    public function test_sin_reglas_de_minimo_la_portada_no_inventa_uno(): void
+    {
+        $this->get('/es')->assertOk()->assertDontSee('Desde 15 prendas')->assertSee('Combina tallas y colores como quieras.');
+    }
+
+    public function test_el_paso_1_lleva_a_una_prenda_con_maqueta(): void
+    {
+        $this->get('/es')->assertDontSee('id="prueba-logo"', false); // sin maquetas, no se ofrece
+
+        $camiseta = $this->camiseta();
+        $foto = Foto::create(['prenda_id' => $camiseta->id, 'color_id' => $camiseta->variantes()->first()->color_id, 'tipo' => TipoFoto::Maqueta, 'cara' => Cara::Delantera, 'ruta' => 'catalogo/1/x.webp']);
+        FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $camiseta->zonas()->first()->id, 'x' => 3000, 'y' => 2600, 'ancho' => 4000, 'alto' => 4200]);
+
+        $this->get('/es')->assertSee('data-destino="'.url('/es/camisetas/camiseta-essential').'#tu-marca"', false);
     }
 
     public function test_el_listado_muestra_las_prendas_con_precio_con_iva(): void
@@ -318,7 +349,7 @@ class TiendaTest extends TestCase
             DB::purge('caida');
         }
 
-        $respuesta->assertOk()->assertSee('Tu colección, impresa como la imaginas.')->assertDontSee('id="nuestras-prendas"', false);
+        $respuesta->assertOk()->assertSee('Creamos marcas que comunican')->assertDontSee('id="prendas"', false)->assertDontSee('id="prueba-logo"', false);
     }
 
     public function test_la_tienda_sigue_fuera_del_indice_mientras_esta_en_construccion(): void

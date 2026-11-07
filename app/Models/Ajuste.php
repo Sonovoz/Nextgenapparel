@@ -15,7 +15,7 @@ class Ajuste extends Model
 {
     /** Valores por defecto mientras no se cambien en el backend. */
     public const POR_DEFECTO = [
-        'tienda.nombre' => 'NextGen Apparel',
+        'tienda.nombre' => 'Nextgenapparel',
         'tienda.correo_contacto' => null,
         // IVA general provisional hasta la fase 3, en centésimas de % (2100 = 21 %) (D75).
         'impuestos.iva_general' => 2100,

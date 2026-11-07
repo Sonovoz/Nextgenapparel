@@ -195,7 +195,7 @@ class SeoTest extends TestCase
         $esquemas = $this->esquemas($this->get('/es')->getContent());
 
         $this->assertSame(['Organization', 'WebSite'], array_column($esquemas, '@type'));
-        $this->assertSame('NextGen Apparel', $esquemas[0]['name']);
+        $this->assertSame('Nextgenapparel', $esquemas[0]['name']);
     }
 
     public function test_el_listado_lleva_su_ruta_de_migas(): void

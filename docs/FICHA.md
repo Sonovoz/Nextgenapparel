@@ -363,3 +363,4 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 | 1. Base | **Completada con limitaciones** (informe: `docs/INFORME_FASE_1.md`). Criterios de aceptación cumplidos en Docker; pendiente desplegar en OVH y verificar el paso 1.6 en Herd | 2026-11-06 |
 | 2. Catálogo | **Completada con limitaciones** (informe: `docs/INFORME_FASE_2.md`). Criterio de aceptación cumplido con un test de principio a fin, en SQLite y en MariaDB estricta; pendiente la revisión del cliente en Herd de los últimos pasos y el despliegue en OVH | 2026-11-07 |
 | 3. Motor de precios | **Completada con limitaciones** (informe: `docs/INFORME_FASE_3.md`). Casos P1–P7, K1–K4 y E1–E5 como tests en SQLite y MariaDB estricta; pendiente el asesor (IVA del envío y recargo), la pregunta D127 y la revisión en Herd | 2026-11-08 |
+| Visual V1 | Completado: sistema de diseño, cabecera, pie y portada premium (`docs/PLAN_VISUAL.md`); pendiente la revisión en Herd | 2026-11-08 |
