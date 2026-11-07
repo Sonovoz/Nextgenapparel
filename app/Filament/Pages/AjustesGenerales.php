@@ -1,0 +1,91 @@
+<?php
+
+namespace App\Filament\Pages;
+
+use App\Dominio\Sistema\Actividad\Actividad;
+use App\Filament\Navegacion\GrupoNavegacion;
+use App\Models\Ajuste;
+use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use UnitEnum;
+
+/** Ajustes → General (como en WooCommerce). */
+class AjustesGenerales extends Page implements HasSchemas
+{
+    use InteractsWithSchemas;
+
+    protected string $view = 'filament.pages.ajustes-generales';
+
+    protected static string|UnitEnum|null $navigationGroup = GrupoNavegacion::Ajustes;
+
+    protected static ?string $navigationLabel = 'General';
+
+    protected static ?string $title = 'Ajustes generales';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
+
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $slug = 'ajustes-generales';
+
+    /** @var array<string, mixed> */
+    public array $data = [];
+
+    public static function canAccess(): bool
+    {
+        return (bool) auth()->user()?->can(GrupoNavegacion::Ajustes->permiso());
+    }
+
+    public function mount(): void
+    {
+        $this->form->fill([
+            'nombre' => Ajuste::obtener('tienda.nombre'),
+            'correo_contacto' => Ajuste::obtener('tienda.correo_contacto'),
+            'iva_general' => Ajuste::obtener('impuestos.iva_general') / 100,
+        ]);
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema->statePath('data')->components([
+            Section::make('Tienda')->columns(2)->schema([
+                TextInput::make('nombre')->label('Nombre de la tienda')->required()->maxLength(100),
+                TextInput::make('correo_contacto')->label('Correo de contacto')->email()->maxLength(255),
+            ]),
+            Section::make('Impuestos')
+                ->description('IVA provisional para mostrar los precios con IVA en la tienda. En la fase 3 se sustituirá por las clases de impuesto de Ajustes → Impuestos.')
+                ->schema([
+                    TextInput::make('iva_general')->label('IVA general')->numeric()->minValue(0)->maxValue(100)->step(0.01)->suffix('%')->required(),
+                ]),
+        ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('guardar')->label('Guardar cambios')->action(function (): void {
+                $datos = $this->form->getState();
+                $ivaAnterior = Ajuste::obtener('impuestos.iva_general');
+                $ivaNuevo = (int) round(((float) $datos['iva_general']) * 100);
+
+                Ajuste::guardar('tienda.nombre', $datos['nombre']);
+                Ajuste::guardar('tienda.correo_contacto', $datos['correo_contacto']);
+                Ajuste::guardar('impuestos.iva_general', $ivaNuevo);
+
+                if ($ivaAnterior !== $ivaNuevo) {
+                    Actividad::apuntar('ajustes', 'IVA general cambiado', propiedades: ['old' => ['iva' => $ivaAnterior / 100 .' %'], 'attributes' => ['iva' => $ivaNuevo / 100 .' %']]);
+                }
+
+                Notification::make()->title('Ajustes guardados')->success()->send();
+            }),
+        ];
+    }
+}

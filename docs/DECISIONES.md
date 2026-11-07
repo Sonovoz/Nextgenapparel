@@ -155,3 +155,13 @@ Formato: decisión — motivo. Las decisiones nuevas se añaden al final con su 
 | D87 | Al subir una maqueta, las zonas de impresión de esa cara se colocan solas en una posición de partida (frontal, pecho, espalda) y se ajustan en % con vista previa | Ahorra trabajo: la mayoría de prendas tienen las zonas en el mismo sitio |
 | D88 | Las maquetas de muestra se preparan con **fondo transparente**, mismo encuadre (1000 × 1200) y misma escala por prenda | Aspecto premium uniforme y se pueden poner sobre cualquier fondo |
 | D89 | Tres prendas de ejemplo con datos inventados (`php artisan db:seed --class=EjemplosCatalogoSeeder`): Camiseta Essential, Polo Classic y Sudadera Urban, sin fotos | Probar en local con datos realistas; las fotos se suben desde el backend (D30) |
+
+## 2026-11-07 — Fase 2, paso 2.5
+
+| # | Decisión | Motivo |
+|---|---|---|
+| D90 | **Ajustes → General** con nombre de la tienda, correo de contacto e **IVA general** (21 % por defecto); los ajustes se guardan en la tabla `ajustes` con caché y, si la base de datos no responde, se usa el valor por defecto. El cambio de IVA queda en la actividad | Regla 4 (configurable en el backend) y D75 |
+| D91 | IVA calculado con enteros: tipo en centésimas de % y redondeo al céntimo, medio hacia arriba (7,50 € → 9,08 €) | Sin coma flotante en el dinero (regla 7) |
+| D92 | URLs de la tienda traducidas: `/es/camisetas/camiseta-essential` y `/en/t-shirts/essential-t-shirt`; si una prenda no tiene URL en inglés, se usa la española. El selector de idioma lleva a la misma página en el otro idioma | SEO por idioma (hreflang) y navegación coherente |
+| D93 | Ficha con visor propio en JavaScript sin librerías (color, cara y zonas sobre la maqueta), apartados con `<details>` nativos y el botón de personalizar desactivado hasta el configurador | Ligero, accesible y sin dependencias |
+| D94 | Solo se muestran prendas visibles, fuera de la papelera y con al menos una variación activa; la portada y el menú se muestran aunque la base de datos no responda | Nada a medias en la tienda; autosuficiencia |

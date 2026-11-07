@@ -27,6 +27,7 @@ class Actividad
         'sku' => 'SKU',
         'familia_id' => 'Familia',
         'activa' => 'Activa',
+        'iva' => 'IVA',
     ];
 
     /** Nombre legible de cada tipo de elemento. */

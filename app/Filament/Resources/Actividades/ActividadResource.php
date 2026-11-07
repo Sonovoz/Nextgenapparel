@@ -47,6 +47,7 @@ class ActividadResource extends Resource
         'errores' => 'Errores',
         'copias' => 'Copias de seguridad',
         'catalogo' => 'Catálogo',
+        'ajustes' => 'Ajustes',
     ];
 
     public static function table(Table $table): Table
