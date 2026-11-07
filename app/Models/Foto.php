@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class Foto extends Model
@@ -41,12 +42,14 @@ class Foto extends Model
     protected static function booted(): void
     {
         // Al borrar la foto se borra también su archivo.
-        static::deleted(fn (Foto $foto) => Storage::disk(self::DISCO)->delete($foto->ruta));
+        // Tras confirmar la transacción: si se deshace, el archivo sigue ahí.
+        static::deleted(fn (Foto $foto) => DB::afterCommit(fn () => Storage::disk(self::DISCO)->delete($foto->ruta)));
 
         // Al cambiar la imagen, el archivo anterior no se queda huérfano en el disco.
         static::updated(function (Foto $foto): void {
             if ($foto->wasChanged('ruta') && filled($foto->getOriginal('ruta'))) {
-                Storage::disk(self::DISCO)->delete($foto->getOriginal('ruta'));
+                $anterior = $foto->getOriginal('ruta');
+                DB::afterCommit(fn () => Storage::disk(self::DISCO)->delete($anterior));
             }
         });
 

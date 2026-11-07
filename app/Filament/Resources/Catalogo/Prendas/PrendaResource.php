@@ -73,7 +73,7 @@ class PrendaResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with('familia')->withCount('variantes')->withMin(['variantes' => fn ($v) => $v->where('activa', true)], 'precio_base')->withSum('variantes', 'stock'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('familia')->withCount('variantes')->withMin(['variantes' => fn ($v) => $v->aLaVenta()], 'precio_base')->withSum('variantes', 'stock'))
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('nombre')->label('Nombre')->searchable(query: fn (Builder $q, string $buscar) => $q->where('nombre->es', 'like', "%{$buscar}%")->orWhere('nombre->en', 'like', "%{$buscar}%")),

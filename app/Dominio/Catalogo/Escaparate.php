@@ -64,10 +64,12 @@ class Escaparate
         return $sinIva === null ? null : Formato::euros(Iva::conIva($sinIva));
     }
 
-    /** Foto principal: maqueta delantera del primer color; si no, la primera foto. */
+    /** Foto principal: maqueta delantera de un color a la venta; si no, la primera foto que no sea de un color retirado. */
     public static function fotoPrincipal(Prenda $prenda): ?Foto
     {
-        $fotos = $prenda->fotos;
+        $aLaVenta = $prenda->variantes()->aLaVenta()->distinct()->pluck('color_id')->all();
+        $fotos = $prenda->fotos->filter(fn (Foto $f) => $f->color_id === null || in_array($f->color_id, $aLaVenta, true))
+            ->sortBy(fn (Foto $f) => array_search($f->color_id, $aLaVenta, true));
 
         return $fotos->first(fn (Foto $f) => $f->tipo === TipoFoto::Maqueta && $f->cara === Cara::Delantera)
             ?? $fotos->first();

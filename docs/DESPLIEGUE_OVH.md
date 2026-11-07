@@ -43,7 +43,8 @@ cp docker/caddy/.env.example docker/caddy/.env
 Rellena en cada `docker/env/*.env`:
 
 - `APP_KEY`: genérala con `docker run --rm nextgenapparel/app:local php artisan key:generate --show` tras el primer despliegue, o con `openssl rand -base64 32` precedido de `base64:`.
-- `APP_URL`, `DB_PASSWORD` (una distinta por entorno), `ALERTAS_EMAIL`.
+- `APP_URL`: el dominio exacto de cada entorno **con `https://`** (por ejemplo `https://nextgenapparel.es`). La aplicación rechaza las peticiones de cualquier otro dominio (D116), así que si no coincide con el de Caddy, la web responde con error 400.
+- `DB_PASSWORD` (una distinta por entorno), `ALERTAS_EMAIL`.
 - Producción: los datos SMTP del proveedor de correo.
 - `BACKUP_ARCHIVE_PASSWORD`: **guárdala también fuera del servidor**. Sin ella no se pueden abrir las copias.
 

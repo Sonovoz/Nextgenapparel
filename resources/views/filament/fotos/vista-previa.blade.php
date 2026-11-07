@@ -1,12 +1,13 @@
 @php
     /** @var \App\Models\Foto|null $foto */
     $foto = $getRecord();
-    $nombres = \App\Models\ZonaImpresion::whereIn('id', collect($zonasFormulario ?? [])->pluck('zona_impresion_id'))->get()->keyBy('id');
+    $filas = collect(is_array($zonasFormulario ?? null) ? $zonasFormulario : [])->filter(fn ($z) => is_array($z));
+    $nombres = \App\Models\ZonaImpresion::whereIn('id', $filas->pluck('zona_impresion_id')->filter(fn ($id) => is_numeric($id)))->get()->keyBy('id');
     // Valores del formulario (en % de la foto), aunque aún no se hayan guardado.
-    $zonas = collect($zonasFormulario ?? [])->map(fn ($z) => [
-        'x' => (float) ($z['x'] ?? 0), 'y' => (float) ($z['y'] ?? 0),
-        'ancho' => (float) ($z['ancho'] ?? 0), 'alto' => (float) ($z['alto'] ?? 0),
-        'zona' => $nombres[$z['zona_impresion_id'] ?? null] ?? null,
+    $zonas = $filas->map(fn ($z) => [
+        'x' => is_numeric($z['x'] ?? null) ? (float) $z['x'] : 0, 'y' => is_numeric($z['y'] ?? null) ? (float) $z['y'] : 0,
+        'ancho' => is_numeric($z['ancho'] ?? null) ? (float) $z['ancho'] : 0, 'alto' => is_numeric($z['alto'] ?? null) ? (float) $z['alto'] : 0,
+        'zona' => is_numeric($z['zona_impresion_id'] ?? null) ? ($nombres[(int) $z['zona_impresion_id']] ?? null) : null,
     ]);
     $ejemplo = $ejemplo ?? 'cuadrado';
 @endphp

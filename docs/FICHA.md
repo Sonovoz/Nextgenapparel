@@ -345,4 +345,4 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 |---|---|---|
 | Planteamiento | Completado | 2026-11-06 |
 | 1. Base | **Completada con limitaciones** (informe: `docs/INFORME_FASE_1.md`). Criterios de aceptación cumplidos en Docker; pendiente desplegar en OVH y verificar el paso 1.6 en Herd | 2026-11-06 |
-| 2. Catálogo | En curso — pasos 2.1 a 2.6 completados (modelo, backend de productos, fotos, tienda con ficha de producto, IVA en Ajustes, visor «Tu marca, aquí» con colección, lupa, giro, ajustador y aviso de calidad; zonas medidas desde el cuello; SEO técnico con sitemaps, robots, datos estructurados y Open Graph); pendiente el cierre con el Gauntlet | 2026-11-07 |
+| 2. Catálogo | **Completada con limitaciones** (informe: `docs/INFORME_FASE_2.md`). Criterio de aceptación cumplido con un test de principio a fin, en SQLite y en MariaDB estricta; pendiente la revisión del cliente en Herd de los últimos pasos y el despliegue en OVH | 2026-11-07 |

@@ -28,7 +28,8 @@ class CamposTraducibles
     public static function urls(string $modelo, int $largo, bool $reservadas = false): Grid
     {
         $campo = fn (string $idioma, string $nombre) => TextInput::make("slug.{$idioma}")->label("URL ({$nombre})")
-            ->alphaDash()->maxLength($largo)
+            ->rule('regex:/^[a-z0-9]+(-[a-z0-9]+)*$/')->maxLength($largo)
+            ->validationMessages(['regex' => 'Solo minúsculas, números y guiones, por ejemplo camiseta-basica.'])
             ->rule(fn (Get $get, ?Model $record) => function (string $atributo, $valor, Closure $fallo) use ($modelo, $idioma, $get, $record, $reservadas): void {
                 if (blank($valor)) {
                     return;

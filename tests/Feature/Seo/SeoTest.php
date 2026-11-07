@@ -77,6 +77,7 @@ class SeoTest extends TestCase
 
     public function test_detras_de_caddy_las_urls_salen_en_https(): void
     {
+        config(['app.url' => 'https://nextgenapparel.es']);
         $cabeceras = ['X-Forwarded-Proto' => 'https', 'X-Forwarded-Host' => 'nextgenapparel.es', 'X-Forwarded-Port' => '443'];
 
         $html = $this->get('/es/camisetas/camiseta-essential', $cabeceras)->getContent();
@@ -86,6 +87,18 @@ class SeoTest extends TestCase
         $sitemap = preg_replace('#xmlns(:\w+)?="http://[^"]+"#', '', $this->get('/sitemap-es.xml', $cabeceras)->getContent());
         $this->assertStringContainsString('<loc>https://nextgenapparel.es/es/camisetas/camiseta-essential</loc>', $sitemap);
         $this->assertStringNotContainsString('http://', $sitemap);
+    }
+
+    public function test_un_dominio_que_no_es_el_de_la_tienda_se_rechaza(): void
+    {
+        config(['app.url' => 'https://nextgenapparel.es']);
+        $this->enEntorno('production');
+
+        // Caddy reenvía la cabecera Host del cliente: solo se atiende el dominio de APP_URL.
+        $this->get('https://dominio-falso.com/es')->assertStatus(400);
+        $this->get('https://nextgenapparel.es/es')->assertOk();
+        $this->get('https://www.nextgenapparel.es/es')->assertOk();
+        $this->get('http://127.0.0.1/up')->assertOk(); // comprobación de salud del contenedor web
     }
 
     public function test_el_backend_queda_fuera_de_los_buscadores(): void

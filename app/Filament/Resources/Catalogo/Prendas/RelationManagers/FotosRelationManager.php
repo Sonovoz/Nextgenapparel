@@ -52,7 +52,8 @@ class FotosRelationManager extends RelationManager
 
         // La zona no puede salirse de la foto (posición + tamaño ≤ 100 %).
         $dentro = fn (string $posicion, string $etiqueta) => fn (Get $get) => function (string $atributo, $valor, Closure $fallo) use ($get, $posicion, $etiqueta): void {
-            if ((float) $get($posicion) + (float) $valor > 100) {
+            // En centésimas, igual que se guarda: sin escapes por redondeo.
+            if ((int) round(((float) $get($posicion)) * 100) + (int) round(((float) $valor) * 100) > 10000) {
                 $fallo("La zona se sale de la foto: «{$etiqueta}» más este valor no puede pasar del 100 %.");
             }
         };

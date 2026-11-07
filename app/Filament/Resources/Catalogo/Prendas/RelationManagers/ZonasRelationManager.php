@@ -2,7 +2,10 @@
 
 namespace App\Filament\Resources\Catalogo\Prendas\RelationManagers;
 
+use App\Dominio\Catalogo\TipoFoto;
+use App\Dominio\Catalogo\ZonasPorDefecto;
 use App\Filament\Concerns\CampoDinero;
+use App\Models\Foto;
 use App\Models\FotoZona;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
@@ -50,7 +53,10 @@ class ZonasRelationManager extends RelationManager
                         $action->getRecordSelect()->label('Zona'),
                         CampoDinero::make('precio', 'Precio de impresión sin IVA')->required(),
                         CampoDinero::make('coste', 'Coste de impresión')->required(),
-                    ]),
+                    ])
+                    // Las maquetas ya subidas reciben la zona en su posición de partida.
+                    ->after(fn () => $this->getOwnerRecord()->fotos()->where('tipo', TipoFoto::Maqueta->value)->get()
+                        ->each(fn (Foto $foto) => app(ZonasPorDefecto::class)($foto))),
             ])
             ->recordActions([EditAction::make(), DetachAction::make()->label('Quitar')
                 // Fuera también de las maquetas: el visor no debe ofrecer una zona sin precio.
