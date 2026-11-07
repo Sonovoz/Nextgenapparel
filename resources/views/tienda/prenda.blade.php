@@ -19,6 +19,7 @@
         'error_archivo' => __('tienda.error_archivo'),
         'error_grande' => __('tienda.error_grande'),
         'medida_impresion' => __('tienda.medida_impresion'),
+        'calidad_sin_diseno' => __('tienda.calidad_sin_diseno'),
         'decimal' => $idioma === 'en' ? '.' : ',',
     ];
     // Misma regla que App\Dominio\Disenos\Calidad: umbrales de Ajustes y textos de aviso.
@@ -64,7 +65,7 @@
         .calidad[data-nivel="baja"] { border-left-color: #F0624D; background: rgba(240,98,77,.12); }
         .calidad-cabecera { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
         .calidad-cabecera strong { font-size: 15px; font-weight: 600; }
-        .calidad p:empty, .calidad span:empty { display: none; }
+        .calidad > p:empty, .calidad-cabecera span:empty { display: none; }
         .lupa { position: absolute; width: 170px; height: 170px; border-radius: 999px; overflow: hidden; pointer-events: none; background: #fff; box-shadow: 0 0 0 3px #fff, 0 14px 36px rgba(22,22,26,.35); z-index: 3; }
         .lupa .capa { position: absolute; }
         .lupa .capa img { width: 100%; height: 100%; }
@@ -171,6 +172,23 @@
 
         <div class="ficha">
             <section class="galeria" aria-label="{{ $prenda->nombre }}">
+                {{-- Estudio: a pantalla completa al diseñar (como la personalización de un videojuego). Fuera de él, la galería de la ficha. --}}
+                <div class="estudio" id="estudio" aria-label="{{ __('tienda.estudio') }}">
+                <div class="estudio-barra">
+                    <p class="estudio-titulo"><span>{{ __('tienda.estudio') }}</span> {{ $prenda->nombre }}</p>
+                    <p class="estudio-atajos" aria-hidden="true">
+                        <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> {{ __('tienda.atajo_mover') }}</span>
+                        <span><kbd>+</kbd><kbd>−</kbd> {{ __('tienda.atajo_tamano') }}</span>
+                        <span><kbd>F</kbd> {{ __('tienda.atajo_girar') }}</span>
+                        <span><kbd>C</kbd> {{ __('tienda.color') }}</span>
+                        <span><kbd>L</kbd> {{ __('tienda.lupa') }}</span>
+                        <span><kbd>Esc</kbd> {{ __('tienda.atajo_salir') }}</span>
+                    </p>
+                    <button type="button" class="estudio-cerrar" id="cerrar-estudio" aria-label="{{ __('tienda.cerrar_estudio') }}">×</button>
+                </div>
+                <div class="estudio-escena">
+                <button type="button" class="girar anterior" data-girar aria-label="{{ __('tienda.atajo_girar') }}">‹</button>
+                <div class="marco-visor">
                 <div class="visor" id="visor" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
                     <div class="visor-controles">
                         <div class="segmento" role="group" aria-label="{{ __('tienda.delantera') }} / {{ __('tienda.trasera') }}">
@@ -190,10 +208,35 @@
                     </div>
                     <div class="lupa" id="lupa" hidden></div>
                     <p class="visor-nota">{{ __('tienda.vista_orientativa') }}</p>
+                    <p class="pista" id="pista" aria-hidden="true">{{ __('tienda.pista_arrastrar') }}</p>
+                </div>
+                </div>
+                <button type="button" class="girar siguiente" data-girar aria-label="{{ __('tienda.atajo_girar') }}">›</button>
+                <button type="button" class="boton-lupa" id="boton-lupa" aria-pressed="false">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                    {{ __('tienda.lupa') }}
+                </button>
+                <div class="pieles" id="pieles" aria-label="{{ __('tienda.coleccion_titulo') }}">
+                    <p class="pieles-titulo"><span>{{ __('tienda.coleccion_titulo') }}</span> <span id="coleccion-texto"></span></p>
+                    <div class="pieles-lista" id="pieles-lista"></div>
+                </div>
+                </div>
+                @if ($conTuMarca)
+                    <div class="estudio-panel">
+                        @include('tienda._tu-marca')
+                    </div>
+                @endif
                 </div>
 
                 @if ($conTuMarca)
-                    @include('tienda._tu-marca')
+                    <div class="invitacion-estudio">
+                        <div>
+                            <p class="etiqueta">{{ __('tienda.tu_marca_etiqueta') }}</p>
+                            <p class="invitacion-titulo">{{ __('tienda.tu_marca_titulo') }}</p>
+                            <p class="suave">{{ __('tienda.invitacion_texto') }}</p>
+                        </div>
+                        <button type="button" class="boton principal" data-abrir-estudio>{{ __('tienda.abrir_estudio') }}</button>
+                    </div>
                 @endif
             </section>
 
@@ -252,7 +295,11 @@
                 @endif
 
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <button type="button" class="cta" disabled aria-describedby="proximamente">{{ __('tienda.personalizar') }}</button>
+                    @if ($conTuMarca)
+                        <button type="button" class="boton principal" data-abrir-estudio style="width: 100%;">{{ __('tienda.abrir_estudio') }}</button>
+                    @else
+                        <button type="button" class="boton inactivo" disabled style="width: 100%;">{{ __('tienda.personalizar') }}</button>
+                    @endif
                     <p class="suave" id="proximamente" style="font-size: 13px;">{{ __('tienda.proximamente') }} {{ __('tienda.minimo') }}</p>
                 </div>
 
@@ -302,13 +349,5 @@
             </section>
         </div>
 
-        @if ($conTuMarca)
-            <section class="coleccion" id="coleccion" aria-labelledby="coleccion-titulo" hidden>
-                <p class="etiqueta">{{ __('tienda.tu_marca_etiqueta') }}</p>
-                <h2 id="coleccion-titulo">{{ __('tienda.coleccion_titulo') }}</h2>
-                <p class="suave" id="coleccion-texto" style="margin-top: 8px;"></p>
-                <div class="coleccion-rejilla" id="coleccion-rejilla"></div>
-            </section>
-        @endif
     </div>
 </x-tienda>

@@ -244,7 +244,11 @@ class TiendaTest extends TestCase
         FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $camiseta->zonas()->first()->id, 'x' => 3000, 'y' => 2600, 'ancho' => 4000, 'alto' => 4200]);
         $this->get('/es/camisetas/camiseta-essential')
             ->assertSee('id="tu-marca"', false)
-            ->assertSee('id="coleccion"', false)
+            ->assertSee('id="estudio"', false)
+            ->assertSee('id="pieles"', false)
+            ->assertSee('data-abrir-estudio', false)
+            ->assertSee('Diseñar mi prenda')
+            ->assertSee('Arrástralo para colocarlo')
             ->assertSee('¿Tienes logo? Míralo puesto.')
             ->assertSee('no lo subimos ni lo guardamos');
         $this->get('/en/t-shirts/essential-t-shirt')->assertSee('Got a logo? See it on.');

@@ -170,7 +170,7 @@
     @endif
 
     {{-- 5. Calidad DTI Textil --}}
-    <section class="calidad" id="calidad" aria-labelledby="titulo-calidad">
+    <section class="seccion-calidad" id="calidad" aria-labelledby="titulo-calidad">
         <div class="contenedor calidad-rejilla">
             <figure class="lupa-tejido aparece" style="margin: 0;">
                 <img src="{{ asset('img/portada/macro.webp') }}" alt="" width="900" height="900" loading="lazy">

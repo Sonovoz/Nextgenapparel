@@ -6,6 +6,23 @@
         <p class="claro" style="margin-top: 8px;">{{ __('tienda.tu_marca_texto') }}</p>
     </div>
 
+    {{-- Energía de la calidad, siempre a la vista mientras se diseña. --}}
+    <div class="calidad" id="calidad" role="status" aria-live="polite" data-nivel="">
+        <div class="calidad-cabecera"><strong id="calidad-etiqueta">{{ __('tienda.calidad_sin_diseno') }}</strong><span class="claro" id="calidad-ppp"></span></div>
+        <div class="calidad-barra" aria-hidden="true"><span id="calidad-relleno"></span></div>
+        <p id="calidad-mensaje"></p>
+        <p class="claro" id="calidad-consejo"></p>
+        <p id="calidad-fondo"></p>
+    </div>
+
+    <div class="herramientas" role="tablist" aria-label="{{ __('tienda.estudio') }}">
+        <button type="button" role="tab" class="herramienta" id="h-diseno" aria-selected="true" aria-controls="hp-diseno" data-herramienta="diseno">{{ __('tienda.herramienta_diseno') }}</button>
+        <button type="button" role="tab" class="herramienta" id="h-zona" aria-selected="false" aria-controls="hp-zona" data-herramienta="zona" tabindex="-1">{{ __('tienda.herramienta_zona') }}</button>
+        <button type="button" role="tab" class="herramienta" id="h-ajustar" aria-selected="false" aria-controls="hp-ajustar" data-herramienta="ajustar" tabindex="-1">{{ __('tienda.herramienta_ajustar') }}</button>
+    </div>
+
+    <div id="hp-diseno" role="tabpanel" aria-labelledby="h-diseno" class="herramienta-panel">
+
     <div class="pestanas" role="tablist" aria-label="{{ __('tienda.tu_marca_etiqueta') }}">
         <button type="button" role="tab" id="pestana-logo" aria-selected="true" aria-controls="panel-logo" data-modo="logo">{{ __('tienda.pestana_logo') }}</button>
         <button type="button" role="tab" id="pestana-texto" aria-selected="false" aria-controls="panel-texto" data-modo="texto" tabindex="-1">{{ __('tienda.pestana_texto') }}</button>
@@ -46,19 +63,18 @@
         </div>
     </div>
 
-    <div class="grupo">
-        <span>{{ __('tienda.donde') }}</span>
-        <div class="opciones" id="zonas-diseno" role="radiogroup" aria-label="{{ __('tienda.donde') }}"></div>
     </div>
 
-    <div class="ajustador" id="ajustador" hidden>
-        <div class="calidad" id="calidad" role="status" aria-live="polite">
-            <div class="calidad-cabecera"><strong id="calidad-etiqueta"></strong><span class="claro" id="calidad-ppp"></span></div>
-            <p id="calidad-mensaje"></p>
-            <p class="claro" id="calidad-consejo"></p>
-            <p id="calidad-fondo"></p>
+    <div id="hp-zona" role="tabpanel" aria-labelledby="h-zona" class="herramienta-panel" hidden>
+        <div class="grupo">
+            <span>{{ __('tienda.donde') }}</span>
+            <div class="opciones" id="zonas-diseno" role="radiogroup" aria-label="{{ __('tienda.donde') }}"></div>
         </div>
+    </div>
 
+    <div id="hp-ajustar" role="tabpanel" aria-labelledby="h-ajustar" class="herramienta-panel" hidden>
+    <p class="claro" id="ajustador-vacio">{{ __('tienda.ajustar_vacio') }}</p>
+    <div class="ajustador" id="ajustador" hidden>
         <h3>{{ __('tienda.ajusta') }}</h3>
         <div class="fila-tamano">
             <label for="tamano-diseno" class="oculto">{{ __('tienda.tamano') }}</label>
@@ -71,12 +87,12 @@
             <button type="button" class="boton-pildora borde" id="arriba-diseno">{{ __('tienda.subir') }}</button>
         </div>
     </div>
+    </div>
 
     <p class="tu-marca-error" id="tu-marca-error" role="alert" hidden></p>
     <p class="tu-marca-estado" id="tu-marca-estado" aria-live="polite"></p>
 
     <div class="acciones-marca" id="tu-marca-acciones" hidden>
-        <button type="button" class="boton-claro" id="ver-coleccion" aria-expanded="false" aria-controls="coleccion">{{ __('tienda.ver_tu_coleccion') }}</button>
         <button type="button" class="boton-texto" id="quitar-diseno">{{ __('tienda.quitar_diseno') }}</button>
     </div>
 

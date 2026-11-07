@@ -47,7 +47,7 @@
         tinta: 'auto',
         zonaId: null,
         zonaElegida: false,    // el cliente eligió zona: no se cambia sola
-        coleccion: false,
+        lupa: false,           // en el estudio, la lupa se activa a mano
         ajustes: {},           // por zona: { escala (0,2–1), cx, cy (0–1 del hueco libre) }
         logoPx: null,          // píxeles reales del logo (sin márgenes transparentes)
         logoTipo: null,        // 'transparente' | 'fondo' | 'fondo_blanco' | 'vectorial'
@@ -414,6 +414,7 @@
         }
 
         document.getElementById('nombre-color').textContent = color.nombre;
+        document.querySelectorAll('.piel').forEach(function (b) { b.setAttribute('aria-pressed', String(Number(b.dataset.color) === estado.color)); });
         document.querySelectorAll('.muestra').forEach(function (b) { b.setAttribute('aria-checked', String(Number(b.dataset.color) === estado.color)); });
         document.querySelectorAll('[data-cara]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cara === estado.cara)); });
         document.getElementById('ver-zonas').setAttribute('aria-pressed', String(estado.zonas));
@@ -452,13 +453,16 @@
 
     var lupa = document.getElementById('lupa');
     var arrastre = null;
+    var estudio = document.getElementById('estudio');
+    var enEstudio = function () { return !!estudio && estudio.classList.contains('activo'); };
+    var lupaActiva = function () { return !enEstudio() || estado.lupa; };
     var lupaSucia = true;
     var AUMENTO = 2.4;
 
     if (lupa && conRaton) {
         lienzo.addEventListener('pointermove', function (e) {
             if (e.pointerType !== 'mouse' || !lienzo.querySelector('img')) return;
-            if (arrastre || e.target.classList.contains('movible')) { lupa.hidden = true; return; }
+            if (arrastre || !lupaActiva()) { lupa.hidden = true; return; }
             var r = lienzo.getBoundingClientRect();
             var v = visor.getBoundingClientRect();
             if (lupaSucia) {
@@ -489,8 +493,6 @@
     var estadoMarca = document.getElementById('tu-marca-estado');
     var errorMarca = document.getElementById('tu-marca-error');
     var acciones = document.getElementById('tu-marca-acciones');
-    var botonColeccion = document.getElementById('ver-coleccion');
-    var coleccion = document.getElementById('coleccion');
 
     // Zonas para elegir
     var grupoZonas = document.getElementById('zonas-diseno');
@@ -555,6 +557,10 @@
         if (cara !== estado.cara) { estado.cara = cara; pintar('giro'); } else { pintar(); }
         acciones.hidden = !hayDiseno();
         avisarListo();
+        if (hayDiseno()) {
+            abrirEstudio();
+            setTimeout(mostrarPista, 700);
+        }
         refrescarColeccion();
     }
 
@@ -569,7 +575,7 @@
     }
 
     // Pestañas: mi logo / escribir mi marca
-    var pestanas = panel.querySelectorAll('[role="tab"]');
+    var pestanas = panel.querySelectorAll('.pestanas [role="tab"]');
     pestanas.forEach(function (p) {
         p.addEventListener('click', function () {
             estado.modo = p.dataset.modo;
@@ -620,6 +626,7 @@
             estado.ajustes = {};
             estado.version++;
             if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
+            elegirHerramienta('ajustar'); // el logo ya está: toca colocarlo
             soltar.classList.add('con-logo');
             document.getElementById('nombre-logo').textContent = original ? original.nombre : archivo.name;
         };
@@ -687,12 +694,9 @@
         estado.version++;
         soltar.classList.remove('con-logo');
         acciones.hidden = true;
-        estado.coleccion = false;
-        coleccion.hidden = true;
-        botonColeccion.setAttribute('aria-expanded', 'false');
-        botonColeccion.textContent = textos.ver_coleccion;
         avisarListo();
         pintar();
+        refrescarColeccion();
     });
 
     /* ---------- Ajustador y calidad ---------- */
@@ -727,6 +731,14 @@
     function actualizarAjustador() {
         var zona = hayDiseno() ? zonaActual() : null;
         ajustador.hidden = !zona;
+        var vacio = document.getElementById('ajustador-vacio');
+        if (vacio) vacio.hidden = !!zona;
+        if (!hayDiseno()) {
+            bloqueCalidad.dataset.nivel = '';
+            document.getElementById('calidad-etiqueta').textContent = textos.calidad_sin_diseno;
+            ['calidad-ppp', 'calidad-mensaje', 'calidad-consejo', 'calidad-fondo'].forEach(function (id) { document.getElementById(id).textContent = ''; });
+            document.getElementById('calidad-relleno').style.width = '0';
+        }
         if (!zona) return;
 
         var color = colores[estado.color];
@@ -747,12 +759,14 @@
             bloqueCalidad.dataset.nivel = 'correcta';
             etiqueta.textContent = t.nivel_correcta;
             mensaje.textContent = estado.modo === 'texto' ? t.texto : t.vectorial;
+            document.getElementById('calidad-relleno').style.width = '100%';
             if (estado.logoTipo === 'vectorial' && estado.modo === 'logo') fondo.textContent = t.formato_pedido;
             return;
         }
 
         var valor = Math.min(ppp(estado.logoPx.w, anchoMm), ppp(estado.logoPx.h, altoMm));
         var n = nivel(valor);
+        document.getElementById('calidad-relleno').style.width = Math.min(100, Math.round(valor / calidad.umbrales.correcto * 100)) + '%';
         bloqueCalidad.dataset.nivel = n;
         etiqueta.textContent = t['nivel_' + n];
         detalle.textContent = t.ppp.replace(':ppp', valor);
@@ -793,7 +807,7 @@
     // Arrastrar el diseño sobre la prenda (ratón o dedo), sin salir de su zona.
     lienzo.addEventListener('pointerdown', function (e) {
         var c = e.target;
-        if (!c.classList || !c.classList.contains('movible')) return;
+        if (!c.classList || !c.classList.contains('movible') || !enEstudio() || estado.lupa) return;
         var zona = zonaActual();
         if (!zona || String(zona.id) !== c.dataset.zona) return;
         e.preventDefault();
@@ -833,7 +847,6 @@
             sessionStorage.removeItem('nga.logo');
             fetch(guardado.datos).then(function (r) { return r.blob(); }).then(function (b) {
                 leerLogo(new File([b], guardado.nombre || 'logo.png', { type: 'image/png' }), guardado);
-                visor.scrollIntoView({ behavior: sinMovimiento ? 'auto' : 'smooth', block: 'start' });
             });
         }
     } catch (e) { /* sin sessionStorage: se sube desde la ficha */ }
@@ -845,44 +858,135 @@
         return z ? z.cara : 'delantera';
     }
 
+    /** «Skins»: la prenda en cada color, con el diseño puesto. Pulsar una elige el color. */
     function refrescarColeccion() {
-        if (!estado.coleccion) return;
-        var rejilla = document.getElementById('coleccion-rejilla');
-        var cara = caraDelDiseno();
-        rejilla.replaceChildren();
+        var lista = document.getElementById('pieles-lista');
+        if (!lista || !enEstudio()) return;
+        var cara = hayDiseno() ? caraDelDiseno() : estado.cara;
+        lista.replaceChildren();
         colores.forEach(function (color, i) {
-            var tarjeta = el('button', 'coleccion-tarjeta');
-            tarjeta.type = 'button';
-            tarjeta.setAttribute('aria-label', texto('ver_en_grande', { color: color.nombre }));
-            if (!sinMovimiento) tarjeta.style.animationDelay = (i * 90) + 'ms';
-            var marco = el('div', 'coleccion-foto');
-            var escena = el('div', 'visor-lienzo');
+            var piel = el('button', 'piel');
+            piel.type = 'button';
+            piel.dataset.color = i;
+            piel.setAttribute('aria-pressed', String(i === estado.color));
+            piel.setAttribute('aria-label', color.nombre);
+            var marco = el('span', 'marco');
+            var escena = el('span', 'visor-lienzo');
             escena.appendChild(construirEscena(i, color.caras[cara] ? cara : 'delantera', { decorativa: true }));
             marco.appendChild(escena);
-            tarjeta.appendChild(marco);
-            tarjeta.appendChild(el('span', 'coleccion-nombre', color.nombre));
-            tarjeta.addEventListener('click', function () {
+            piel.appendChild(marco);
+            piel.appendChild(el('span', '', color.nombre));
+            piel.addEventListener('click', function () {
                 estado.color = i;
-                estado.cara = color.caras[cara] ? cara : 'delantera';
+                if (hayDiseno() && color.caras[cara]) estado.cara = cara;
                 pintar('fundido');
                 avisarListo();
-                visor.scrollIntoView({ behavior: sinMovimiento ? 'auto' : 'smooth', block: 'center' });
             });
-            rejilla.appendChild(tarjeta);
+            lista.appendChild(piel);
         });
-        document.getElementById('coleccion-texto').textContent = texto('coleccion_texto', { n: colores.length, prenda: textos.prenda });
+        document.getElementById('coleccion-texto').textContent = hayDiseno()
+            ? texto('coleccion_texto', { n: colores.length, prenda: textos.prenda }) : '';
     }
 
-    botonColeccion.addEventListener('click', function () {
-        estado.coleccion = !estado.coleccion;
-        coleccion.hidden = !estado.coleccion;
-        botonColeccion.setAttribute('aria-expanded', String(estado.coleccion));
-        botonColeccion.textContent = estado.coleccion ? textos.ocultar_coleccion : textos.ver_coleccion;
-        if (estado.coleccion) {
-            refrescarColeccion();
-            coleccion.scrollIntoView({ behavior: sinMovimiento ? 'auto' : 'smooth', block: 'start' });
-        }
+    /* ---------- Estudio: entrar, salir y mandos ---------- */
+
+    var cerrarBoton = document.getElementById('cerrar-estudio');
+    var botonLupa = document.getElementById('boton-lupa');
+    var desdeHistorial = false;
+
+    function abrirEstudio() {
+        if (!estudio || enEstudio()) return;
+        estudio.classList.add('activo');
+        document.body.classList.add('estudio-abierto');
+        try { history.pushState({ estudio: true }, ''); } catch (e) {}
+        lupaSucia = true;
+        pintar();
+        refrescarColeccion();
+        cerrarBoton.focus({ preventScroll: true });
+    }
+
+    function cerrarEstudio() {
+        if (!enEstudio()) return;
+        estudio.classList.remove('activo', 'con-lupa');
+        document.body.classList.remove('estudio-abierto');
+        estado.lupa = false;
+        botonLupa.setAttribute('aria-pressed', 'false');
+        lupa.hidden = true;
+        lupaSucia = true;
+        pintar();
+        if (!desdeHistorial) { try { if (history.state && history.state.estudio) history.back(); } catch (e) {} }
+        desdeHistorial = false;
+        var abrir = document.querySelector('[data-abrir-estudio]');
+        if (abrir) abrir.focus({ preventScroll: true });
+    }
+
+    document.querySelectorAll('[data-abrir-estudio]').forEach(function (b) { b.addEventListener('click', abrirEstudio); });
+    cerrarBoton.addEventListener('click', cerrarEstudio);
+    window.addEventListener('popstate', function () { if (enEstudio()) { desdeHistorial = true; cerrarEstudio(); } });
+    document.querySelectorAll('[data-girar]').forEach(function (b) {
+        b.addEventListener('click', function () { cambiarCara(estado.cara === 'delantera' ? 'trasera' : 'delantera'); });
     });
+    function alternarLupa() {
+        estado.lupa = !estado.lupa;
+        botonLupa.setAttribute('aria-pressed', String(estado.lupa));
+        estudio.classList.toggle('con-lupa', estado.lupa);
+        if (!estado.lupa) lupa.hidden = true;
+    }
+    botonLupa.addEventListener('click', alternarLupa);
+
+    // Herramientas: Diseño · Zona · Ajustar
+    var herramientas = panel.querySelectorAll('.herramientas [role="tab"]');
+    function elegirHerramienta(nombre) {
+        herramientas.forEach(function (h) {
+            var activa = h.dataset.herramienta === nombre;
+            h.setAttribute('aria-selected', String(activa));
+            h.tabIndex = activa ? 0 : -1;
+            document.getElementById(h.getAttribute('aria-controls')).hidden = !activa;
+        });
+    }
+    herramientas.forEach(function (h) { h.addEventListener('click', function () { elegirHerramienta(h.dataset.herramienta); }); });
+
+    // Pista animada la primera vez que el diseño cae sobre la prenda.
+    var pistaMostrada = false;
+    function mostrarPista() {
+        var pista = document.getElementById('pista');
+        if (pistaMostrada || !pista || !enEstudio()) return;
+        pistaMostrada = true;
+        pista.classList.remove('visible');
+        void pista.offsetWidth;
+        pista.classList.add('visible');
+    }
+
+    // Mandos de teclado, como en una consola (solo dentro del estudio y fuera de los campos de texto).
+    document.addEventListener('keydown', function (e) {
+        if (!enEstudio()) return;
+        if (e.key === 'Escape') { cerrarEstudio(); return; }
+        var etiqueta = (e.target.tagName || '').toLowerCase();
+        if (etiqueta === 'input' || etiqueta === 'textarea' || e.ctrlKey || e.metaKey || e.altKey) return;
+        var zona = hayDiseno() ? zonaActual() : null;
+        var aj = zona ? ajusteDe(zona.id) : null;
+        var paso = e.shiftKey ? 0.1 : 0.025;
+        var tecla = e.key.toLowerCase();
+        var manejado = true;
+        if (aj && e.key === 'ArrowLeft') aj.cx = Math.max(0, aj.cx - paso);
+        else if (aj && e.key === 'ArrowRight') aj.cx = Math.min(1, aj.cx + paso);
+        else if (aj && e.key === 'ArrowUp') aj.cy = Math.max(0, aj.cy - paso);
+        else if (aj && e.key === 'ArrowDown') aj.cy = Math.min(1, aj.cy + paso);
+        else if (aj && (e.key === '+' || e.key === '=')) aj.escala = Math.min(1, Math.round((aj.escala + 0.05) * 100) / 100);
+        else if (aj && (e.key === '-' || e.key === '_')) aj.escala = Math.max(0.2, Math.round((aj.escala - 0.05) * 100) / 100);
+        else if (tecla === 'f') { cambiarCara(estado.cara === 'delantera' ? 'trasera' : 'delantera'); return e.preventDefault(); }
+        else if (tecla === 'c') { estado.color = (estado.color + 1) % colores.length; pintar('fundido'); avisarListo(); return e.preventDefault(); }
+        else if (tecla === 'l') { alternarLupa(); return e.preventDefault(); }
+        else manejado = false;
+        if (!manejado) return;
+        e.preventDefault();
+        mostrarGuia();
+        pintar();
+        actualizarAjustador();
+        clearTimeout(esperaTeclas);
+        esperaTeclas = setTimeout(refrescarColeccion, 250);
+    });
+    var esperaTeclas = null;
 
     pintar();
 })();
