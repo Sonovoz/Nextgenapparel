@@ -3,6 +3,7 @@
 namespace Tests\Feature\Catalogo;
 
 use App\Dominio\Catalogo\Cara;
+use App\Dominio\Catalogo\Escaparate;
 use App\Dominio\Catalogo\TipoFoto;
 use App\Dominio\Disenos\Calidad;
 use App\Dominio\Precios\Formato;
@@ -83,7 +84,7 @@ class TiendaTest extends TestCase
 
         $this->assertSame(1000, Ajuste::obtener('impuestos.iva_general'));
         $this->assertSame('IVA general cambiado', Activity::latest('id')->value('description'));
-        $this->get('/es/camisetas')->assertSee('4,62 €'); // 4,20 + 10 %
+        $this->get('/es/camisetas')->assertSee('6,60 €'); // (4,20 + pecho 1,80) + 10 %
     }
 
     public function test_los_umbrales_de_calidad_se_cambian_en_ajustes_y_deben_ir_en_orden(): void
@@ -121,8 +122,8 @@ class TiendaTest extends TestCase
 
     public function test_el_listado_muestra_las_prendas_con_precio_con_iva(): void
     {
-        $this->get('/es/camisetas')->assertOk()->assertSee('Camiseta Essential')->assertSee('Desde 5,08 €')->assertSee('IVA incluido');
-        $this->get('/en/t-shirts')->assertOk()->assertSee('Essential T-shirt')->assertSee('From €5.08')->assertSee('VAT included');
+        $this->get('/es/camisetas')->assertOk()->assertSee('Camiseta Essential')->assertSee('Desde 7,26 €')->assertSee('con impresión')->assertSee('IVA incluido');
+        $this->get('/en/t-shirts')->assertOk()->assertSee('Essential T-shirt')->assertSee('From €7.26')->assertSee('printed')->assertSee('VAT included');
     }
 
     public function test_las_prendas_ocultas_en_papelera_o_sin_variaciones_no_aparecen(): void
@@ -145,7 +146,7 @@ class TiendaTest extends TestCase
     {
         $this->get('/es/camisetas/camiseta-essential')->assertOk()
             ->assertSee('<h1>Camiseta Essential</h1>', false)
-            ->assertSee('5,08 €')
+            ->assertSee('7,26 €') // 4,20 + pecho 1,80 + 21 %
             ->assertSee('aria-label="Blanco"', false)->assertSee('aria-label="Negro"', false)
             ->assertSeeInOrder(['XS', 'S', 'M', 'L', 'XL', 'XXL'])
             ->assertSee('Hasta 28 × 38 cm')
@@ -241,6 +242,26 @@ class TiendaTest extends TestCase
             $this->assertNotContains('', $es);
             $this->assertNotContains('', $en);
         }
+    }
+
+    public function test_el_desde_incluye_la_impresion_mas_barata_activa(): void
+    {
+        $camiseta = $this->camiseta();
+        $this->assertSame(600, Escaparate::desdeSinIva($camiseta)); // 4,20 + pecho 1,80
+
+        $camiseta->zonas()->where('clave', 'pecho')->first()->update(['activa' => false]);
+        $this->assertSame(720, Escaparate::desdeSinIva($camiseta)); // 4,20 + frontal 3,00
+        $this->get('/es/camisetas/camiseta-essential')->assertSee('8,71 €');
+    }
+
+    public function test_sin_zonas_de_impresion_no_se_muestra_precio(): void
+    {
+        $camiseta = $this->camiseta();
+        $camiseta->zonas()->detach();
+
+        $this->assertNull(Escaparate::desdeSinIva($camiseta));
+        $html = $this->get('/es/camisetas/camiseta-essential')->assertOk()->assertDontSee('class="precio"', false)->getContent();
+        $this->assertStringNotContainsString('"offers"', $html);
     }
 
     public function test_un_color_desactivado_desaparece_de_la_ficha_y_del_precio(): void

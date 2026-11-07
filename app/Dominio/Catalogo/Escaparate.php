@@ -56,10 +56,38 @@ class Escaparate
         return $modelo->getTranslation('slug', $idioma, false) ?: $modelo->getTranslation('slug', 'es');
     }
 
-    /** «Desde 5,08 €» con IVA, o null si no tiene precio. */
+    /**
+     * Precio unitario más bajo al que se vende, sin IVA y en céntimos: la
+     * variación a la venta más barata + la zona activa más barata (D118). La
+     * prenda nunca se vende sin imprimir. Null si no hay variación o zona.
+     */
+    public static function desdeSinIva(Prenda $prenda): ?int
+    {
+        $prendaLisa = $prenda->precioDesde();
+        $zonas = self::preciosZonas($prenda);
+
+        return $prendaLisa === null || $zonas === [] ? null : $prendaLisa + min($zonas);
+    }
+
+    /** El más alto con una zona: variación más cara + zona más cara, sin IVA. */
+    public static function hastaSinIva(Prenda $prenda): ?int
+    {
+        $maximo = $prenda->variantes()->aLaVenta()->max('precio_base');
+        $zonas = self::preciosZonas($prenda);
+
+        return $maximo === null || $zonas === [] ? null : (int) $maximo + max($zonas);
+    }
+
+    /** @return list<int> precio de cada zona activa de la prenda */
+    private static function preciosZonas(Prenda $prenda): array
+    {
+        return $prenda->zonas()->where('zonas_impresion.activa', true)->pluck('prenda_zona.precio')->map(fn ($p) => (int) $p)->all();
+    }
+
+    /** «Desde 7,26 €» con IVA (prenda + impresión más barata), o null si no se vende. */
     public static function precioDesde(Prenda $prenda): ?string
     {
-        $sinIva = $prenda->precioDesde();
+        $sinIva = self::desdeSinIva($prenda);
 
         return $sinIva === null ? null : Formato::euros(Iva::conIva($sinIva));
     }

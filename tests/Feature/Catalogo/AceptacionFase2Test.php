@@ -105,7 +105,7 @@ class AceptacionFase2Test extends TestCase
         // ── Tienda en español ──
         $es = $this->get('/es/camisetas-premium/camiseta-heavy')->assertOk()
             ->assertSee('Camiseta Heavy')
-            ->assertSee('6,05 €') // 5,00 + 21 %
+            ->assertSee('9,68 €') // (5,00 + frontal 3,00) + 21 %
             ->assertSee('Hasta 28 × 38 cm')
             ->getContent();
         $this->get('/es/camisetas-premium')->assertOk()->assertSee('Camiseta Heavy');
@@ -114,7 +114,7 @@ class AceptacionFase2Test extends TestCase
         $producto = json_decode($bloques[1][0], true);
         $this->assertSame('Product', $producto['@type']);
         // lowPrice = el «Desde» de la página; el color retirado no cuenta.
-        $this->assertSame(['6.05', '7.26', 4], [$producto['offers']['lowPrice'], $producto['offers']['highPrice'], $producto['offers']['offerCount']]);
+        $this->assertSame(['9.68', '10.89', 4], [$producto['offers']['lowPrice'], $producto['offers']['highPrice'], $producto['offers']['offerCount']]);
         $this->assertStringNotContainsString('Gris retirado', $es);
         $migas = json_decode($bloques[1][1], true);
         $this->assertSame([url('/es'), url('/es/camisetas-premium'), url('/es/camisetas-premium/camiseta-heavy')], array_column($migas['itemListElement'], 'item'));
