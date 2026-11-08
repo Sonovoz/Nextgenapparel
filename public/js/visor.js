@@ -49,19 +49,22 @@
         version: 0,            // cambia con cada diseño nuevo (invalida la caché)
         nivel: 'diseno',       // diseno · cantidades · resumen (D142)
         lineas: [],            // índices de los colores del pedido, en orden
-        cantidades: {}         // por color: { colorId: { tallaId: unidades } }
+        cantidades: {},        // por color: { colorId: { tallaId: unidades } }
+        derechos: false,       // el cliente declara que tiene los derechos de sus diseños (fase 4)
+        errorSubida: '',       // mensaje si un diseño no se acepta al pasar al nivel 2
+        subiendo: false
     };
 
     // estado.modo, estado.logo, estado.texto… son los del diseño de la zona activa
     // (o un borrador mientras aún no hay zona). Así cada zona lleva su propio diseño.
-    function nuevoDiseno() { return { modo: 'logo', logo: null, texto: '', fuente: 0, tinta: 'auto', logoPx: null, logoTipo: null, nombre: '' }; }
+    function nuevoDiseno() { return { modo: 'logo', logo: null, texto: '', fuente: 0, tinta: 'auto', logoPx: null, logoTipo: null, nombre: '', archivo: null, uuid: null }; }
     var borrador = nuevoDiseno();
     function actual() {
         if (estado.zonaId === null) return borrador;
         if (!estado.disenos[estado.zonaId]) estado.disenos[estado.zonaId] = nuevoDiseno();
         return estado.disenos[estado.zonaId];
     }
-    ['modo', 'logo', 'texto', 'fuente', 'tinta', 'logoPx', 'logoTipo', 'nombre'].forEach(function (campo) {
+    ['modo', 'logo', 'texto', 'fuente', 'tinta', 'logoPx', 'logoTipo', 'nombre', 'archivo', 'uuid'].forEach(function (campo) {
         Object.defineProperty(estado, campo, { get: function () { return actual()[campo]; }, set: function (v) { actual()[campo] = v; } });
     });
     function disenoValido(d) { return !!d && (d.modo === 'logo' ? !!d.logo : d.texto.trim() !== ''); }
@@ -654,8 +657,26 @@
             });
             botones.appendChild(mas);
         }
-        var seguir = el('button', 'boton-siguiente', textos.siguiente_cantidades + ' →');
+        if (pendientesDeSubir().length) {
+            // Al pasar al pedido se suben los logos: antes, la declaración de derechos (fase 4).
+            var casilla = el('label', 'casilla-derechos');
+            var marca = el('input');
+            marca.type = 'checkbox';
+            marca.id = 'derechos-diseno';
+            marca.checked = estado.derechos;
+            marca.addEventListener('change', function () { estado.derechos = marca.checked; estado.errorSubida = ''; pintarCapas(); });
+            casilla.appendChild(marca);
+            casilla.appendChild(el('span', '', textos.derechos_casilla));
+            caja.appendChild(casilla);
+        }
+        if (estado.errorSubida) {
+            var error = el('p', 'error-subida', estado.errorSubida);
+            error.setAttribute('role', 'alert');
+            caja.appendChild(error);
+        }
+        var seguir = el('button', 'boton-siguiente', estado.subiendo ? textos.comprobando : textos.siguiente_cantidades + ' →');
         seguir.type = 'button';
+        seguir.disabled = estado.subiendo;
         seguir.addEventListener('click', function () { irANivel('cantidades'); });
         botones.appendChild(seguir);
         caja.appendChild(botones);
@@ -806,6 +827,10 @@
             var factor = original && original.ancho ? original.ancho / w : 1;
             estado.logoPx = { w: Math.round(estado.logo.width / escala * factor), h: Math.round(estado.logo.height / escala * factor) };
             estado.nombre = original ? original.nombre : archivo.name;
+            // Para el pedido hace falta el archivo original, no la copia reducida de la portada (fase 4).
+            estado.archivo = original ? (original.archivo || null) : archivo;
+            estado.uuid = null;
+            estado.errorSubida = '';
             if (estado.zonaId !== null) delete estado.ajustes[estado.zonaId];
             estado.version++;
             if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
@@ -1094,11 +1119,31 @@
         var guardado = JSON.parse(sessionStorage.getItem('nga.logo') || 'null');
         if (guardado && guardado.datos) {
             sessionStorage.removeItem('nga.logo');
-            fetch(guardado.datos).then(function (r) { return r.blob(); }).then(function (b) {
+            originalDeLaPortada().then(function (archivo) {
+                guardado.archivo = archivo && archivo.name === guardado.nombre ? archivo : null;
+                return fetch(guardado.datos);
+            }).then(function (r) { return r.blob(); }).then(function (b) {
                 leerLogo(new File([b], guardado.nombre || 'logo.png', { type: 'image/png' }), guardado);
             });
         }
     } catch (e) { /* sin sessionStorage: se sube desde la ficha */ }
+
+    /** Archivo original que la portada dejó en este navegador (IndexedDB); nunca sale de él hasta el pedido. */
+    function originalDeLaPortada() {
+        return new Promise(function (resolver) {
+            try {
+                var peticion = indexedDB.open('nga', 1);
+                peticion.onupgradeneeded = function () { peticion.result.createObjectStore('archivos'); };
+                peticion.onerror = function () { resolver(null); };
+                peticion.onsuccess = function () {
+                    var almacen = peticion.result.transaction('archivos', 'readwrite').objectStore('archivos');
+                    var leer = almacen.get('logo');
+                    leer.onsuccess = function () { almacen.delete('logo'); resolver(leer.result || null); };
+                    leer.onerror = function () { resolver(null); };
+                };
+            } catch (e) { resolver(null); }
+        });
+    }
 
     /* ---------- Tu colección ---------- */
 
@@ -1340,7 +1385,77 @@
         if (estado.nivel === 'resumen' && !listo) irANivel('cantidades');
     }
 
+    /* ---------- Subida de los logos al pasar al pedido (fase 4) ---------- */
+
+    function pendientesDeSubir() {
+        return zonasConDiseno().map(function (id) { return estado.disenos[id]; })
+            .filter(function (d) { return d.modo === 'logo' && !d.uuid; });
+    }
+
+    function fallarSubida(mensaje) {
+        estado.subiendo = false;
+        estado.errorSubida = mensaje;
+        pintarCapas();
+        var aviso = document.querySelector('#capas .error-subida');
+        if (aviso && aviso.scrollIntoView) aviso.scrollIntoView({ block: 'nearest', behavior: sinMovimiento ? 'auto' : 'smooth' });
+        return false;
+    }
+
+    /** Sube uno a uno los logos aún sin subir. El servidor decide: sus píxeles útiles sustituyen a los del navegador. */
+    function subirDisenos() {
+        var pendientes = pendientesDeSubir();
+        if (!estado.derechos) return Promise.resolve(fallarSubida(textos.error_derechos));
+        for (var i = 0; i < pendientes.length; i++) {
+            var d = pendientes[i];
+            if (!d.archivo) return Promise.resolve(fallarSubida(texto('error_original', { nombre: d.nombre })));
+            if (d.archivo.type !== 'image/png') return Promise.resolve(fallarSubida(textos.error_no_png));
+            if (d.archivo.size > Number(visor.dataset.maxBytes || Infinity)) return Promise.resolve(fallarSubida(d.nombre + ': ' + textos.error_pesado));
+        }
+        estado.subiendo = true;
+        estado.errorSubida = '';
+        pintarCapas();
+        var token = document.querySelector('meta[name="csrf-token"]');
+
+        return pendientes.reduce(function (cadena, d) {
+            return cadena.then(function (seguir) {
+                if (!seguir) return false;
+                var datos = new FormData();
+                datos.append('archivo', d.archivo, d.archivo.name);
+                datos.append('derechos', '1');
+                return fetch(visor.dataset.subida, {
+                    method: 'POST',
+                    body: datos,
+                    credentials: 'same-origin',
+                    headers: { Accept: 'application/json', 'X-CSRF-TOKEN': token ? token.content : '' }
+                }).then(function (r) {
+                    return r.json().catch(function () { return {}; }).then(function (json) {
+                        if (r.ok && json.uuid) {
+                            d.uuid = json.uuid;
+                            d.logoPx = { w: json.ancho_px, h: json.alto_px };
+                            return true;
+                        }
+                        var mensaje = json.message;
+                        if (json.errors) mensaje = json.errors[Object.keys(json.errors)[0]][0];
+                        return fallarSubida(r.status === 429 || r.status >= 500 || !mensaje ? textos.error_red : d.nombre + ': ' + mensaje);
+                    });
+                }, function () { return fallarSubida(textos.error_red); });
+            });
+        }, Promise.resolve(true)).then(function (ok) {
+            if (ok) { estado.subiendo = false; pintarCapas(); actualizarAjustador(); }
+            return ok;
+        });
+    }
+
     function irANivel(nombre) {
+        if (nombre !== 'diseno' && zonasConDiseno().length && pendientesDeSubir().length) {
+            if (estado.subiendo) return;
+            subirDisenos().then(function (ok) { if (ok) mostrarNivel(nombre); });
+            return;
+        }
+        mostrarNivel(nombre);
+    }
+
+    function mostrarNivel(nombre) {
         if (nombre !== 'diseno' && zonasConDiseno().length === 0) nombre = 'diseno';
         estado.nivel = nombre;
         ['diseno', 'cantidades', 'resumen'].forEach(function (n) {

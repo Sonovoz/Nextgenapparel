@@ -131,6 +131,27 @@ class AnalizadorPngTest extends TestCase
         $this->assertDatabaseHas('activity_log', ['description' => 'Límites de los archivos de diseño cambiados']);
     }
 
+    public static function valoresIni(): array
+    {
+        return [['2M', 2 * 1024 ** 2], ['512K', 512 * 1024], ['1G', 1024 ** 3], ['55m', 55 * 1024 ** 2], ['1048576', 1048576], ['0', 0]];
+    }
+
+    #[DataProvider('valoresIni')]
+    public function test_lee_los_limites_de_subida_de_php(string $valor, int $bytes): void
+    {
+        $this->assertSame($bytes, AnalizadorPng::bytesIni($valor));
+    }
+
+    public function test_el_peso_maximo_efectivo_nunca_supera_el_de_php_ni_el_de_ajustes(): void
+    {
+        $php = intdiv(min(AnalizadorPng::bytesIni((string) ini_get('upload_max_filesize')), AnalizadorPng::bytesIni((string) ini_get('post_max_size'))), 1024 * 1024);
+
+        Ajuste::guardar('disenos.max_mb', 1);
+        $this->assertSame(1, AnalizadorPng::maxMbEfectivo());
+        Ajuste::guardar('disenos.max_mb', 50);
+        $this->assertSame(min(50, max(1, $php)), AnalizadorPng::maxMbEfectivo());
+    }
+
     public function test_lee_el_perfil_de_color(): void
     {
         $base = fn () => PngDePrueba::crear(400, 400, 'white');

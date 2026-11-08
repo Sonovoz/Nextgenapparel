@@ -36,7 +36,11 @@ return [
     'error_procesar' => 'La imagen es demasiado grande para procesarla. Redúcela o expórtala de nuevo en PNG de 8 bits por canal.',
     'error_vacio' => 'La imagen es totalmente transparente: no hay nada que imprimir.',
     'error_sin_archivo' => 'Elige el PNG de tu diseño.',
-    'error_subida' => 'No hemos recibido el archivo completo. Comprueba que pesa menos de :mb MB y vuelve a intentarlo.',
+    'error_subida' => 'No hemos recibido el archivo completo. Vuelve a intentarlo; el archivo debe pesar menos de :mb MB.',
     'error_derechos' => 'Para subir el diseño, confirma que tienes los derechos sobre él.',
     'aviso_perfil' => 'Tu archivo usa el perfil de color «:perfil». Imprimimos en sRGB: algunos colores pueden variar un poco. Si puedes, expórtalo en sRGB.',
+    'derechos_casilla' => 'Declaro que tengo los derechos sobre estos diseños y que puedo imprimirlos.',
+    'comprobando' => 'Comprobando tu diseño…',
+    'error_original' => 'Para el pedido necesitamos el archivo original de «:nombre». Vuelve a elegirlo en «Mi logo».',
+    'error_red' => 'No hemos podido comprobar tu diseño ahora mismo. Espera un momento y vuelve a intentarlo.',
 ];

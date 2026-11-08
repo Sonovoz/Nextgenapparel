@@ -17,7 +17,7 @@ class DisenoController
 {
     public function subir(Request $request, GuardarDiseno $guardar, string $idioma): JsonResponse
     {
-        $maxMb = AnalizadorPng::limites()['max_mb'];
+        $maxMb = AnalizadorPng::maxMbEfectivo();
 
         $request->validate([
             'archivo' => ['required', 'file', 'max:'.($maxMb * 1024)],

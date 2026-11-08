@@ -65,6 +65,14 @@
         'calculando' => __('tienda.calculando'),
         'ia_copiar' => __('tienda.ia_copiar'),
         'ia_copiado' => __('tienda.ia_copiado'),
+        // Subida de los logos al pasar al pedido (fase 4).
+        'derechos_casilla' => __('disenos.derechos_casilla'),
+        'comprobando' => __('disenos.comprobando'),
+        'error_derechos' => __('disenos.error_derechos'),
+        'error_original' => __('disenos.error_original'),
+        'error_no_png' => __('disenos.error_no_png'),
+        'error_red' => __('disenos.error_red'),
+        'error_pesado' => __('disenos.error_pesado', ['mb' => \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo()]),
     ];
     // Misma regla que App\Dominio\Disenos\Calidad: umbrales de Ajustes y textos de aviso.
     $calidadVisor = [
@@ -246,7 +254,7 @@
                 <div class="estudio-escena">
                 <button type="button" class="girar anterior" data-girar aria-label="{{ __('tienda.atajo_girar') }}">‹</button>
                 <div class="marco-visor">
-                <div class="visor" id="visor" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
+                <div class="visor" id="visor" data-subida="{{ route('disenos.subir') }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
                     <div class="visor-controles">
                         <div class="segmento" role="group" aria-label="{{ __('tienda.delantera') }} / {{ __('tienda.trasera') }}">
                             <button type="button" class="boton-pildora" data-cara="delantera" aria-pressed="true">{{ __('tienda.delantera') }}</button>

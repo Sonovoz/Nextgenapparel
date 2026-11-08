@@ -809,3 +809,8 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .navegacion a, .navegacion summary { white-space: nowrap; }
 @media (min-width: 1024px) and (max-width: 1199px) { .navegacion { display: none; } .boton-menu { display: inline-flex; } }
 @media (min-width: 1200px) and (max-width: 1279px) { .navegacion ul { gap: 22px; } }
+
+/* Declaración de derechos y errores al subir los diseños (fase 4). */
+.casilla-derechos { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.45; color: #DCD8E8; cursor: pointer; }
+.casilla-derechos input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--azul); cursor: pointer; }
+.error-subida { margin: 0; padding: 10px 12px; border-radius: 10px; background: rgba(240, 98, 77, .14); border: 1px solid rgba(240, 98, 77, .5); color: #FFC9C0; font-size: 13px; line-height: 1.45; }

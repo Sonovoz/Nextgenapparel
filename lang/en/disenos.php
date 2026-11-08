@@ -36,7 +36,11 @@ return [
     'error_procesar' => 'The image is too large to process. Make it smaller or export it again as an 8-bit-per-channel PNG.',
     'error_vacio' => 'The image is fully transparent: there is nothing to print.',
     'error_sin_archivo' => 'Choose the PNG of your design.',
-    'error_subida' => 'We did not receive the whole file. Check it is smaller than :mb MB and try again.',
+    'error_subida' => 'We did not receive the whole file. Try again; the file must be smaller than :mb MB.',
     'error_derechos' => 'To upload the design, confirm that you hold the rights to it.',
     'aviso_perfil' => 'Your file uses the «:perfil» colour profile. We print in sRGB, so some colours may shift slightly. If you can, export it in sRGB.',
+    'derechos_casilla' => 'I declare that I hold the rights to these designs and may have them printed.',
+    'comprobando' => 'Checking your design…',
+    'error_original' => 'We need the original file of «:nombre» for the order. Choose it again in «My logo».',
+    'error_red' => 'We could not check your design right now. Wait a moment and try again.',
 ];

@@ -93,6 +93,32 @@ final class AnalizadorPng
         }
     }
 
+    /**
+     * Peso máximo que de verdad puede llegar: el de Ajustes, sin pasar del límite de subida
+     * de PHP (en Herd, 2 MB si no se cambia; en Docker, 50 MB).
+     */
+    public static function maxMbEfectivo(): int
+    {
+        $php = min(self::bytesIni((string) ini_get('upload_max_filesize')), self::bytesIni((string) ini_get('post_max_size')));
+        $ajuste = self::limites()['max_mb'];
+
+        return $php > 0 ? max(1, min($ajuste, intdiv($php, 1024 * 1024))) : $ajuste;
+    }
+
+    /** «2M», «512K», «1G» o bytes; 0 = sin límite. */
+    public static function bytesIni(string $valor): int
+    {
+        $valor = trim($valor);
+        $numero = (int) $valor;
+
+        return match (strtoupper(substr($valor, -1))) {
+            'G' => $numero * 1024 ** 3,
+            'M' => $numero * 1024 ** 2,
+            'K' => $numero * 1024,
+            default => $numero,
+        };
+    }
+
     /** @return array{max_mb: int, max_px: int, min_px: int} */
     public static function limites(): array
     {
