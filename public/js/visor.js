@@ -118,7 +118,8 @@
                 var img = new Image();
                 img.crossOrigin = 'anonymous'; // preparado para servir las fotos desde un almacenamiento externo
                 img.onload = function () { resolver(img); };
-                img.onerror = rechazar;
+                // Si falla (red, CORS), se olvida para poder reintentar en el siguiente pintado.
+                img.onerror = function (e) { delete cacheFotos[url]; rechazar(e); };
                 img.src = url;
             });
         }
@@ -222,11 +223,16 @@
      * de la zona (en píxeles de la foto) que toma las luces, sombras y pliegues
      * de la tela. Si el navegador no deja leer la foto, se devuelve sin fundir.
      */
+    function claveCapa(color, cara, zona) {
+        var aj = ajusteDe(zona.id);
+        return [estado.version, estado.modo, estado.fuente, tintaPara(color), estado.texto, color.caras[cara].url, zona.id, aj.escala, aj.cx, aj.cy].join('|');
+    }
+
     function capaImpresa(color, cara, zona) {
         var datos = color.caras[cara];
         var diseno = disenoPara(color);
         var aj = ajusteDe(zona.id);
-        var clave = [estado.version, estado.modo, estado.fuente, tintaPara(color), estado.texto, datos.url, zona.id, aj.escala, aj.cx, aj.cy].join('|');
+        var clave = claveCapa(color, cara, zona);
         if (cacheCapas[clave]) return cacheCapas[clave];
 
         cacheCapas[clave] = cargarFoto(datos.url).then(function (foto) {
@@ -419,6 +425,10 @@
                 c.setAttribute('aria-hidden', 'true');
                 c.style.cssText = 'left:' + zona.x + '%;top:' + zona.y + '%;width:' + zona.ancho + '%;height:' + zona.alto + '%';
                 escena.appendChild(c);
+                if (activa && opciones.movible) ocultarCarga();
+            }, function () {
+                // La foto no cargó: sin capa (y sin promesa sin capturar); se reintenta al volver a pintar.
+                delete cacheCapas[conDiseno(zona.id, function () { return claveCapa(color, cara, zona); })];
                 if (activa && opciones.movible) ocultarCarga();
             });
         });
