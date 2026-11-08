@@ -155,6 +155,17 @@ final class ComprobarLinea
             && 2 * abs($i->desdeCentroMm - $zona->desde_centro_mm) + $i->anchoMm <= $zona->ancho_max_mm + 2 * $t;
     }
 
+    /**
+     * Un logo se imprime sin deformar (revisión N3 del 5.8, M1): el alto que pide es el que
+     * da su proporción, con 1 mm o un 2 % de margen por el redondeo.
+     */
+    private static function conSuProporcion(Impresion $i, Diseno $diseno): bool
+    {
+        $esperado = $i->anchoMm * $diseno->util_alto_px / max(1, $diseno->util_ancho_px);
+
+        return abs($i->altoMm - $esperado) <= max(Impresion::TOLERANCIA_MM, 0.02 * $esperado);
+    }
+
     private static function textoValido(Impresion $i): bool
     {
         $largo = mb_strlen(trim((string) $i->texto));
@@ -188,7 +199,7 @@ final class ComprobarLinea
         $medidas = ZonaImpresion::whereIn('id', $zonas)->get(['id', 'ancho_max_mm', 'alto_max_mm', 'desde_cuello_mm', 'desde_centro_mm'])->keyBy('id');
         // Un diseño rechazado en la revisión (fase 6) no se puede volver a pedir (M3).
         $existen = Diseno::whereIn('id', array_filter(array_map(fn (Impresion $i) => $i->disenoId, $impresiones)))
-            ->where('estado', '!=', 'rechazado')->pluck('id')->flip();
+            ->where('estado', '!=', 'rechazado')->get(['id', 'util_ancho_px', 'util_alto_px'])->keyBy('id');
         foreach ($impresiones as $impresion) {
             $zona = $medidas->get($impresion->zonaId);
             if ($impresion->esTexto()) {
@@ -197,6 +208,8 @@ final class ComprobarLinea
                 }
             } elseif ($impresion->disenoId === null || ! $existen->has($impresion->disenoId)) {
                 $problemas[] = 'diseno_no_disponible';
+            } elseif (! self::conSuProporcion($impresion, $existen[$impresion->disenoId])) {
+                $problemas[] = 'medida_no_valida';
             }
             if ($zona !== null && (
                 $impresion->anchoMm < Impresion::MINIMO_MM || $impresion->altoMm < Impresion::MINIMO_MM

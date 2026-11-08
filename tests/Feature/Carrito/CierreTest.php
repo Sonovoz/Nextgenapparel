@@ -108,6 +108,25 @@ class CierreTest extends TestCase
         $this->actingAs($usuario->fresh())->get('/es/carrito/cerrar-pedido')->assertSee('confirma tu correo');
     }
 
+    public function test_el_cierre_no_usa_datos_viejos_de_la_sesion(): void
+    {
+        Ajuste::guardar('clientes.recargo_lo_indica', 'cliente');
+        $this->post('/es/carrito/cerrar-pedido', $this->datos(['tipo' => 'empresa', 'nif' => 'B12345674', 'recargo' => '1']));
+        $this->get('/es/carrito/cerrar-pedido')->assertSee('Recargo de equivalencia');
+
+        // Entra en una cuenta sin recargo: lo calculado como invitado no vale.
+        $usuario = User::factory()->create(['email' => 'ana@ejemplo.com']);
+        $cliente = Cliente::factory()->create(['user_id' => $usuario->id, 'correo' => 'ana@ejemplo.com', 'tipo' => 'empresa', 'nif' => 'B12345674', 'recargo_equivalencia' => false]);
+        Carrito::query()->update(['token' => null, 'cliente_id' => $cliente->id]);
+        $this->actingAs($usuario)->get('/es/carrito/cerrar-pedido')->assertDontSee('Recargo de equivalencia')->assertDontSee('invitada@ejemplo.com');
+        $this->assertNull(session('cierre'));
+
+        // Con cuenta, el recargo es siempre el de su ficha, aunque cambie después de calcular.
+        $this->post('/es/carrito/cerrar-pedido', $this->datos());
+        $cliente->update(['recargo_equivalencia' => true]);
+        $this->actingAs($usuario->fresh())->get('/es/carrito/cerrar-pedido')->assertSee('Recargo de equivalencia');
+    }
+
     public function test_sin_carrito_vuelve_al_carrito(): void
     {
         Carrito::query()->delete();

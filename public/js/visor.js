@@ -204,6 +204,20 @@
     }
 
     /**
+     * El diseño en mm reales (revisión N3 del 5.8, A1): se encaja con la proporción de la
+     * zona en mm, no con la del rectángulo dibujado en la foto, que puede ser distinta.
+     * Así el tamaño, la calidad y lo que se guarda en el carrito no deforman el diseño.
+     */
+    function geometriaMm(diseno, zona) {
+        var aj = ajusteDe(zona.id);
+        var proporcion = diseno.width / diseno.height;
+        var w, h;
+        if (proporcion > zona.ancho_mm / zona.alto_mm) { w = zona.ancho_mm * aj.escala; h = w / proporcion; }
+        else { h = zona.alto_mm * aj.escala; w = h * proporcion; }
+        return { x: (zona.ancho_mm - w) * aj.cx, y: (zona.alto_mm - h) * aj.cy, w: w, h: h };
+    }
+
+    /**
      * Capa del diseño «impreso» sobre la zona de una foto: un canvas del tamaño
      * de la zona (en píxeles de la foto) que toma las luces, sombras y pliegues
      * de la tela. Si el navegador no deja leer la foto, se devuelve sin fundir.
@@ -1090,8 +1104,8 @@
         if (!zona) return;
 
         var color = colores[estado.color];
-        var g = geometria(disenoPara(color), zona);
-        var anchoMm = zona.ancho_mm * g.w, altoMm = zona.alto_mm * g.h;
+        var g = geometriaMm(disenoPara(color), zona);
+        var anchoMm = g.w, altoMm = g.h;
         tamano.value = Math.round(ajusteDe(zona.id).escala * 100);
         document.getElementById('medida-diseno').textContent = texto('medida_impresion', { medida: cm(anchoMm) + ' × ' + cm(altoMm) + ' cm' });
 
@@ -1842,13 +1856,13 @@
             var zona = zonaActual();
             var info = zonas.filter(function (z) { return z.id === id; })[0];
             if (!zona || !info) return null;
-            var g = geometria(disenoPara(color), zona);
-            var desplazamiento = (g.x + g.w / 2 - 0.5) * zona.ancho_mm;
+            var g = geometriaMm(disenoPara(color), zona);
+            var desplazamiento = g.x + g.w / 2 - zona.ancho_mm / 2;
             var d = estado.disenos[id];
             var datos = {
-                ancho_mm: Math.round(zona.ancho_mm * g.w),
-                alto_mm: Math.round(zona.alto_mm * g.h),
-                desde_cuello_mm: Math.round((zona.cuello_mm || 0) + g.y * zona.alto_mm),
+                ancho_mm: Math.round(g.w),
+                alto_mm: Math.round(g.h),
+                desde_cuello_mm: Math.round((zona.cuello_mm || 0) + g.y),
                 desde_centro_mm: Math.round((zona.centro_mm || 0) + (info.cara === 'delantera' ? -desplazamiento : desplazamiento))
             };
             if (d.modo === 'logo') { datos.diseno = d.uuid; } else { datos.texto = d.texto.trim(); datos.fuente = d.fuente; datos.tinta = d.tinta; }

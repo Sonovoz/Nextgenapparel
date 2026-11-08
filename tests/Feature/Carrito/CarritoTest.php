@@ -97,7 +97,7 @@ class CarritoTest extends TestCase
 
         $this->assertSame([$this->tallas['M'] => 10, $this->tallas['L'] => 5], $linea->fresh()->tallas);
         $this->assertSame($diseno->id, $linea->impresiones->sole()->diseno_id);
-        $this->assertSame(['ancho_mm' => 200, 'alto_mm' => 150, 'desde_cuello_mm' => 75, 'desde_centro_mm' => 0],
+        $this->assertSame(['ancho_mm' => 200, 'alto_mm' => 200, 'desde_cuello_mm' => 75, 'desde_centro_mm' => 0],
             $linea->impresiones->sole()->only(['ancho_mm', 'alto_mm', 'desde_cuello_mm', 'desde_centro_mm']));
 
         $valoracion = app(ValorarCarrito::class)($carrito);
@@ -127,7 +127,8 @@ class CarritoTest extends TestCase
         return [
             'zona que la prenda no ofrece' => [fn ($t) => [[$t->tallas['M'] => 15], [$t->zonas['manga'] => []]], ['zona_no_disponible']],
             'más ancho que la zona' => [fn ($t) => [[$t->tallas['M'] => 15], [$t->zonas['frontal'] => ['ancho_mm' => 281]]], ['medida_no_valida']],
-            'más pequeño que el mínimo' => [fn ($t) => [[$t->tallas['M'] => 15], [$t->zonas['frontal'] => ['alto_mm' => 9]]], ['medida_no_valida']],
+            'logo deformado (cuadrado a 200 × 100)' => [fn ($t) => [[$t->tallas['M'] => 15], [$t->zonas['frontal'] => ['alto_mm' => 100]]], ['medida_no_valida']],
+            'más pequeño que el mínimo' => [fn ($t) => [[$t->tallas['M'] => 15], [$t->zonas['frontal'] => ['ancho_mm' => 9, 'alto_mm' => 9]]], ['medida_no_valida']],
             'posición fuera de la prenda' => [fn ($t) => [[$t->tallas['M'] => 15], [$t->zonas['frontal'] => ['desde_centro_mm' => -1001]]], ['medida_no_valida']],
             'sin unidades' => [fn ($t) => [[$t->tallas['M'] => 0], [$t->zonas['frontal'] => []]], ['sin_unidades']],
             'unidades que no son enteras' => [fn ($t) => [[$t->tallas['M'] => '15'], [$t->zonas['frontal'] => []]], ['cantidad_no_valida']],
@@ -495,7 +496,7 @@ class CarritoTest extends TestCase
 
     private function impresion(Diseno $diseno): array
     {
-        return ['diseno' => $diseno->uuid, 'ancho_mm' => 200, 'alto_mm' => 150, 'desde_cuello_mm' => 75, 'desde_centro_mm' => 0];
+        return ['diseno' => $diseno->uuid, 'ancho_mm' => 200, 'alto_mm' => 200, 'desde_cuello_mm' => 75, 'desde_centro_mm' => 0];
     }
 
     private function carritoConCamisetas(int $unidades, ?int $cliente = null, ?string $token = null, string $propietario = 'sesion-a'): Carrito

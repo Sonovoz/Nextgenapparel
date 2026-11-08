@@ -36,7 +36,16 @@ class CierreController
             return redirect(CarritoController::url('ver'));
         }
         $cliente = $this->cliente($request);
+        // Los datos calculados valen solo para quien los calculó (revisión N3 del 5.8, M2):
+        // si un invitado entra en su cuenta, se descartan y se usan los de su ficha.
         $datos = $request->session()->get(self::SESION);
+        if ($datos !== null && ($datos['cliente_id'] ?? null) !== $cliente?->id) {
+            $request->session()->forget(self::SESION);
+            $datos = null;
+        }
+        if ($datos !== null && $cliente !== null) {
+            $datos['recargo'] = (bool) $cliente->recargo_equivalencia; // el de su ficha, siempre al día
+        }
         $destino = $datos ? new Destino($datos['pais'], $datos['codigo_postal']) : null;
         $valoracion = $valorar($carrito, $destino, $datos ? (bool) $datos['recargo'] : false);
         $envio = $cliente?->direcciones()->where('tipo', TipoDireccion::Envio)->orderByDesc('predeterminada')->first();
@@ -104,6 +113,7 @@ class CierreController
         $datos['recargo'] = $cliente !== null
             ? (bool) $cliente->recargo_equivalencia
             : (Ajuste::obtener('clientes.recargo_lo_indica') === 'cliente' && TipoCliente::from($datos['tipo'])->admiteRecargo() && $request->boolean('recargo'));
+        $datos['cliente_id'] = $cliente?->id;
         $request->session()->put(self::SESION, $datos);
 
         return redirect(CarritoController::url('cerrar').'#total');
