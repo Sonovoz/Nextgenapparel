@@ -826,3 +826,7 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .biblioteca-usar span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .biblioteca-quitar { flex: none; width: 44px; border-radius: 12px; border: 1px solid var(--linea-fuerte); background: transparent; color: var(--tinta-suave); font-size: 20px; cursor: pointer; }
 .biblioteca-quitar:hover { color: #FFC9C0; border-color: rgba(240, 98, 77, .6); }
+.avisos-subida { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(242, 179, 61, .12); border: 1px solid rgba(242, 179, 61, .45); color: #F7D27E; font-size: 13px; line-height: 1.45; }
+.avisos-subida p { margin: 0; }
+.avisos-subida p + p { margin-top: 6px; }
+.boton-siguiente[aria-disabled="true"] { opacity: .55; cursor: progress; }

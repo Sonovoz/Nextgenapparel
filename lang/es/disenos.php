@@ -49,4 +49,6 @@ return [
     'biblioteca_titulo' => 'Tus diseños subidos',
     'biblioteca_quitar' => 'Quitar «:nombre» de tus diseños',
     'biblioteca_confirmar' => '¿Quitar «:nombre»? Lo borraremos de nuestro servidor.',
+    'biblioteca_usar' => 'Usar «:nombre» en esta prenda',
+    'error_caducada' => 'La página ha caducado por inactividad. Recárgala y vuelve a intentarlo.',
 ];

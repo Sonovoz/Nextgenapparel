@@ -41,7 +41,9 @@ class BibliotecaDisenosTest extends TestCase
 
         $primero = $this->subir(600)->json('uuid');
         $segundo = $this->subir(700)->json('uuid');
-        $this->getJson('/es/disenos')->assertOk()->assertJsonPath('disenos.*.uuid', [$segundo, $primero]);
+        $this->getJson('/es/disenos')->assertOk()->assertJsonPath('disenos.*.uuid', [$segundo, $primero])
+            ->assertJsonMissingPath('disenos.0.propietario')->assertJsonMissingPath('disenos.0.ruta')
+            ->assertJsonMissingPath('disenos.0.sha256')->assertJsonMissingPath('disenos.0.id');
 
         $this->flushSession();
         $this->getJson('/es/disenos')->assertOk()->assertExactJson(['disenos' => []]);
@@ -67,6 +69,7 @@ class BibliotecaDisenosTest extends TestCase
     {
         return [
             'superadministrador' => [Rol::Superadministrador, true],
+            'administrador' => [Rol::Administrador, true],
             'gestor de la tienda' => [Rol::GestorTienda, true],
             'producción' => [Rol::Produccion, false],
         ];
@@ -82,6 +85,29 @@ class BibliotecaDisenosTest extends TestCase
         $this->get(DisenoResource::getUrl('view', ['record' => $diseno], panel: 'admin'))->assertStatus($accede ? 200 : 403);
         $this->get(route('backend.disenos.miniatura', $diseno))->assertStatus($accede ? 200 : 404);
         $this->get(route('backend.disenos.original', $diseno))->assertStatus($accede ? 200 : 404);
+    }
+
+    public function test_un_usuario_desactivado_con_la_sesion_abierta_no_descarga_nada(): void
+    {
+        $diseno = $this->disenoSubido();
+        $this->actingAs($this->usuarioConRol(Rol::Superadministrador, ['activo' => false]));
+
+        $this->get(route('backend.disenos.miniatura', $diseno))->assertNotFound();
+        $this->get(route('backend.disenos.original', $diseno))->assertNotFound();
+        $this->assertDatabaseMissing('activity_log', ['description' => 'Original de un diseño descargado']);
+    }
+
+    public function test_el_original_se_descarga_siempre_como_png(): void
+    {
+        $uuid = $this->postJson('/es/disenos', [
+            'archivo' => new UploadedFile(PngDePrueba::crear(600, 600, 'white'), 'factura.html', 'text/html', null, true),
+            'derechos' => '1',
+        ])->assertCreated()->json('uuid');
+        $this->actingAs($this->usuarioConRol(Rol::GestorTienda));
+
+        $descarga = $this->get(route('backend.disenos.original', Diseno::where('uuid', $uuid)->sole()))->assertOk();
+
+        $this->assertStringContainsString('filename=factura.png', (string) $descarga->headers->get('Content-Disposition'));
     }
 
     public function test_sin_sesion_los_archivos_del_backend_no_existen(): void

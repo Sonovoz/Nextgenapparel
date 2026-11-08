@@ -41,8 +41,8 @@ Route::prefix('{idioma}')
         // Diseños del cliente (fase 4): subida y miniatura, solo para su dueño.
         Route::post('/disenos', [DisenoController::class, 'subir'])->name('disenos.subir')->middleware('throttle:disenos');
         Route::get('/disenos/{diseno}/miniatura', [DisenoController::class, 'miniatura'])->name('disenos.miniatura')->whereUuid('diseno');
-        Route::get('/disenos', [DisenoController::class, 'lista'])->name('disenos.lista');
-        Route::delete('/disenos/{diseno}', [DisenoController::class, 'borrar'])->name('disenos.borrar')->whereUuid('diseno');
+        Route::get('/disenos', [DisenoController::class, 'lista'])->name('disenos.lista')->middleware('throttle:120,1');
+        Route::delete('/disenos/{diseno}', [DisenoController::class, 'borrar'])->name('disenos.borrar')->whereUuid('diseno')->middleware('throttle:60,1');
 
         // Sobre nosotros (D145): /es/sobre-nosotros y /en/about-us; antes de las familias.
         Route::get('/{pagina}', [TiendaController::class, 'nosotros'])

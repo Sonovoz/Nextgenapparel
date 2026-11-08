@@ -59,7 +59,13 @@ class LimpiarDisenosTest extends TestCase
         touch($disco->path('2026/11/viejo-huerfano.png'), now()->subDays(2)->getTimestamp());
         $disco->put('2026/11/subiendo-ahora.png', 'x');
 
-        $this->assertSame(['disenos' => 0, 'huerfanos' => 1], (new LimpiarDisenos)());
+        $disco->put('2025/01/viejo.png', 'x');
+        touch($disco->path('2025/01/viejo.png'), now()->subDays(2)->getTimestamp());
+
+        $this->assertSame(['disenos' => 0, 'huerfanos' => 2], (new LimpiarDisenos)());
+        $this->assertFalse($disco->directoryExists('2025/01'), 'La carpeta vacía se borra');
+        $this->assertFalse($disco->directoryExists('2025'));
+        $this->assertTrue($disco->directoryExists('2026/11'));
 
         $this->assertFalse($disco->exists('2026/11/viejo-huerfano.png'));
         $this->assertTrue($disco->exists('2026/11/subiendo-ahora.png'));

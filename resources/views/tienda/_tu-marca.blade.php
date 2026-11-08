@@ -143,13 +143,15 @@
         <button type="button" class="accion-reiniciar" id="empezar-de-nuevo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M20 10A8 8 0 0 0 6.3 6.3L4 10m16 4-2.3 3.7A8 8 0 0 1 4 14"/></svg><span id="empezar-texto">{{ __('tienda.empezar_de_nuevo') }}</span></button>
     </div>
 
-    <p class="claro" style="font-size: 13px;">{{ __('tienda.privacidad') }}</p>
+    <p class="claro" style="font-size: 13px;">{{ __('tienda.privacidad', ['dias' => (int) \App\Models\Ajuste::obtener('disenos.dias_sin_pedido')]) }}</p>
     </div>
 
     <div class="nivel" id="nivel-cantidades" hidden>
         <div>
             <h2 class="nivel-titulo">{{ __('tienda.nivel_cantidades') }}</h2>
             <p class="claro">{{ __('tienda.cantidades_texto') }}</p>
+            {{-- Avisos del servidor sobre los logos subidos (perfil de color, fondo). --}}
+            <div class="avisos-subida" id="avisos-subida" role="status" hidden></div>
         </div>
         <div class="lineas-color" id="lineas-color"></div>
         <div class="grupo" id="anadir-color">

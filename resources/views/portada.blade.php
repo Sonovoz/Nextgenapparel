@@ -127,7 +127,10 @@
                 try {
                     var peticion = indexedDB.open('nga', 1);
                     peticion.onupgradeneeded = function () { peticion.result.createObjectStore('archivos'); };
-                    peticion.onsuccess = function () { peticion.result.transaction('archivos', 'readwrite').objectStore('archivos').put(archivo, 'logo'); };
+                    peticion.onsuccess = function () {
+                        var almacen = peticion.result.transaction('archivos', 'readwrite').objectStore('archivos');
+                        if (archivo) almacen.put(archivo, 'logo'); else almacen.delete('logo');
+                    };
                 } catch (e) { /* sin IndexedDB: en la ficha se pedirá elegirlo de nuevo */ }
             }
             function leer(archivo) {
@@ -146,8 +149,11 @@
                     URL.revokeObjectURL(url);
                     guardarOriginal(archivo);
                     try {
-                        sessionStorage.setItem('nga.logo', JSON.stringify({ nombre: archivo.name, tipo: archivo.type, datos: c.toDataURL('image/png'), ancho: w, alto: h }));
-                    } catch (e) { /* sin espacio: la ficha permite subirlo allí */ }
+                        sessionStorage.setItem('nga.logo', JSON.stringify({ nombre: archivo.name, tipo: archivo.type, datos: c.toDataURL('image/png'), ancho: w, alto: h, tamano: archivo.size, modificado: archivo.lastModified }));
+                    } catch (e) {
+                        // Sin espacio: la ficha permite subirlo allí, y el original no se queda guardado.
+                        guardarOriginal(null);
+                    }
                     setTimeout(function () { window.location.href = caja.dataset.destino; }, Math.max(0, MINIMO - (Date.now() - inicio)));
                 };
                 img.onerror = function () { URL.revokeObjectURL(url); fallo(); };

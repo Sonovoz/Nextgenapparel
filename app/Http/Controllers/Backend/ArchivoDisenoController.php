@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Dominio\Disenos\GuardarDiseno;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Diseno;
+use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,7 +18,7 @@ class ArchivoDisenoController
 {
     public function miniatura(Diseno $diseno): Response
     {
-        abort_unless(auth()->user()?->can('view', $diseno), 404);
+        $this->comprobarAcceso($diseno);
 
         return Storage::disk(GuardarDiseno::DISCO)->response($diseno->miniatura, null, [
             'Content-Type' => 'image/webp',
@@ -28,13 +29,28 @@ class ArchivoDisenoController
 
     public function original(Diseno $diseno): Response
     {
-        abort_unless(auth()->user()?->can('view', $diseno), 404);
+        $this->comprobarAcceso($diseno);
 
         Actividad::apuntar('disenos', 'Original de un diseño descargado', $diseno);
 
-        return Storage::disk(GuardarDiseno::DISCO)->download($diseno->ruta, $diseno->nombre_original, [
+        // Siempre .png: un archivo llamado «x.html» o «x.svg» no se abre en el equipo del taller como tal.
+        $nombre = (pathinfo($diseno->nombre_original, PATHINFO_FILENAME) ?: 'diseno').'.png';
+
+        return Storage::disk(GuardarDiseno::DISCO)->download($diseno->ruta, $nombre, [
             'Content-Type' => 'image/png',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    /**
+     * Las mismas condiciones que el panel (usuario activo y con rol) más el permiso del diseño:
+     * estas rutas no pasan por el middleware de Filament y un empleado desactivado con la
+     * sesión abierta no debe descargar nada.
+     */
+    private function comprobarAcceso(Diseno $diseno): void
+    {
+        $usuario = auth()->user();
+
+        abort_unless($usuario !== null && $usuario->canAccessPanel(Filament::getPanel('admin')) && $usuario->can('view', $diseno), 404);
     }
 }

@@ -49,4 +49,6 @@ return [
     'biblioteca_titulo' => 'Your uploaded designs',
     'biblioteca_quitar' => 'Remove «:nombre» from your designs',
     'biblioteca_confirmar' => 'Remove «:nombre»? We will delete it from our server.',
+    'biblioteca_usar' => 'Use «:nombre» on this garment',
+    'error_caducada' => 'The page has expired after being idle. Reload it and try again.',
 ];

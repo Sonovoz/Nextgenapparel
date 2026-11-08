@@ -44,6 +44,13 @@ final class LimpiarDisenos
             }
         }
 
+        // Carpetas de mes que se han quedado vacías (de la más profunda a la raíz).
+        foreach (collect($disco->allDirectories())->sortByDesc(fn ($d) => substr_count($d, '/')) as $carpeta) {
+            if ($disco->files($carpeta) === [] && $disco->directories($carpeta) === []) {
+                $disco->deleteDirectory($carpeta);
+            }
+        }
+
         if ($resultado['disenos'] + $resultado['huerfanos'] > 0) {
             Actividad::apuntar('disenos', 'Limpieza de diseños', propiedades: [
                 'diseños borrados' => $resultado['disenos'],
