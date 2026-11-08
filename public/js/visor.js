@@ -399,6 +399,7 @@
                 c.setAttribute('aria-hidden', 'true');
                 c.style.cssText = 'left:' + zona.x + '%;top:' + zona.y + '%;width:' + zona.ancho + '%;height:' + zona.alto + '%';
                 escena.appendChild(c);
+                if (activa && opciones.movible) ocultarCarga();
             });
         });
 
@@ -715,12 +716,38 @@
         errorMarca.hidden = !mensaje;
     }
 
+    /* Animación de carga: «Estampando tu diseño…» con un cabezal de luz que barre la
+       prenda. Dura al menos MINIMO_CARGA para que no parpadee con imágenes pequeñas. */
+    var MINIMO_CARGA = 650;
+    var cargando = document.getElementById('cargando');
+    var inicioCarga = 0;
+    var esperaCarga = null;
+    function mostrarCarga() {
+        if (!cargando) return;
+        inicioCarga = Date.now();
+        cargando.hidden = false;
+        cargando.classList.remove('saliendo');
+        clearTimeout(esperaCarga);
+        esperaCarga = setTimeout(ocultarCarga, 8000); // por si algo falla, nunca se queda colgada
+    }
+    function ocultarCarga() {
+        if (!cargando || cargando.hidden) return;
+        var falta = Math.max(0, MINIMO_CARGA - (Date.now() - inicioCarga));
+        clearTimeout(esperaCarga);
+        setTimeout(function () {
+            cargando.classList.add('saliendo');
+            setTimeout(function () { cargando.hidden = true; cargando.classList.remove('saliendo'); }, 380);
+        }, falta);
+    }
+
     /** @param original  datos del archivo original si llega reducido desde la portada */
     function leerLogo(archivo, original) {
         mostrarError('');
         if (!archivo) return;
         if (!/^image\/(png|jpeg|webp|svg\+xml|gif)$/.test(archivo.type)) { mostrarError(textos.error_archivo); return; }
         if (archivo.size > PESO_MAXIMO) { mostrarError(textos.error_grande); return; }
+        abrirEstudio();
+        mostrarCarga();
 
         var url = URL.createObjectURL(archivo);
         var img = new Image();
@@ -746,7 +773,7 @@
             elegirHerramienta('ajustar'); // el logo ya está: toca colocarlo
             sincronizar();
         };
-        img.onerror = function () { URL.revokeObjectURL(url); mostrarError(textos.error_archivo); };
+        img.onerror = function () { URL.revokeObjectURL(url); ocultarCarga(); mostrarError(textos.error_archivo); };
         img.src = url;
     }
 

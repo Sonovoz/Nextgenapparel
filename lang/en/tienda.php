@@ -100,4 +100,5 @@ return [
     'elige_zona_nuevo' => 'Choose where your new design goes.',
     'solapa' => ':zona overlaps :otra, which already has a design.',
     'listo_varios' => 'It has :n designs: check the front and the back.',
+    'cargando_diseno' => 'Printing your design',
 ];

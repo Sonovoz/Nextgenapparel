@@ -215,6 +215,10 @@
                     <div class="lupa" id="lupa" hidden></div>
                     <p class="visor-nota">{{ __('tienda.vista_orientativa') }}</p>
                     <p class="pista" id="pista" aria-hidden="true">{{ __('tienda.pista_arrastrar') }}</p>
+                    <div class="cargando" id="cargando" role="status" hidden>
+                        <span class="cabezal" aria-hidden="true"></span>
+                        <p>{{ __('tienda.cargando_diseno') }}<span class="puntos" aria-hidden="true"><i></i><i></i><i></i></span></p>
+                    </div>
                 </div>
                 </div>
                 <button type="button" class="girar siguiente" data-girar aria-label="{{ __('tienda.atajo_girar') }}">›</button>

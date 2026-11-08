@@ -100,4 +100,5 @@ return [
     'elige_zona_nuevo' => 'Elige dónde va tu nuevo diseño.',
     'solapa' => ':zona se pisa con :otra, que ya tiene diseño.',
     'listo_varios' => 'Lleva :n diseños: míralo por delante y por detrás.',
+    'cargando_diseno' => 'Estampando tu diseño',
 ];
