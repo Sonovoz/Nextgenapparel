@@ -13,6 +13,7 @@ use App\Http\Controllers\Cuenta\MisDisenosController;
 use App\Http\Controllers\Cuenta\RegistroController;
 use App\Http\Controllers\Cuenta\VerificacionController;
 use App\Http\Controllers\DisenoController;
+use App\Http\Controllers\PackController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TiendaController;
 use App\Http\Middleware\EstablecerIdioma;
@@ -125,6 +126,11 @@ Route::prefix('{idioma}')
         Route::get('/disenos/{diseno}/miniatura', [DisenoController::class, 'miniatura'])->name('disenos.miniatura')->whereUuid('diseno');
         Route::get('/disenos', [DisenoController::class, 'lista'])->name('disenos.lista')->middleware('throttle:disenos-lista');
         Route::delete('/disenos/{diseno}', [DisenoController::class, 'borrar'])->name('disenos.borrar')->whereUuid('diseno')->middleware('throttle:disenos-borrar');
+
+        // Packs (paso 5.7): /es/packs/pack-joven, antes de las familias.
+        Route::get('/packs/{pack}', [PackController::class, 'ver'])->name('packs.ver');
+        Route::post('/packs/{pack}', [PackController::class, 'anadir'])->name('packs.anadir')->middleware('throttle:carrito');
+        Route::post('/packs/{pack}/diseno', [PackController::class, 'subir'])->name('packs.subir')->middleware('throttle:disenos');
 
         // Sobre nosotros (D145): /es/sobre-nosotros y /en/about-us; antes de las familias.
         Route::get('/{pagina}', [TiendaController::class, 'nosotros'])

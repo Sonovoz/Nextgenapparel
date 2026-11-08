@@ -962,3 +962,16 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 /* Con el carrito en la cabecera (paso 5.6), el menú completo necesita menos aire hasta pantallas anchas. */
 @media (min-width: 1360px) and (max-width: 1599px) { .navegacion ul { gap: 22px; } .cabecera-acciones { gap: 10px; } }
 @media (max-width: 360px) { .cabecera-acciones { gap: 0; } }
+/* Página de un pack (paso 5.7): reutiliza la rejilla y las cajas del carrito. */
+.pack-pagina .pack-precio { font-family: var(--display); font-size: 30px; font-weight: 800; margin: 8px 0; }
+.pack-subir { margin-top: 28px; padding: 22px; border: 1px solid var(--linea); border-radius: 14px; display: flex; flex-direction: column; gap: 12px; }
+.pack-subir h2, .pack-pagina form h2 { margin: 0; font-family: var(--display); font-size: 20px; }
+.pack-origen { margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 10px; }
+.casilla { display: flex; gap: 10px; align-items: center; font-size: 14px; }
+.pack-disenos { display: flex; flex-wrap: wrap; gap: 8px; }
+.pack-disenos label { position: relative; cursor: pointer; }
+.pack-disenos input { position: absolute; opacity: 0; }
+.pack-disenos img { display: block; border-radius: 10px; border: 2px solid var(--linea); background: #2a2b38; }
+.pack-disenos input:checked + img { border-color: var(--azul); }
+.pack-disenos input:focus-visible + img { outline: 2px solid #fff; outline-offset: 2px; }
+.campo-pack { min-height: 48px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--linea); background: var(--fondo); color: var(--tinta); font: inherit; font-size: 16px; width: 100%; }

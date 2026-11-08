@@ -37,6 +37,7 @@ final class Portada
             ->filter(fn (Pack $p) => $p->lineas->isNotEmpty() && $p->lineas->every(fn ($l) => $l->prenda?->activa))
             ->map(fn (Pack $p) => [
                 'nombre' => $p->nombre,
+                'url' => route('packs.ver', ['pack' => $p->getTranslation('slug', app()->getLocale())]),
                 'descripcion' => $p->descripcion,
                 'unidades' => $p->unidades(),
                 'precio' => Formato::euros(Iva::conIva($p->precio, Impuestos::tipoIva($p->clase_impuesto_id))),
