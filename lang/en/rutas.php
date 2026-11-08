@@ -19,4 +19,7 @@ return [
     'contrasena' => 'password',
     'borrado' => 'delete-account',
     'confirmar_correo' => 'confirm-new-email',
+    'carrito' => 'cart',
+    'lineas' => 'lines',
+    'cupon' => 'coupon',
 ];

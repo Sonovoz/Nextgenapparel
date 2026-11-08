@@ -145,9 +145,18 @@ final class EditarCarrito
                     throw new LineaNoValida(['medida_no_valida']);
                 }
             }
+            $medidas = [$d['ancho_mm'], $d['alto_mm'], $d['desde_cuello_mm'], $d['desde_centro_mm']];
+            if (array_key_exists('texto', $d)) {
+                // «Escribir mi marca»: texto, fuente y tinta; la comprobación decide si valen.
+                $impresiones[] = new Impresion((int) $zona, null, ...$medidas,
+                    texto: is_string($d['texto']) ? trim($d['texto']) : '',
+                    fuente: is_int($d['fuente'] ?? null) ? $d['fuente'] : -1,
+                    tinta: is_string($d['tinta'] ?? null) ? $d['tinta'] : '');
+
+                continue;
+            }
             $diseno = is_string($d['diseno'] ?? null) ? $suyos->get($d['diseno']) : null; // B1: nada de arrays
-            $impresiones[] = new Impresion((int) $zona, $diseno,
-                $d['ancho_mm'], $d['alto_mm'], $d['desde_cuello_mm'], $d['desde_centro_mm']);
+            $impresiones[] = new Impresion((int) $zona, $diseno, ...$medidas);
         }
 
         return $impresiones;

@@ -53,6 +53,17 @@ class ZonaImpresionResource extends RecursoCatalogo
                 $cm('alto_max_mm', 'Alto máximo'),
                 TextInput::make('orden')->label('Orden')->numeric()->integer()->minValue(0)->default(0),
             ]),
+            // Dónde está la zona en la prenda (D99): con esto el pedido guarda la posición en mm.
+            Grid::make(2)->schema([
+                TextInput::make('desde_cuello_mm')->label('Borde de arriba bajo el cuello')->numeric()->minValue(0)->maxValue(80)->step(0.1)->suffix('cm')->required()->default(0)
+                    ->formatStateUsing(fn ($state) => $state === null ? null : $state / 10)
+                    ->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 10))
+                    ->helperText('Frontal y pecho, 7,5 cm bajo el cuello delantero; espalda, 10 cm bajo el trasero.'),
+                TextInput::make('desde_centro_mm')->label('Centro de la zona desde el centro de la prenda')->numeric()->minValue(-40)->maxValue(40)->step(0.1)->suffix('cm')->required()->default(0)
+                    ->formatStateUsing(fn ($state) => $state === null ? null : $state / 10)
+                    ->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 10))
+                    ->helperText('0 si está centrada. En negativo, hacia la izquierda de quien la lleva (el pecho, −10 cm).'),
+            ]),
         ]);
     }
 

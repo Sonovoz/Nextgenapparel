@@ -69,7 +69,7 @@ class AppServiceProvider extends ServiceProvider
         // comparten el de la IP y quien se registra, entra y pide otra contraseña se quedaba bloqueado.
         foreach ([
             'cuenta-entrar' => 30, 'cuenta-registro' => 10, 'cuenta-recuperar' => 6, 'cuenta-restablecer' => 10,
-            'cuenta-verificar' => 10, 'cuenta-reenviar' => 3, 'disenos-lista' => 120, 'disenos-borrar' => 60, 'precio' => 120,
+            'cuenta-verificar' => 10, 'cuenta-reenviar' => 3, 'disenos-lista' => 120, 'disenos-borrar' => 60, 'precio' => 120, 'carrito' => 60,
             // Área de cliente: piden la contraseña actual; por usuario e IP (revisión N3 del 5.3, M2 y B2).
             'cuenta-datos' => 10, 'cuenta-contrasena' => 6, 'cuenta-borrado' => 5,
         ] as $nombre => $porMinuto) {

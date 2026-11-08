@@ -169,8 +169,8 @@
         <h2 class="nivel-titulo">{{ __('tienda.resumen_titulo') }}</h2>
         <div class="resumen" id="resumen"></div>
         <p class="claro">{{ __('tienda.envio_al_cerrar') }}</p>
-        <button type="button" class="boton-siguiente" id="anadir-pedido" disabled aria-describedby="anadir-pronto">{{ __('tienda.anadir_pedido') }}</button>
-        <p class="claro" id="anadir-pronto">{{ __('tienda.anadir_pronto') }}</p>
+        <button type="button" class="boton-siguiente" id="anadir-pedido" disabled>{{ __('tienda.anadir_pedido') }}</button>
+        <p class="aviso-zona" id="anadir-error" role="alert"></p>
         <button type="button" class="boton-texto" data-ir="cantidades">← {{ __('tienda.cambiar_cantidades') }}</button>
     </div>
 </section>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Backend\ArchivoDisenoController;
+use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\Cuenta\AccesoController;
 use App\Http\Controllers\Cuenta\BorradoController;
 use App\Http\Controllers\Cuenta\CambiarContrasenaController;
@@ -82,11 +83,26 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
             });
         });
 
+    // Carrito (paso 5.6): /es/carrito y /en/cart, con cuenta o sin ella.
+    Route::prefix($idioma.'/'.$tramo('carrito'))
+        ->name("carrito.{$idioma}.")
+        ->middleware(EstablecerIdioma::class)
+        ->group(function () use ($tramo) {
+            $linea = $tramo('lineas').'/{uuid}';
+            Route::get('/', [CarritoController::class, 'ver'])->name('ver');
+            Route::post($tramo('lineas'), [CarritoController::class, 'anadir'])->name('anadir')->middleware('throttle:carrito');
+            Route::patch($linea, [CarritoController::class, 'tallas'])->name('tallas')->whereUuid('uuid')->middleware('throttle:carrito');
+            Route::delete($linea, [CarritoController::class, 'quitar'])->name('quitar')->whereUuid('uuid')->middleware('throttle:carrito');
+            Route::post($tramo('cupon'), [CarritoController::class, 'cupon'])->name('cupon')->middleware('throttle:carrito');
+            Route::get($tramo('disenos').'/{diseno}', [CarritoController::class, 'miniatura'])->name('miniatura')->whereUuid('diseno');
+        });
+
     // El idioma va en la ruta (para EstablecerIdioma y las URL), no en un parámetro de la URL.
-    $prefijo = $idioma.'/'.$tramo('cuenta');
-    foreach (Route::getRoutes()->getRoutes() as $ruta) {
-        if (str_starts_with($ruta->uri(), $prefijo)) {
-            $ruta->defaults('idioma', $idioma);
+    foreach ([$idioma.'/'.$tramo('cuenta'), $idioma.'/'.$tramo('carrito')] as $prefijo) {
+        foreach (Route::getRoutes()->getRoutes() as $ruta) {
+            if (str_starts_with($ruta->uri(), $prefijo)) {
+                $ruta->defaults('idioma', $idioma);
+            }
         }
     }
 }

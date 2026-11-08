@@ -42,13 +42,14 @@ class CatalogoInicialSeeder extends Seeder
         }
 
         foreach ([
-            ['frontal', 'Frontal', 'Front', Cara::Delantera, 280, 380],
-            ['pecho', 'Pecho', 'Chest', Cara::Delantera, 90, 90],
-            ['espalda', 'Espalda grande', 'Large back', Cara::Trasera, 300, 400],
-        ] as $orden => [$clave, $es, $en, $cara, $ancho, $alto]) {
+            ['frontal', 'Frontal', 'Front', Cara::Delantera, 280, 380, 75, 0],
+            ['pecho', 'Pecho', 'Chest', Cara::Delantera, 90, 90, 75, -100],
+            ['espalda', 'Espalda grande', 'Large back', Cara::Trasera, 300, 400, 100, 0],
+        ] as $orden => [$clave, $es, $en, $cara, $ancho, $alto, $cuello, $centro]) {
             ZonaImpresion::firstOrCreate(['clave' => $clave], [
                 'nombre' => ['es' => $es, 'en' => $en], 'cara' => $cara,
                 'ancho_max_mm' => $ancho, 'alto_max_mm' => $alto, 'orden' => $orden,
+                'desde_cuello_mm' => $cuello, 'desde_centro_mm' => $centro,
             ]);
         }
     }

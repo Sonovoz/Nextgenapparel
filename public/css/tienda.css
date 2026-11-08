@@ -75,7 +75,7 @@ h1, h2, h3 { font-family: var(--display); font-weight: 800; letter-spacing: -.03
 .marca img { filter: invert(1) hue-rotate(180deg) brightness(1.1); }
 .marca .monograma { height: 40px; width: auto; }
 .marca .palabra { height: 19px; width: auto; }
-@media (max-width: 380px) { .marca .palabra { display: none; } }
+@media (max-width: 479px) { .marca .palabra { display: none; } } /* con el carrito en la cabecera (paso 5.6) */
 .navegacion { display: none; }
 .navegacion ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 34px; }
 .navegacion a, .navegacion summary { font-size: 13px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; text-decoration: none; cursor: pointer; color: var(--tinta); }
@@ -912,3 +912,53 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .borrado-detalle summary::-webkit-details-marker { display: none; }
 .boton-peligro { border-color: #F0624D; color: #FFC9C0; }
 .boton-peligro:hover { background: #F0624D; color: #fff; }
+
+/* ── Carrito (paso 5.6) ─────────────────────────────────────────── */
+.enlace-carrito { position: relative; }
+.contador-carrito { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 99px; background: var(--azul); color: #fff; font-size: 11px; font-weight: 600; letter-spacing: 0; }
+.carrito-pagina { padding: 48px 0 var(--hueco); }
+.carrito-vacio { margin-top: 24px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px; color: var(--tinta-suave); }
+.carrito-rejilla { margin-top: 28px; display: grid; gap: 28px; }
+@media (min-width: 980px) { .carrito-rejilla { grid-template-columns: minmax(0, 1fr) 360px; align-items: start; } .carrito-resumen { position: sticky; top: calc(var(--cabecera) + 20px); } }
+.carrito-lineas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; }
+.carrito-linea { display: grid; gap: 18px; padding: 18px; border: 1px solid var(--linea); border-radius: 14px; background: var(--papel); }
+.carrito-linea.con-problemas { border-color: rgba(242, 179, 61, .55); }
+@media (min-width: 640px) { .carrito-linea { grid-template-columns: 220px minmax(0, 1fr); } }
+.carrito-maquetas { display: flex; gap: 8px; }
+.carrito-maquetas .maqueta { position: relative; margin: 0; flex: 1 1 0; min-width: 0; aspect-ratio: 5 / 6; border-radius: 10px; overflow: hidden; background: var(--crema); }
+.maqueta > img:first-child { width: 100%; height: 100%; object-fit: cover; display: block; }
+.maqueta .capa { position: absolute; object-fit: contain; object-position: top center; }
+.maqueta .capa-texto { container-type: size; display: flex; justify-content: center; align-items: flex-start; overflow: hidden; white-space: nowrap; line-height: 1; }
+.carrito-detalle { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.carrito-detalle h2 { margin: 0; font-family: var(--display); font-size: 22px; font-weight: 600; }
+.carrito-detalle .claro { margin: 0; }
+.muestra { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .35); vertical-align: -1px; }
+.carrito-impresiones { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.carrito-impresiones li { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.carrito-impresiones small { color: var(--tinta-suave); }
+.nivel-calidad { padding: 1px 8px; border-radius: 99px; border: 1px solid currentColor; font-size: 11px; }
+.nivel-calidad[data-nivel="correcta"] { color: #7FE0A8; } .nivel-calidad[data-nivel="buena"] { color: #C6E37F; }
+.nivel-calidad[data-nivel="justa"] { color: #F7D27E; } .nivel-calidad[data-nivel="baja"] { color: #FF9C8C; }
+.carrito-tallas fieldset { margin: 0; padding: 0; border: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.carrito-tallas legend { margin-bottom: 8px; font-size: 13px; color: var(--tinta-suave); }
+.carrito-tallas label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.carrito-tallas input { width: 72px; min-height: 44px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--linea); background: var(--fondo); color: var(--tinta); font: inherit; font-size: 16px; }
+.carrito-resumen { padding: 22px; border: 1px solid var(--linea); border-radius: 14px; background: var(--papel); display: flex; flex-direction: column; gap: 14px; }
+.carrito-resumen h2 { margin: 0; font-family: var(--display); font-size: 20px; }
+.carrito-resumen dl { margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+.carrito-resumen dl div { display: flex; justify-content: space-between; gap: 12px; }
+.carrito-resumen dd { margin: 0; text-align: right; }
+.carrito-resumen .descuento dd { color: #7FE0A8; }
+.carrito-cupon label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--tinta-suave); }
+.fila-cupon { display: flex; gap: 8px; }
+.fila-cupon input { flex: 1; min-width: 0; min-height: 48px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--linea); background: var(--fondo); color: var(--tinta); font: inherit; font-size: 16px; text-transform: uppercase; }
+.fila-cupon .boton { min-height: 48px; padding: 0 18px; font-size: 12px; }
+.carrito-siguiente { margin: 0; font-size: 14px; color: var(--tinta-suave); }
+/* El carrito va solo con icono y contador (su nombre lo lee el lector de pantalla): la cabecera cabe en 1366 y en 320. */
+.enlace-carrito .texto-cuenta { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.enlace-carrito { gap: 4px; }
+@media (max-width: 600px) { .cabecera-acciones { gap: 4px; } .enlace-cuenta { min-width: 40px; } }
+.carrito-resumen .claro { margin: 0; font-size: 13px; }
+/* Con el carrito en la cabecera (paso 5.6), el menú completo necesita menos aire hasta pantallas anchas. */
+@media (min-width: 1360px) and (max-width: 1599px) { .navegacion ul { gap: 22px; } .cabecera-acciones { gap: 10px; } }
+@media (max-width: 360px) { .cabecera-acciones { gap: 0; } }

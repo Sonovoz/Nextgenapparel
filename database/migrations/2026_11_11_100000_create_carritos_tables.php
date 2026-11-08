@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 | Carrito persistente (paso 5.5, ficha § 5): lo que el cliente quiere comprar, nunca
 | sus precios (los calcula el motor cada vez, regla 3). Uno por cliente con cuenta o,
 | para un invitado, por el token de su cookie (solo se guarda su hash). Las impresiones
-| tienen la misma forma que tendrán las del pedido (fase 6): zona, diseño, tamaño y
+| tienen la misma forma que tendrán las del pedido (fase 6): zona, diseño o texto, tamaño y
 | posición en mm desde el cuello y desde el centro (D99). Prendas y packs nunca se borran
 | del todo (papelera); colores y zonas en uso en un carrito no se pueden borrar (CatalogoPolicy).
 */
@@ -43,8 +43,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('linea_carrito_id')->constrained('lineas_carrito')->cascadeOnDelete();
             $table->foreignId('zona_impresion_id')->constrained('zonas_impresion')->restrictOnDelete();
-            // El diseño del cliente; si se borra, la línea deja de estar disponible hasta que ponga otro.
+            // Un logo (diseño subido) o un texto escrito en el configurador («Escribir mi marca»).
+            // Si el diseño se borra, la línea deja de estar disponible hasta que ponga otro.
             $table->foreignId('diseno_id')->nullable()->constrained('disenos')->nullOnDelete();
+            $table->string('texto', 60)->nullable();
+            $table->unsignedTinyInteger('fuente')->nullable();
+            $table->string('tinta', 10)->nullable();
             $table->unsignedSmallInteger('ancho_mm');
             $table->unsignedSmallInteger('alto_mm');
             $table->unsignedSmallInteger('desde_cuello_mm');

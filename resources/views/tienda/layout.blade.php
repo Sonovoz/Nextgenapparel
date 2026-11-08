@@ -14,6 +14,9 @@
     $conCuenta = auth()->check();
     $urlCuenta = \App\Support\RutaCuenta::url($conCuenta ? 'inicio' : 'entrar');
     $textoCuenta = $conCuenta ? __('cuenta.mi_cuenta') : __('cuenta.entrar');
+    // Carrito (paso 5.6): número de líneas, sin crear ningún carrito.
+    $urlCarrito = \App\Http\Controllers\CarritoController::url('ver');
+    $lineasCarrito = rescue(fn () => \App\Dominio\Carrito\CarritoActual::de(request())?->lineas()->count() ?? 0, 0, report: false);
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $idiomaActual }}">
@@ -96,6 +99,11 @@
                 <a class="enlace-cuenta" href="{{ $urlCuenta }}" aria-label="{{ $textoCuenta }}" @if (url()->current() === $urlCuenta) aria-current="page" @endif>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
                     <span class="texto-cuenta">{{ $textoCuenta }}</span>
+                </a>
+                <a class="enlace-cuenta enlace-carrito" href="{{ $urlCarrito }}" @if (url()->current() === $urlCarrito) aria-current="page" @endif>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 7h14l-1.2 12.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8L5 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+                    <span class="texto-cuenta">{{ __('carrito.enlace') }}</span>
+                    @if ($lineasCarrito > 0)<span class="contador-carrito">{{ $lineasCarrito }}<span class="oculto"> {{ trans_choice('carrito.lineas_contador', $lineasCarrito) }}</span></span>@endif
                 </a>
                 <a class="boton principal cabecera-cta" href="{{ $portada }}#pasos">{{ __('portada.cta_coleccion') }}</a>
                 <button class="boton-menu" type="button" aria-expanded="false" aria-controls="menu-movil" aria-label="{{ __('portada.menu') }}"><span></span></button>

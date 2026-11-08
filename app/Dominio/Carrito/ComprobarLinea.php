@@ -120,6 +120,7 @@ final class ComprobarLinea
     {
         return $linea->impresiones->map(fn ($i) => new Impresion(
             $i->zona_impresion_id, $i->diseno_id, $i->ancho_mm, $i->alto_mm, $i->desde_cuello_mm, $i->desde_centro_mm,
+            $i->texto, $i->fuente, $i->tinta,
         ))->all();
     }
 
@@ -144,6 +145,25 @@ final class ComprobarLinea
         return $limpias;
     }
 
+    /** El diseño entero dentro de la zona (D99), con el margen del redondeo del visor. */
+    private static function dentroDeLaZona(Impresion $i, ZonaImpresion $zona): bool
+    {
+        $t = Impresion::TOLERANCIA_MM;
+
+        return $i->desdeCuelloMm >= $zona->desde_cuello_mm - $t
+            && $i->desdeCuelloMm + $i->altoMm <= $zona->desde_cuello_mm + $zona->alto_max_mm + $t
+            && 2 * abs($i->desdeCentroMm - $zona->desde_centro_mm) + $i->anchoMm <= $zona->ancho_max_mm + 2 * $t;
+    }
+
+    private static function textoValido(Impresion $i): bool
+    {
+        $largo = mb_strlen(trim((string) $i->texto));
+
+        return $largo > 0 && $largo <= Impresion::MAXIMO_TEXTO && $i->disenoId === null
+            && $i->fuente !== null && $i->fuente >= 0 && $i->fuente < Impresion::FUENTES
+            && in_array($i->tinta, Impresion::TINTAS, true);
+    }
+
     /**
      * @param  list<Impresion>  $impresiones
      * @param  list<int>  $permitidas  zonas que se pueden imprimir
@@ -165,13 +185,17 @@ final class ComprobarLinea
             $problemas[] = 'faltan_disenos_pack';
         }
 
-        $medidas = ZonaImpresion::whereIn('id', $zonas)->get(['id', 'ancho_max_mm', 'alto_max_mm'])->keyBy('id');
+        $medidas = ZonaImpresion::whereIn('id', $zonas)->get(['id', 'ancho_max_mm', 'alto_max_mm', 'desde_cuello_mm', 'desde_centro_mm'])->keyBy('id');
         // Un diseño rechazado en la revisión (fase 6) no se puede volver a pedir (M3).
         $existen = Diseno::whereIn('id', array_filter(array_map(fn (Impresion $i) => $i->disenoId, $impresiones)))
             ->where('estado', '!=', 'rechazado')->pluck('id')->flip();
         foreach ($impresiones as $impresion) {
             $zona = $medidas->get($impresion->zonaId);
-            if ($impresion->disenoId === null || ! $existen->has($impresion->disenoId)) {
+            if ($impresion->esTexto()) {
+                if (! self::textoValido($impresion)) {
+                    $problemas[] = 'texto_no_valido';
+                }
+            } elseif ($impresion->disenoId === null || ! $existen->has($impresion->disenoId)) {
                 $problemas[] = 'diseno_no_disponible';
             }
             if ($zona !== null && (
@@ -179,6 +203,7 @@ final class ComprobarLinea
                 || $impresion->anchoMm > $zona->ancho_max_mm || $impresion->altoMm > $zona->alto_max_mm
                 || $impresion->desdeCuelloMm < 0 || $impresion->desdeCuelloMm > Impresion::MAXIMO_POSICION_MM
                 || abs($impresion->desdeCentroMm) > Impresion::MAXIMO_POSICION_MM
+                || ! self::dentroDeLaZona($impresion, $zona)
                 || ($prendaMm['largo'] !== null && $impresion->desdeCuelloMm + $impresion->altoMm > $prendaMm['largo'])
                 || ($prendaMm['ancho'] !== null && 2 * abs($impresion->desdeCentroMm) + $impresion->anchoMm > $prendaMm['ancho']))) {
                 $problemas[] = 'medida_no_valida';

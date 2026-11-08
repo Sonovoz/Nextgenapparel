@@ -1473,6 +1473,7 @@
     }
 
     function pintarPrecio() {
+        if (typeof pintarAnadir === 'function') pintarAnadir();
         var r = resumenPrecio();
         if (precioBarra.importe) {
             var v = r || precioInicial;
@@ -1826,6 +1827,73 @@
         }
     }
     if (pieSiguiente) pieSiguiente.addEventListener('click', function () { irANivel(pieSiguiente.dataset.ir); });
+
+    /* ---------- Añadir a mi pedido (paso 5.6) ---------- */
+
+    /**
+     * El diseño de una zona en mm (D99), con la misma geometría que se ve en el visor:
+     * tamaño, borde de arriba bajo el cuello y centro desde el centro de la prenda
+     * (negativo = a la izquierda de quien la lleva, que de frente es la derecha de la foto).
+     * El servidor comprueba que queda dentro de la zona.
+     */
+    function impresionEnMm(id) {
+        return conDiseno(id, function () {
+            var color = colores[estado.color];
+            var zona = zonaActual();
+            var info = zonas.filter(function (z) { return z.id === id; })[0];
+            if (!zona || !info) return null;
+            var g = geometria(disenoPara(color), zona);
+            var desplazamiento = (g.x + g.w / 2 - 0.5) * zona.ancho_mm;
+            var d = estado.disenos[id];
+            var datos = {
+                ancho_mm: Math.round(zona.ancho_mm * g.w),
+                alto_mm: Math.round(zona.alto_mm * g.h),
+                desde_cuello_mm: Math.round((zona.cuello_mm || 0) + g.y * zona.alto_mm),
+                desde_centro_mm: Math.round((zona.centro_mm || 0) + (info.cara === 'delantera' ? -desplazamiento : desplazamiento))
+            };
+            if (d.modo === 'logo') { datos.diseno = d.uuid; } else { datos.texto = d.texto.trim(); datos.fuente = d.fuente; datos.tinta = d.tinta; }
+            return datos;
+        });
+    }
+
+    var botonAnadir = document.getElementById('anadir-pedido');
+    var errorAnadir = document.getElementById('anadir-error');
+    function pintarAnadir() {
+        if (!botonAnadir) return;
+        botonAnadir.disabled = !(precio && precio.confirmable) || estado.anadiendoPedido;
+    }
+    if (botonAnadir) botonAnadir.addEventListener('click', function () {
+        var impresiones = {};
+        zonasConDiseno().forEach(function (id) { var i = impresionEnMm(id); if (i) impresiones[id] = i; });
+        var lineas = estado.lineas.map(function (i) {
+            var id = colores[i].id, c = estado.cantidades[id] || {}, tallas = {};
+            Object.keys(c).forEach(function (t) { if (c[t] > 0) tallas[t] = c[t]; });
+            return { color: id, tallas: tallas };
+        }).filter(function (l) { return Object.keys(l.tallas).length; });
+        var token = document.querySelector('meta[name="csrf-token"]');
+        estado.anadiendoPedido = true;
+        errorAnadir.textContent = '';
+        botonAnadir.textContent = textos.anadiendo;
+        pintarAnadir();
+        fetch(visor.dataset.anadir, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token ? token.content : '' },
+            body: JSON.stringify({ prenda: Number(visor.dataset.prenda), lineas: lineas, impresiones: impresiones })
+        }).then(function (r) {
+            return r.json().catch(function () { return {}; }).then(function (json) {
+                if (r.ok && json.url) { window.location.href = json.url; return; }
+                var mensaje = json.message;
+                if (json.errors) mensaje = json.errors[Object.keys(json.errors)[0]][0];
+                throw new Error(r.status === 419 ? textos.error_caducada : (r.status === 422 && mensaje ? mensaje : textos.error_anadir));
+            });
+        }).catch(function (e) {
+            estado.anadiendoPedido = false;
+            errorAnadir.textContent = e && e.message && e.message !== 'Failed to fetch' ? e.message : textos.error_anadir;
+            botonAnadir.textContent = textos.anadir_pedido;
+            pintarAnadir();
+        });
+    });
 
     if (esPagina) {
         document.body.classList.add('estudio-abierto');

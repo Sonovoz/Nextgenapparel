@@ -19,4 +19,7 @@ return [
     'contrasena' => 'contrasena',
     'borrado' => 'borrar-cuenta',
     'confirmar_correo' => 'confirmar-nuevo-correo',
+    'carrito' => 'carrito',
+    'lineas' => 'lineas',
+    'cupon' => 'cupon',
 ];
