@@ -70,6 +70,12 @@ class Cliente extends Model
         return $this->hasMany(Diseno::class);
     }
 
+    /** ¿Lo marca el propio cliente (Ajustes → General) y su tipo lo admite? */
+    public function puedeIndicarRecargo(): bool
+    {
+        return Ajuste::obtener('clientes.recargo_lo_indica') === 'cliente' && $this->tipo->admiteRecargo();
+    }
+
     public function esInvitado(): bool
     {
         return $this->user_id === null;

@@ -139,4 +139,5 @@ return [
     'formato_fecha' => 'j \\d\\e F \\d\\e Y',
     'correo_borrado_plazo' => 'Hay que atenderla en un mes como máximo (RGPD). Busca al cliente en Clientes del backend.',
     'cp_sin_envio' => 'Todavía no enviamos a este código postal. Escríbenos y lo vemos.',
+    'recargo_casilla' => 'Estoy en el régimen de recargo de equivalencia (comercio minorista): aplicarlo en mis facturas.',
 ];

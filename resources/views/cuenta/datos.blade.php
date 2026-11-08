@@ -23,7 +23,9 @@
                 @endforeach
             </select>
         </div>
-        @if ($cliente->tipo->admiteRecargo())
+        @if ($cliente->puedeIndicarRecargo())
+            <label class="casilla-cuenta"><input type="checkbox" name="recargo_equivalencia" value="1" @checked(session()->hasOldInput() ? (bool) old('recargo_equivalencia') : $cliente->recargo_equivalencia)> <span>{{ __('cuenta.recargo_casilla') }}</span></label>
+        @elseif ($cliente->tipo->admiteRecargo())
             <p class="nota-cuenta"><strong>{{ __('cuenta.recargo') }}:</strong> {{ $cliente->recargo_equivalencia ? __('cuenta.recargo_si') : __('cuenta.recargo_no') }}</p>
         @endif
         <label class="casilla-cuenta"><input type="checkbox" name="marketing" value="1" @checked(session()->hasOldInput() ? (bool) old('marketing') : $cliente->marketing_consentido_en !== null)> <span>{{ __('cuenta.marketing') }}</span></label>

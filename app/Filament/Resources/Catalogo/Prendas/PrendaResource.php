@@ -76,7 +76,7 @@ class PrendaResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->with('familia')->withCount('variantes')->withMin(['variantes' => fn ($v) => $v->aLaVenta()], 'precio_base')->withSum('variantes', 'stock'))
             ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('nombre')->label('Nombre')->searchable(query: fn (Builder $q, string $buscar) => $q->where('nombre->es', 'like', "%{$buscar}%")->orWhere('nombre->en', 'like', "%{$buscar}%")),
+                TextColumn::make('nombre')->label('Nombre')->searchable(query: fn (Builder $query, string $search) => $query->where(fn (Builder $q) => $q->where('nombre->es', 'like', "%{$search}%")->orWhere('nombre->en', 'like', "%{$search}%"))),
                 TextColumn::make('familia.nombre')->label('Familia'),
                 TextColumn::make('variantes_count')->label('Variaciones'),
                 TextColumn::make('variantes_min_precio_base')->label('Desde (sin IVA)')->formatStateUsing(fn ($state) => CampoDinero::formatear($state === null ? null : (int) $state)),

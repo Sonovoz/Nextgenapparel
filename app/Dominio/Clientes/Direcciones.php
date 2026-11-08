@@ -18,7 +18,7 @@ final class Direcciones
     {
         return DB::transaction(function () use ($cliente, $datos, $direccion): Direccion {
             Cliente::whereKey($cliente->id)->lockForUpdate()->first(); // una sola predeterminada aunque lleguen dos a la vez (B5)
-            $tipo = TipoDireccion::from($datos['tipo']);
+            $tipo = $datos['tipo'] instanceof TipoDireccion ? $datos['tipo'] : TipoDireccion::from($datos['tipo']);
             $quiereSerlo = (bool) ($datos['predeterminada'] ?? false);
             unset($datos['predeterminada']);
 

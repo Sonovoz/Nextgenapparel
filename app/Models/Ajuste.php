@@ -32,6 +32,8 @@ class Ajuste extends Model
         // Frenos al abuso: subidas por hora e IP y diseños nuevos por visitante y día.
         'disenos.subidas_hora' => 60,
         'disenos.max_dia' => 40,
+        // Recargo de equivalencia (paso 5.4): «equipo» (lo activa el equipo en la ficha) o «cliente» (lo marca él).
+        'clientes.recargo_lo_indica' => 'equipo',
         // Mejora con IA para el cliente (D143): activa, desde qué nivel y texto propio por idioma (vacío = el de lang/disenos.php).
         'disenos.ia_activa' => true,
         'disenos.ia_desde' => 'justa',

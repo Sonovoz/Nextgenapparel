@@ -7,8 +7,10 @@ use App\Dominio\Sistema\Errores\ErrorDeCopia;
 use App\Models\Ajuste;
 use App\Models\Caja;
 use App\Models\ClaseImpuesto;
+use App\Models\Cliente;
 use App\Models\Color;
 use App\Models\Cupon;
+use App\Models\Direccion;
 use App\Models\Diseno;
 use App\Models\Familia;
 use App\Models\Foto;
@@ -24,6 +26,8 @@ use App\Models\ZonaEnvio;
 use App\Models\ZonaImpresion;
 use App\Policies\ActividadPolicy;
 use App\Policies\CatalogoPolicy;
+use App\Policies\ClientePolicy;
+use App\Policies\DireccionPolicy;
 use App\Policies\DisenoPolicy;
 use App\Policies\SeccionPolicy;
 use Illuminate\Auth\Events\Failed;
@@ -80,6 +84,8 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Activity::class, ActividadPolicy::class);
         Gate::policy(Diseno::class, DisenoPolicy::class);
+        Gate::policy(Cliente::class, ClientePolicy::class);
+        Gate::policy(Direccion::class, DireccionPolicy::class);
 
         foreach ([Familia::class, Color::class, Talla::class, ZonaImpresion::class, Proveedor::class, Prenda::class, Variante::class, Foto::class] as $modelo) {
             Gate::policy($modelo, CatalogoPolicy::class);

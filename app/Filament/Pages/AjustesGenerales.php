@@ -58,6 +58,7 @@ class AjustesGenerales extends Page implements HasSchemas
             ...Calidad::umbrales(),
             ...AnalizadorPng::limites(),
             'dias_sin_pedido' => (int) Ajuste::obtener('disenos.dias_sin_pedido'),
+            'recargo_lo_indica' => Ajuste::obtener('clientes.recargo_lo_indica'),
             'subidas_hora' => (int) Ajuste::obtener('disenos.subidas_hora'),
             'max_dia' => (int) Ajuste::obtener('disenos.max_dia'),
             'indexar' => (bool) Ajuste::obtener('seo.indexar'),
@@ -95,6 +96,14 @@ class AjustesGenerales extends Page implements HasSchemas
                     TextInput::make('subidas_hora')->label('Subidas por hora y conexión')->integer()->minValue(5)->maxValue(1000)->required()
                         ->helperText('Frena el abuso; quien prueba varias versiones de su logo no llega.'),
                     TextInput::make('max_dia')->label('Diseños nuevos por visitante y día')->integer()->minValue(5)->maxValue(1000)->required(),
+                ]),
+            Section::make('Clientes')
+                ->description('El recargo de equivalencia solo es de autónomos y empresas del comercio minorista y cambia los impuestos de sus facturas. Consulta con tu asesor quién debe indicarlo. El equipo siempre puede cambiarlo en la ficha del cliente.')
+                ->schema([
+                    Select::make('recargo_lo_indica')->label('El recargo de equivalencia lo indica')->required()->selectablePlaceholder(false)->options([
+                        'equipo' => 'El equipo, en la ficha del cliente (el cliente solo lo ve)',
+                        'cliente' => 'El propio cliente, en «Mis datos»',
+                    ]),
                 ]),
             Section::make('Mejorar el diseño con IA')
                 ->description('Si la calidad no llega, el cliente ve un botón con estas instrucciones para mejorar su diseño con su propia herramienta de IA y volver a subirlo. La tienda no envía nada a ninguna IA. Escribe :medida donde va el tamaño de impresión (por ejemplo, «28 × 28 cm»). Si vacías un texto, se usa el de por defecto.')
@@ -150,6 +159,12 @@ class AjustesGenerales extends Page implements HasSchemas
                 }
                 if ($archivosAnteriores !== $archivosNuevos) {
                     Actividad::apuntar('ajustes', 'Límites de los archivos de diseño cambiados', propiedades: ['old' => $archivosAnteriores, 'attributes' => $archivosNuevos]);
+                }
+
+                $recargoAntes = Ajuste::obtener('clientes.recargo_lo_indica');
+                Ajuste::guardar('clientes.recargo_lo_indica', $datos['recargo_lo_indica'] === 'cliente' ? 'cliente' : 'equipo');
+                if ($recargoAntes !== Ajuste::obtener('clientes.recargo_lo_indica')) {
+                    Actividad::apuntar('ajustes', 'Quién indica el recargo de equivalencia cambiado', propiedades: ['old' => ['recargo_lo_indica' => $recargoAntes], 'attributes' => ['recargo_lo_indica' => Ajuste::obtener('clientes.recargo_lo_indica')]]);
                 }
 
                 // Mejora con IA: solo se guarda el texto que difiere del de por defecto, para que este pueda mejorar con las versiones.
