@@ -122,6 +122,17 @@
             // Animación de subida: dura al menos MINIMO ms para que se vea y se entienda.
             var MINIMO = 1100;
             function fallo() { zona.classList.remove('subiendo'); error.textContent = caja.dataset.error; error.hidden = false; }
+            // El original, sin reducir, también se queda en este navegador (IndexedDB) para el pedido.
+            function guardarOriginal(archivo) {
+                try {
+                    var peticion = indexedDB.open('nga', 1);
+                    peticion.onupgradeneeded = function () { peticion.result.createObjectStore('archivos'); };
+                    peticion.onsuccess = function () {
+                        var almacen = peticion.result.transaction('archivos', 'readwrite').objectStore('archivos');
+                        if (archivo) almacen.put(archivo, 'logo'); else almacen.delete('logo');
+                    };
+                } catch (e) { /* sin IndexedDB: en la ficha se pedirá elegirlo de nuevo */ }
+            }
             function leer(archivo) {
                 error.hidden = true;
                 if (!archivo || !/^image\/(png|jpeg|webp|svg\+xml)$/.test(archivo.type)) { fallo(); return; }
@@ -136,9 +147,13 @@
                     c.width = Math.round(w * escala); c.height = Math.round(h * escala);
                     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
                     URL.revokeObjectURL(url);
+                    guardarOriginal(archivo);
                     try {
-                        sessionStorage.setItem('nga.logo', JSON.stringify({ nombre: archivo.name, tipo: archivo.type, datos: c.toDataURL('image/png'), ancho: w, alto: h }));
-                    } catch (e) { /* sin espacio: la ficha permite subirlo allí */ }
+                        sessionStorage.setItem('nga.logo', JSON.stringify({ nombre: archivo.name, tipo: archivo.type, datos: c.toDataURL('image/png'), ancho: w, alto: h, tamano: archivo.size, modificado: archivo.lastModified }));
+                    } catch (e) {
+                        // Sin espacio: la ficha permite subirlo allí, y el original no se queda guardado.
+                        guardarOriginal(null);
+                    }
                     setTimeout(function () { window.location.href = caja.dataset.destino; }, Math.max(0, MINIMO - (Date.now() - inicio)));
                 };
                 img.onerror = function () { URL.revokeObjectURL(url); fallo(); };

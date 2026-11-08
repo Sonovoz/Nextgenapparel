@@ -11,6 +11,7 @@ use App\Dominio\Sistema\Salud\Comprobaciones\CopiasSeguridad;
 use App\Dominio\Sistema\Salud\Comprobaciones\Correo;
 use App\Dominio\Sistema\Salud\Comprobaciones\ErroresCriticos;
 use App\Dominio\Sistema\Salud\Comprobaciones\EspacioDisco;
+use App\Dominio\Sistema\Salud\Comprobaciones\Imagenes;
 use App\Dominio\Sistema\Salud\Comprobaciones\TareasProgramadas;
 use App\Notifications\AlertaSalud;
 use Carbon\CarbonImmutable;
@@ -36,6 +37,7 @@ class ComprobarSalud
             Colas::class,
             Correo::class,
             EspacioDisco::class,
+            Imagenes::class,
             CopiasSeguridad::class,
             ErroresCriticos::class,
             Configuracion::class,

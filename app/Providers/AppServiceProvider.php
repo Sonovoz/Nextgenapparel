@@ -4,10 +4,12 @@ namespace App\Providers;
 
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Dominio\Sistema\Errores\ErrorDeCopia;
+use App\Models\Ajuste;
 use App\Models\Caja;
 use App\Models\ClaseImpuesto;
 use App\Models\Color;
 use App\Models\Cupon;
+use App\Models\Diseno;
 use App\Models\Familia;
 use App\Models\Foto;
 use App\Models\Pack;
@@ -22,12 +24,16 @@ use App\Models\ZonaEnvio;
 use App\Models\ZonaImpresion;
 use App\Policies\ActividadPolicy;
 use App\Policies\CatalogoPolicy;
+use App\Policies\DisenoPolicy;
 use App\Policies\SeccionPolicy;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Backup\Events\BackupHasFailed;
@@ -48,6 +54,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Subidas de diseños: un límite por IP frena el abuso sin molestar a quien prueba varias versiones.
+        RateLimiter::for('disenos', fn (Request $request) => Limit::perHour(max(1, (int) Ajuste::obtener('disenos.subidas_hora')))->by($request->ip()));
+
         // @recurso('img/portada/macro.webp'): URL pública con la fecha del archivo, para que el
         // navegador no siga mostrando la versión antigua al cambiar una imagen con el mismo nombre (D145).
         Blade::directive('recurso', fn (string $ruta) => "<?php echo e(asset({$ruta}).'?v='.@filemtime(public_path({$ruta}))); ?>");
@@ -59,6 +68,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::after(fn (User $usuario, string $habilidad, ?bool $resultado) => $resultado ?? ($usuario->esSuperadministrador() ? true : null));
 
         Gate::policy(Activity::class, ActividadPolicy::class);
+        Gate::policy(Diseno::class, DisenoPolicy::class);
 
         foreach ([Familia::class, Color::class, Talla::class, ZonaImpresion::class, Proveedor::class, Prenda::class, Variante::class, Foto::class] as $modelo) {
             Gate::policy($modelo, CatalogoPolicy::class);

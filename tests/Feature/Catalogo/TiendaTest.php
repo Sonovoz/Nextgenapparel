@@ -254,7 +254,7 @@ class TiendaTest extends TestCase
             ->assertDontSee('<section class="info"', false)
             ->assertSee('Arrástralo para colocarlo')
             ->assertSee('¿Tienes logo? Míralo puesto.')
-            ->assertSee('no lo subimos ni lo guardamos');
+            ->assertSee('si no llega a un pedido, lo borramos a los 30 días');
         $this->get('/en/t-shirts/essential-t-shirt')->assertSee('Got a logo? See it on.');
     }
 

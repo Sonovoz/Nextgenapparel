@@ -1,9 +1,11 @@
 <?php
 
+use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Sistema\Errores\RegistrarError;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -29,6 +31,18 @@ return Application::configure(basePath: dirname(__DIR__))
         // además cada error en storage/logs.
         $exceptions->report(function (Throwable $error): void {
             app(RegistrarError::class)($error);
+        });
+
+        // Un diseño más grande que el límite de PHP (post_max_size) no llega ni a la ruta:
+        // se responde con el mismo aviso que el resto de errores de subida, en su idioma.
+        $exceptions->render(function (PostTooLargeException $error, Request $request) {
+            if (! $request->is('*/disenos')) {
+                return null;
+            }
+            $idioma = array_key_exists((string) $request->segment(1), config('idiomas.disponibles')) ? $request->segment(1) : config('idiomas.predeterminado');
+            app()->setLocale($idioma);
+
+            return response()->json(['message' => __('disenos.error_subida', ['mb' => AnalizadorPng::maxMbEfectivo()]), 'motivo' => 'subida'], 413);
         });
 
         $exceptions->shouldRenderJsonWhen(

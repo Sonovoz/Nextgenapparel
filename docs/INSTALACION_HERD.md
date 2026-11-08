@@ -133,3 +133,5 @@ php artisan migrate
 | Página en blanco o error 500 | Revisa `storage\logs\laravel.log` |
 | `composer install` pide la extensión `bcmath` | En Herd → *PHP* → *Extensions*, activa `bcmath` |
 | El backend se ve sin estilos | Ejecuta `php artisan filament:upgrade` y recarga con Ctrl + F5 |
+| Tests de diseños saltados o «Procesado de imágenes» en rojo en Estado del sistema | En Herd → *PHP* → *Extensions*, activa `imagick` |
+| Al subir un diseño: «No hemos recibido el archivo completo» | PHP de Herd limita las subidas a 2 MB. En Herd → *PHP* → la versión activa → *Open php.ini*, pon `upload_max_filesize = 50M` y `post_max_size = 55M`, guarda y reinicia Herd |

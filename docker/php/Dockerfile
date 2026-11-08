@@ -17,7 +17,7 @@ RUN --mount=type=secret,id=ca_extra,required=false \
 
 RUN apk add --no-cache \
         git unzip mariadb-client \
-        icu-libs libzip libpng libjpeg-turbo freetype libwebp imagemagick imagemagick-libs \
+        icu-libs libzip libpng libjpeg-turbo freetype libwebp imagemagick imagemagick-libs imagemagick-webp \
     && apk add --no-cache --virtual .compilacion $PHPIZE_DEPS linux-headers \
         icu-dev libzip-dev libpng-dev libjpeg-turbo-dev freetype-dev libwebp-dev imagemagick-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
@@ -30,6 +30,8 @@ RUN apk add --no-cache \
     && rm -rf /tmp/pear /tmp/*.tgz
 
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/zz-nextgenapparel.ini
+# ImageMagick 7 de Alpine: WebP para las miniaturas y política propia de recursos y formatos (fase 4).
+COPY docker/php/imagemagick-policy.xml /etc/ImageMagick-7/policy.xml
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
