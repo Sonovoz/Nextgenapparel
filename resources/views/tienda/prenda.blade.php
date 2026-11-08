@@ -36,6 +36,33 @@
         'empezar_de_nuevo' => __('tienda.empezar_de_nuevo'),
         'confirmar_empezar' => __('tienda.confirmar_empezar'),
         'decimal' => $idioma === 'en' ? '.' : ',',
+        // Niveles, precio en directo y cantidades (D142)
+        'desde' => __('tienda.desde'),
+        'por_unidad' => __('tienda.por_unidad'),
+        'iva_incluido' => __('tienda.iva_incluido'),
+        'tu_prenda' => __('tienda.tu_prenda'),
+        'tu_prenda_desde' => __('tienda.tu_prenda_desde'),
+        'un_diseno' => __('tienda.un_diseno'),
+        'n_disenos' => __('tienda.n_disenos'),
+        'total' => __('tienda.total'),
+        'ud' => __('tienda.ud'),
+        'uds' => __('tienda.uds'),
+        'media' => __('tienda.media'),
+        'decision_uno' => __('tienda.decision_uno'),
+        'decision_varios' => __('tienda.decision_varios'),
+        'decision_pregunta' => __('tienda.decision_pregunta'),
+        'siguiente_cantidades' => __('tienda.siguiente_cantidades'),
+        'siguiente_resumen' => __('tienda.siguiente_resumen'),
+        'elige_cantidades' => __('tienda.elige_cantidades'),
+        'quitar_color' => __('tienda.quitar_color'),
+        'una_menos' => __('tienda.una_menos'),
+        'una_mas' => __('tienda.una_mas'),
+        'ver_en_prenda' => __('tienda.ver_en_prenda'),
+        'resumen_disenos' => __('tienda.resumen_disenos'),
+        'resumen_prendas' => __('tienda.resumen_prendas'),
+        'resumen_total' => __('tienda.resumen_total'),
+        'anadir_pedido' => __('tienda.anadir_pedido'),
+        'calculando' => __('tienda.calculando'),
     ];
     // Misma regla que App\Dominio\Disenos\Calidad: umbrales de Ajustes y textos de aviso.
     $calidadVisor = [
@@ -209,14 +236,14 @@
                         <span><kbd>Esc</kbd> {{ __('tienda.atajo_salir') }}</span>
                     </p>
                     @if ($precio)
-                        <p class="estudio-precio"><span>{{ __('tienda.desde') }}</span> <strong>{{ $precio }}</strong> <small>{{ __('tienda.por_unidad') }} · {{ __('tienda.iva_incluido') }}</small></p>
+                        <p class="estudio-precio" id="estudio-precio" aria-live="polite"><span id="precio-etiqueta">{{ __('tienda.desde') }}</span> <strong id="precio-importe">{{ $precio }}</strong> <small id="precio-detalle">{{ __('tienda.por_unidad') }} · {{ __('tienda.iva_incluido') }}</small></p>
                     @endif
                     <button type="button" class="estudio-cerrar" id="cerrar-estudio" aria-label="{{ __('tienda.cerrar_estudio') }}">×</button>
                 </div>
                 <div class="estudio-escena">
                 <button type="button" class="girar anterior" data-girar aria-label="{{ __('tienda.atajo_girar') }}">‹</button>
                 <div class="marco-visor">
-                <div class="visor" id="visor" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
+                <div class="visor" id="visor" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
                     <div class="visor-controles">
                         <div class="segmento" role="group" aria-label="{{ __('tienda.delantera') }} / {{ __('tienda.trasera') }}">
                             <button type="button" class="boton-pildora" data-cara="delantera" aria-pressed="true">{{ __('tienda.delantera') }}</button>
@@ -253,8 +280,13 @@
                 </div>
                 </div>
                 @if ($conTuMarca)
-                    <div class="estudio-panel">
+                    <div class="estudio-panel" id="estudio-panel">
                         @include('tienda._tu-marca')
+                    </div>
+                    {{-- Móvil: el precio y el siguiente paso, siempre a mano (D142). --}}
+                    <div class="estudio-pie" id="estudio-pie" hidden>
+                        <p class="pie-precio"><strong id="pie-importe"></strong> <small id="pie-detalle"></small></p>
+                        <button type="button" class="boton-siguiente" id="pie-siguiente"></button>
                     </div>
                 @endif
                 </div>

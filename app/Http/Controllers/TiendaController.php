@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Dominio\Catalogo\Escaparate;
 use App\Dominio\Catalogo\Portada;
+use App\Dominio\Precios\Configurador;
+use App\Dominio\Precios\Formato;
+use App\Dominio\Precios\Motor\MotorPrecios;
 use App\Dominio\Seo\DatosEstructurados;
 use App\Models\Talla;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class TiendaController
@@ -74,6 +79,35 @@ class TiendaController
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Precio en directo del configurador (D142): una prenda con sus diseños o,
+     * con cantidades, el pedido de esa prenda calculado por el motor.
+     */
+    public function precio(Request $request, Configurador $configurador, string $idioma, string $familia, string $prenda): JsonResponse
+    {
+        $prenda = Escaparate::prenda(Escaparate::familia($familia, $idioma), $prenda, $idioma);
+        $datos = $request->validate([
+            'color' => ['required', 'integer'],
+            'zonas' => ['array', 'max:10'],
+            'zonas.*' => ['integer'],
+            'cantidades' => ['array', 'max:30'],
+            'cantidades.*' => ['array', 'max:20'],
+            'cantidades.*.*' => ['integer', 'min:0', 'max:'.MotorPrecios::MAXIMO_UNIDADES],
+        ]);
+
+        $cantidades = [];
+        foreach ($datos['cantidades'] ?? [] as $color => $tallas) {
+            $claves = [$color, ...array_keys($tallas)];
+            abort_unless(collect($claves)->every(fn ($c) => ctype_digit((string) $c)), 422);
+            $cantidades[(int) $color] = array_map('intval', $tallas);
+        }
+
+        $r = $configurador->calcular($prenda, (int) $datos['color'], array_map('intval', $datos['zonas'] ?? []), $cantidades);
+        $euros = fn (?int $c) => $c === null ? null : Formato::euros($c);
+
+        return response()->json([...$r, 'por_unidad' => $euros($r['por_unidad']), 'total' => $euros($r['total'])]);
     }
 
     /** URL de la misma página en cada idioma (selector de idioma y hreflang). */

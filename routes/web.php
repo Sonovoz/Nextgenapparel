@@ -34,4 +34,5 @@ Route::prefix('{idioma}')
         // Las rutas fijas futuras (carrito, cuenta…) se registran antes de estas.
         Route::get('/{familia}', [TiendaController::class, 'familia'])->name('tienda.familia');
         Route::get('/{familia}/{prenda}', [TiendaController::class, 'prenda'])->name('tienda.prenda');
+        Route::get('/{familia}/{prenda}/precio', [TiendaController::class, 'precio'])->name('tienda.precio')->middleware('throttle:120,1');
     });

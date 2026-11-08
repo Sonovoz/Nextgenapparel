@@ -46,7 +46,10 @@
         zonaElegida: false,    // el cliente eligió zona: no se cambia sola
         lupa: false,           // en el estudio, la lupa se activa a mano
         ajustes: {},           // por zona: { escala (0,2–1), cx, cy (0–1 del hueco libre) }
-        version: 0             // cambia con cada diseño nuevo (invalida la caché)
+        version: 0,            // cambia con cada diseño nuevo (invalida la caché)
+        nivel: 'diseno',       // diseno · cantidades · resumen (D142)
+        lineas: [],            // índices de los colores del pedido, en orden
+        cantidades: {}         // por color: { colorId: { tallaId: unidades } }
     };
 
     // estado.modo, estado.logo, estado.texto… son los del diseño de la zona activa
@@ -611,21 +614,25 @@
         if (aviso) aviso.textContent = estado.anadiendo ? textos.elige_zona_nuevo : '';
     }
 
-    /** Lista de capas: cada zona con su diseño, y añadir otro. */
+    /** Tarjeta de decisión (D142): tus diseños con lo que suma cada uno, y «¿otro o seguimos?». */
     function pintarCapas() {
         var caja = document.getElementById('capas');
         if (!caja) return;
         var usadas = zonasConDiseno();
         caja.replaceChildren();
+        caja.classList.toggle('decision', usadas.length > 0);
         if (usadas.length === 0) return;
-        caja.appendChild(el('p', 'capas-titulo', textos.tus_disenos));
-        zonas.filter(function (z) { return usadas.indexOf(z.id) !== -1; }).forEach(function (z) {
+        var conDisenos = zonas.filter(function (z) { return usadas.indexOf(z.id) !== -1; });
+        caja.appendChild(el('p', 'capas-titulo', usadas.length === 1
+            ? texto('decision_uno', { zona: conDisenos[0].nombre }) : texto('decision_varios', { n: usadas.length })));
+        conDisenos.forEach(function (z) {
             var d = estado.disenos[z.id];
             var b = el('button', 'capa-diseno');
             b.type = 'button';
             b.setAttribute('aria-pressed', String(z.id === estado.zonaId));
             b.appendChild(el('strong', '', z.nombre));
             b.appendChild(el('span', '', d.modo === 'logo' ? (d.nombre || textos.pestana_logo) : '«' + d.texto.trim() + '»'));
+            if (z.precio) b.appendChild(el('small', '', '+' + z.precio + textos.por_unidad));
             b.addEventListener('click', function () {
                 fijarZona(z.id);
                 estado.anadiendo = false;
@@ -635,7 +642,9 @@
             caja.appendChild(b);
         });
         var libres = zonas.filter(function (z) { return usadas.indexOf(z.id) === -1 && !zonas.some(function (o) { return usadas.indexOf(o.id) !== -1 && solapan(z, o); }); });
+        var botones = el('div', 'decision-botones');
         if (libres.length) {
+            caja.appendChild(el('p', 'decision-pregunta', textos.decision_pregunta));
             var mas = el('button', 'boton-pildora borde anadir', '+ ' + textos.anadir_diseno);
             mas.type = 'button';
             mas.addEventListener('click', function () {
@@ -643,8 +652,13 @@
                 marcarZona();
                 elegirHerramienta('zona');
             });
-            caja.appendChild(mas);
+            botones.appendChild(mas);
         }
+        var seguir = el('button', 'boton-siguiente', textos.siguiente_cantidades + ' →');
+        seguir.type = 'button';
+        seguir.addEventListener('click', function () { irANivel('cantidades'); });
+        botones.appendChild(seguir);
+        caja.appendChild(botones);
     }
 
     /** Lleva los controles del panel al diseño de la zona activa. */
@@ -701,6 +715,7 @@
 
     function avisarListo() {
         actualizarAjustador();
+        pedirPrecio();
         // Botones de borrar: visibles con algún diseño; «Quitar» nombra su zona.
         acciones.hidden = zonasConDiseno().length === 0;
         var zonaActiva = zonas.filter(function (o) { return o.id === estado.zonaId; })[0];
@@ -1190,6 +1205,323 @@
         esperaTeclas = setTimeout(refrescarColeccion, 250);
     });
     var esperaTeclas = null;
+
+
+    /* ---------- Niveles: 1 Diseño · 2 Tallas y colores · 3 Resumen (D142) ----------
+       El precio SIEMPRE lo calcula el servidor (motor de precios); aquí solo se muestra. */
+
+    var urlPrecio = visor.dataset.precio;
+    var botonesNivel = document.querySelectorAll('#niveles [data-nivel]');
+    var precioBarra = {
+        etiqueta: document.getElementById('precio-etiqueta'),
+        importe: document.getElementById('precio-importe'),
+        detalle: document.getElementById('precio-detalle')
+    };
+    var precioInicial = precioBarra.importe ? {
+        etiqueta: precioBarra.etiqueta.textContent, importe: precioBarra.importe.textContent, detalle: precioBarra.detalle.textContent
+    } : null;
+    var pie = document.getElementById('estudio-pie');
+    var pieSiguiente = document.getElementById('pie-siguiente');
+    var precio = null;          // última respuesta del servidor
+    var clavePrecio = '';
+    var esperaPrecio = null;
+    var peticion = null;
+
+    function textoUds(n) { return texto(n === 1 ? 'ud' : 'uds', { n: n }); }
+    function textoDisenos(n) { return n === 1 ? textos.un_diseno : texto('n_disenos', { n: n }); }
+    function unidadesDe(colorId) {
+        var c = estado.cantidades[colorId] || {};
+        return Object.keys(c).reduce(function (s, t) { return s + c[t]; }, 0);
+    }
+
+    function consultaPrecio() {
+        var q = new URLSearchParams();
+        q.append('color', colores[estado.color].id);
+        zonasConDiseno().forEach(function (id) { q.append('zonas[]', id); });
+        estado.lineas.forEach(function (i) {
+            var id = colores[i].id;
+            var c = estado.cantidades[id] || {};
+            Object.keys(c).forEach(function (t) { if (c[t] > 0) q.append('cantidades[' + id + '][' + t + ']', c[t]); });
+        });
+        return q.toString();
+    }
+
+    function pedirPrecio() {
+        if (!urlPrecio || !colores.length) return;
+        if (zonasConDiseno().length === 0 && estado.nivel !== 'diseno') irANivel('diseno');
+        var clave = consultaPrecio();
+        if (clave === clavePrecio) return;
+        clearTimeout(esperaPrecio);
+        esperaPrecio = setTimeout(function () {
+            clavePrecio = clave;
+            if (peticion) peticion.abort();
+            peticion = window.AbortController ? new AbortController() : null;
+            if (estudio) estudio.classList.add('calculando');
+            fetch(urlPrecio + '?' + clave, { headers: { Accept: 'application/json' }, signal: peticion ? peticion.signal : undefined })
+                .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(function (datos) { precio = datos; pintarPrecio(); })
+                .catch(function (e) { if (e.name !== 'AbortError') clavePrecio = ''; })
+                .finally(function () { if (estudio) estudio.classList.remove('calculando'); });
+        }, 160);
+    }
+
+    /** Arriba (y en el pie del móvil): «Desde», «Tu prenda» o el total, según lo configurado. */
+    function resumenPrecio() {
+        var n = zonasConDiseno().length;
+        if (!n || !precio || precio.disenos !== n || (precio.por_unidad === null && precio.total === null)) return null;
+        if (precio.unidades > 0 && precio.total) {
+            return { etiqueta: textos.total, importe: precio.total, detalle: textoUds(precio.unidades) + ' · ' + precio.por_unidad + textos.por_unidad + ' · ' + textos.iva_incluido };
+        }
+        if (precio.por_unidad === null) return null;
+        return { etiqueta: precio.varia ? textos.tu_prenda_desde : textos.tu_prenda, importe: precio.por_unidad, detalle: textos.por_unidad + ' · ' + textoDisenos(n) + ' · ' + textos.iva_incluido };
+    }
+
+    function pintarPrecio() {
+        var r = resumenPrecio();
+        if (precioBarra.importe) {
+            var v = r || precioInicial;
+            var cambia = precioBarra.importe.textContent !== v.importe;
+            precioBarra.etiqueta.textContent = v.etiqueta;
+            precioBarra.importe.textContent = v.importe;
+            precioBarra.detalle.textContent = v.detalle;
+            if (cambia && !sinMovimiento) { precioBarra.importe.classList.remove('latido'); void precioBarra.importe.offsetWidth; precioBarra.importe.classList.add('latido'); }
+        }
+        pintarNiveles();
+        pintarCuenta();
+        pintarResumen();
+        pintarPie(r);
+    }
+
+    function pintarNiveles() {
+        var hay = zonasConDiseno().length > 0;
+        var listo = hay && !!precio && precio.confirmable && precio.disenos === zonasConDiseno().length;
+        botonesNivel.forEach(function (b) {
+            var n = b.dataset.nivel;
+            b.disabled = n === 'cantidades' ? !hay : (n === 'resumen' ? !listo : false);
+            if (n === estado.nivel) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+        });
+        var ir = document.getElementById('ir-resumen');
+        if (ir) ir.disabled = !listo;
+        if (estado.nivel === 'resumen' && !listo) irANivel('cantidades');
+    }
+
+    function irANivel(nombre) {
+        if (nombre !== 'diseno' && zonasConDiseno().length === 0) nombre = 'diseno';
+        estado.nivel = nombre;
+        ['diseno', 'cantidades', 'resumen'].forEach(function (n) {
+            var caja = document.getElementById('nivel-' + n);
+            if (caja) caja.hidden = n !== nombre;
+        });
+        if (nombre === 'cantidades' && estado.lineas.length === 0) anadirLinea(estado.color);
+        var panelEstudio = document.getElementById('estudio-panel');
+        if (panelEstudio) panelEstudio.scrollTop = 0;
+        pintarLineas();
+        pintarPrecio();
+        pedirPrecio();
+    }
+
+    botonesNivel.forEach(function (b) { b.addEventListener('click', function () { irANivel(b.dataset.nivel); }); });
+    document.querySelectorAll('[data-ir]').forEach(function (b) { b.addEventListener('click', function () { irANivel(b.dataset.ir); }); });
+
+    /* Tallas y colores: una línea por color, con las mismas zonas y diseños. */
+    function anadirLinea(i) {
+        if (estado.lineas.indexOf(i) === -1) estado.lineas.push(i);
+        estado.cantidades[colores[i].id] = estado.cantidades[colores[i].id] || {};
+    }
+
+    function verColor(i) {
+        if (estado.color === i) return;
+        estado.color = i;
+        var cara = hayDiseno() ? caraDelDiseno() : estado.cara;
+        if (colores[i].caras[cara]) estado.cara = cara;
+        pintar('fundido');
+        avisarListo();
+    }
+
+    function muestraColor(color) {
+        var m = el('span', 'punto-color');
+        m.style.background = color.hex || '#888';
+        return m;
+    }
+
+    function pintarLineas() {
+        var caja = document.getElementById('lineas-color');
+        if (!caja) return;
+        caja.replaceChildren();
+        estado.lineas.forEach(function (i) {
+            var color = colores[i];
+            var cant = estado.cantidades[color.id];
+            var fila = el('div', 'linea-color');
+            fila.classList.toggle('viendo', i === estado.color);
+            var cabeza = el('div', 'linea-cabeza');
+            var ver = el('button', 'linea-ver');
+            ver.type = 'button';
+            ver.setAttribute('aria-label', texto('ver_en_prenda', { color: color.nombre }));
+            ver.appendChild(muestraColor(color));
+            ver.appendChild(el('strong', '', color.nombre));
+            var cuenta = el('span', 'linea-unidades', textoUds(unidadesDe(color.id)));
+            ver.appendChild(cuenta);
+            ver.addEventListener('click', function () { verColor(i); pintarLineas(); });
+            cabeza.appendChild(ver);
+            if (estado.lineas.length > 1) {
+                var quitar = el('button', 'linea-quitar', '×');
+                quitar.type = 'button';
+                quitar.setAttribute('aria-label', texto('quitar_color', { color: color.nombre }));
+                quitar.addEventListener('click', function () {
+                    estado.lineas.splice(estado.lineas.indexOf(i), 1);
+                    delete estado.cantidades[color.id];
+                    if (estado.color === i) verColor(estado.lineas[0]);
+                    pintarLineas();
+                    pedirPrecio();
+                });
+                cabeza.appendChild(quitar);
+            }
+            fila.appendChild(cabeza);
+            var rejilla = el('div', 'tallas-rejilla');
+            color.tallas.forEach(function (t) {
+                var celda = el('div', 'talla-celda');
+                var id = 'cantidad-' + color.id + '-' + t.id;
+                var etiqueta = el('label', 'talla-nombre', t.nombre);
+                etiqueta.htmlFor = id;
+                var campo = document.createElement('input');
+                campo.type = 'number';
+                campo.id = id;
+                campo.inputMode = 'numeric';
+                campo.min = 0;
+                campo.max = 10000;
+                campo.step = 1;
+                campo.value = cant[t.id] || 0;
+                var fijar = function (n) {
+                    n = Math.max(0, Math.min(10000, Math.floor(Number(n) || 0)));
+                    if (n > 0) cant[t.id] = n; else delete cant[t.id];
+                    campo.value = n;
+                    celda.classList.toggle('con-unidades', n > 0);
+                    cuenta.textContent = textoUds(unidadesDe(color.id));
+                    pedirPrecio();
+                };
+                celda.classList.toggle('con-unidades', (cant[t.id] || 0) > 0);
+                var menos = el('button', 'talla-boton', '−');
+                menos.type = 'button';
+                menos.setAttribute('aria-label', texto('una_menos', { talla: t.nombre }));
+                menos.addEventListener('click', function () { fijar((cant[t.id] || 0) - 1); });
+                var mas = el('button', 'talla-boton', '+');
+                mas.type = 'button';
+                mas.setAttribute('aria-label', texto('una_mas', { talla: t.nombre }));
+                mas.addEventListener('click', function () { fijar((cant[t.id] || 0) + 1); });
+                campo.addEventListener('input', function () { if (campo.value !== '') fijar(campo.value); });
+                campo.addEventListener('change', function () { fijar(campo.value); });
+                campo.addEventListener('focus', function () { campo.select(); });
+                var mando = el('div', 'talla-mando');
+                mando.appendChild(menos);
+                mando.appendChild(campo);
+                mando.appendChild(mas);
+                celda.appendChild(etiqueta);
+                celda.appendChild(mando);
+                rejilla.appendChild(celda);
+            });
+            fila.appendChild(rejilla);
+            caja.appendChild(fila);
+        });
+
+        var libres = document.getElementById('colores-libres');
+        if (!libres) return;
+        libres.replaceChildren();
+        colores.forEach(function (color, i) {
+            if (estado.lineas.indexOf(i) !== -1 || !color.tallas.length) return;
+            var b = el('button', 'boton-pildora borde color-libre');
+            b.type = 'button';
+            b.appendChild(muestraColor(color));
+            b.appendChild(document.createTextNode('+ ' + color.nombre));
+            b.addEventListener('click', function () { anadirLinea(i); verColor(i); pintarLineas(); pedirPrecio(); });
+            libres.appendChild(b);
+        });
+        document.getElementById('anadir-color').hidden = libres.children.length === 0;
+    }
+
+    function listaMensajes(clase, mensajes) {
+        var ul = el('ul', 'mensajes ' + clase);
+        mensajes.forEach(function (m) { ul.appendChild(el('li', '', m)); });
+        return ul;
+    }
+
+    function pintarCuenta() {
+        var caja = document.getElementById('cuenta');
+        if (!caja || estado.nivel !== 'cantidades') return;
+        caja.replaceChildren();
+        var unidades = estado.lineas.reduce(function (s, i) { return s + unidadesDe(colores[i].id); }, 0);
+        if (unidades === 0 || !precio || precio.unidades === 0) {
+            caja.appendChild(el('p', 'claro', textos.elige_cantidades));
+            return;
+        }
+        if (precio.total) {
+            var total = el('p', 'cuenta-total');
+            total.appendChild(el('span', '', textos.total));
+            total.appendChild(el('strong', '', precio.total));
+            caja.appendChild(total);
+            caja.appendChild(el('p', 'claro', textoUds(precio.unidades) + ' · ' + texto('media', { precio: precio.por_unidad }) + ' · ' + textos.iva_incluido));
+        }
+        if (precio.avisos.length) caja.appendChild(listaMensajes('avisos', precio.avisos));
+        if (precio.impedimentos.length) caja.appendChild(listaMensajes('impedimentos', precio.impedimentos));
+    }
+
+    function pintarResumen() {
+        var caja = document.getElementById('resumen');
+        if (!caja || estado.nivel !== 'resumen' || !precio) return;
+        caja.replaceChildren();
+        caja.appendChild(el('h3', '', textos.resumen_disenos));
+        var ul = el('ul', 'resumen-lista');
+        zonas.filter(function (z) { return zonasConDiseno().indexOf(z.id) !== -1; }).forEach(function (z) {
+            var d = estado.disenos[z.id];
+            var li = el('li');
+            li.appendChild(el('strong', '', z.nombre));
+            li.appendChild(el('span', '', d.modo === 'logo' ? (d.nombre || textos.pestana_logo) : '«' + d.texto.trim() + '»'));
+            if (z.precio) li.appendChild(el('small', '', '+' + z.precio + textos.por_unidad));
+            ul.appendChild(li);
+        });
+        caja.appendChild(ul);
+        caja.appendChild(el('h3', '', textos.resumen_prendas));
+        var prendas = el('ul', 'resumen-lista');
+        estado.lineas.forEach(function (i) {
+            var color = colores[i];
+            var c = estado.cantidades[color.id] || {};
+            var partes = color.tallas.filter(function (t) { return c[t.id] > 0; }).map(function (t) { return t.nombre + ' × ' + c[t.id]; });
+            if (!partes.length) return;
+            var li = el('li');
+            var nombre = el('strong');
+            nombre.appendChild(muestraColor(color));
+            nombre.appendChild(document.createTextNode(textos.prenda + ' · ' + color.nombre));
+            li.appendChild(nombre);
+            li.appendChild(el('span', '', partes.join(' · ')));
+            li.appendChild(el('small', '', textoUds(unidadesDe(color.id))));
+            prendas.appendChild(li);
+        });
+        caja.appendChild(prendas);
+        if (precio.avisos.length) caja.appendChild(listaMensajes('avisos', precio.avisos));
+        var total = el('p', 'cuenta-total');
+        total.appendChild(el('span', '', textos.resumen_total));
+        total.appendChild(el('strong', '', precio.total || '—'));
+        caja.appendChild(total);
+        caja.appendChild(el('p', 'claro', textoUds(precio.unidades) + ' · ' + texto('media', { precio: precio.por_unidad })));
+    }
+
+    /** Móvil: barra fija con el precio y el siguiente paso. */
+    function pintarPie(r) {
+        if (!pie) return;
+        var hay = zonasConDiseno().length > 0;
+        pie.hidden = !hay;
+        if (!hay) return;
+        r = r || resumenPrecio();
+        document.getElementById('pie-importe').textContent = r ? r.importe : textos.calculando;
+        document.getElementById('pie-detalle').textContent = r ? r.etiqueta + ' · ' + r.detalle : '';
+        var siguiente = { diseno: ['cantidades', textos.siguiente_cantidades], cantidades: ['resumen', textos.siguiente_resumen], resumen: null }[estado.nivel];
+        pieSiguiente.hidden = !siguiente;
+        if (siguiente) {
+            pieSiguiente.dataset.ir = siguiente[0];
+            pieSiguiente.textContent = siguiente[1] + ' →';
+            pieSiguiente.disabled = siguiente[0] === 'resumen' && !(precio && precio.confirmable);
+        }
+    }
+    if (pieSiguiente) pieSiguiente.addEventListener('click', function () { irANivel(pieSiguiente.dataset.ir); });
 
     if (esPagina) {
         document.body.classList.add('estudio-abierto');

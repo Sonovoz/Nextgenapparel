@@ -121,7 +121,11 @@ class Escaparate
         $maquetas = $prenda->fotos()->where('tipo', TipoFoto::Maqueta->value)
             ->with(['zonas' => fn ($q) => $q->whereIn('zona_impresion_id', $zonasOfrecidas), 'zonas.zona'])->get();
 
-        return Color::whereIn('id', $idsColores)->orderBy('orden')->get()->map(function (Color $color) use ($maquetas, $precioZona): array {
+        // Tallas a la venta de cada color, para elegir cantidades en el configurador.
+        $tallas = $prenda->variantes()->aLaVenta()->with('talla')->get()->groupBy('color_id')
+            ->map(fn ($vs) => $vs->sortBy(fn ($v) => $v->talla->orden)->map(fn ($v) => ['id' => $v->talla_id, 'nombre' => $v->talla->nombre])->values()->all());
+
+        return Color::whereIn('id', $idsColores)->orderBy('orden')->get()->map(function (Color $color) use ($maquetas, $precioZona, $tallas): array {
             $caras = [];
 
             foreach (Cara::cases() as $cara) {
@@ -138,7 +142,7 @@ class Escaparate
                 ];
             }
 
-            return ['id' => $color->id, 'nombre' => $color->nombre, 'hex' => $color->codigo_hex, 'caras' => $caras];
+            return ['id' => $color->id, 'nombre' => $color->nombre, 'hex' => $color->codigo_hex, 'caras' => $caras, 'tallas' => $tallas[$color->id] ?? []];
         })->values()->all();
     }
 }

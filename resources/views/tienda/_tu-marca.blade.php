@@ -6,6 +6,14 @@
         <p class="claro" style="margin-top: 8px;">{{ __('tienda.tu_marca_texto') }}</p>
     </div>
 
+    {{-- Niveles del configurador (D142): 1 Diseño · 2 Tallas y colores · 3 Resumen. --}}
+    <ol class="niveles" id="niveles" aria-label="{{ __('tienda.niveles') }}">
+        <li><button type="button" data-nivel="diseno" aria-current="step"><b>1</b> {{ __('tienda.nivel_diseno') }}</button></li>
+        <li><button type="button" data-nivel="cantidades" disabled><b>2</b> {{ __('tienda.nivel_cantidades') }}</button></li>
+        <li><button type="button" data-nivel="resumen" disabled><b>3</b> {{ __('tienda.nivel_resumen') }}</button></li>
+    </ol>
+
+    <div class="nivel" id="nivel-diseno">
     {{-- Energía de la calidad, siempre a la vista mientras se diseña. --}}
     <div class="calidad" id="calidad" role="status" aria-live="polite" data-nivel="">
         <div class="calidad-cabecera"><strong id="calidad-etiqueta">{{ __('tienda.calidad_sin_diseno') }}</strong><span class="claro" id="calidad-ppp"></span></div>
@@ -14,6 +22,9 @@
         <p class="claro" id="calidad-consejo"></p>
         <p id="calidad-fondo"></p>
     </div>
+
+    {{-- Tarjeta de decisión: tus diseños con lo que suman y «¿otro diseño o seguimos?». --}}
+    <div class="capas" id="capas" aria-live="polite"></div>
 
     <div class="herramientas" role="tablist" aria-label="{{ __('tienda.estudio') }}">
         <button type="button" role="tab" class="herramienta" id="h-diseno" aria-selected="true" aria-controls="hp-diseno" data-herramienta="diseno">{{ __('tienda.herramienta_diseno') }}</button>
@@ -27,7 +38,6 @@
     </div>
 
     <div id="hp-diseno" role="tabpanel" aria-labelledby="h-diseno" class="herramienta-panel">
-    <div class="capas" id="capas"></div>
 
     <div class="pestanas" role="tablist" aria-label="{{ __('tienda.tu_marca_etiqueta') }}">
         <button type="button" role="tab" id="pestana-logo" aria-selected="true" aria-controls="panel-logo" data-modo="logo">{{ __('tienda.pestana_logo') }}</button>
@@ -106,4 +116,31 @@
     </div>
 
     <p class="claro" style="font-size: 13px;">{{ __('tienda.privacidad') }}</p>
+    </div>
+
+    <div class="nivel" id="nivel-cantidades" hidden>
+        <div>
+            <h2 class="nivel-titulo">{{ __('tienda.nivel_cantidades') }}</h2>
+            <p class="claro">{{ __('tienda.cantidades_texto') }}</p>
+        </div>
+        <div class="lineas-color" id="lineas-color"></div>
+        <div class="grupo" id="anadir-color">
+            <span>{{ __('tienda.anadir_color') }}</span>
+            <div class="opciones" id="colores-libres"></div>
+        </div>
+        <div class="cuenta" id="cuenta" aria-live="polite"></div>
+        <div class="nivel-acciones">
+            <button type="button" class="boton-texto" data-ir="diseno">← {{ __('tienda.volver_diseno') }}</button>
+            <button type="button" class="boton-siguiente" id="ir-resumen" data-ir="resumen" disabled>{{ __('tienda.siguiente_resumen') }} <span aria-hidden="true">→</span></button>
+        </div>
+    </div>
+
+    <div class="nivel" id="nivel-resumen" hidden>
+        <h2 class="nivel-titulo">{{ __('tienda.resumen_titulo') }}</h2>
+        <div class="resumen" id="resumen"></div>
+        <p class="claro">{{ __('tienda.envio_al_cerrar') }}</p>
+        <button type="button" class="boton-siguiente" id="anadir-pedido" disabled aria-describedby="anadir-pronto">{{ __('tienda.anadir_pedido') }}</button>
+        <p class="claro" id="anadir-pronto">{{ __('tienda.anadir_pronto') }}</p>
+        <button type="button" class="boton-texto" data-ir="cantidades">← {{ __('tienda.cambiar_cantidades') }}</button>
+    </div>
 </section>
