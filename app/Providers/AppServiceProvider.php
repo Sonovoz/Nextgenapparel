@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Dominio\Carrito\FusionarCarrito;
+use App\Dominio\Disenos\Propietario;
+use App\Dominio\Disenos\TraspasarDisenos;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Dominio\Sistema\Errores\ErrorDeCopia;
 use App\Models\Ajuste;
@@ -32,6 +35,7 @@ use App\Policies\DisenoPolicy;
 use App\Policies\SeccionPolicy;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\SessionGuard;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
@@ -113,6 +117,21 @@ class AppServiceProvider extends ServiceProvider
             if ($evento->user instanceof User && ($enBackend() || $esEmpleado($evento->user))) {
                 Actividad::apuntar('accesos', 'Inicio de sesión', $evento->user, quien: $evento->user);
             }
+        });
+
+        // Quien vuelve con «recordarme» no pasa por el formulario de entrar: su carrito sin cuenta
+        // y sus diseños de la sesión se suman igual (revisión N3 del 5.5, B6).
+        Event::listen(Login::class, function (Login $evento): void {
+            $guarda = auth()->guard($evento->guard);
+            $cliente = $evento->user instanceof User ? $evento->user->cliente : null;
+            if ($cliente === null || ! $guarda instanceof SessionGuard || ! $guarda->viaRemember() || ! request()->hasSession()) {
+                return;
+            }
+            $propietario = Propietario::hash(request(), crear: false);
+            if ($propietario !== null) {
+                app(TraspasarDisenos::class)($propietario, $cliente);
+            }
+            app(FusionarCarrito::class)(request(), $cliente);
         });
 
         Event::listen(Failed::class, function (Failed $evento) use ($esEmpleado, $enBackend): void {

@@ -3,14 +3,10 @@
 namespace App\Dominio\Carrito;
 
 use App\Dominio\Disenos\Dueno;
-use App\Dominio\Precios\Motor\Cesta;
-use App\Dominio\Precios\Motor\MotorPrecios;
-use App\Dominio\Precios\Motor\PackCesta;
 use App\Models\Carrito;
 use App\Models\Cupon;
 use App\Models\Diseno;
 use App\Models\LineaCarrito;
-use App\Models\Pack;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -23,10 +19,7 @@ final class EditarCarrito
     /** Freno al abuso: líneas por carrito (al sumar carritos al entrar no se pierde ninguna). */
     public const MAXIMO_LINEAS = 50;
 
-    public function __construct(
-        private readonly ComprobarLinea $comprobar,
-        private readonly MotorPrecios $motor,
-    ) {}
+    public function __construct(private readonly ComprobarLinea $comprobar) {}
 
     /**
      * @param  array<int|string, mixed>  $tallas  talla_id => unidades
@@ -52,14 +45,24 @@ final class EditarCarrito
         $impresiones = $this->impresiones($dueno, $impresiones);
         $elecciones = self::elecciones($elecciones);
         $this->validar($this->comprobar->pack($packId, $impresiones, now()));
-        $this->validarReparto($packId, $elecciones, $impresiones);
+        $this->validar($this->comprobar->reparto($packId, $elecciones, $impresiones, now()));
 
         return $this->guardar($carrito, ['tipo' => TipoLinea::Pack, 'pack_id' => $packId, 'elecciones' => $elecciones], $impresiones);
     }
 
-    /** @param  array<int|string, mixed>  $tallas */
-    public function cambiarTallas(LineaCarrito $linea, array $tallas): void
+    /**
+     * La línea se busca dentro del carrito de quien compra: nadie edita líneas ajenas
+     * conociendo su uuid (revisión N3, B3).
+     */
+    public function linea(Carrito $carrito, string $uuid): LineaCarrito
     {
+        return $carrito->lineas()->where('uuid', $uuid)->firstOrFail();
+    }
+
+    /** @param  array<int|string, mixed>  $tallas */
+    public function cambiarTallas(Carrito $carrito, string $uuid, array $tallas): void
+    {
+        $linea = $this->linea($carrito, $uuid);
         if ($linea->tipo !== TipoLinea::Prenda) {
             throw new LineaNoValida(['cantidad_no_valida']);
         }
@@ -67,13 +70,13 @@ final class EditarCarrito
         $this->validar($this->comprobar->prenda($linea->prenda_id, $linea->color_id, $tallas, ComprobarLinea::deLinea($linea)));
 
         $linea->update(['tallas' => ComprobarLinea::unidades($tallas)]);
-        $linea->carrito->touch();
+        $carrito->touch();
     }
 
-    public function quitar(LineaCarrito $linea): void
+    public function quitar(Carrito $carrito, string $uuid): void
     {
-        $linea->delete(); // impresiones en cascada
-        $linea->carrito->touch();
+        $this->linea($carrito, $uuid)->delete(); // impresiones en cascada
+        $carrito->touch();
     }
 
     public function vaciar(Carrito $carrito): void
@@ -122,22 +125,6 @@ final class EditarCarrito
     }
 
     /**
-     * El reparto del pack lo decide el motor: si con esas elecciones no lo puede
-     * valorar, no se añade.
-     *
-     * @param  list<Impresion>  $impresiones
-     */
-    private function validarReparto(int $packId, array $elecciones, array $impresiones): void
-    {
-        $incluidas = Pack::find($packId)?->zonas()->pluck('zonas_impresion.id')->all() ?? [];
-        $extra = array_values(array_diff(array_map(fn (Impresion $i) => $i->zonaId, $impresiones), $incluidas));
-        $resultado = $this->motor->calcular(new Cesta(packs: [new PackCesta($packId, $elecciones, $extra)]));
-        if ($resultado->lineas === []) {
-            throw new LineaNoValida(['reparto_pack_no_valido']);
-        }
-    }
-
-    /**
      * Los diseños se buscan por su uuid y solo entre los de quien compra.
      *
      * @param  array<int|string, mixed>  $datos
@@ -146,7 +133,7 @@ final class EditarCarrito
     private function impresiones(Dueno $dueno, array $datos): array
     {
         $uuids = array_values(array_filter(array_map(fn ($d) => is_array($d) && is_string($d['diseno'] ?? null) ? $d['diseno'] : null, $datos)));
-        $suyos = $dueno->filtrar(Diseno::query())->whereIn('uuid', $uuids)->pluck('id', 'uuid');
+        $suyos = $dueno->filtrar(Diseno::query())->whereIn('uuid', $uuids)->where('estado', '!=', 'rechazado')->pluck('id', 'uuid');
 
         $impresiones = [];
         foreach ($datos as $zona => $d) {
@@ -158,7 +145,8 @@ final class EditarCarrito
                     throw new LineaNoValida(['medida_no_valida']);
                 }
             }
-            $impresiones[] = new Impresion((int) $zona, $suyos->get($d['diseno'] ?? '') ?? null,
+            $diseno = is_string($d['diseno'] ?? null) ? $suyos->get($d['diseno']) : null; // B1: nada de arrays
+            $impresiones[] = new Impresion((int) $zona, $diseno,
                 $d['ancho_mm'], $d['alto_mm'], $d['desde_cuello_mm'], $d['desde_centro_mm']);
         }
 

@@ -108,7 +108,7 @@ class AjustesGenerales extends Page implements HasSchemas
                     ]),
                 ]),
             Section::make('Carrito')
-                ->description('Lo que el cliente deja en el carrito, con cuenta o sin ella, se guarda este tiempo desde la última vez que lo usa. Después se borra, y con él los diseños de visitantes sin cuenta que solo estaban en ese carrito.')
+                ->description('Lo que el cliente deja en el carrito, con cuenta o sin ella, se guarda este tiempo desde la última vez que lo usa. Después se borra. Los diseños de visitantes sin cuenta que solo estaban en ese carrito se borran cuando además superan los días de «Guardar sin pedido».')
                 ->schema([
                     TextInput::make('carrito_dias')->label('Guardar el carrito')->integer()->minValue(1)->maxValue(365)->suffix('días')->required(),
                 ]),

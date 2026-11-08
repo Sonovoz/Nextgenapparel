@@ -35,7 +35,7 @@ return new class extends Migration
             $table->json('tallas')->nullable(); // talla_id => unidades
             $table->foreignId('pack_id')->nullable()->constrained('packs')->restrictOnDelete();
             $table->json('elecciones')->nullable(); // pack: linea_pack_id => {color, tallas}
-            $table->unsignedSmallInteger('orden')->default(0);
+            $table->unsignedInteger('orden')->default(0);
             $table->timestamps();
         });
 

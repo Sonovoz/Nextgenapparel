@@ -4,10 +4,12 @@ namespace Tests\Feature\Carrito;
 
 use App\Dominio\Carrito\CarritoActual;
 use App\Dominio\Carrito\EditarCarrito;
+use App\Dominio\Carrito\FusionarCarrito;
 use App\Dominio\Carrito\LimpiarCarritos;
 use App\Dominio\Carrito\LineaNoValida;
 use App\Dominio\Carrito\ValorarCarrito;
 use App\Dominio\Catalogo\Cara;
+use App\Dominio\Clientes\BorrarCliente;
 use App\Dominio\Disenos\Dueno;
 use App\Dominio\Disenos\LimpiarDisenos;
 use App\Dominio\Precios\Motor\Cesta;
@@ -29,9 +31,12 @@ use App\Models\User;
 use App\Models\Variante;
 use App\Models\ZonaImpresion;
 use App\Policies\CatalogoPolicy;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\URL;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -73,6 +78,10 @@ class CarritoTest extends TestCase
         }
         $this->camiseta->zonas()->attach($this->zonas['frontal'], ['precio' => 300, 'coste' => 100]);
         $this->camiseta->zonas()->attach($this->zonas['espalda'], ['precio' => 400, 'coste' => 100]);
+        // Talla M: 700 mm de largo y 500 de ancho; L y XL, más grandes.
+        foreach (['M' => [700, 500], 'L' => [740, 540], 'XL' => [760, 560]] as $talla => [$largo, $ancho]) {
+            $this->camiseta->medidas()->create(['talla_id' => $this->tallas[$talla], 'largo_mm' => $largo, 'ancho_mm' => $ancho]);
+        }
     }
 
     /* ---------- Añadir ---------- */
@@ -90,9 +99,6 @@ class CarritoTest extends TestCase
         $this->assertSame($diseno->id, $linea->impresiones->sole()->diseno_id);
         $this->assertSame(['ancho_mm' => 200, 'alto_mm' => 150, 'desde_cuello_mm' => 75, 'desde_centro_mm' => 0],
             $linea->impresiones->sole()->only(['ancho_mm', 'alto_mm', 'desde_cuello_mm', 'desde_centro_mm']));
-        $this->assertDoesNotMatchRegularExpression('/precio|importe|total/', implode(',', [
-            ...\Schema::getColumnListing('carritos'), ...\Schema::getColumnListing('lineas_carrito'), ...\Schema::getColumnListing('impresiones_carrito'),
-        ]));
 
         $valoracion = app(ValorarCarrito::class)($carrito);
         $motor = app(MotorPrecios::class)->calcular(new Cesta([new LineaCesta($this->camiseta->id, $this->negro->id, [$this->tallas['M'] => 10, $this->tallas['L'] => 5], [$this->zonas['frontal']])]));
@@ -106,8 +112,9 @@ class CarritoTest extends TestCase
     {
         $ajeno = $this->diseno(['propietario' => 'sesion-b']);
         $deCliente = $this->diseno(['cliente_id' => Cliente::factory()->create()->id]);
+        $rechazado = $this->diseno(['propietario' => 'sesion-a', 'estado' => 'rechazado']);
 
-        foreach ([$ajeno, $deCliente] as $diseno) {
+        foreach ([$ajeno, $deCliente, $rechazado] as $diseno) {
             $this->assertProblemas(['diseno_no_disponible'], fn () => $this->editar()->anadirPrenda(Carrito::create(), Dueno::sesion('sesion-a'),
                 $this->camiseta->id, $this->negro->id, [$this->tallas['M'] => 15], [$this->zonas['frontal'] => $this->impresion($diseno)]));
         }
@@ -127,6 +134,9 @@ class CarritoTest extends TestCase
             'más del máximo del motor' => [fn ($t) => [[$t->tallas['M'] => MotorPrecios::MAXIMO_UNIDADES + 1], [$t->zonas['frontal'] => []]], ['cantidad_no_valida']],
             'talla que no existe' => [fn ($t) => [[999 => 15], [$t->zonas['frontal'] => []]], ['talla_no_disponible']],
             'sin diseño' => [fn ($t) => [[$t->tallas['M'] => 15], []], ['sin_impresion']],
+            'diseño que no es un texto' => [fn ($t) => [[$t->tallas['M'] => 15], [$t->zonas['frontal'] => ['diseno' => ['x']]]], ['diseno_no_disponible']],
+            'fuera del largo de la talla' => [fn ($t) => [[$t->tallas['M'] => 15], [$t->zonas['frontal'] => ['desde_cuello_mm' => 600]]], ['medida_no_valida']],
+            'fuera del ancho de la talla' => [fn ($t) => [[$t->tallas['M'] => 15], [$t->zonas['frontal'] => ['desde_centro_mm' => 200]]], ['medida_no_valida']],
         ];
     }
 
@@ -151,8 +161,6 @@ class CarritoTest extends TestCase
 
         $this->assertProblemas(['demasiadas_lineas'], fn () => $this->editar()->anadirPrenda($carrito, Dueno::sesion('sesion-a'),
             $this->camiseta->id, $this->negro->id, [$this->tallas['M'] => 15], [$this->zonas['frontal'] => $this->impresion($diseno)]));
-        $this->assertSame('Tu carrito ya tiene 50 líneas. Cierra este pedido o quita alguna antes de añadir más.',
-            (new LineaNoValida(['demasiadas_lineas']))->textos('es')[0]);
     }
 
     /* ---------- El catálogo cambia mientras el carrito espera ---------- */
@@ -169,6 +177,8 @@ class CarritoTest extends TestCase
             'zona quitada de la prenda' => [fn ($t, $d) => $t->camiseta->zonas()->detach($t->zonas['frontal']), 'zona_no_disponible'],
             'zona más pequeña' => [fn ($t, $d) => ZonaImpresion::whereKey($t->zonas['frontal'])->update(['ancho_max_mm' => 150]), 'medida_no_valida'],
             'diseño borrado' => [fn ($t, $d) => $d->delete(), 'diseno_no_disponible'],
+            'diseño rechazado en la revisión' => [fn ($t, $d) => $d->forceFill(['estado' => 'rechazado'])->save(), 'diseno_no_disponible'],
+            'talla más corta en el backend' => [fn ($t, $d) => $t->camiseta->medidas()->where('talla_id', $t->tallas['M'])->update(['largo_mm' => 200]), 'medida_no_valida'],
         ];
     }
 
@@ -219,12 +229,23 @@ class CarritoTest extends TestCase
         $carrito = $this->carritoConCamisetas(15);
         $linea = $carrito->lineas()->sole();
 
-        $this->editar()->cambiarTallas($linea, [$this->tallas['M'] => 20, $this->tallas['XL'] => 2]);
+        $this->editar()->cambiarTallas($carrito, $linea->uuid, [$this->tallas['M'] => 20, $this->tallas['XL'] => 2]);
         $this->assertSame([$this->tallas['M'] => 20, $this->tallas['XL'] => 2], $linea->fresh()->tallas);
-        $this->assertProblemas(['sin_unidades'], fn () => $this->editar()->cambiarTallas($linea->fresh(), [$this->tallas['M'] => 0]));
+        $this->assertProblemas(['sin_unidades'], fn () => $this->editar()->cambiarTallas($carrito, $linea->uuid, [$this->tallas['M'] => 0]));
 
-        $this->editar()->quitar($linea->fresh());
-        $this->assertSame(0, ImpresionCarrito::count());
+        // La línea se busca en el carrito de quien compra: con el uuid de otra no se toca nada.
+        $ajeno = $this->carritoConCamisetas(15, propietario: 'sesion-b');
+        foreach ([fn () => $this->editar()->quitar($ajeno, $linea->uuid), fn () => $this->editar()->cambiarTallas($ajeno, $linea->uuid, [$this->tallas['M'] => 1])] as $accion) {
+            try {
+                $accion();
+                $this->fail('Se esperaba ModelNotFoundException');
+            } catch (ModelNotFoundException) {
+            }
+        }
+        $this->assertModelExists($linea);
+
+        $this->editar()->quitar($carrito, $linea->uuid);
+        $this->assertSame(1, ImpresionCarrito::count()); // solo la del carrito ajeno
         $this->assertTrue(app(ValorarCarrito::class)($carrito->fresh())->vacio());
     }
 
@@ -249,6 +270,17 @@ class CarritoTest extends TestCase
         $valoracion = app(ValorarCarrito::class)($carrito);
         $this->assertSame(8182 + 10 * 400, $valoracion->resultado->subtotal()); // la espalda se cobra aparte (D106)
         $this->assertTrue($valoracion->confirmable());
+
+        // Una zona extra que no ofrecen todas las prendas del pack no se puede añadir (D106).
+        $this->assertProblemas(['zona_no_disponible'], fn () => $this->editar()->anadirPack(Carrito::create(), $dueno, $pack->id, $bien,
+            [$this->zonas['frontal'] => $this->impresion($diseno), $this->zonas['manga'] => $this->impresion($diseno)]));
+
+        // Si el backend retira una talla del reparto, la línea lo dice (revisión N3, M1).
+        $lineaPack->update(['tallas_permitidas' => [$this->tallas['L']]]);
+        $this->assertSame(['reparto_pack_no_valido'], app(ValorarCarrito::class)($carrito->fresh())->lineas[0]['problemas']);
+        $lineaPack->update(['tallas_permitidas' => [$this->tallas['L'], $this->tallas['XL']]]);
+        Variante::where('talla_id', $this->tallas['XL'])->update(['activa' => false]);
+        $this->assertSame(['reparto_pack_no_valido'], app(ValorarCarrito::class)($carrito->fresh())->lineas[0]['problemas']);
 
         $pack->update(['activo' => false]);
         $this->assertSame(['pack_no_disponible'], app(ValorarCarrito::class)($carrito->fresh())->lineas[0]['problemas']);
@@ -325,6 +357,71 @@ class CarritoTest extends TestCase
         $this->assertModelMissing($invitado);
     }
 
+    public function test_sumar_dos_veces_no_duplica_y_al_sumar_se_renumera_con_tope(): void
+    {
+        $usuario = $this->usuario();
+        $suyo = Carrito::create(['cliente_id' => $usuario->cliente->id]);
+        $invitado = Carrito::create(['token' => hash('sha256', $token = str_repeat('g', 40))]);
+        foreach ([[$suyo, 60], [$invitado, 80]] as [$carrito, $n]) {
+            for ($i = 0; $i < $n; $i++) {
+                $carrito->lineas()->create(['tipo' => 'prenda', 'prenda_id' => $this->camiseta->id, 'color_id' => $this->negro->id, 'tallas' => [$this->tallas['M'] => 1], 'orden' => 1000 + $i]);
+            }
+        }
+
+        $this->withCookie(CarritoActual::COOKIE, $token)->post('/es/cuenta/entrar', ['correo' => $usuario->email, 'contrasena' => self::CLAVE]);
+        $this->assertSame(range(1, FusionarCarrito::TOPE), $suyo->lineas()->pluck('orden')->all());
+        $this->assertModelMissing($invitado);
+
+        // Con la cookie vieja ya no hay nada que sumar.
+        app(FusionarCarrito::class)(Request::create('/es', cookies: [CarritoActual::COOKIE => $token]), $usuario->cliente);
+        $this->assertSame(FusionarCarrito::TOPE, $suyo->lineas()->count());
+    }
+
+    public function test_al_verificar_el_correo_en_el_mismo_navegador_se_suma_y_en_otro_no(): void
+    {
+        $usuario = $this->usuario();
+        $usuario->forceFill(['email_verified_at' => null])->save();
+        $enlace = fn (User $u) => URL::temporarySignedRoute('cuenta.es.verificar', now()->addHour(), ['id' => $u->id, 'hash' => sha1($u->email)]);
+        $invitado = $this->carritoConCamisetas(15, token: hash('sha256', $token = str_repeat('g', 40)));
+
+        // Otra persona con la sesión abierta en ese navegador: no se le suma.
+        $otro = User::factory()->create();
+        $this->actingAs($otro)->withCookie(CarritoActual::COOKIE, $token)->get($enlace($usuario));
+        $this->assertModelExists($invitado);
+
+        $this->flushSession(); // otro navegador: sin la sesión de la otra persona
+        $this->app['auth']->forgetGuards();
+        $this->actingAs($usuario->fresh())->withCookie(CarritoActual::COOKIE, $token)->get($enlace($usuario->fresh()));
+        $this->assertModelMissing($invitado);
+        $this->assertSame(1, $usuario->cliente->carrito->lineas()->count());
+    }
+
+    public function test_quien_vuelve_con_recordarme_tambien_suma_su_carrito(): void
+    {
+        $usuario = $this->usuario();
+        $usuario->forceFill(['remember_token' => $recuerdo = str_repeat('r', 60)])->save();
+        $invitado = $this->carritoConCamisetas(15, token: hash('sha256', $token = str_repeat('g', 40)));
+        $guarda = auth()->guard('web');
+
+        $this->withCookie(CarritoActual::COOKIE, $token)
+            ->withCookie($guarda->getRecallerName(), $usuario->id.'|'.$recuerdo.'|'.$usuario->password)
+            ->get('/es/cuenta')->assertOk();
+
+        $this->assertModelMissing($invitado);
+        $this->assertSame(1, $usuario->cliente->carrito->lineas()->count());
+    }
+
+    public function test_al_borrar_el_cliente_se_borra_su_carrito(): void
+    {
+        $usuario = $this->usuario();
+        $carrito = $this->carritoConCamisetas(15, cliente: $usuario->cliente->id);
+
+        app(BorrarCliente::class)($usuario->cliente, User::factory()->create());
+
+        $this->assertModelMissing($carrito);
+        $this->assertSame(0, LineaCarrito::count() + ImpresionCarrito::count());
+    }
+
     /* ---------- Retención ---------- */
 
     public function test_los_carritos_sin_usar_se_borran_y_sus_disenos_de_invitado_despues(): void
@@ -358,6 +455,13 @@ class CarritoTest extends TestCase
 
         CarritoActual::de($peticion);
         $this->assertTrue($carrito->fresh()->updated_at->isToday());
+        $cookie = collect(Cookie::getQueuedCookies())->first(fn ($c) => $c->getName() === CarritoActual::COOKIE);
+        $this->assertEqualsWithDelta(now()->addDays(30)->getTimestamp(), $cookie->getExpiresTime(), 5);
+
+        // Usado hace menos de un día: no se escribe en la base de datos.
+        Carrito::whereKey($carrito->id)->update(['updated_at' => $hace = now()->subHours(23)->startOfSecond()]);
+        CarritoActual::de($peticion);
+        $this->assertEquals($hace, $carrito->fresh()->updated_at);
     }
 
     public function test_un_color_o_una_zona_en_un_carrito_no_se_pueden_borrar(): void

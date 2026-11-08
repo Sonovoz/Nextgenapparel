@@ -25,7 +25,7 @@ final class CarritoActual
         $cliente = $request->user()?->cliente;
         if ($cliente instanceof Cliente) {
             return self::usado($crear
-                ? Carrito::createOrFirst(['cliente_id' => $cliente->id])
+                ? Carrito::firstOrCreate(['cliente_id' => $cliente->id])
                 : Carrito::where('cliente_id', $cliente->id)->first());
         }
 
