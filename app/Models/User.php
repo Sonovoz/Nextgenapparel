@@ -9,6 +9,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\LogOptions;
@@ -48,6 +49,12 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->activo && $this->hasAnyRole(Rol::valores());
+    }
+
+    /** Ficha de cliente de la tienda, si el usuario compra (fase 5). Los clientes no tienen rol. */
+    public function cliente(): HasOne
+    {
+        return $this->hasOne(Cliente::class);
     }
 
     public function rol(): ?Rol
