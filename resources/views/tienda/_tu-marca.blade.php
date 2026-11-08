@@ -143,7 +143,7 @@
         <button type="button" class="accion-reiniciar" id="empezar-de-nuevo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M20 10A8 8 0 0 0 6.3 6.3L4 10m16 4-2.3 3.7A8 8 0 0 1 4 14"/></svg><span id="empezar-texto">{{ __('tienda.empezar_de_nuevo') }}</span></button>
     </div>
 
-    <p class="claro" style="font-size: 13px;">{{ __('tienda.privacidad', ['dias' => (int) \App\Models\Ajuste::obtener('disenos.dias_sin_pedido')]) }}</p>
+    <p class="claro" style="font-size: 13px;">{{ trans_choice('tienda.privacidad', $diasDisenos = (int) \App\Models\Ajuste::obtener('disenos.dias_sin_pedido'), ['dias' => $diasDisenos]) }}</p>
     </div>
 
     <div class="nivel" id="nivel-cantidades" hidden>

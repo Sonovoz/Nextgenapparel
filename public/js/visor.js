@@ -57,14 +57,14 @@
 
     // estado.modo, estado.logo, estado.texto… son los del diseño de la zona activa
     // (o un borrador mientras aún no hay zona). Así cada zona lleva su propio diseño.
-    function nuevoDiseno() { return { modo: 'logo', logo: null, texto: '', fuente: 0, tinta: 'auto', logoPx: null, logoTipo: null, nombre: '', archivo: null, uuid: null }; }
+    function nuevoDiseno() { return { modo: 'logo', logo: null, texto: '', fuente: 0, tinta: 'auto', logoPx: null, logoTipo: null, nombre: '', archivo: null, uuid: null, avisos: null }; }
     var borrador = nuevoDiseno();
     function actual() {
         if (estado.zonaId === null) return borrador;
         if (!estado.disenos[estado.zonaId]) estado.disenos[estado.zonaId] = nuevoDiseno();
         return estado.disenos[estado.zonaId];
     }
-    ['modo', 'logo', 'texto', 'fuente', 'tinta', 'logoPx', 'logoTipo', 'nombre', 'archivo', 'uuid'].forEach(function (campo) {
+    ['modo', 'logo', 'texto', 'fuente', 'tinta', 'logoPx', 'logoTipo', 'nombre', 'archivo', 'uuid', 'avisos'].forEach(function (campo) {
         Object.defineProperty(estado, campo, { get: function () { return actual()[campo]; }, set: function (v) { actual()[campo] = v; } });
     });
     function disenoValido(d) { return !!d && (d.modo === 'logo' ? !!d.logo : d.texto.trim() !== ''); }
@@ -822,6 +822,12 @@
         var url = URL.createObjectURL(archivo);
         var img = new Image();
         img.onload = function () {
+            if (estado.subiendo) { // empezó la subida mientras se leía (Gauntlet N1)
+                URL.revokeObjectURL(url);
+                ocultarCarga();
+                mostrarError(textos.espera_subida);
+                return;
+            }
             var w = img.naturalWidth || 1000, h = img.naturalHeight || 1000;
             var escala = Math.min(1, LADO_MAXIMO / Math.max(w, h));
             var c = document.createElement('canvas');
@@ -856,6 +862,7 @@
         estado.nombre = logo.nombre;
         estado.archivo = logo.archivo;
         estado.uuid = logo.uuid;
+        estado.avisos = logo.avisos || null;
         estado.errorSubida = '';
         // Un logo nuevo pide su propia declaración de derechos (Gauntlet M1).
         if (!logo.uuid) estado.derechos = false;
@@ -924,7 +931,9 @@
                     cargarBiblioteca(function () {
                         // El foco va al siguiente diseño o, si no quedan, a «Elegir mi logo».
                         var siguiente = listaBiblioteca.querySelector('.biblioteca-usar');
-                        (siguiente || entrada).focus();
+                        if (siguiente) { siguiente.focus(); return; }
+                        soltar.tabIndex = -1; // la zona «Elegir mi logo», visible (el campo de archivo está oculto)
+                        soltar.focus();
                     });
                 }, function () { mostrarError(textos.error_red); });
             });
@@ -943,7 +952,7 @@
             var c = document.createElement('canvas');
             c.width = img.naturalWidth; c.height = img.naturalHeight;
             c.getContext('2d').drawImage(img, 0, 0);
-            ponerLogo({ lienzo: c, tipo: d.fondo, px: { w: d.ancho_px, h: d.alto_px }, nombre: d.nombre, archivo: null, uuid: d.uuid });
+            ponerLogo({ lienzo: c, tipo: d.fondo, px: { w: d.ancho_px, h: d.alto_px }, nombre: d.nombre, archivo: null, uuid: d.uuid, avisos: d.avisos || [] });
         }, function () { ocultarCarga(); mostrarError(textos.error_red); });
     }
 
@@ -1511,10 +1520,12 @@
     /** Sube uno a uno los logos aún sin subir. El servidor decide: sus píxeles útiles sustituyen a los del navegador. */
     function subirDisenos() {
         var pendientes = pendientesDeSubir();
+        for (var j = 0; j < pendientes.length; j++) {
+            if (!pendientes[j].archivo) return Promise.resolve(fallarSubida(texto('error_original', { nombre: pendientes[j].nombre })));
+        }
         if (!estado.derechos) return Promise.resolve(fallarSubida(textos.error_derechos));
         for (var i = 0; i < pendientes.length; i++) {
             var d = pendientes[i];
-            if (!d.archivo) return Promise.resolve(fallarSubida(texto('error_original', { nombre: d.nombre })));
             // Sin tipo (algunos selectores de Android) decide el servidor por la firma del archivo.
             if (d.archivo.type && d.archivo.type !== 'image/png') return Promise.resolve(fallarSubida(textos.error_no_png));
             if (d.archivo.size > Number(visor.dataset.maxBytes || Infinity)) return Promise.resolve(fallarSubida(d.nombre + ': ' + textos.error_pesado));
@@ -1562,8 +1573,9 @@
                 cargarBiblioteca();
                 pintarAvisosSubida();
             }
-            // Si algo cambió mientras tanto, lo que quede pendiente impide seguir.
-            return ok && pendientesDeSubir().length === 0;
+            // Si algo cambió mientras tanto, lo que quede pendiente impide seguir, con su motivo.
+            if (ok && pendientesDeSubir().length) return fallarSubida(textos.error_cambiado);
+            return ok;
         });
     }
 
@@ -1606,6 +1618,7 @@
         if (nombre === 'cantidades' && estado.lineas.length === 0) anadirLinea(estado.color);
         var panelEstudio = document.getElementById('estudio-panel');
         if (panelEstudio) panelEstudio.scrollTop = 0;
+        pintarAvisosSubida();
         pintarLineas();
         pintarPrecio();
         pedirPrecio();

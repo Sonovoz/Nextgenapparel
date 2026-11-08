@@ -51,4 +51,6 @@ return [
     'biblioteca_confirmar' => 'Remove «:nombre»? We will delete it from our server.',
     'biblioteca_usar' => 'Use «:nombre» on this garment',
     'error_caducada' => 'The page has expired after being idle. Reload it and try again.',
+    'espera_subida' => 'Wait until we finish checking your design before changing it.',
+    'error_cambiado' => 'You changed the design while we were checking it. Press «Next» again.',
 ];

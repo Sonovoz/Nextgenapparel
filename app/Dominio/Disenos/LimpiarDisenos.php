@@ -44,10 +44,13 @@ final class LimpiarDisenos
             }
         }
 
-        // Carpetas de mes que se han quedado vacías (de la más profunda a la raíz).
+        // Carpetas que se han quedado vacías (de la más profunda a la raíz). rmdir no es
+        // recursivo: si una subida acaba de escribir dentro, falla y no borra nada. La carpeta
+        // del mes en curso (y su año) no se toca nunca.
+        $enUso = [now()->format('Y/m'), now()->format('Y')];
         foreach (collect($disco->allDirectories())->sortByDesc(fn ($d) => substr_count($d, '/')) as $carpeta) {
-            if ($disco->files($carpeta) === [] && $disco->directories($carpeta) === []) {
-                $disco->deleteDirectory($carpeta);
+            if (! in_array($carpeta, $enUso, true)) {
+                @rmdir($disco->path($carpeta));
             }
         }
 

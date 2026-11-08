@@ -75,6 +75,8 @@
         'biblioteca_quitar' => __('disenos.biblioteca_quitar'),
         'biblioteca_usar' => __('disenos.biblioteca_usar'),
         'error_caducada' => __('disenos.error_caducada'),
+        'espera_subida' => __('disenos.espera_subida'),
+        'error_cambiado' => __('disenos.error_cambiado'),
         'biblioteca_confirmar' => __('disenos.biblioteca_confirmar'),
         'error_pesado' => __('disenos.error_pesado', ['mb' => \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo()]),
     ];

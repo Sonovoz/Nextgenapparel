@@ -51,4 +51,6 @@ return [
     'biblioteca_confirmar' => '¿Quitar «:nombre»? Lo borraremos de nuestro servidor.',
     'biblioteca_usar' => 'Usar «:nombre» en esta prenda',
     'error_caducada' => 'La página ha caducado por inactividad. Recárgala y vuelve a intentarlo.',
+    'espera_subida' => 'Espera a que terminemos de comprobar tu diseño para cambiarlo.',
+    'error_cambiado' => 'Has cambiado el diseño mientras lo comprobábamos. Pulsa otra vez «Siguiente».',
 ];
