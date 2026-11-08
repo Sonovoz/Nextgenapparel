@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Cuenta;
 
+use App\Dominio\Carrito\FusionarCarrito;
 use App\Dominio\Clientes\VincularCliente;
 use App\Dominio\Disenos\Propietario;
 use App\Dominio\Disenos\TraspasarDisenos;
@@ -24,7 +25,7 @@ class AccesoController
         return view('cuenta.entrar', ['alternos' => RutaCuenta::alternos('entrar')]);
     }
 
-    public function entrar(Request $request, VincularCliente $vincular, TraspasarDisenos $traspasar): RedirectResponse
+    public function entrar(Request $request, VincularCliente $vincular, TraspasarDisenos $traspasar, FusionarCarrito $fusionar): RedirectResponse
     {
         $datos = $request->validate([
             'correo' => ['required', 'string', 'email', 'max:255'],
@@ -50,6 +51,9 @@ class AccesoController
         $cliente = $vincular($request->user());
         if ($cliente !== null && $propietario !== null) {
             $traspasar($propietario, $cliente);
+        }
+        if ($cliente !== null) {
+            $fusionar($request, $cliente); // el carrito sin cuenta se suma al suyo (paso 5.5)
         }
 
         return redirect(self::destino($request));

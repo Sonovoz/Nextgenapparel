@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Cliente de la tienda (fase 5, D153): con cuenta (user_id) o invitado. Los datos
@@ -68,6 +69,11 @@ class Cliente extends Model
     public function disenos(): HasMany
     {
         return $this->hasMany(Diseno::class);
+    }
+
+    public function carrito(): HasOne
+    {
+        return $this->hasOne(Carrito::class);
     }
 
     /** ¿Lo marca el propio cliente (Ajustes → General) y su tipo lo admite? */

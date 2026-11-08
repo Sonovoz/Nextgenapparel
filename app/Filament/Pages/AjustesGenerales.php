@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Dominio\Carrito\CarritoActual;
 use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Disenos\Calidad;
 use App\Dominio\Disenos\MejoraIa;
@@ -59,6 +60,7 @@ class AjustesGenerales extends Page implements HasSchemas
             ...AnalizadorPng::limites(),
             'dias_sin_pedido' => (int) Ajuste::obtener('disenos.dias_sin_pedido'),
             'recargo_lo_indica' => Ajuste::obtener('clientes.recargo_lo_indica'),
+            'carrito_dias' => CarritoActual::dias(),
             'subidas_hora' => (int) Ajuste::obtener('disenos.subidas_hora'),
             'max_dia' => (int) Ajuste::obtener('disenos.max_dia'),
             'indexar' => (bool) Ajuste::obtener('seo.indexar'),
@@ -104,6 +106,11 @@ class AjustesGenerales extends Page implements HasSchemas
                         'equipo' => 'El equipo, en la ficha del cliente (el cliente solo lo ve)',
                         'cliente' => 'El propio cliente, en «Mis datos»',
                     ]),
+                ]),
+            Section::make('Carrito')
+                ->description('Lo que el cliente deja en el carrito, con cuenta o sin ella, se guarda este tiempo desde la última vez que lo usa. Después se borra, y con él los diseños de visitantes sin cuenta que solo estaban en ese carrito.')
+                ->schema([
+                    TextInput::make('carrito_dias')->label('Guardar el carrito')->integer()->minValue(1)->maxValue(365)->suffix('días')->required(),
                 ]),
             Section::make('Mejorar el diseño con IA')
                 ->description('Si la calidad no llega, el cliente ve un botón con estas instrucciones para mejorar su diseño con su propia herramienta de IA y volver a subirlo. La tienda no envía nada a ninguna IA. Escribe :medida donde va el tamaño de impresión (por ejemplo, «28 × 28 cm»). Si vacías un texto, se usa el de por defecto.')
@@ -165,6 +172,12 @@ class AjustesGenerales extends Page implements HasSchemas
                 Ajuste::guardar('clientes.recargo_lo_indica', $datos['recargo_lo_indica'] === 'cliente' ? 'cliente' : 'equipo');
                 if ($recargoAntes !== Ajuste::obtener('clientes.recargo_lo_indica')) {
                     Actividad::apuntar('ajustes', 'Quién indica el recargo de equivalencia cambiado', propiedades: ['old' => ['recargo_lo_indica' => $recargoAntes], 'attributes' => ['recargo_lo_indica' => Ajuste::obtener('clientes.recargo_lo_indica')]]);
+                }
+
+                $carritoAntes = CarritoActual::dias();
+                Ajuste::guardar('carrito.dias', (int) $datos['carrito_dias']);
+                if ($carritoAntes !== CarritoActual::dias()) {
+                    Actividad::apuntar('ajustes', 'Días que se guarda el carrito cambiados', propiedades: ['old' => ['carrito_dias' => $carritoAntes], 'attributes' => ['carrito_dias' => CarritoActual::dias()]]);
                 }
 
                 // Mejora con IA: solo se guarda el texto que difiere del de por defecto, para que este pueda mejorar con las versiones.

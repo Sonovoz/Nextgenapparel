@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Cuenta;
 
+use App\Dominio\Carrito\FusionarCarrito;
 use App\Dominio\Clientes\VincularCliente;
 use App\Dominio\Disenos\Propietario;
 use App\Dominio\Disenos\TraspasarDisenos;
@@ -19,7 +20,7 @@ class VerificacionController
      * El enlace del correo. No exige haber entrado: se abre a menudo en otro navegador
      * o en el móvil, y la firma de la URL ya demuestra que llegó a ese correo.
      */
-    public function verificar(Request $request, string $id, string $hash, VincularCliente $vincular, TraspasarDisenos $traspasar): RedirectResponse
+    public function verificar(Request $request, string $id, string $hash, VincularCliente $vincular, TraspasarDisenos $traspasar, FusionarCarrito $fusionar): RedirectResponse
     {
         $destino = auth()->check() ? RutaCuenta::url('inicio') : RutaCuenta::url('entrar');
         $usuario = User::find($id);
@@ -37,6 +38,9 @@ class VerificacionController
         $propietario = Propietario::hash($request, crear: false);
         if ($cliente !== null && $propietario !== null && auth()->id() === $usuario->id) {
             $traspasar($propietario, $cliente);
+        }
+        if ($cliente !== null && auth()->id() === $usuario->id) {
+            $fusionar($request, $cliente);
         }
 
         return redirect($destino)->with('estado', __('cuenta.correo_verificado'));

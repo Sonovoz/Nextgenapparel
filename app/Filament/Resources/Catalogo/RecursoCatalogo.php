@@ -42,6 +42,6 @@ abstract class RecursoCatalogo extends Resource
     public static function accionBorrar(): DeleteAction
     {
         return DeleteAction::make()
-            ->modalDescription('Solo se puede borrar si no se usa en ninguna prenda. Si se usa, desactívalo.');
+            ->modalDescription('Solo se puede borrar si no se usa en ninguna prenda ni en ningún carrito. Si se usa, desactívalo.');
     }
 }

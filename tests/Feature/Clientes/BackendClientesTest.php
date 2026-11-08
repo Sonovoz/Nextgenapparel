@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Clientes;
 
+use App\Dominio\Carrito\CarritoActual;
 use App\Dominio\Sistema\Acceso\Rol;
 use App\Filament\Pages\AjustesGenerales;
 use App\Filament\Resources\Clientes\ClienteResource;
@@ -267,6 +268,17 @@ class BackendClientesTest extends TestCase
 
         $this->assertFalse($this->cliente->fresh()->recargo_equivalencia);
         $this->get('/es/cuenta/mis-datos')->assertDontSee('name="recargo_equivalencia"', false);
+    }
+
+    public function test_los_dias_del_carrito_se_configuran_en_ajustes_y_quedan_registrados(): void
+    {
+        $this->actingAs($this->usuarioConRol(Rol::Administrador));
+        Livewire::test(AjustesGenerales::class)->assertSet('data.carrito_dias', 30)
+            ->fillForm(['carrito_dias' => 0])->call('callMountedAction')->callAction('guardar')->assertHasFormErrors(['carrito_dias']);
+        Livewire::test(AjustesGenerales::class)->fillForm(['carrito_dias' => 45])->call('callMountedAction')->callAction('guardar');
+
+        $this->assertSame(45, CarritoActual::dias());
+        $this->assertDatabaseHas('activity_log', ['description' => 'Días que se guarda el carrito cambiados']);
     }
 
     public function test_si_lo_indica_el_cliente_lo_marca_en_mis_datos_y_queda_registrado(): void

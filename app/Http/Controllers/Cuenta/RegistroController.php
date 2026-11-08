@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Cuenta;
 
+use App\Dominio\Carrito\FusionarCarrito;
 use App\Dominio\Clientes\RegistrarCliente;
 use App\Dominio\Clientes\TipoCliente;
 use App\Dominio\Disenos\Propietario;
@@ -23,7 +24,7 @@ class RegistroController
         return view('cuenta.registro', ['alternos' => RutaCuenta::alternos('registro')]);
     }
 
-    public function registrar(Request $request, RegistrarCliente $registrar, TraspasarDisenos $traspasar): RedirectResponse
+    public function registrar(Request $request, RegistrarCliente $registrar, TraspasarDisenos $traspasar, FusionarCarrito $fusionar): RedirectResponse
     {
         $request->merge(['correo' => mb_strtolower(trim((string) $request->input('correo')))]);
         $datos = $request->validate([
@@ -43,6 +44,9 @@ class RegistroController
         $request->session()->regenerate();
         if ($usuario->cliente !== null && $propietario !== null) {
             $traspasar($propietario, $usuario->cliente);
+        }
+        if ($usuario->cliente !== null) {
+            $fusionar($request, $usuario->cliente);
         }
         $usuario->sendEmailVerificationNotification();
 
