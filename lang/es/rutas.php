@@ -10,4 +10,12 @@ return [
     'restablecer' => 'nueva-contrasena',
     'verificar' => 'verificar-correo',
     'reenviar' => 'reenviar-verificacion',
+    'datos' => 'mis-datos',
+    'direcciones' => 'direcciones',
+    'nueva' => 'nueva',
+    'editar' => 'editar',
+    'predeterminada' => 'predeterminada',
+    'disenos' => 'mis-disenos',
+    'contrasena' => 'contrasena',
+    'borrado' => 'borrar-cuenta',
 ];

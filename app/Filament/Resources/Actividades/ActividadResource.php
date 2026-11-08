@@ -49,6 +49,7 @@ class ActividadResource extends Resource
         'catalogo' => 'Catálogo',
         'ajustes' => 'Ajustes',
         'disenos' => 'Diseños',
+        'clientes' => 'Clientes',
     ];
 
     public static function table(Table $table): Table

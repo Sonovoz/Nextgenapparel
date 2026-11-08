@@ -40,6 +40,7 @@ class Cliente extends Model
             'recargo_equivalencia' => 'boolean',
             'activo' => 'boolean',
             'marketing_consentido_en' => 'datetime',
+            'borrado_solicitado_en' => 'datetime',
         ];
     }
 

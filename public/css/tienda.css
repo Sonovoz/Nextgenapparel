@@ -879,3 +879,36 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .resumen-errores ul { margin: 6px 0 0; padding-left: 18px; }
 .resumen-errores a { color: inherit; }
 .resumen-errores:focus { outline: 2px solid var(--azul); outline-offset: 2px; }
+
+/* Área de cliente (paso 5.3) */
+.area-rejilla { display: grid; gap: 24px; }
+@media (min-width: 900px) { .area-rejilla { grid-template-columns: 220px 1fr; align-items: start; gap: 40px; } .area-nav { position: sticky; top: calc(var(--cabecera) + 24px); } }
+.area-nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+@media (min-width: 900px) { .area-nav ul { flex-direction: column; } }
+.area-nav a { display: flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--linea-fuerte); text-decoration: none; font-size: 14px; }
+.area-nav a:hover { border-color: var(--neon); }
+.area-nav a[aria-current="page"] { background: var(--azul-suave); border-color: var(--neon); color: #fff; }
+.area-salir { margin-top: 12px; min-height: 44px; padding: 0 14px; border: 0; background: none; color: var(--tinta-suave); font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
+.area-contenido { max-width: none; margin: 0; }
+.campo-cuenta select { min-height: 50px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--linea-fuerte); background: var(--fondo); color: var(--tinta); font: inherit; font-size: 16px; }
+.campos-dos { display: grid; gap: 18px; }
+@media (min-width: 560px) { .campos-dos { grid-template-columns: 1fr 1fr; } }
+.botones-formulario { display: flex; flex-wrap: wrap; gap: 10px; }
+.botones-formulario .boton { width: auto; flex: 1 1 180px; }
+.grupo-direcciones { display: grid; gap: 12px; margin-top: 8px; }
+.grupo-direcciones > .boton { justify-self: start; min-height: 44px; font-size: 12px; }
+.direccion-tarjeta { padding: 16px; border-radius: 14px; border: 1px solid var(--linea-fuerte); display: grid; gap: 10px; }
+.direccion-tarjeta address { font-style: normal; line-height: 1.55; color: var(--tinta-suave); }
+.direccion-tarjeta address strong { color: var(--tinta); }
+.insignia { justify-self: start; margin: 0; padding: 4px 10px; border-radius: 99px; background: var(--azul-suave); color: var(--neon); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+.direccion-acciones { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.direccion-acciones form { margin: 0; }
+.boton-texto { display: inline-flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; color: var(--neon); font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
+.boton-texto.peligro { color: #FFB3A6; }
+.mis-disenos form { margin: 0; }
+.enlace-area { color: var(--neon); }
+.zona-borrado { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--linea-fuerte); }
+.borrado-detalle summary { list-style: none; min-height: 44px; font-size: 12px; cursor: pointer; }
+.borrado-detalle summary::-webkit-details-marker { display: none; }
+.boton-peligro { border-color: #F0624D; color: #FFC9C0; }
+.boton-peligro:hover { background: #F0624D; color: #fff; }

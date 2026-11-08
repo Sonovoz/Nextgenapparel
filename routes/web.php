@@ -2,8 +2,13 @@
 
 use App\Http\Controllers\Backend\ArchivoDisenoController;
 use App\Http\Controllers\Cuenta\AccesoController;
+use App\Http\Controllers\Cuenta\BorradoController;
+use App\Http\Controllers\Cuenta\CambiarContrasenaController;
 use App\Http\Controllers\Cuenta\ContrasenaController;
 use App\Http\Controllers\Cuenta\CuentaController;
+use App\Http\Controllers\Cuenta\DatosController;
+use App\Http\Controllers\Cuenta\DireccionesController;
+use App\Http\Controllers\Cuenta\MisDisenosController;
 use App\Http\Controllers\Cuenta\RegistroController;
 use App\Http\Controllers\Cuenta\VerificacionController;
 use App\Http\Controllers\DisenoController;
@@ -56,6 +61,23 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
                 Route::get('/', [CuentaController::class, 'inicio'])->name('inicio');
                 Route::post($tramo('salir'), [AccesoController::class, 'salir'])->name('salir');
                 Route::post($tramo('reenviar'), [VerificacionController::class, 'reenviar'])->name('reenviar')->middleware('throttle:cuenta-reenviar');
+
+                // Área de cliente (paso 5.3).
+                Route::get($tramo('datos'), [DatosController::class, 'editar'])->name('datos');
+                Route::put($tramo('datos'), [DatosController::class, 'guardar'])->name('datos.guardar');
+                $direccion = $tramo('direcciones').'/{direccion}';
+                Route::get($tramo('direcciones'), [DireccionesController::class, 'lista'])->name('direcciones');
+                Route::get($tramo('direcciones').'/'.$tramo('nueva'), [DireccionesController::class, 'crear'])->name('direcciones.crear');
+                Route::post($tramo('direcciones'), [DireccionesController::class, 'guardar'])->name('direcciones.guardar');
+                Route::get($direccion.'/'.$tramo('editar'), [DireccionesController::class, 'editar'])->name('direcciones.editar')->whereUuid('direccion');
+                Route::put($direccion, [DireccionesController::class, 'actualizar'])->name('direcciones.actualizar')->whereUuid('direccion');
+                Route::delete($direccion, [DireccionesController::class, 'borrar'])->name('direcciones.borrar')->whereUuid('direccion');
+                Route::post($direccion.'/'.$tramo('predeterminada'), [DireccionesController::class, 'predeterminar'])->name('direcciones.predeterminar')->whereUuid('direccion');
+                Route::get($tramo('disenos'), [MisDisenosController::class, 'lista'])->name('disenos');
+                Route::delete($tramo('disenos').'/{diseno}', [MisDisenosController::class, 'borrar'])->name('disenos.borrar')->whereUuid('diseno');
+                Route::get($tramo('contrasena'), [CambiarContrasenaController::class, 'editar'])->name('contrasena');
+                Route::put($tramo('contrasena'), [CambiarContrasenaController::class, 'guardar'])->name('contrasena.guardar')->middleware('throttle:cuenta-restablecer');
+                Route::post($tramo('borrado'), [BorradoController::class, 'solicitar'])->name('borrado')->middleware('throttle:cuenta-reenviar');
             });
         });
 
