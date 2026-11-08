@@ -52,6 +52,11 @@ Schedule::command('queue:prune-failed --hours=720')
     ->description('Borrar trabajos fallidos de hace más de 30 días')
     ->dailyAt('03:30');
 
+Schedule::command('disenos:limpiar')
+    ->description('Borrar diseños sin pedido de visitantes sin cuenta y archivos huérfanos')
+    ->dailyAt('03:40')
+    ->withoutOverlapping();
+
 // Copias de seguridad (paso 1.6): limpieza según la retención, copia diaria
 // y prueba de restauración semanal.
 Schedule::command('backup:clean --disable-notifications')
