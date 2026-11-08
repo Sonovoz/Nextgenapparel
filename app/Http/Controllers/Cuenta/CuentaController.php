@@ -15,6 +15,10 @@ class CuentaController
     {
         $usuario = $request->user();
         $cliente = $vincular($usuario);
+        if ($cliente !== null && ! $cliente->activo) {
+            session()->now('error', __('cuenta.ficha_inactiva'));
+            $cliente = null;
+        }
 
         return view('cuenta.inicio', [
             'usuario' => $usuario,

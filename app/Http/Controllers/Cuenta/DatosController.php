@@ -80,20 +80,28 @@ class DatosController
 
             // Recargo de equivalencia (Ajustes → General): si lo indica el cliente, se aplica lo que marque
             // (solo autónomos y empresas). Si lo indica el equipo, lo validó para un NIF y un tipo concretos:
-            // si cambian, se retira y queda registrado para que el equipo lo revise (M3).
+            // si cambian, se retira para que el equipo lo revise. Un particular nunca lo tiene.
             $despues = ['tipo' => $cliente->tipo->value, 'nif' => $cliente->nif];
+            $recargoAntes = (bool) $cliente->getOriginal('recargo_equivalencia');
             if ($cliente->puedeIndicarRecargo()) {
-                $recargo = (bool) ($datos['recargo_equivalencia'] ?? false);
-                if ($recargo !== $cliente->recargo_equivalencia) {
-                    $cliente->recargo_equivalencia = $recargo;
-                    Actividad::apuntar('clientes', $recargo ? 'Recargo de equivalencia activado por el cliente' : 'Recargo de equivalencia retirado por el cliente', $cliente, quien: $usuario);
-                }
-            } elseif (! $cliente->tipo->admiteRecargo()) {
+                $cliente->recargo_equivalencia = (bool) ($datos['recargo_equivalencia'] ?? false);
+            } elseif (! $cliente->tipo->admiteRecargo() || $antes !== $despues) {
                 $cliente->recargo_equivalencia = false;
-            } elseif ($antes !== $despues) {
-                $quitaRecargo = $cliente->recargo_equivalencia;
-                $cliente->recargo_equivalencia = false;
-                Actividad::apuntar('clientes', $quitaRecargo ? 'Datos fiscales cambiados por el cliente: recargo de equivalencia retirado' : 'Datos fiscales cambiados por el cliente', $cliente, ['old' => $antes, 'attributes' => $despues], $usuario);
+            }
+
+            // Todo cambio fiscal queda registrado, en los dos modos (revisión N3 del 5.4, M1).
+            $recargoDespues = (bool) $cliente->recargo_equivalencia;
+            if ($antes !== $despues || $recargoAntes !== $recargoDespues) {
+                $descripcion = match (true) {
+                    $antes === $despues => $recargoDespues ? 'Recargo de equivalencia activado por el cliente' : 'Recargo de equivalencia retirado por el cliente',
+                    $recargoAntes && ! $recargoDespues => 'Datos fiscales cambiados por el cliente: recargo de equivalencia retirado',
+                    ! $recargoAntes && $recargoDespues => 'Datos fiscales cambiados por el cliente: recargo de equivalencia activado',
+                    default => 'Datos fiscales cambiados por el cliente',
+                };
+                Actividad::apuntar('clientes', $descripcion, $cliente, [
+                    'old' => [...$antes, 'recargo_equivalencia' => $recargoAntes],
+                    'attributes' => [...$despues, 'recargo_equivalencia' => $recargoDespues],
+                ], $usuario);
             }
             $cliente->save();
 

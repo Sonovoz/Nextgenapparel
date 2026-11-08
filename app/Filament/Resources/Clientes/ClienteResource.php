@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Clientes;
 
 use App\Dominio\Clientes\Nif;
+use App\Dominio\Clientes\ReglasDireccion;
 use App\Dominio\Clientes\TipoCliente;
 use App\Filament\Navegacion\GrupoNavegacion;
 use App\Filament\Resources\Clientes\Pages\EditCliente;
@@ -77,11 +78,11 @@ class ClienteResource extends Resource
                 TextInput::make('nombre')->label('Nombre o razón social')->required()->maxLength(150),
                 Placeholder::make('correo_ficha')->label('Correo')->content(fn (?Cliente $record) => $record?->correo)
                     ->helperText('Lo cambia el propio cliente, con verificación.'),
-                Select::make('tipo')->label('Tipo')->options(TipoCliente::class)->required()->native(false)->live(),
+                Select::make('tipo')->label('Tipo')->options(TipoCliente::class)->required()->native(false)->selectablePlaceholder(false)->live(),
                 TextInput::make('nif')->label('NIF, NIE o CIF')->maxLength(20)
                     ->dehydrateStateUsing(fn ($state) => blank($state) ? null : Nif::normalizar($state))
                     ->rule(fn () => fn ($a, $v, $fallo) => blank($v) || Nif::valido($v) ? null : $fallo('El NIF, NIE o CIF no es válido.')),
-                TextInput::make('telefono')->label('Teléfono')->tel()->maxLength(30),
+                TextInput::make('telefono')->label('Teléfono')->tel()->maxLength(30)->regex(ReglasDireccion::TELEFONO),
                 Select::make('idioma')->label('Idioma')->options(config('idiomas.disponibles'))->required()->native(false),
                 Toggle::make('recargo_equivalencia')->label('Recargo de equivalencia')->columnSpanFull()
                     ->helperText('Solo autónomos y empresas del comercio minorista. Cambia los impuestos de sus facturas.')
@@ -94,7 +95,7 @@ class ClienteResource extends Resource
                     $record->usuario?->hasVerifiedEmail() => 'Con cuenta, correo confirmado',
                     default => 'Con cuenta, correo sin confirmar',
                 }),
-                Toggle::make('activo')->label('Activo')->helperText('Desactivado, no puede entrar en su cuenta.'),
+                Toggle::make('activo')->label('Activo')->helperText('Desactivado, no puede entrar en su cuenta ni usar su ficha en la tienda. La cuenta de un empleado que compra se gestiona en Usuarios.'),
                 Placeholder::make('marketing')->label('Consentimiento de marketing')->content(fn (?Cliente $record) => $record?->marketing_consentido_en
                     ? 'Sí, desde el '.$record->marketing_consentido_en->format('d/m/Y H:i').' ('.$record->marketing_origen.')' : 'No'),
                 Placeholder::make('alta')->label('Alta')->content(fn (?Cliente $record) => $record?->created_at?->format('d/m/Y H:i')),

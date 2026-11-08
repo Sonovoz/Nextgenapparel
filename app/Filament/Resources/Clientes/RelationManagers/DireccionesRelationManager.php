@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Clientes\RelationManagers;
 
 use App\Dominio\Clientes\Direcciones;
 use App\Dominio\Clientes\Paises;
+use App\Dominio\Clientes\ReglasDireccion;
 use App\Dominio\Clientes\TipoDireccion;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Direccion;
@@ -42,10 +43,16 @@ class DireccionesRelationManager extends RelationManager
             TextInput::make('direccion_2')->label('Piso, puerta…')->maxLength(200),
             Select::make('pais')->label('País')->options(fn () => Paises::disponibles())->required()->native(false)->default('ES')->live(),
             TextInput::make('codigo_postal')->label('Código postal')->required()->maxLength(10)
-                ->rule(fn (Get $get) => fn ($a, $v, $fallo) => preg_match(Paises::patronCodigoPostal((string) $get('pais')), strtoupper(trim((string) $v))) ? null : $fallo('El código postal no tiene el formato de ese país.')),
+                ->rule(fn (Get $get) => function ($a, $v, $fallo) use ($get): void {
+                    $tipo = $get('tipo');
+                    $error = ReglasDireccion::errorCodigoPostal((string) $get('pais'), (string) $v, $tipo instanceof TipoDireccion ? $tipo->value : (string) $tipo);
+                    if ($error !== null) {
+                        $fallo($error);
+                    }
+                }),
             TextInput::make('localidad')->label('Localidad')->required()->maxLength(100),
             TextInput::make('provincia')->label('Provincia')->maxLength(100),
-            TextInput::make('telefono')->label('Teléfono')->tel()->maxLength(30),
+            TextInput::make('telefono')->label('Teléfono')->tel()->maxLength(30)->regex(ReglasDireccion::TELEFONO),
         ]);
     }
 
@@ -72,7 +79,10 @@ class DireccionesRelationManager extends RelationManager
             ])
             ->recordActions([
                 Action::make('predeterminar')->label('Predeterminada')->icon('heroicon-o-star')->visible(fn (Direccion $d) => ! $d->predeterminada)
-                    ->action(fn (Direccion $d) => app(Direcciones::class)->predeterminar($d)),
+                    ->action(function (Direccion $d): void {
+                        app(Direcciones::class)->predeterminar($d);
+                        Actividad::apuntar('clientes', 'Dirección predeterminada cambiada por el equipo', $this->getOwnerRecord());
+                    }),
                 EditAction::make()->using(function (Direccion $record, array $data) use ($guardar): Model {
                     $direccion = $guardar($data, $record);
                     Actividad::apuntar('clientes', 'Dirección cambiada por el equipo', $this->getOwnerRecord());

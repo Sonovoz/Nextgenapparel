@@ -22,6 +22,11 @@ trait ConCliente
             throw new HttpResponseException(redirect(RutaCuenta::url('inicio'))->with('error', __('cuenta.necesita_ficha')));
         }
 
+        if (! $cliente->activo) {
+            // Ficha desactivada por el equipo (también la de un empleado que compra): sin área ni compras (B1).
+            throw new HttpResponseException(redirect(RutaCuenta::url('inicio'))->with('error', __('cuenta.ficha_inactiva')));
+        }
+
         return $cliente;
     }
 }

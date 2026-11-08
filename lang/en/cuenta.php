@@ -140,4 +140,5 @@ return [
     'correo_borrado_plazo' => 'It must be handled within one month at most (GDPR). Find the customer under Customers in the backend.',
     'cp_sin_envio' => 'We do not ship to this postcode yet. Write to us and we will look into it.',
     'recargo_casilla' => 'I am under the equivalence surcharge scheme (retail trade): apply it on my invoices.',
+    'ficha_inactiva' => 'Your customer account is deactivated. Write to us if you think it is a mistake.',
 ];

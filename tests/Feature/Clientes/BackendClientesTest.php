@@ -13,9 +13,12 @@ use App\Models\Cliente;
 use App\Models\Direccion;
 use App\Models\Diseno;
 use App\Models\User;
+use App\Models\ZonaEnvio;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -171,6 +174,91 @@ class BackendClientesTest extends TestCase
         $this->assertDatabaseHas('activity_log', ['description' => 'Solicitud de borrado anulada']);
     }
 
+    /* ---------- Revisión N3 del 5.4 ---------- */
+
+    public function test_pasar_a_particular_y_desactivar_a_la_vez_desactiva_la_cuenta_y_registra_la_retirada_del_recargo(): void
+    {
+        $this->cliente->update(['recargo_equivalencia' => true]);
+        $this->actingAs($this->usuarioConRol(Rol::GestorTienda));
+
+        Livewire::test(EditCliente::class, ['record' => $this->cliente->getRouteKey()])
+            ->fillForm(['tipo' => 'particular', 'activo' => false])->call('save')->assertHasNoFormErrors();
+
+        $this->assertFalse($this->cliente->fresh()->recargo_equivalencia);
+        $this->assertFalse($this->cliente->usuario->fresh()->activo);
+        $apunte = Activity::where('description', 'Cliente modificado')->sole();
+        $this->assertTrue($apunte->properties['old']['recargo_equivalencia']);
+        $this->assertFalse($apunte->properties['attributes']['recargo_equivalencia']);
+    }
+
+    public function test_tras_borrar_no_queda_ningun_dato_personal_del_cliente(): void
+    {
+        $usuario = $this->cliente->usuario;
+        // Rastro previo: cambios del equipo y del cliente, un token de contraseña y una sesión.
+        $this->actingAs($this->usuarioConRol(Rol::GestorTienda));
+        Livewire::test(EditCliente::class, ['record' => $this->cliente->getRouteKey()])->fillForm(['telefono' => '600111222'])->call('save');
+        $this->actingAs($usuario)->put('/es/cuenta/mis-datos', $this->datos(['nif' => 'A58818501', 'telefono' => '600111222']));
+        Password::createToken($usuario);
+        DB::table('sessions')->insert(['id' => 'sesion-de-ana', 'user_id' => $usuario->id, 'ip_address' => '10.0.0.1', 'user_agent' => 'Navegador', 'payload' => '', 'last_activity' => time()]);
+        $this->assertTrue($this->hayRastro(), 'Antes de borrar hay datos en el registro');
+
+        $this->actingAs($this->usuarioConRol(Rol::Administrador));
+        Livewire::test(EditCliente::class, ['record' => $this->cliente->getRouteKey()])->callAction('borrar', data: ['confirmacion' => 'BORRAR']);
+
+        $this->assertFalse($this->hayRastro());
+        $this->assertSame(0, DB::table('password_reset_tokens')->where('email', 'ana@ejemplo.com')->count());
+        $this->assertSame(0, DB::table('sessions')->where('id', 'sesion-de-ana')->count());
+        $this->assertDatabaseHas('activity_log', ['description' => 'Cliente borrado']);
+    }
+
+    public function test_el_backend_no_acepta_direcciones_de_envio_fuera_de_las_zonas(): void
+    {
+        ZonaEnvio::create(['nombre' => ['es' => 'Baleares', 'en' => 'Balearic'], 'paises' => ['ES'], 'prefijos_cp' => ['07'], 'metodo' => 'por_caja', 'precio_caja' => 900, 'activa' => true]);
+        $this->actingAs($this->usuarioConRol(Rol::GestorTienda));
+        $datos = ['tipo' => 'envio', 'nombre' => 'Ana', 'direccion' => 'Calle Mayor 1', 'codigo_postal' => '28013', 'localidad' => 'Madrid', 'pais' => 'ES'];
+
+        $gestor = fn () => Livewire::test(DireccionesRelationManager::class, ['ownerRecord' => $this->cliente, 'pageClass' => EditCliente::class]);
+        $gestor()->callTableAction('create', data: $datos)->assertHasTableActionErrors(['codigo_postal']);
+        $gestor()->callTableAction('create', data: [...$datos, 'codigo_postal' => '07001', 'telefono' => 'llámame'])->assertHasTableActionErrors(['telefono']);
+        $this->assertSame(0, $this->cliente->direcciones()->count());
+    }
+
+    public function test_fijar_la_direccion_predeterminada_queda_registrado(): void
+    {
+        Direccion::factory()->for($this->cliente)->create(['predeterminada' => true]);
+        $segunda = Direccion::factory()->for($this->cliente)->create();
+        $this->actingAs($this->usuarioConRol(Rol::GestorTienda));
+
+        Livewire::test(DireccionesRelationManager::class, ['ownerRecord' => $this->cliente, 'pageClass' => EditCliente::class])->callTableAction('predeterminar', $segunda);
+
+        $this->assertTrue($segunda->fresh()->predeterminada);
+        $this->assertDatabaseHas('activity_log', ['description' => 'Dirección predeterminada cambiada por el equipo']);
+    }
+
+    public function test_una_ficha_desactivada_no_puede_usar_el_area_aunque_su_cuenta_entre(): void
+    {
+        $this->cliente->update(['activo' => false]);
+
+        $this->actingAs($this->cliente->usuario)->get('/es/cuenta/mis-datos')->assertRedirect('/es/cuenta')->assertSessionHas('error', __('cuenta.ficha_inactiva'));
+    }
+
+    public static function modosRecargo(): array
+    {
+        return ['lo indica el equipo' => ['equipo'], 'lo indica el cliente' => ['cliente']];
+    }
+
+    #[DataProvider('modosRecargo')]
+    public function test_pasar_de_empresa_con_recargo_a_particular_queda_registrado_en_los_dos_modos(string $modo): void
+    {
+        Ajuste::guardar('clientes.recargo_lo_indica', $modo);
+        $this->cliente->update(['recargo_equivalencia' => true]);
+
+        $this->actingAs($this->cliente->usuario)->put('/es/cuenta/mis-datos', $this->datos(['tipo' => 'particular', 'recargo_equivalencia' => '1']));
+
+        $this->assertFalse($this->cliente->fresh()->recargo_equivalencia);
+        $this->assertDatabaseHas('activity_log', ['description' => 'Datos fiscales cambiados por el cliente: recargo de equivalencia retirado', 'subject_id' => $this->cliente->id]);
+    }
+
     /* ---------- Quién indica el recargo (Ajustes → General) ---------- */
 
     public function test_por_defecto_lo_indica_el_equipo_y_el_cliente_no_puede_cambiarlo(): void
@@ -195,6 +283,13 @@ class BackendClientesTest extends TestCase
         // Un particular, ni aunque lo envíe.
         $this->put('/es/cuenta/mis-datos', $this->datos(['tipo' => 'particular', 'recargo_equivalencia' => '1']));
         $this->assertFalse($this->cliente->fresh()->recargo_equivalencia);
+    }
+
+    private function hayRastro(): bool
+    {
+        $todo = json_encode(Activity::all()->map(fn ($a) => [$a->description, $a->properties])->all(), JSON_UNESCAPED_UNICODE);
+
+        return collect(['ana@ejemplo.com', 'Ana García', 'B12345674', 'A58818501', '600111222'])->contains(fn ($t) => str_contains($todo, $t));
     }
 
     private function datos(array $cambios = []): array

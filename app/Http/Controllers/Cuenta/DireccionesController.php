@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Cuenta;
 
 use App\Dominio\Clientes\Direcciones;
 use App\Dominio\Clientes\Paises;
+use App\Dominio\Clientes\ReglasDireccion;
 use App\Dominio\Clientes\TipoDireccion;
 use App\Models\Direccion;
-use App\Models\ZonaEnvio;
 use App\Support\RutaCuenta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -96,18 +96,15 @@ class DireccionesController
             'direccion' => ['required', 'string', 'max:200'],
             'direccion_2' => ['nullable', 'string', 'max:200'],
             'codigo_postal' => ['required', 'string', 'max:10', function ($a, $v, $fallo) use ($pais, $request) {
-                if (! preg_match(Paises::patronCodigoPostal($pais), $v)) {
-                    return $fallo(__('cuenta.cp_no_valido', ['pais' => Paises::nombre($pais)]));
-                }
-                // Una dirección de envío tiene que caer en una zona de envío (misma regla que el motor, M4).
-                if ($request->input('tipo') === TipoDireccion::Envio->value && ZonaEnvio::where('activa', true)->exists() && ZonaEnvio::paraDestino($pais, $v) === null) {
-                    $fallo(__('cuenta.cp_sin_envio'));
+                $error = ReglasDireccion::errorCodigoPostal($pais, (string) $v, (string) $request->input('tipo'));
+                if ($error !== null) {
+                    $fallo($error);
                 }
             }],
             'localidad' => ['required', 'string', 'max:100'],
             'provincia' => ['nullable', 'string', 'max:100'],
             'pais' => ['required', Rule::in($paises)],
-            'telefono' => ['nullable', 'string', 'max:30', 'regex:/^[+0-9 ()\-]{6,30}$/'],
+            'telefono' => ['nullable', 'string', 'max:30', 'regex:'.ReglasDireccion::TELEFONO],
             'predeterminada' => ['nullable', 'boolean'],
         ], [], collect(['nombre', 'empresa', 'direccion', 'direccion_2', 'codigo_postal', 'localidad', 'provincia', 'pais', 'telefono'])
             ->mapWithKeys(fn ($c) => [$c => mb_strtolower(__('cuenta.'.($c === 'nombre' ? 'campo_nombre' : $c)))])->all());

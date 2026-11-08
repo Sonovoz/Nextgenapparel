@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
-/** Buscar prendas por nombre en el backend, en cualquier idioma. */
+/** Buscar prendas por nombre en el backend, en cualquier idioma y sin distinguir mayúsculas (también en MariaDB). */
 class BuscarPrendasTest extends TestCase
 {
     use RefreshDatabase;
@@ -24,7 +24,9 @@ class BuscarPrendasTest extends TestCase
         $camiseta = Prenda::where('slug->es', 'camiseta-essential')->sole();
 
         Livewire::test(ListPrendas::class)
-            ->searchTable('Polo')->assertCanSeeTableRecords([$polo])->assertCanNotSeeTableRecords([$camiseta])
-            ->searchTable('T-shirt')->assertCanSeeTableRecords([$camiseta])->assertCanNotSeeTableRecords([$polo]);
+            ->searchTable('polo')->assertCanSeeTableRecords([$polo])->assertCanNotSeeTableRecords([$camiseta])
+            ->searchTable('T-SHIRT')->assertCanSeeTableRecords([$camiseta])->assertCanNotSeeTableRecords([$polo])
+            // «es» está en las claves del JSON de todas las prendas: no debe casar con todas.
+            ->searchTable('es')->assertCanNotSeeTableRecords([$polo]);
     }
 }

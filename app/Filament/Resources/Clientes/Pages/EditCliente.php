@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Clientes\Pages;
 
 use App\Dominio\Clientes\BorrarCliente;
+use App\Dominio\Clientes\TipoCliente;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Filament\Resources\Clientes\ClienteResource;
 use App\Models\Cliente;
@@ -33,6 +34,17 @@ class EditCliente extends EditRecord
         $this->antes = $this->getRecord()->getOriginal();
     }
 
+    /** Un particular no tiene recargo: se retira en el mismo guardado, para que conste en el mismo apunte (revisión N3 del 5.4, A1 y M2). */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $tipo = $data['tipo'] instanceof TipoCliente ? $data['tipo'] : TipoCliente::tryFrom((string) ($data['tipo'] ?? ''));
+        if ($tipo !== null && ! $tipo->admiteRecargo()) {
+            $data['recargo_equivalencia'] = false;
+        }
+
+        return $data;
+    }
+
     protected function afterSave(): void
     {
         /** @var Cliente $cliente */
@@ -46,10 +58,7 @@ class EditCliente extends EditRecord
                 'attributes' => $cambios->mapWithKeys(fn ($c) => [$c => $valor($cliente->{$c})])->all(),
             ]);
         }
-        // Un particular no tiene recargo; la cuenta sigue el estado del cliente.
-        if (! $cliente->tipo->admiteRecargo() && $cliente->recargo_equivalencia) {
-            $cliente->update(['recargo_equivalencia' => false]);
-        }
+        // La cuenta sigue el estado del cliente (salvo la de un empleado, que se gestiona en Usuarios).
         if ($cliente->wasChanged('activo') && $cliente->usuario !== null && ! $cliente->usuario->roles()->exists()) {
             $cliente->usuario->forceFill(['activo' => $cliente->activo])->saveQuietly();
         }

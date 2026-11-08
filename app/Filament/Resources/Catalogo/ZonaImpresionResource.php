@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Catalogo;
 
 use App\Dominio\Catalogo\Cara;
+use App\Filament\Concerns\BusquedaTraducible;
 use App\Filament\Concerns\CamposTraducibles;
 use App\Models\ZonaImpresion;
 use BackedEnum;
@@ -61,7 +62,7 @@ class ZonaImpresionResource extends RecursoCatalogo
             ->defaultSort('orden')
             ->reorderable('orden')
             ->columns([
-                TextColumn::make('nombre')->label('Zona')->searchable(),
+                TextColumn::make('nombre')->label('Zona')->searchable(query: BusquedaTraducible::en('nombre')),
                 TextColumn::make('cara')->label('Cara')->badge(),
                 TextColumn::make('medida')->label('Medida máxima')
                     ->state(fn (ZonaImpresion $r) => str_replace('.', ',', ($r->ancho_max_mm / 10).' × '.($r->alto_max_mm / 10)).' cm'),

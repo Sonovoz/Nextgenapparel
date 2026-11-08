@@ -98,7 +98,7 @@ class AjustesGenerales extends Page implements HasSchemas
                     TextInput::make('max_dia')->label('Diseños nuevos por visitante y día')->integer()->minValue(5)->maxValue(1000)->required(),
                 ]),
             Section::make('Clientes')
-                ->description('El recargo de equivalencia solo es de autónomos y empresas del comercio minorista y cambia los impuestos de sus facturas. Consulta con tu asesor quién debe indicarlo. El equipo siempre puede cambiarlo en la ficha del cliente.')
+                ->description('El recargo de equivalencia solo es de autónomos y empresas del comercio minorista y cambia los impuestos de sus facturas. Consulta con tu asesor quién debe indicarlo. El equipo siempre puede cambiarlo en la ficha del cliente. Si pasas de «el propio cliente» a «el equipo», los recargos que marcaron los clientes siguen activos: revísalos en Clientes con el filtro «Recargo de equivalencia».')
                 ->schema([
                     Select::make('recargo_lo_indica')->label('El recargo de equivalencia lo indica')->required()->selectablePlaceholder(false)->options([
                         'equipo' => 'El equipo, en la ficha del cliente (el cliente solo lo ve)',
