@@ -34,6 +34,9 @@ class Ajuste extends Model
         'disenos.max_dia' => 40,
         // Carrito (paso 5.5): días que se guarda desde su último uso, con cuenta o sin ella.
         'carrito.dias' => 30,
+        // Pedidos (D169): prefijo del número y días que vale el enlace para que un invitado confirme su correo.
+        'pedidos.prefijo' => 'PED-',
+        'pedidos.dias_confirmar_correo' => 7,
         // Recargo de equivalencia (paso 5.4): «equipo» (lo activa el equipo en la ficha) o «cliente» (lo marca él).
         'clientes.recargo_lo_indica' => 'equipo',
         // Mejora con IA para el cliente (D143): activa, desde qué nivel y texto propio por idioma (vacío = el de lang/disenos.php).

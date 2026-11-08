@@ -23,4 +23,8 @@ return [
     'lineas' => 'lineas',
     'cupon' => 'cupon',
     'cerrar' => 'cerrar-pedido',
+    'confirmar' => 'confirmar',
+    'pedidos' => 'pedidos',
+    'confirmar_correo_pedido' => 'confirmar-correo',
+    'reenviar_enlace' => 'reenviar-enlace',
 ];

@@ -984,3 +984,20 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .carrito-maquetas { align-self: start; align-items: flex-start; }
 .carrito-maquetas .maqueta { aspect-ratio: auto; }
 .carrito-maquetas .maqueta > img:first-child { height: auto; object-fit: initial; }
+
+/* Pedido (paso 6.1) */
+.confirmar-pedido { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--linea); }
+.confirmar-pedido .boton { width: 100%; }
+.pedido-lineas { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.pedido-linea h2, .pedido-datos h2 { margin: 0 0 6px; font-size: 16px; font-family: var(--sans); font-weight: 600; text-transform: none; letter-spacing: 0; }
+.pedido-impresiones { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.pedido-impresiones li { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.pedido-impresiones strong { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+.pedido-impresiones span { color: var(--tinta-suave); }
+.pedido-impresiones small { color: var(--neon); }
+.pedido-importe { margin: 12px 0 0; font-weight: 600; }
+.pedido-importe small { font-weight: 400; color: var(--tinta-suave); }
+.pedido-datos { display: grid; gap: 20px; }
+@media (min-width: 700px) { .pedido-datos { grid-template-columns: 1fr 1fr; } }
+.pedido-tarjeta { padding: 20px; border: 1px solid var(--linea); border-radius: 16px; background: var(--papel); }
+.sin-cortar { white-space: nowrap; }

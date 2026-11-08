@@ -71,6 +71,11 @@ class Cliente extends Model
         return $this->hasMany(Diseno::class);
     }
 
+    public function pedidos(): HasMany
+    {
+        return $this->hasMany(Pedido::class)->latest('id');
+    }
+
     public function carrito(): HasOne
     {
         return $this->hasOne(Carrito::class);

@@ -15,6 +15,7 @@ use App\Http\Controllers\Cuenta\RegistroController;
 use App\Http\Controllers\Cuenta\VerificacionController;
 use App\Http\Controllers\DisenoController;
 use App\Http\Controllers\PackController;
+use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TiendaController;
 use App\Http\Middleware\EstablecerIdioma;
@@ -100,10 +101,22 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
             Route::get($tramo('cerrar'), [CierreController::class, 'ver'])->name('cerrar');
             Route::post($tramo('cerrar'), [CierreController::class, 'calcular'])->name('cerrar.calcular')->middleware('throttle:carrito');
             Route::get($tramo('disenos').'/{diseno}', [CarritoController::class, 'miniatura'])->name('miniatura')->whereUuid('diseno');
+            // Confirmar el pedido (paso 6.1): crea el pedido; el pago, en la fase 7.
+            Route::post($tramo('cerrar').'/'.$tramo('confirmar'), [PedidoController::class, 'confirmar'])->name('confirmar')->middleware('throttle:carrito');
+        });
+
+    // Pedidos (paso 6.1): /es/pedidos/{uuid} y /en/orders/{uuid}, sin indexar.
+    Route::prefix($idioma.'/'.$tramo('pedidos'))
+        ->name("pedidos.{$idioma}.")
+        ->middleware(EstablecerIdioma::class)
+        ->group(function () use ($tramo) {
+            Route::get('/{pedido}', [PedidoController::class, 'ver'])->name('ver')->whereUuid('pedido');
+            Route::get('/{pedido}/'.$tramo('confirmar_correo_pedido'), [PedidoController::class, 'confirmarCorreo'])->name('confirmar-correo')->whereUuid('pedido')->middleware('throttle:cuenta-verificar');
+            Route::post('/{pedido}/'.$tramo('reenviar_enlace'), [PedidoController::class, 'reenviar'])->name('reenviar')->whereUuid('pedido')->middleware('throttle:cuenta-reenviar');
         });
 
     // El idioma va en la ruta (para EstablecerIdioma y las URL), no en un parámetro de la URL.
-    foreach ([$idioma.'/'.$tramo('cuenta'), $idioma.'/'.$tramo('carrito')] as $prefijo) {
+    foreach ([$idioma.'/'.$tramo('cuenta'), $idioma.'/'.$tramo('carrito'), $idioma.'/'.$tramo('pedidos')] as $prefijo) {
         foreach (Route::getRoutes()->getRoutes() as $ruta) {
             if (str_starts_with($ruta->uri(), $prefijo)) {
                 $ruta->defaults('idioma', $idioma);

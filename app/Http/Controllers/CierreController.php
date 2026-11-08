@@ -9,6 +9,7 @@ use App\Dominio\Clientes\Paises;
 use App\Dominio\Clientes\ReglasDireccion;
 use App\Dominio\Clientes\TipoCliente;
 use App\Dominio\Clientes\TipoDireccion;
+use App\Dominio\Pedidos\CuponesUsados;
 use App\Dominio\Precios\Motor\Destino;
 use App\Models\Ajuste;
 use App\Models\Cliente;
@@ -47,7 +48,9 @@ class CierreController
             $datos['recargo'] = (bool) $cliente->recargo_equivalencia; // el de su ficha, siempre al día
         }
         $destino = $datos ? new Destino($datos['pais'], $datos['codigo_postal']) : null;
-        $valoracion = $valorar($carrito, $destino, $datos ? (bool) $datos['recargo'] : false);
+        // Los cupones que ya usó: el total que ve es el que se cobrará al confirmar (D169).
+        $usados = $datos ? CuponesUsados::de($cliente, $cliente?->correo ?? $datos['correo'] ?? null) : [];
+        $valoracion = $valorar($carrito, $destino, $datos ? (bool) $datos['recargo'] : false, $usados);
         $envio = $cliente?->direcciones()->where('tipo', TipoDireccion::Envio)->orderByDesc('predeterminada')->first();
 
         return view('carrito.cierre', [
@@ -119,8 +122,13 @@ class CierreController
         return redirect(CarritoController::url('cerrar').'#total');
     }
 
-    /** Lo que impide cerrar con cuenta: correo sin verificar, ficha desactivada o datos fiscales incompletos. */
     private function bloqueo(Request $request, ?Cliente $cliente): ?string
+    {
+        return self::bloqueoDe($request, $cliente);
+    }
+
+    /** Lo que impide cerrar con cuenta: correo sin verificar, ficha desactivada o datos fiscales incompletos. También al confirmar (D169). */
+    public static function bloqueoDe(Request $request, ?Cliente $cliente): ?string
     {
         $usuario = $request->user();
 

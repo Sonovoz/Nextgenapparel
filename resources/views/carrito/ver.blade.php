@@ -13,6 +13,9 @@
     <section class="carrito-pagina" aria-labelledby="titulo-carrito">
         <div class="contenedor">
             <h1 class="titulo-cuenta" id="titulo-carrito">{{ __('carrito.titulo') }}</h1>
+            @if (session('aviso_pedido'))
+                <p class="aviso-cuenta error" role="alert">{{ session('aviso_pedido') }}</p>
+            @endif
             @if (session('estado'))
                 <p class="aviso-cuenta correcto" role="status">{{ session('estado') }}</p>
             @endif

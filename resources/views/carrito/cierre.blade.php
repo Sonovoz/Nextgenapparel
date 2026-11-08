@@ -78,6 +78,9 @@
 
                 <aside class="carrito-resumen" id="total" aria-labelledby="titulo-resumen">
                     <h2 id="titulo-resumen">{{ __('carrito.resumen') }}</h2>
+                    @if (session('aviso_pedido'))
+                        <p class="aviso-cuenta error" role="alert">{{ session('aviso_pedido') }}</p>
+                    @endif
                     <dl>
                         <div><dt>{{ __('carrito.prendas_impresion') }}</dt><dd>{{ Formato::euros($r->bruto()) }}</dd></div>
                         @if ($r->descuentos() > 0)
@@ -95,8 +98,15 @@
                     <p class="cuenta-total"><span>{{ __('carrito.total') }}</span><strong>{{ Formato::euros($r->total()) }}</strong></p>
                     @if ($r->impedimentos || $valoracion->conProblemas())
                         <ul class="mensajes impedimentos">@foreach ($r->textos('impedimentos') as $i)<li>{{ $i }}</li>@endforeach @if ($valoracion->conProblemas())<li>{{ __('carrito.revisa_antes') }}</li>@endif</ul>
-                    @elseif ($datos && ! $bloqueo)
-                        <p class="aviso-cuenta correcto" role="status">{{ __('carrito.siguiente_fase') }}</p>
+                    @elseif ($datos && ! $bloqueo && $valoracion->confirmable())
+                        {{-- Confirmar (paso 6.1, D169): el servidor vuelve a valorar y solo crea el pedido con este mismo total. --}}
+                        <form class="confirmar-pedido" method="POST" action="{{ CarritoController::url('confirmar') }}">
+                            @csrf
+                            <input type="hidden" name="total" value="{{ $r->total() }}">
+                            <label class="casilla-cuenta"><input type="checkbox" name="condiciones" value="1" required @checked(old('condiciones'))> <span>{{ __('pedidos.condiciones_acepto') }}</span></label>
+                            <button type="submit" class="boton principal">{{ __('pedidos.confirmar_boton') }} <span class="sin-cortar">· {{ Formato::euros($r->total()) }}</span></button>
+                            <p class="nota-cuenta">{{ $cliente ? __('pedidos.confirmar_nota_cuenta') : __('pedidos.confirmar_nota_invitado') }}</p>
+                        </form>
                     @endif
                     <a class="boton-texto" href="{{ CarritoController::url('ver') }}">← {{ __('carrito.volver_carrito') }}</a>
                 </aside>

@@ -23,4 +23,8 @@ return [
     'lineas' => 'lines',
     'cupon' => 'coupon',
     'cerrar' => 'checkout',
+    'confirmar' => 'confirm',
+    'pedidos' => 'orders',
+    'confirmar_correo_pedido' => 'confirm-email',
+    'reenviar_enlace' => 'resend-link',
 ];

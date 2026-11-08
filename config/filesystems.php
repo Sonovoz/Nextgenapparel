@@ -47,6 +47,16 @@ return [
             'report' => false,
         ],
 
+        // Archivos de los pedidos (D169): copia de cada diseño tal como se confirmó. Privado,
+        // sin URL pública; aparte del disco «disenos» para que su limpieza no los toque.
+        'pedidos' => [
+            'driver' => 'local',
+            'root' => storage_path('app/pedidos'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
         // Copias de seguridad en el propio servidor (fuera de storage/app).
         'copias' => [
             'driver' => 'local',
