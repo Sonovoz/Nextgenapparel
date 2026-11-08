@@ -4,14 +4,18 @@ namespace App\Http\Controllers\Cuenta;
 
 use App\Dominio\Clientes\Nif;
 use App\Dominio\Clientes\TipoCliente;
+use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Cliente;
 use App\Models\User;
+use App\Notifications\Cuenta\AvisoCambioCorreo;
+use App\Notifications\Cuenta\ConfirmarNuevoCorreo;
 use App\Support\CamposCuenta;
 use App\Support\RutaCuenta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -43,27 +47,26 @@ class DatosController
             'contrasena_actual' => ['nullable', 'string'],
         ], [], CamposCuenta::nombres() + ['telefono' => mb_strtolower(__('cuenta.telefono'))]);
 
-        $cambiaCorreo = $datos['correo'] !== $usuario->email;
-        if ($cambiaCorreo) {
+        $correoNuevo = $datos['correo'] !== $usuario->email ? $datos['correo'] : null;
+        if ($correoNuevo !== null) {
             if (! Hash::check((string) ($datos['contrasena_actual'] ?? ''), $usuario->password)) {
                 throw ValidationException::withMessages(['contrasena_actual' => __('cuenta.contrasena_actual_mal')]);
             }
-            $ocupado = User::where('email', $datos['correo'])->whereKeyNot($usuario->id)->exists()
-                || Cliente::where('correo', $datos['correo'])->whereKeyNot($cliente->id)->exists();
-            if ($ocupado) {
+            if (self::correoOcupado($correoNuevo, $usuario, $cliente)) {
                 throw ValidationException::withMessages(['correo' => __('cuenta.correo_no_disponible')]);
             }
         }
 
-        DB::transaction(function () use ($cliente, $usuario, $datos, $cambiaCorreo): void {
+        DB::transaction(function () use ($cliente, $usuario, $datos, $correoNuevo): void {
+            $cliente = Cliente::whereKey($cliente->id)->lockForUpdate()->first();
+            $antes = ['tipo' => $cliente->tipo->value, 'nif' => $cliente->nif];
             $marketing = (bool) ($datos['marketing'] ?? false);
             $cliente->fill([
                 'nombre' => trim($datos['nombre']),
-                'correo' => $datos['correo'],
                 'tipo' => TipoCliente::from($datos['tipo']),
-                'telefono' => $datos['telefono'] ?: null,
+                'telefono' => ($datos['telefono'] ?? null) ?: null,
                 'idioma' => $datos['idioma'],
-                'nif' => $datos['nif'] ?: null,
+                'nif' => ($datos['nif'] ?? null) ?: null,
             ]);
             // El consentimiento guarda cuándo y dónde se dio; al retirarlo, se borra.
             if ($marketing && $cliente->marketing_consentido_en === null) {
@@ -73,24 +76,36 @@ class DatosController
                 $cliente->marketing_consentido_en = null;
                 $cliente->marketing_origen = null;
             }
-            // Un particular no tiene recargo de equivalencia.
-            if (! $cliente->tipo->admiteRecargo()) {
+
+            // Datos fiscales: el recargo lo validó el equipo para un NIF y un tipo concretos.
+            // Si cambian, se retira y queda registrado para que el equipo lo revise (M3).
+            $despues = ['tipo' => $cliente->tipo->value, 'nif' => $cliente->nif];
+            if ($antes !== $despues) {
+                $quitaRecargo = $cliente->recargo_equivalencia;
                 $cliente->recargo_equivalencia = false;
+                Actividad::apuntar('clientes', $quitaRecargo ? 'Datos fiscales cambiados por el cliente: recargo de equivalencia retirado' : 'Datos fiscales cambiados por el cliente', $cliente, ['old' => $antes, 'attributes' => $despues], $usuario);
             }
             $cliente->save();
 
             $usuario->name = trim($datos['nombre']);
-            if ($cambiaCorreo) {
-                $usuario->email = $datos['correo'];
-                $usuario->email_verified_at = null;
-            }
+            // El correo no cambia hasta que se confirma el nuevo (A1).
+            $usuario->correo_pendiente = $correoNuevo ?? $usuario->correo_pendiente;
             $usuario->save();
         });
 
-        if ($cambiaCorreo) {
-            $usuario->sendEmailVerificationNotification();
+        if ($correoNuevo !== null) {
+            Notification::route('mail', $correoNuevo)->notify((new ConfirmarNuevoCorreo($usuario, $correoNuevo))->locale($cliente->fresh()->idioma));
+            $usuario->notify((new AvisoCambioCorreo($correoNuevo))->locale($cliente->fresh()->idioma));
         }
 
-        return redirect(RutaCuenta::url('datos'))->with('estado', __($cambiaCorreo ? 'cuenta.correo_cambiado' : 'cuenta.datos_guardados'));
+        return redirect(RutaCuenta::url('datos'))->with('estado', __($correoNuevo !== null ? 'cuenta.correo_cambiado' : 'cuenta.datos_guardados'));
+    }
+
+    /** Ocupado por otra cuenta, otra ficha (también de invitado) o pendiente de otro usuario. */
+    public static function correoOcupado(string $correo, User $usuario, Cliente $cliente): bool
+    {
+        return User::where('email', $correo)->whereKeyNot($usuario->id)->exists()
+            || User::where('correo_pendiente', $correo)->whereKeyNot($usuario->id)->exists()
+            || Cliente::where('correo', $correo)->whereKeyNot($cliente->id)->exists();
     }
 }

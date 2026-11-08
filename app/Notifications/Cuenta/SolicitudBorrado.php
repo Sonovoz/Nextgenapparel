@@ -34,6 +34,7 @@ class SolicitudBorrado extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject(__('cuenta.correo_borrado_asunto', ['tienda' => Ajuste::obtener('tienda.nombre')]))
             ->line(__('cuenta.correo_borrado_texto', ['nombre' => $this->cliente->nombre, 'correo' => $this->cliente->correo]))
-            ->action(__('cuenta.correo_borrado_boton'), url('/admin'));
+            ->action(__('cuenta.correo_borrado_boton'), url('/admin'))
+            ->line(__('cuenta.correo_borrado_plazo'));
     }
 }

@@ -56,6 +56,7 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
             });
 
             Route::get($tramo('verificar').'/{id}/{hash}', [VerificacionController::class, 'verificar'])->name('verificar')->middleware('throttle:cuenta-verificar');
+            Route::get($tramo('confirmar_correo').'/{id}/{hash}', [VerificacionController::class, 'confirmarCorreo'])->name('confirmar-correo')->middleware('throttle:cuenta-verificar');
 
             Route::middleware('auth')->group(function () use ($tramo) {
                 Route::get('/', [CuentaController::class, 'inicio'])->name('inicio');
@@ -64,7 +65,7 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
 
                 // Área de cliente (paso 5.3).
                 Route::get($tramo('datos'), [DatosController::class, 'editar'])->name('datos');
-                Route::put($tramo('datos'), [DatosController::class, 'guardar'])->name('datos.guardar');
+                Route::put($tramo('datos'), [DatosController::class, 'guardar'])->name('datos.guardar')->middleware('throttle:cuenta-datos');
                 $direccion = $tramo('direcciones').'/{direccion}';
                 Route::get($tramo('direcciones'), [DireccionesController::class, 'lista'])->name('direcciones');
                 Route::get($tramo('direcciones').'/'.$tramo('nueva'), [DireccionesController::class, 'crear'])->name('direcciones.crear');
@@ -76,8 +77,8 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
                 Route::get($tramo('disenos'), [MisDisenosController::class, 'lista'])->name('disenos');
                 Route::delete($tramo('disenos').'/{diseno}', [MisDisenosController::class, 'borrar'])->name('disenos.borrar')->whereUuid('diseno');
                 Route::get($tramo('contrasena'), [CambiarContrasenaController::class, 'editar'])->name('contrasena');
-                Route::put($tramo('contrasena'), [CambiarContrasenaController::class, 'guardar'])->name('contrasena.guardar')->middleware('throttle:cuenta-restablecer');
-                Route::post($tramo('borrado'), [BorradoController::class, 'solicitar'])->name('borrado')->middleware('throttle:cuenta-reenviar');
+                Route::put($tramo('contrasena'), [CambiarContrasenaController::class, 'guardar'])->name('contrasena.guardar')->middleware('throttle:cuenta-contrasena');
+                Route::post($tramo('borrado'), [BorradoController::class, 'solicitar'])->name('borrado')->middleware('throttle:cuenta-borrado');
             });
         });
 

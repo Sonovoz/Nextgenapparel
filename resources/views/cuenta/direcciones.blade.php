@@ -13,11 +13,11 @@
                         @if ($d->telefono)<br>{{ $d->telefono }}@endif
                     </address>
                     <div class="direccion-acciones">
-                        <a class="boton-texto" href="{{ RutaCuenta::url('direcciones.editar', ['direccion' => $d->uuid]) }}">{{ __('cuenta.editar') }}<span class="oculto"> · {{ $d->direccion }}</span></a>
+                        <a class="boton-texto" href="{{ RutaCuenta::url('direcciones.editar', ['direccion' => $d->uuid]) }}">{{ __('cuenta.editar') }}<span class="oculto"> · {{ $tipo->getLabel() }}: {{ $d->direccion }}</span></a>
                         @unless ($d->predeterminada)
-                            <form method="POST" action="{{ RutaCuenta::url('direcciones.predeterminar', ['direccion' => $d->uuid]) }}">@csrf<button type="submit" class="boton-texto">{{ __('cuenta.hacer_predeterminada') }}<span class="oculto"> · {{ $d->direccion }}</span></button></form>
+                            <form method="POST" action="{{ RutaCuenta::url('direcciones.predeterminar', ['direccion' => $d->uuid]) }}">@csrf<button type="submit" class="boton-texto">{{ __('cuenta.hacer_predeterminada') }}<span class="oculto"> · {{ $tipo->getLabel() }}: {{ $d->direccion }}</span></button></form>
                         @endunless
-                        <form method="POST" action="{{ RutaCuenta::url('direcciones.borrar', ['direccion' => $d->uuid]) }}" onsubmit="return confirm(@js(__('cuenta.borrar_direccion_confirmar')))">@csrf @method('DELETE')<button type="submit" class="boton-texto peligro">{{ __('cuenta.borrar') }}<span class="oculto"> · {{ $d->direccion }}</span></button></form>
+                        <form method="POST" action="{{ RutaCuenta::url('direcciones.borrar', ['direccion' => $d->uuid]) }}" onsubmit="return confirm(@js(__('cuenta.borrar_direccion_confirmar')))">@csrf @method('DELETE')<button type="submit" class="boton-texto peligro">{{ __('cuenta.borrar') }}<span class="oculto"> · {{ $tipo->getLabel() }}: {{ $d->direccion }}</span></button></form>
                     </div>
                 </article>
             @empty

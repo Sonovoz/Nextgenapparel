@@ -31,7 +31,7 @@
             </div>
         </div>
         @include('cuenta._campo', ['nombre' => 'telefono', 'etiqueta' => __('cuenta.telefono'), 'tipo' => 'tel', 'autocompletar' => 'tel', 'valor' => $direccion->telefono, 'opcional' => true])
-        <label class="casilla-cuenta"><input type="checkbox" name="predeterminada" value="1" @checked(old('predeterminada', $direccion->predeterminada))> <span>{{ __('cuenta.usar_predeterminada') }}</span></label>
+        <label class="casilla-cuenta"><input type="checkbox" name="predeterminada" value="1" @checked(session()->hasOldInput() ? (bool) old('predeterminada') : $direccion->predeterminada)> <span>{{ __('cuenta.usar_predeterminada') }}</span></label>
         <div class="botones-formulario">
             <button type="submit" class="boton principal">{{ __('cuenta.guardar') }}</button>
             <a class="boton" href="{{ RutaCuenta::url('direcciones') }}">{{ __('cuenta.cancelar') }}</a>

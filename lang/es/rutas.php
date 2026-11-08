@@ -18,4 +18,5 @@ return [
     'disenos' => 'mis-disenos',
     'contrasena' => 'contrasena',
     'borrado' => 'borrar-cuenta',
+    'confirmar_correo' => 'confirmar-nuevo-correo',
 ];

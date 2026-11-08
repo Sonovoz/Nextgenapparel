@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Cuenta;
 use App\Dominio\Clientes\VincularCliente;
 use App\Dominio\Disenos\Propietario;
 use App\Dominio\Disenos\TraspasarDisenos;
+use App\Models\Cliente;
 use App\Models\User;
 use App\Support\RutaCuenta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /** Verificación del correo (paso 5.2, D153): obligatoria antes de cerrar un pedido. */
 class VerificacionController
@@ -36,6 +38,34 @@ class VerificacionController
         if ($cliente !== null && $propietario !== null && auth()->id() === $usuario->id) {
             $traspasar($propietario, $cliente);
         }
+
+        return redirect($destino)->with('estado', __('cuenta.correo_verificado'));
+    }
+
+    /**
+     * Confirmar el cambio de correo (revisión N3 del paso 5.3, A1): solo con el enlace firmado
+     * que llegó al correo nuevo cambian el de la cuenta y el de la ficha.
+     */
+    public function confirmarCorreo(Request $request, string $id, string $hash): RedirectResponse
+    {
+        $destino = auth()->check() ? RutaCuenta::url('datos') : RutaCuenta::url('entrar');
+        $usuario = User::find($id);
+        $nuevo = $usuario?->correo_pendiente;
+
+        if (! $request->hasValidSignature() || $nuevo === null || ! hash_equals(sha1($nuevo), $hash)) {
+            return redirect($destino)->with('error', __('cuenta.verificacion_caducada'));
+        }
+        $cliente = $usuario->cliente;
+        if (DatosController::correoOcupado($nuevo, $usuario, $cliente ?? new Cliente)) {
+            $usuario->forceFill(['correo_pendiente' => null])->save();
+
+            return redirect($destino)->with('error', __('cuenta.correo_no_disponible'));
+        }
+
+        DB::transaction(function () use ($usuario, $cliente, $nuevo): void {
+            $usuario->forceFill(['email' => $nuevo, 'correo_pendiente' => null, 'email_verified_at' => now()])->save();
+            $cliente?->update(['correo' => $nuevo]);
+        });
 
         return redirect($destino)->with('estado', __('cuenta.correo_verificado'));
     }

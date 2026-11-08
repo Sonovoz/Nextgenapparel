@@ -62,8 +62,10 @@ class AppServiceProvider extends ServiceProvider
         foreach ([
             'cuenta-entrar' => 30, 'cuenta-registro' => 10, 'cuenta-recuperar' => 6, 'cuenta-restablecer' => 10,
             'cuenta-verificar' => 10, 'cuenta-reenviar' => 3, 'disenos-lista' => 120, 'disenos-borrar' => 60, 'precio' => 120,
+            // Área de cliente: piden la contraseña actual; por usuario e IP (revisión N3 del 5.3, M2 y B2).
+            'cuenta-datos' => 10, 'cuenta-contrasena' => 6, 'cuenta-borrado' => 5,
         ] as $nombre => $porMinuto) {
-            RateLimiter::for($nombre, fn (Request $request) => Limit::perMinute($porMinuto)->by($nombre.'|'.$request->ip()));
+            RateLimiter::for($nombre, fn (Request $request) => Limit::perMinute($porMinuto)->by($nombre.'|'.($request->user()?->id ?? '-').'|'.$request->ip()));
         }
 
         // @recurso('img/portada/macro.webp'): URL pública con la fecha del archivo, para que el

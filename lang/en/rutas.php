@@ -18,4 +18,5 @@ return [
     'disenos' => 'my-designs',
     'contrasena' => 'password',
     'borrado' => 'delete-account',
+    'confirmar_correo' => 'confirm-new-email',
 ];

@@ -17,6 +17,7 @@ final class Direcciones
     public function guardar(Cliente $cliente, array $datos, ?Direccion $direccion = null): Direccion
     {
         return DB::transaction(function () use ($cliente, $datos, $direccion): Direccion {
+            Cliente::whereKey($cliente->id)->lockForUpdate()->first(); // una sola predeterminada aunque lleguen dos a la vez (B5)
             $tipo = TipoDireccion::from($datos['tipo']);
             $quiereSerlo = (bool) ($datos['predeterminada'] ?? false);
             unset($datos['predeterminada']);
@@ -42,6 +43,7 @@ final class Direcciones
     public function predeterminar(Direccion $direccion): void
     {
         DB::transaction(function () use ($direccion): void {
+            Cliente::whereKey($direccion->cliente_id)->lockForUpdate()->first();
             $direccion->update(['predeterminada' => true]);
             $this->unicaPredeterminada($direccion->cliente, $direccion);
         });

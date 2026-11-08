@@ -3,14 +3,18 @@
 namespace Tests\Feature\Clientes;
 
 use App\Dominio\Clientes\TipoDireccion;
+use App\Dominio\Sistema\Acceso\Rol;
+use App\Http\Controllers\Cuenta\BorradoController;
 use App\Models\Ajuste;
 use App\Models\Cliente;
 use App\Models\Direccion;
 use App\Models\Diseno;
 use App\Models\User;
 use App\Models\ZonaEnvio;
+use App\Notifications\Cuenta\AcuseBorrado;
+use App\Notifications\Cuenta\AvisoCambioCorreo;
+use App\Notifications\Cuenta\ConfirmarNuevoCorreo;
 use App\Notifications\Cuenta\SolicitudBorrado;
-use App\Notifications\Cuenta\VerificarCorreo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -98,15 +102,84 @@ class AreaClienteTest extends TestCase
         $this->assertSame('ana@ejemplo.com', $this->usuario->fresh()->email);
     }
 
-    public function test_cambiar_el_correo_pide_confirmarlo_de_nuevo(): void
+    public function test_el_correo_solo_cambia_al_abrir_el_enlace_que_llega_al_nuevo_y_se_avisa_al_anterior(): void
     {
         $this->put('/es/cuenta/mis-datos', $this->datos(['correo' => 'Ana.Nueva@Ejemplo.com', 'contrasena_actual' => self::CLAVE]))
             ->assertSessionHas('estado', __('cuenta.correo_cambiado'));
 
+        // Hasta confirmar, todo sigue con el correo de siempre (revisión N3 del 5.3, A1).
+        $this->assertSame('ana@ejemplo.com', $this->usuario->fresh()->email);
+        $this->assertSame('ana@ejemplo.com', $this->cliente->fresh()->correo);
+        $this->assertSame('ana.nueva@ejemplo.com', $this->usuario->fresh()->correo_pendiente);
+        $enlace = null;
+        Notification::assertSentOnDemand(ConfirmarNuevoCorreo::class, function (ConfirmarNuevoCorreo $n, array $canales, object $destino) use (&$enlace) {
+            $enlace = $n->toMail($destino)->actionUrl;
+
+            return $destino->routes['mail'] === 'ana.nueva@ejemplo.com';
+        });
+        Notification::assertSentTo($this->usuario, AvisoCambioCorreo::class);
+
+        $manipulado = str_replace(sha1('ana.nueva@ejemplo.com'), sha1('otra@ejemplo.com'), $enlace);
+        $this->get($manipulado)->assertSessionHas('error');
+        $this->assertSame('ana@ejemplo.com', $this->usuario->fresh()->email);
+
+        $this->get($enlace)->assertRedirect('/es/cuenta/mis-datos')->assertSessionHas('estado');
         $this->assertSame('ana.nueva@ejemplo.com', $this->usuario->fresh()->email);
         $this->assertSame('ana.nueva@ejemplo.com', $this->cliente->fresh()->correo);
-        $this->assertFalse($this->usuario->fresh()->hasVerifiedEmail());
-        Notification::assertSentTo($this->usuario, VerificarCorreo::class);
+        $this->assertNull($this->usuario->fresh()->correo_pendiente);
+        $this->assertTrue($this->usuario->fresh()->hasVerifiedEmail());
+    }
+
+    public function test_no_se_puede_pedir_un_correo_de_una_ficha_de_invitado_ni_uno_pendiente_de_otro(): void
+    {
+        Cliente::factory()->create(['correo' => 'invitada@ejemplo.com', 'user_id' => null]);
+        [$otro] = $this->clienteCon('luis@ejemplo.com');
+        $otro->forceFill(['correo_pendiente' => 'reservado@ejemplo.com'])->save();
+
+        foreach (['invitada@ejemplo.com', 'reservado@ejemplo.com'] as $correo) {
+            $this->put('/es/cuenta/mis-datos', $this->datos(['correo' => $correo, 'contrasena_actual' => self::CLAVE]))
+                ->assertSessionHasErrors(['correo' => __('cuenta.correo_no_disponible')]);
+        }
+    }
+
+    public function test_tras_un_error_la_casilla_de_marketing_respeta_lo_que_envio_el_cliente(): void
+    {
+        $this->cliente->update(['marketing_consentido_en' => now(), 'marketing_origen' => 'registro']);
+
+        // Desmarca y envía con un NIF erróneo: la casilla no puede volver marcada (A2).
+        $this->from('/es/cuenta/mis-datos')->put('/es/cuenta/mis-datos', $this->datos(['nif' => '12345678A']));
+        $html = $this->get('/es/cuenta/mis-datos')->getContent();
+
+        $this->assertMatchesRegularExpression('/<input type="checkbox" name="marketing" value="1"\s*>/', $html);
+    }
+
+    public function test_cambiar_el_nif_o_el_tipo_retira_el_recargo_y_queda_registrado(): void
+    {
+        $this->cliente->update(['tipo' => 'empresa', 'nif' => 'B12345674', 'recargo_equivalencia' => true]);
+
+        $this->put('/es/cuenta/mis-datos', $this->datos(['tipo' => 'empresa', 'nif' => 'A58818501']));
+
+        $this->assertFalse($this->cliente->fresh()->recargo_equivalencia);
+        $this->assertDatabaseHas('activity_log', ['log_name' => 'clientes', 'description' => 'Datos fiscales cambiados por el cliente: recargo de equivalencia retirado', 'subject_id' => $this->cliente->id]);
+    }
+
+    public function test_sin_telefono_en_la_peticion_no_hay_error(): void
+    {
+        $datos = $this->datos();
+        unset($datos['telefono'], $datos['nif']);
+
+        $this->put('/es/cuenta/mis-datos', $datos)->assertRedirect('/es/cuenta/mis-datos')->assertSessionHasNoErrors();
+    }
+
+    public function test_comprobar_la_contrasena_en_mis_datos_tiene_limite_de_intentos(): void
+    {
+        for ($i = 0; $i < 10; $i++) {
+            $this->put('/es/cuenta/mis-datos', $this->datos(['correo' => 'otra@ejemplo.com', 'contrasena_actual' => 'mal-'.$i]));
+        }
+
+        $this->from('/es/cuenta/mis-datos')->put('/es/cuenta/mis-datos', $this->datos(['correo' => 'otra@ejemplo.com', 'contrasena_actual' => self::CLAVE]))
+            ->assertSessionHas('error');
+        $this->assertNull($this->usuario->fresh()->correo_pendiente);
     }
 
     /* ---------- Direcciones ---------- */
@@ -168,12 +241,22 @@ class AreaClienteTest extends TestCase
         $this->post('/es/cuenta/direcciones', $this->direccion(['pais' => 'PT', 'codigo_postal' => '1000-001']))->assertSessionHasNoErrors();
     }
 
+    public function test_las_direcciones_de_envio_tienen_que_caer_en_una_zona_de_envio(): void
+    {
+        ZonaEnvio::create(['nombre' => ['es' => 'Madrid', 'en' => 'Madrid'], 'paises' => ['ES'], 'prefijos_cp' => ['28'], 'metodo' => 'por_caja', 'precio_caja' => 500, 'activa' => true]);
+
+        $this->post('/es/cuenta/direcciones', $this->direccion(['codigo_postal' => '07001']))->assertSessionHasErrors(['codigo_postal' => __('cuenta.cp_sin_envio')]);
+        $this->post('/es/cuenta/direcciones', $this->direccion(['codigo_postal' => '28013']))->assertSessionHasNoErrors();
+        // La de facturación puede estar fuera de las zonas de envío.
+        $this->post('/es/cuenta/direcciones', $this->direccion(['tipo' => 'facturacion', 'codigo_postal' => '07001']))->assertSessionHasNoErrors();
+    }
+
     /* ---------- Acceso entre clientes ---------- */
 
     public function test_nadie_ve_ni_toca_las_direcciones_ni_los_disenos_de_otro_cliente(): void
     {
         [, $otro] = $this->clienteCon('luis@ejemplo.com');
-        $suya = Direccion::factory()->for($otro)->create();
+        $suya = Direccion::factory()->for($otro)->create(['direccion' => 'Calle Ajena 99']);
         $diseno = $this->diseno($otro);
 
         $this->get('/es/cuenta/direcciones/'.$suya->uuid.'/editar')->assertNotFound();
@@ -181,7 +264,7 @@ class AreaClienteTest extends TestCase
         $this->post('/es/cuenta/direcciones/'.$suya->uuid.'/predeterminada')->assertNotFound();
         $this->delete('/es/cuenta/direcciones/'.$suya->uuid)->assertNotFound();
         $this->delete('/es/cuenta/mis-disenos/'.$diseno->uuid)->assertNotFound();
-        $this->get('/es/cuenta/direcciones')->assertDontSee($suya->direccion === 'Calle Mayor 1' ? 'xx-no-aplica' : $suya->direccion);
+        $this->get('/es/cuenta/direcciones')->assertDontSee('Calle Ajena 99');
         $this->get('/es/cuenta/mis-disenos')->assertDontSee($diseno->nombre_original);
 
         $this->assertModelExists($suya);
@@ -228,6 +311,28 @@ class AreaClienteTest extends TestCase
         Notification::assertSentOnDemandTimes(SolicitudBorrado::class, 1);
         // La ficha se vuelve a leer de la base de datos, como en producción (antes daba error 500).
         $this->actingAs($this->usuario->fresh())->get('/es/cuenta/mis-datos')->assertOk()->assertSee('Hemos recibido tu solicitud de borrado');
+    }
+
+    public function test_sin_correo_de_contacto_el_aviso_de_borrado_va_al_de_alertas_o_a_los_administradores_y_el_cliente_recibe_acuse(): void
+    {
+        config(['errores.correo_alertas' => 'alertas@nga.test']);
+        $this->assertSame(['alertas@nga.test'], BorradoController::destinatarios());
+
+        config(['errores.correo_alertas' => null]);
+        $admin = $this->usuarioConRol(Rol::Administrador, ['email' => 'jefa@nga.test']);
+        $this->usuarioConRol(Rol::Produccion, ['email' => 'taller@nga.test']);
+        $this->assertSame([$admin->email], BorradoController::destinatarios());
+
+        $this->post('/es/cuenta/borrar-cuenta', ['contrasena_borrado' => self::CLAVE]);
+        Notification::assertSentOnDemand(SolicitudBorrado::class, fn ($n, $c, $destino) => $destino->routes['mail'] === 'jefa@nga.test');
+        Notification::assertSentTo($this->usuario, AcuseBorrado::class);
+    }
+
+    public function test_tras_una_contrasena_erronea_el_formulario_de_borrado_sigue_abierto(): void
+    {
+        $this->from('/es/cuenta/mis-datos')->post('/es/cuenta/borrar-cuenta', ['contrasena_borrado' => 'mal-123456']);
+
+        $this->get('/es/cuenta/mis-datos')->assertSee('<details class="borrado-detalle"  open', false);
     }
 
     public function test_sin_ficha_de_cliente_el_area_pide_confirmar_el_correo(): void
