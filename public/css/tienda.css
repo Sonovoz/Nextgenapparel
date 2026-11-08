@@ -975,3 +975,6 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .pack-disenos input:checked + img { border-color: var(--azul); }
 .pack-disenos input:focus-visible + img { outline: 2px solid #fff; outline-offset: 2px; }
 .campo-pack { min-height: 48px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--linea); background: var(--fondo); color: var(--tinta); font: inherit; font-size: 16px; width: 100%; }
+/* Cierra el pedido (paso 5.8) */
+.cierre-formulario { display: flex; flex-direction: column; gap: 14px; grid-template-columns: none; }
+.cierre-formulario h2 { margin: 8px 0 0; font-family: var(--display); font-size: 20px; }

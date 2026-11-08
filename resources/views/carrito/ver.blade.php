@@ -144,7 +144,11 @@
                             </form>
                         @endif
 
-                        <p class="carrito-siguiente">{{ $valoracion->confirmable() ? __('carrito.listo_para_cerrar') : __('carrito.revisa_antes') }}</p>
+                        @if ($valoracion->confirmable())
+                            <a class="boton principal" href="{{ CarritoController::url('cerrar') }}">{{ __('carrito.cerrar_pedido') }} <span class="flecha" aria-hidden="true">→</span></a>
+                        @else
+                            <p class="carrito-siguiente">{{ __('carrito.revisa_antes') }}</p>
+                        @endif
                         <a class="boton-texto" href="{{ route('portada') }}#prendas">← {{ __('carrito.seguir_comprando') }}</a>
                     </aside>
                 </div>

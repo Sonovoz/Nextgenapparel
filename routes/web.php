@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Backend\ArchivoDisenoController;
 use App\Http\Controllers\CarritoController;
+use App\Http\Controllers\CierreController;
 use App\Http\Controllers\Cuenta\AccesoController;
 use App\Http\Controllers\Cuenta\BorradoController;
 use App\Http\Controllers\Cuenta\CambiarContrasenaController;
@@ -95,6 +96,9 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
             Route::patch($linea, [CarritoController::class, 'tallas'])->name('tallas')->whereUuid('uuid')->middleware('throttle:carrito');
             Route::delete($linea, [CarritoController::class, 'quitar'])->name('quitar')->whereUuid('uuid')->middleware('throttle:carrito');
             Route::post($tramo('cupon'), [CarritoController::class, 'cupon'])->name('cupon')->middleware('throttle:carrito');
+            // Cierra el pedido (paso 5.8): datos, envío y total; confirmar y pagar, en las fases 6 y 7.
+            Route::get($tramo('cerrar'), [CierreController::class, 'ver'])->name('cerrar');
+            Route::post($tramo('cerrar'), [CierreController::class, 'calcular'])->name('cerrar.calcular')->middleware('throttle:carrito');
             Route::get($tramo('disenos').'/{diseno}', [CarritoController::class, 'miniatura'])->name('miniatura')->whereUuid('diseno');
         });
 

@@ -22,4 +22,5 @@ return [
     'carrito' => 'cart',
     'lineas' => 'lines',
     'cupon' => 'coupon',
+    'cerrar' => 'checkout',
 ];
