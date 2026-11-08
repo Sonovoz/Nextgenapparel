@@ -11,6 +11,8 @@ return [
     'nav_packs' => 'Packs',
     'nav_como' => 'How it works',
     'nav_calidad' => 'DTI Textile',
+    'nav_nosotros' => 'About us',
+    'ruta_nosotros' => 'about-us',
     'firma' => 'Premium studio for fashion brands',
     'hero_etiqueta' => 'Design · Development · Premium production',
     'hero_titular' => 'We create brands that speak',

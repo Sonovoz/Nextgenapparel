@@ -10,6 +10,7 @@ use App\Dominio\Precios\Motor\MotorPrecios;
 use App\Dominio\Seo\DatosEstructurados;
 use App\Models\Talla;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -26,6 +27,28 @@ class TiendaController
             'seo' => [
                 'imagen' => asset('img/portada/pareja-1600.webp'),
                 'esquemas' => rescue(fn () => [DatosEstructurados::organizacion(), DatosEstructurados::sitioWeb($idioma)], [], report: false),
+            ],
+        ]);
+    }
+
+    /** Sobre nosotros (D145): página fija, sin base de datos, con la URL traducida en cada idioma. */
+    public function nosotros(string $idioma, string $pagina): View|RedirectResponse
+    {
+        $alternos = $this->alternos(fn ($i) => route('nosotros', ['idioma' => $i, 'pagina' => trans('portada.ruta_nosotros', [], $i)]));
+
+        // /es/about-us lleva a /es/sobre-nosotros: una sola URL por idioma.
+        if ($pagina !== trans('portada.ruta_nosotros', [], $idioma)) {
+            return redirect($alternos[$idioma], 301);
+        }
+
+        return view('nosotros', [
+            'alternos' => $alternos,
+            'seo' => [
+                'imagen' => asset('img/portada/camiseta-dragon-1120.webp'),
+                'esquemas' => [DatosEstructurados::migas([
+                    __('tienda.inicio') => route('portada'),
+                    __('nosotros.titulo_corto') => $alternos[$idioma],
+                ])],
             ],
         ]);
     }

@@ -11,6 +11,8 @@ return [
     'nav_packs' => 'Packs',
     'nav_como' => 'Cómo funciona',
     'nav_calidad' => 'DTI Textil',
+    'nav_nosotros' => 'Sobre nosotros',
+    'ruta_nosotros' => 'sobre-nosotros',
     'firma' => 'Estudio premium para marcas de moda',
     'hero_etiqueta' => 'Diseño · Desarrollo · Producción premium',
     'hero_titular' => 'Creamos marcas que comunican',

@@ -764,3 +764,48 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 /* La espalda, un 2 % más pequeña: al girar no cuenta como un nuevo LCP (la medida de Google se quedaría con ella) */
 .giro .cara.espalda .prenda { transform: scale(.98); }
 .pie .pie-titulo { margin-top: 0; line-height: 1.4; }
+
+/* ── Sobre nosotros (D145) ───────────────────────────────────────── */
+.nosotros-hero { padding: 40px 0 0; }
+.nosotros-hero-rejilla { display: grid; gap: 40px; align-items: center; }
+.nosotros-hero h1 { font-size: clamp(40px, 8vw, 96px); }
+.nosotros-foto { position: relative; margin: 0; border-radius: 18px; overflow: hidden; border: 1px solid var(--linea-fuerte); background: radial-gradient(120% 90% at 50% 30%, #1B1D2E, var(--fondo) 70%); }
+.nosotros-foto img { width: 78%; margin: 6% auto 18%; }
+.nosotros-sello { position: absolute; left: 16px; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border-radius: 12px; background: rgba(7, 7, 12, .78); border: 1px solid var(--linea-fuerte); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.nosotros-sello span { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--neon); }
+.nosotros-sello b { font-size: 17px; font-weight: 600; }
+@media (min-width: 1024px) {
+    .nosotros-hero { padding: 64px 0 0; }
+    .nosotros-hero-rejilla { grid-template-columns: 1.15fr 1fr; gap: 72px; }
+    .nosotros-sello { right: auto; }
+}
+
+.sellos { list-style: none; margin: 40px 0 0; padding: 0; display: grid; gap: 16px; }
+.sello-tarjeta { padding: 28px 26px; border-radius: 18px; border: 1px solid var(--linea-fuerte); background: linear-gradient(180deg, var(--fondo-suave), var(--fondo)); }
+.sello-numero { margin: 0 0 18px; font-size: 12px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: var(--neon); }
+.sello-numero span { font-family: var(--display); font-weight: 800; }
+.sello-tarjeta h3 { font-size: clamp(24px, 2.4vw, 30px); line-height: 1.1; }
+.sello-tarjeta p:last-child { margin: 12px 0 0; color: var(--tinta-suave); }
+@media (min-width: 900px) { .sellos { grid-template-columns: repeat(3, 1fr); gap: 24px; } }
+
+.cita { margin: 36px 0 0; padding-left: 22px; border-left: 2px solid var(--azul); }
+.cita blockquote { margin: 0; }
+.cita blockquote p { margin: 0; font-size: clamp(20px, 2.2vw, 26px); line-height: 1.35; font-weight: 500; }
+.cita figcaption { margin-top: 12px; font-size: 12px; letter-spacing: .24em; text-transform: uppercase; color: var(--tinta-suave); }
+.pilar-etiqueta { margin: 0 0 4px; font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--tinta-suave) !important; }
+
+.fichas { list-style: none; margin: 28px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.fichas li { padding: 10px 16px; border-radius: 999px; border: 1px solid var(--linea-fuerte); background: var(--fondo-suave); font-size: 13px; letter-spacing: .08em; }
+.fichas li::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 10px; border-radius: 9px; background: var(--azul); vertical-align: middle; }
+
+.academia-puntos { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; color: var(--tinta-suave); }
+.academia-puntos li { padding-left: 18px; position: relative; }
+.academia-puntos li::before { content: ""; position: absolute; left: 0; top: .7em; width: 8px; height: 1px; background: var(--neon); }
+/* En 320–374 px las palabras largas en mayúsculas («INTERNACIONAL») no caben a 40 px. */
+@media (max-width: 374px) { .pagina-nosotros .titulo-seccion { font-size: 34px; } }
+.pagina-nosotros .titulo-seccion { overflow-wrap: break-word; }
+
+/* Con «Sobre nosotros» el menú tiene cinco entradas: nunca en dos líneas. */
+.navegacion a, .navegacion summary { white-space: nowrap; }
+@media (min-width: 1024px) and (max-width: 1199px) { .navegacion { display: none; } .boton-menu { display: inline-flex; } }
+@media (min-width: 1200px) and (max-width: 1279px) { .navegacion ul { gap: 22px; } }

@@ -188,17 +188,17 @@
                 @php $conEspalda = is_file(public_path('img/portada/camiseta-dragon-espalda-900.webp')); @endphp
                 <div class="giro{{ $conEspalda ? ' con-espalda' : '' }}" id="giro">
                     <div class="cara frente">
-                        <img class="prenda" src="{{ asset('img/portada/camiseta-dragon-900.webp') }}"
-                             srcset="{{ asset('img/portada/camiseta-dragon-560.webp') }} 560w, {{ asset('img/portada/camiseta-dragon-900.webp') }} 900w, {{ asset('img/portada/camiseta-dragon-1120.webp') }} 1120w"
+                        <img class="prenda" src="@recurso('img/portada/camiseta-dragon-900.webp')"
+                             srcset="@recurso('img/portada/camiseta-dragon-560.webp') 560w, @recurso('img/portada/camiseta-dragon-900.webp') 900w, @recurso('img/portada/camiseta-dragon-1120.webp') 1120w"
                              sizes="(min-width: 1024px) 40vw, 82vw" width="900" height="1018" alt="{{ __('portada.hud_alt') }}" fetchpriority="high" draggable="false">
-                        <span class="brillo" aria-hidden="true" style="--mascara: url('{{ asset('img/portada/camiseta-dragon-560.webp') }}');"></span>
+                        <span class="brillo" aria-hidden="true" style="--mascara: url('@recurso('img/portada/camiseta-dragon-560.webp')');"></span>
                     </div>
                     @if ($conEspalda)
                         <div class="cara espalda">
-                            <img class="prenda" data-src="{{ asset('img/portada/camiseta-dragon-espalda-900.webp') }}"
-                                 data-srcset="{{ asset('img/portada/camiseta-dragon-espalda-560.webp') }} 560w, {{ asset('img/portada/camiseta-dragon-espalda-900.webp') }} 900w, {{ asset('img/portada/camiseta-dragon-espalda-1120.webp') }} 1120w"
+                            <img class="prenda" data-src="@recurso('img/portada/camiseta-dragon-espalda-900.webp')"
+                                 data-srcset="@recurso('img/portada/camiseta-dragon-espalda-560.webp') 560w, @recurso('img/portada/camiseta-dragon-espalda-900.webp') 900w, @recurso('img/portada/camiseta-dragon-espalda-1120.webp') 1120w"
                                  sizes="(min-width: 1024px) 40vw, 82vw" width="900" height="1018" alt="" loading="lazy" draggable="false">
-                            <span class="brillo" aria-hidden="true" data-mascara="{{ asset('img/portada/camiseta-dragon-espalda-560.webp') }}"></span>
+                            <span class="brillo" aria-hidden="true" data-mascara="@recurso('img/portada/camiseta-dragon-espalda-560.webp')"></span>
                         </div>
                     @endif
                 </div>
@@ -318,7 +318,7 @@
     <section class="seccion-calidad" id="calidad" aria-labelledby="titulo-calidad">
         <div class="contenedor calidad-rejilla">
             <figure class="lupa-tejido aparece" style="margin: 0;">
-                <img src="{{ asset('img/portada/macro.webp') }}" alt="" width="900" height="900" loading="lazy">
+                <img src="@recurso('img/portada/macro.webp')" alt="" width="900" height="900" loading="lazy">
                 <figcaption>{{ __('portada.macro_pie') }}</figcaption>
             </figure>
             <div>

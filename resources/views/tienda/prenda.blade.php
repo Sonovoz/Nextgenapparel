@@ -204,7 +204,7 @@
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('js/visor.js') }}?v={{ @filemtime(public_path('js/visor.js')) }}" defer></script>
+    <script src="@recurso('js/visor.js')?v={{ @filemtime(public_path('js/visor.js')) }}" defer></script>
 @endpush
 
 <x-tienda :titulo="($prenda->seo_titulo ?: $prenda->nombre).' · Nextgenapparel'" :descripcion="$prenda->seo_descripcion ?: \Illuminate\Support\Str::limit((string) $prenda->descripcion, 155)" :alternos="$alternos" :seo="$seo">
@@ -224,7 +224,7 @@
                 <div class="estudio{{ $conTuMarca ? ' activo pagina' : '' }}" id="estudio" aria-label="{{ __('tienda.estudio') }}" data-salir="{{ $urlFamilia }}">
                 <div class="estudio-barra">
                     <div class="estudio-identidad">
-                        <a class="estudio-inicio" href="{{ route('portada') }}" aria-label="{{ __('tienda.inicio') }}"><img src="{{ asset('img/marca/monograma.png') }}" alt="" width="190" height="147"></a>
+                        <a class="estudio-inicio" href="{{ route('portada') }}" aria-label="{{ __('tienda.inicio') }}"><img src="@recurso('img/marca/monograma.png')" alt="" width="190" height="147"></a>
                         <div>
                             <nav class="estudio-ruta" aria-label="Ruta"><a href="{{ route('portada') }}">{{ __('tienda.inicio') }}</a> / <a href="{{ $urlFamilia }}">{{ $familia->nombre }}</a></nav>
                             <h1 class="estudio-titulo">{{ $prenda->nombre }}</h1>

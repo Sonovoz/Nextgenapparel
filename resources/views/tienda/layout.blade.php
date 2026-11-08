@@ -8,7 +8,8 @@
     $localesOg = ['es' => 'es_ES', 'en' => 'en_GB'];
     $nombreTienda = rescue(fn () => \App\Models\Ajuste::obtener('tienda.nombre'), 'Nextgenapparel', report: false);
     $portada = route('portada');
-    $version = fn (string $ruta) => asset($ruta).'?v='.@filemtime(public_path($ruta));
+    $urlNosotros = route('nosotros', ['pagina' => __('portada.ruta_nosotros')]);
+    $enNosotros = url()->current() === $urlNosotros;
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $idiomaActual }}">
@@ -45,9 +46,9 @@
     @foreach ($seo['esquemas'] ?? [] as $esquema)
         <script type="application/ld+json">{!! json_encode($esquema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
     @endforeach
-    <link rel="icon" type="image/png" href="{{ asset('img/marca/favicon.png') }}">
+    <link rel="icon" type="image/png" href="@recurso('img/marca/favicon.png')">
     <link rel="preload" href="{{ asset('fonts/jost.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ $version('css/tienda.css') }}">
+    <link rel="stylesheet" href="@recurso('css/tienda.css')">
     <meta name="theme-color" content="#07070C">
     {{-- Con JavaScript, las animaciones de entrada; sin él, todo se ve igual. --}}
     <script>document.documentElement.classList.add('js')</script>
@@ -57,8 +58,8 @@
     <header class="cabecera" id="cabecera">
         <div class="contenedor">
             <a class="marca" href="{{ $portada }}" aria-label="{{ $nombreTienda }} — {{ __('portada.inicio') }}">
-                <img class="monograma" src="{{ asset('img/marca/monograma.png') }}" alt="" width="190" height="147">
-                <img class="palabra" src="{{ asset('img/marca/nextgenapparel.png') }}" alt="{{ $nombreTienda }}" width="510" height="80">
+                <img class="monograma" src="@recurso('img/marca/monograma.png')" alt="" width="190" height="147">
+                <img class="palabra" src="@recurso('img/marca/nextgenapparel.png')" alt="{{ $nombreTienda }}" width="510" height="80">
             </a>
 
             <nav class="navegacion" aria-label="{{ __('portada.menu') }}">
@@ -77,6 +78,7 @@
                     <li><a href="{{ $portada }}#packs">{{ __('portada.nav_packs') }}</a></li>
                     <li><a href="{{ $portada }}#pasos">{{ __('portada.nav_como') }}</a></li>
                     <li><a href="{{ $portada }}#calidad">{{ __('portada.nav_calidad') }}</a></li>
+                    <li><a href="{{ $urlNosotros }}" @if ($enNosotros) aria-current="page" @endif>{{ __('portada.nav_nosotros') }}</a></li>
                 </ul>
             </nav>
 
@@ -94,7 +96,7 @@
 
     <div class="menu-movil" id="menu-movil" role="dialog" aria-modal="true" aria-label="{{ __('portada.menu') }}">
         <div class="menu-movil-cabecera">
-            <a class="marca" href="{{ $portada }}"><img class="monograma" src="{{ asset('img/marca/monograma.png') }}" alt="{{ $nombreTienda }}" width="190" height="147"></a>
+            <a class="marca" href="{{ $portada }}"><img class="monograma" src="@recurso('img/marca/monograma.png')" alt="{{ $nombreTienda }}" width="190" height="147"></a>
             <button class="boton-cerrar" type="button" aria-label="{{ __('portada.cerrar') }}">×</button>
         </div>
         <nav>
@@ -109,6 +111,7 @@
                 <li><a href="{{ $portada }}#packs">{{ __('portada.nav_packs') }}</a></li>
                 <li><a href="{{ $portada }}#pasos">{{ __('portada.nav_como') }}</a></li>
                 <li><a href="{{ $portada }}#calidad">{{ __('portada.nav_calidad') }}</a></li>
+                <li><a href="{{ $urlNosotros }}" @if ($enNosotros) aria-current="page" @endif>{{ __('portada.nav_nosotros') }}</a></li>
             </ul>
         </nav>
         <div class="acciones">
@@ -126,8 +129,8 @@
             <div class="pie-rejilla">
                 <div>
                     <a class="marca" href="{{ $portada }}">
-                        <img class="monograma" src="{{ asset('img/marca/monograma.png') }}" alt="" width="190" height="147">
-                        <img class="palabra" src="{{ asset('img/marca/nextgenapparel.png') }}" alt="{{ $nombreTienda }}" width="510" height="80">
+                        <img class="monograma" src="@recurso('img/marca/monograma.png')" alt="" width="190" height="147">
+                        <img class="palabra" src="@recurso('img/marca/nextgenapparel.png')" alt="{{ $nombreTienda }}" width="510" height="80">
                     </a>
                     <p style="max-width: 36ch; margin: 22px 0 0; color: #B8B1A9;">{{ __('portada.pie_texto') }}</p>
                 </div>
@@ -145,6 +148,7 @@
                         <li><a href="{{ $portada }}#pasos">{{ __('portada.nav_como') }}</a></li>
                         <li><a href="{{ $portada }}#packs">{{ __('portada.nav_packs') }}</a></li>
                         <li><a href="{{ $portada }}#calidad">{{ __('portada.nav_calidad') }}</a></li>
+                        <li><a href="{{ $urlNosotros }}">{{ __('portada.nav_nosotros') }}</a></li>
                     </ul>
                 </div>
                 <div>
