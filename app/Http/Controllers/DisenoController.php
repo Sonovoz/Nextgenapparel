@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Disenos\DisenoNoValido;
+use App\Dominio\Disenos\Dueno;
 use App\Dominio\Disenos\GuardarDiseno;
-use App\Dominio\Disenos\Propietario;
 use App\Models\Diseno;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -31,7 +31,7 @@ class DisenoController
         ]);
 
         try {
-            $diseno = $guardar($request->file('archivo'), Propietario::hash($request));
+            $diseno = $guardar($request->file('archivo'), Dueno::de($request));
         } catch (DisenoNoValido $error) {
             return response()->json(['message' => $error->mensaje(), 'motivo' => $error->motivo], 422);
         }
@@ -42,8 +42,8 @@ class DisenoController
     /** Biblioteca del visitante: sus diseños, del más reciente al más antiguo. */
     public function lista(Request $request, string $idioma): JsonResponse
     {
-        $propietario = Propietario::hash($request, crear: false);
-        $disenos = $propietario === null ? collect() : Diseno::where('propietario', $propietario)->latest('id')->limit(60)->get();
+        $dueno = Dueno::de($request, crear: false);
+        $disenos = $dueno === null ? collect() : $dueno->filtrar(Diseno::query())->latest('id')->limit(60)->get();
 
         return response()->json(['disenos' => $disenos->map(fn (Diseno $d) => self::datos($d))->values()]);
     }
@@ -58,10 +58,10 @@ class DisenoController
 
     private function delVisitante(Request $request, string $uuid): Diseno
     {
-        $propietario = Propietario::hash($request, crear: false);
-        abort_if($propietario === null, 404);
+        $dueno = Dueno::de($request, crear: false);
+        abort_if($dueno === null, 404);
 
-        return Diseno::where('uuid', $uuid)->where('propietario', $propietario)->firstOrFail();
+        return $dueno->filtrar(Diseno::query())->where('uuid', $uuid)->firstOrFail();
     }
 
     /** Miniatura de un diseño, solo para su dueño. A los demás les responde 404, sin desvelar que existe. */

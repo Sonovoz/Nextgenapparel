@@ -140,7 +140,7 @@ class FotosTest extends TestCase
             ->mountAction(TestAction::make('edit')->table($foto))
             ->fillForm(['zonas' => [
                 "record-{$frontal->id}" => ['x' => 31.5, 'y' => 27, 'ancho' => 37, 'alto' => 40],
-                "record-{$pecho->id}" => ['x' => 55, 'y' => 24, 'ancho' => 14, 'alto' => 13],
+                "record-{$pecho->id}" => ['x' => 55, 'y' => 24, 'ancho' => 12, 'alto' => 13.6],
             ]])
             ->callMountedAction()
             ->assertHasNoFormErrors();
@@ -161,6 +161,30 @@ class FotosTest extends TestCase
             ->assertHasFormErrors(["zonas.record-{$frontal->id}.ancho"]);
 
         $this->assertNotSame(9000, $frontal->fresh()->x);
+    }
+
+    public function test_una_maqueta_tiene_que_ser_5_6(): void
+    {
+        $this->tabla()->callTableAction('create', data: ['tipo' => 'maqueta', 'color_id' => $this->negro->id, 'cara' => 'delantera',
+            'ruta' => UploadedFile::fake()->image('maqueta.png', 1120, 1267)])->assertHasTableActionErrors(['ruta']);
+        $this->assertSame(0, Foto::count());
+
+        // Otras fotos (modelo, detalle) pueden tener cualquier proporción.
+        $this->tabla()->callTableAction('create', data: ['tipo' => 'modelo', 'ruta' => UploadedFile::fake()->image('modelo.png', 1600, 900)])->assertHasNoTableActionErrors();
+    }
+
+    public function test_el_rectangulo_de_una_zona_tiene_que_tener_su_proporcion(): void
+    {
+        $this->subir(['tipo' => 'maqueta', 'color_id' => $this->negro->id, 'cara' => 'delantera']);
+        $foto = Foto::sole();
+        $frontal = $foto->zonas()->whereHas('zona', fn ($q) => $q->where('clave', 'frontal'))->sole();
+
+        // Frontal de 28 × 38 cm dibujada al 40 % × 40 % de una foto 5:6: proporción 0,83 en lugar de 0,74.
+        $this->tabla()
+            ->mountAction(TestAction::make('edit')->table($foto))
+            ->fillForm(['zonas' => ["record-{$frontal->id}" => ['x' => 30, 'y' => 20, 'ancho' => 40, 'alto' => 40]]])
+            ->callMountedAction()
+            ->assertHasFormErrors(["zonas.record-{$frontal->id}.alto"]);
     }
 
     public function test_la_vista_previa_muestra_el_diseno_de_ejemplo_con_los_valores_sin_guardar(): void

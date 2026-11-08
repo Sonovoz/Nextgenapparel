@@ -52,6 +52,12 @@ Schedule::command('queue:prune-failed --hours=720')
     ->description('Borrar trabajos fallidos de hace más de 30 días')
     ->dailyAt('03:30');
 
+// Primero los carritos: así sus diseños de invitados quedan libres para la limpieza de diseños.
+Schedule::command('carritos:limpiar')
+    ->description('Borrar carritos sin usar desde hace más de los días de Ajustes → General')
+    ->dailyAt('03:35')
+    ->withoutOverlapping();
+
 Schedule::command('disenos:limpiar')
     ->description('Borrar diseños sin pedido de visitantes sin cuenta y archivos huérfanos')
     ->dailyAt('03:40')

@@ -7,6 +7,7 @@ use App\Dominio\Disenos\GuardarDiseno;
 use App\Dominio\Disenos\NivelCalidad;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -30,6 +31,11 @@ class Diseno extends Model
         static::deleted(fn (Diseno $diseno) => DB::afterCommit(
             fn () => Storage::disk(GuardarDiseno::DISCO)->delete(array_filter([$diseno->ruta, $diseno->miniatura]))
         ));
+    }
+
+    public function cliente(): BelongsTo
+    {
+        return $this->belongsTo(Cliente::class);
     }
 
     /** Dueño legible para el backend. */

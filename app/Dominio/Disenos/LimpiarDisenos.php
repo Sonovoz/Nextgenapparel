@@ -6,6 +6,7 @@ use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Ajuste;
 use App\Models\Diseno;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -69,6 +70,8 @@ final class LimpiarDisenos
     {
         $dias = max(1, (int) Ajuste::obtener('disenos.dias_sin_pedido'));
 
-        return Diseno::whereNull('cliente_id')->where('created_at', '<', now()->subDays($dias));
+        // Los que están en un carrito se quedan mientras el carrito exista (su plazo es aparte).
+        return Diseno::whereNull('cliente_id')->where('created_at', '<', now()->subDays($dias))
+            ->whereNotExists(fn ($q) => $q->select(DB::raw(1))->from('impresiones_carrito')->whereColumn('impresiones_carrito.diseno_id', 'disenos.id'));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Catalogo\Prendas;
 
+use App\Filament\Concerns\BusquedaTraducible;
 use App\Filament\Concerns\CampoDinero;
 use App\Filament\Concerns\CamposTraducibles;
 use App\Filament\Navegacion\GrupoNavegacion;
@@ -76,7 +77,7 @@ class PrendaResource extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query->with('familia')->withCount('variantes')->withMin(['variantes' => fn ($v) => $v->aLaVenta()], 'precio_base')->withSum('variantes', 'stock'))
             ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('nombre')->label('Nombre')->searchable(query: fn (Builder $q, string $buscar) => $q->where('nombre->es', 'like', "%{$buscar}%")->orWhere('nombre->en', 'like', "%{$buscar}%")),
+                TextColumn::make('nombre')->label('Nombre')->searchable(query: BusquedaTraducible::en('nombre')),
                 TextColumn::make('familia.nombre')->label('Familia'),
                 TextColumn::make('variantes_count')->label('Variaciones'),
                 TextColumn::make('variantes_min_precio_base')->label('Desde (sin IVA)')->formatStateUsing(fn ($state) => CampoDinero::formatear($state === null ? null : (int) $state)),

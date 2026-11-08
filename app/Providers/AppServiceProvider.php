@@ -2,13 +2,18 @@
 
 namespace App\Providers;
 
+use App\Dominio\Carrito\FusionarCarrito;
+use App\Dominio\Disenos\Propietario;
+use App\Dominio\Disenos\TraspasarDisenos;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Dominio\Sistema\Errores\ErrorDeCopia;
 use App\Models\Ajuste;
 use App\Models\Caja;
 use App\Models\ClaseImpuesto;
+use App\Models\Cliente;
 use App\Models\Color;
 use App\Models\Cupon;
+use App\Models\Direccion;
 use App\Models\Diseno;
 use App\Models\Familia;
 use App\Models\Foto;
@@ -24,10 +29,13 @@ use App\Models\ZonaEnvio;
 use App\Models\ZonaImpresion;
 use App\Policies\ActividadPolicy;
 use App\Policies\CatalogoPolicy;
+use App\Policies\ClientePolicy;
+use App\Policies\DireccionPolicy;
 use App\Policies\DisenoPolicy;
 use App\Policies\SeccionPolicy;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\SessionGuard;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
@@ -57,6 +65,17 @@ class AppServiceProvider extends ServiceProvider
         // Subidas de diseños: un límite por IP frena el abuso sin molestar a quien prueba varias versiones.
         RateLimiter::for('disenos', fn (Request $request) => Limit::perHour(max(1, (int) Ajuste::obtener('disenos.subidas_hora')))->by($request->ip()));
 
+        // Cada limitador lleva su propio contador: con «throttle:6,1» sin nombre todas las rutas
+        // comparten el de la IP y quien se registra, entra y pide otra contraseña se quedaba bloqueado.
+        foreach ([
+            'cuenta-entrar' => 30, 'cuenta-registro' => 10, 'cuenta-recuperar' => 6, 'cuenta-restablecer' => 10,
+            'cuenta-verificar' => 10, 'cuenta-reenviar' => 3, 'disenos-lista' => 120, 'disenos-borrar' => 60, 'precio' => 120, 'carrito' => 60,
+            // Área de cliente: piden la contraseña actual; por usuario e IP (revisión N3 del 5.3, M2 y B2).
+            'cuenta-datos' => 10, 'cuenta-contrasena' => 6, 'cuenta-borrado' => 5,
+        ] as $nombre => $porMinuto) {
+            RateLimiter::for($nombre, fn (Request $request) => Limit::perMinute($porMinuto)->by($nombre.'|'.($request->user()?->id ?? '-').'|'.$request->ip()));
+        }
+
         // @recurso('img/portada/macro.webp'): URL pública con la fecha del archivo, para que el
         // navegador no siga mostrando la versión antigua al cambiar una imagen con el mismo nombre (D145).
         Blade::directive('recurso', fn (string $ruta) => "<?php echo e(asset({$ruta}).'?v='.@filemtime(public_path({$ruta}))); ?>");
@@ -69,6 +88,8 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Activity::class, ActividadPolicy::class);
         Gate::policy(Diseno::class, DisenoPolicy::class);
+        Gate::policy(Cliente::class, ClientePolicy::class);
+        Gate::policy(Direccion::class, DireccionPolicy::class);
 
         foreach ([Familia::class, Color::class, Talla::class, ZonaImpresion::class, Proveedor::class, Prenda::class, Variante::class, Foto::class] as $modelo) {
             Gate::policy($modelo, CatalogoPolicy::class);
@@ -88,14 +109,35 @@ class AppServiceProvider extends ServiceProvider
             report(new ErrorDeCopia('La copia de seguridad ha fallado: '.$evento->exception->getMessage(), previous: $evento->exception));
         });
 
-        // Registro de actividad: accesos al backend.
-        Event::listen(Login::class, function (Login $evento): void {
-            if ($evento->user instanceof User) {
+        // Registro de actividad: accesos de los empleados, entren por el backend o por la tienda
+        // (con la misma sesión llegan al backend); los de clientes, no (D154, revisión N3 M1).
+        $esEmpleado = fn ($usuario) => $usuario instanceof User && $usuario->roles()->exists();
+        $enBackend = fn () => request()->is('admin', 'admin/*', 'livewire*');
+        Event::listen(Login::class, function (Login $evento) use ($esEmpleado, $enBackend): void {
+            if ($evento->user instanceof User && ($enBackend() || $esEmpleado($evento->user))) {
                 Actividad::apuntar('accesos', 'Inicio de sesión', $evento->user, quien: $evento->user);
             }
         });
 
-        Event::listen(Failed::class, function (Failed $evento): void {
+        // Quien vuelve con «recordarme» no pasa por el formulario de entrar: su carrito sin cuenta
+        // y sus diseños de la sesión se suman igual (revisión N3 del 5.5, B6).
+        Event::listen(Login::class, function (Login $evento): void {
+            $guarda = auth()->guard($evento->guard);
+            $cliente = $evento->user instanceof User ? $evento->user->cliente : null;
+            if ($cliente === null || ! $guarda instanceof SessionGuard || ! $guarda->viaRemember() || ! request()->hasSession()) {
+                return;
+            }
+            $propietario = Propietario::hash(request(), crear: false);
+            if ($propietario !== null) {
+                app(TraspasarDisenos::class)($propietario, $cliente);
+            }
+            app(FusionarCarrito::class)(request(), $cliente);
+        });
+
+        Event::listen(Failed::class, function (Failed $evento) use ($esEmpleado, $enBackend): void {
+            if (! $enBackend() && ! $esEmpleado($evento->user)) {
+                return;
+            }
             Actividad::apuntar('accesos', 'Intento de acceso fallido', $evento->user instanceof User ? $evento->user : null, [
                 'email' => mb_substr((string) ($evento->credentials['email'] ?? ''), 0, 255),
                 'ip' => request()->ip(),

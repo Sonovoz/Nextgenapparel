@@ -6,6 +6,8 @@ use App\Filament\Navegacion\GrupoNavegacion;
 use App\Models\Color;
 use App\Models\Familia;
 use App\Models\Foto;
+use App\Models\ImpresionCarrito;
+use App\Models\LineaCarrito;
 use App\Models\Proveedor;
 use App\Models\Talla;
 use App\Models\User;
@@ -65,9 +67,11 @@ class CatalogoPolicy
     {
         return match (true) {
             $registro instanceof Familia => $registro->prendas()->withTrashed()->exists(),
-            $registro instanceof Color => Variante::where('color_id', $registro->id)->exists() || Foto::where('color_id', $registro->id)->exists(),
+            $registro instanceof Color => Variante::where('color_id', $registro->id)->exists() || Foto::where('color_id', $registro->id)->exists()
+                || LineaCarrito::where('color_id', $registro->id)->exists(),
             $registro instanceof Talla => Variante::where('talla_id', $registro->id)->exists(),
-            $registro instanceof ZonaImpresion => $registro->getConnection()->table('prenda_zona')->where('zona_impresion_id', $registro->id)->exists(),
+            $registro instanceof ZonaImpresion => $registro->getConnection()->table('prenda_zona')->where('zona_impresion_id', $registro->id)->exists()
+                || ImpresionCarrito::where('zona_impresion_id', $registro->id)->exists(),
             $registro instanceof Proveedor => $registro->prendas()->withTrashed()->exists(),
             default => false,
         };

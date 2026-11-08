@@ -44,7 +44,7 @@ return [
     'pack_prendas' => ':n prendas',
     'pack_iva' => 'IVA incluido',
     'pack_impresion' => 'Impresión incluida: :zonas',
-    'pack_proximamente' => 'Muy pronto',
+    'pack_elegir' => 'Elegir este pack',
     'sin_packs' => 'Muy pronto tendremos packs listos para tu marca.',
     'prendas_etiqueta' => 'Selección',
     'prendas_titulo' => 'Elige tu base',

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Catalogo;
 
+use App\Filament\Concerns\BusquedaTraducible;
 use App\Filament\Concerns\CamposTraducibles;
 use App\Models\Color;
 use BackedEnum;
@@ -52,7 +53,7 @@ class ColorResource extends RecursoCatalogo
             ->reorderable('orden')
             ->columns([
                 ColorColumn::make('codigo_hex')->label(''),
-                TextColumn::make('nombre')->label('Nombre')->searchable(),
+                TextColumn::make('nombre')->label('Nombre')->searchable(query: BusquedaTraducible::en('nombre')),
                 TextColumn::make('codigo_hex')->label('Código')->fontFamily('mono'),
                 IconColumn::make('activo')->label('Activo')->boolean(),
             ])

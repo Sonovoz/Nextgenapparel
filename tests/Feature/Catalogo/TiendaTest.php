@@ -222,7 +222,7 @@ class TiendaTest extends TestCase
         $negroEnVisor = collect($colores)->firstWhere('nombre', 'Negro');
         $this->assertStringEndsWith('catalogo/1/negro.webp', $negroEnVisor['caras']['delantera']['url']);
         $zonaFrontal = $camiseta->zonas()->where('clave', 'frontal')->value('zonas_impresion.id');
-        $this->assertSame(['precio' => '3,63 €', 'id' => $zonaFrontal, 'nombre' => 'Frontal', 'ancho_mm' => 280, 'alto_mm' => 380, 'x' => 30, 'y' => 26, 'ancho' => 40, 'alto' => 42], $negroEnVisor['caras']['delantera']['zonas'][0]);
+        $this->assertSame(['precio' => '3,63 €', 'id' => $zonaFrontal, 'nombre' => 'Frontal', 'ancho_mm' => 280, 'alto_mm' => 380, 'cuello_mm' => 75, 'centro_mm' => 0, 'x' => 30, 'y' => 26, 'ancho' => 40, 'alto' => 42], $negroEnVisor['caras']['delantera']['zonas'][0]);
         $this->assertNull($negroEnVisor['caras']['trasera']);
     }
 
