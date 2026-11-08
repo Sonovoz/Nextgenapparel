@@ -23,6 +23,12 @@ class Ajuste extends Model
         'disenos.ppp_correcto' => 300,
         'disenos.ppp_aceptable' => 200,
         'disenos.ppp_minimo' => 150,
+        // Archivos de diseño (fase 4): tamaño máximo, píxeles máximos del lado mayor,
+        // mínimos del lado menor de lo que se imprime y días que se guardan sin pedido.
+        'disenos.max_mb' => 30,
+        'disenos.max_px' => 8000, // 67 cm a 300 ppp; más solo cuesta memoria y tiempo
+        'disenos.min_px' => 300,
+        'disenos.dias_sin_pedido' => 30,
         // Mejora con IA para el cliente (D143): activa, desde qué nivel y texto propio por idioma (vacío = el de lang/disenos.php).
         'disenos.ia_activa' => true,
         'disenos.ia_desde' => 'justa',

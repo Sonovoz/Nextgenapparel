@@ -27,4 +27,12 @@ return [
 5. Entrégame el diseño en formato PNG, con fondo transparente si el diseño lo permite. No incluyas la camiseta, una maqueta, sombras, marcos ni fondos que no formen parte del diseño.
 6. Comprueba que las letras sean legibles y que no falten detalles. Si algún elemento no puede reproducirse fielmente, avísame.
 7. Indica las dimensiones finales del archivo en píxeles y el tamaño aproximado al que puede imprimirse a 300 ppp.',
+    // Errores al subir el diseño (fase 4).
+    'error_ilegible' => 'No hemos podido leer el archivo. Comprueba que es un PNG válido y vuelve a subirlo.',
+    'error_no_png' => 'Para el pedido necesitamos tu diseño en PNG. Expórtalo como PNG, a ser posible con fondo transparente.',
+    'error_pesado' => 'El archivo pesa más de :mb MB. Expórtalo de nuevo en PNG sin capas ni metadatos.',
+    'error_enorme' => 'La imagen mide más de :px píxeles por lado. Redúcela: para imprimir a 300 ppp basta con mucho menos.',
+    'error_pequeno' => 'Tu diseño mide :ancho × :alto píxeles sin contar los márgenes transparentes. Necesitamos al menos :px píxeles por lado.',
+    'error_procesar' => 'La imagen es demasiado grande para procesarla. Redúcela o expórtala de nuevo en PNG de 8 bits por canal.',
+    'error_vacio' => 'La imagen es totalmente transparente: no hay nada que imprimir.',
 ];

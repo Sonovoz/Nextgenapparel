@@ -38,6 +38,15 @@ return [
             'report' => false,
         ],
 
+        // Diseños de los clientes: privados, nunca servidos directamente (fase 4).
+        'disenos' => [
+            'driver' => 'local',
+            'root' => storage_path('app/disenos'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
         // Copias de seguridad en el propio servidor (fuera de storage/app).
         'copias' => [
             'driver' => 'local',

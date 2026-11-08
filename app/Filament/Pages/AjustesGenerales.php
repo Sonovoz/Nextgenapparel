@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Disenos\Calidad;
 use App\Dominio\Disenos\MejoraIa;
 use App\Dominio\Sistema\Actividad\Actividad;
@@ -55,6 +56,8 @@ class AjustesGenerales extends Page implements HasSchemas
             'nombre' => Ajuste::obtener('tienda.nombre'),
             'correo_contacto' => Ajuste::obtener('tienda.correo_contacto'),
             ...Calidad::umbrales(),
+            ...AnalizadorPng::limites(),
+            'dias_sin_pedido' => (int) Ajuste::obtener('disenos.dias_sin_pedido'),
             'indexar' => (bool) Ajuste::obtener('seo.indexar'),
             'ia_activa' => MejoraIa::activa(),
             'ia_desde' => MejoraIa::desde(),
@@ -76,6 +79,16 @@ class AjustesGenerales extends Page implements HasSchemas
                     TextInput::make('correcto')->label('Calidad excelente desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required()->gt('aceptable'),
                     TextInput::make('aceptable')->label('Buena calidad desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required()->gt('minimo'),
                     TextInput::make('minimo')->label('Calidad justa desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required(),
+                ]),
+            Section::make('Archivos de diseño')
+                ->description('Límites de los PNG que suben los clientes. El mínimo se mide sin los márgenes transparentes, sobre lo que se imprime. Los diseños que no llegan a un pedido se borran pasados los días indicados.')
+                ->columns(4)
+                ->schema([
+                    TextInput::make('max_mb')->label('Peso máximo')->integer()->minValue(1)->maxValue(100)->suffix('MB')->required(),
+                    TextInput::make('max_px')->label('Lado mayor, como mucho')->integer()->minValue(1000)->maxValue(10000)->suffix('px')->required()
+                        ->helperText('8000 px son 67 cm a 300 ppp. Más solo hace la subida más lenta.'),
+                    TextInput::make('min_px')->label('Lado menor, al menos')->integer()->minValue(50)->maxValue(2000)->suffix('px')->required(),
+                    TextInput::make('dias_sin_pedido')->label('Guardar sin pedido')->integer()->minValue(1)->maxValue(365)->suffix('días')->required(),
                 ]),
             Section::make('Mejorar el diseño con IA')
                 ->description('Si la calidad no llega, el cliente ve un botón con estas instrucciones para mejorar su diseño con su propia herramienta de IA y volver a subirlo. La tienda no envía nada a ninguna IA. Escribe :medida donde va el tamaño de impresión (por ejemplo, «28 × 28 cm»). Si vacías un texto, se usa el de por defecto.')
@@ -121,6 +134,16 @@ class AjustesGenerales extends Page implements HasSchemas
 
                 if ($umbralesAnteriores !== $umbralesNuevos) {
                     Actividad::apuntar('ajustes', 'Umbrales de calidad cambiados', propiedades: ['old' => $umbralesAnteriores, 'attributes' => $umbralesNuevos]);
+                }
+
+                $archivosAnteriores = [...AnalizadorPng::limites(), 'dias_sin_pedido' => (int) Ajuste::obtener('disenos.dias_sin_pedido')];
+                $archivosNuevos = [];
+                foreach (array_keys($archivosAnteriores) as $clave) {
+                    $archivosNuevos[$clave] = (int) $datos[$clave];
+                    Ajuste::guardar('disenos.'.$clave, $archivosNuevos[$clave]);
+                }
+                if ($archivosAnteriores !== $archivosNuevos) {
+                    Actividad::apuntar('ajustes', 'Límites de los archivos de diseño cambiados', propiedades: ['old' => $archivosAnteriores, 'attributes' => $archivosNuevos]);
                 }
 
                 // Mejora con IA: solo se guarda el texto que difiere del de por defecto, para que este pueda mejorar con las versiones.

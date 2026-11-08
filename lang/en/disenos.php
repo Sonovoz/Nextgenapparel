@@ -27,4 +27,12 @@ return [
 5. Give me the design as a PNG file, with a transparent background if the design allows it. Do not include the T-shirt, a mock-up, shadows, frames or backgrounds that are not part of the design.
 6. Check that the lettering is legible and that no details are missing. If any element cannot be reproduced faithfully, let me know.
 7. State the final file dimensions in pixels and the approximate size at which it can be printed at 300 ppi.',
+    // Upload errors (phase 4).
+    'error_ilegible' => 'We could not read the file. Check it is a valid PNG and upload it again.',
+    'error_no_png' => 'We need your design as a PNG for the order. Export it as PNG, ideally with a transparent background.',
+    'error_pesado' => 'The file is larger than :mb MB. Export it again as a PNG without layers or metadata.',
+    'error_enorme' => 'The image is more than :px pixels on one side. Make it smaller: printing at 300 dpi needs far less.',
+    'error_pequeno' => 'Your design is :ancho × :alto pixels without its transparent margins. We need at least :px pixels per side.',
+    'error_procesar' => 'The image is too large to process. Make it smaller or export it again as an 8-bit-per-channel PNG.',
+    'error_vacio' => 'The image is fully transparent: there is nothing to print.',
 ];
