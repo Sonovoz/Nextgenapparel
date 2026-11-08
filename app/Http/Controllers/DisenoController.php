@@ -39,13 +39,35 @@ class DisenoController
         return response()->json(self::datos($diseno), $diseno->wasRecentlyCreated ? 201 : 200);
     }
 
-    /** Miniatura de un diseño, solo para su dueño. A los demás les responde 404, sin desvelar que existe. */
-    public function miniatura(Request $request, string $idioma, string $diseno): Response
+    /** Biblioteca del visitante: sus diseños, del más reciente al más antiguo. */
+    public function lista(Request $request, string $idioma): JsonResponse
+    {
+        $propietario = Propietario::hash($request, crear: false);
+        $disenos = $propietario === null ? collect() : Diseno::where('propietario', $propietario)->latest('id')->limit(60)->get();
+
+        return response()->json(['disenos' => $disenos->map(fn (Diseno $d) => self::datos($d))->values()]);
+    }
+
+    /** El visitante borra un diseño suyo (y sus archivos). A los demás, 404. */
+    public function borrar(Request $request, string $idioma, string $diseno): JsonResponse
+    {
+        $this->delVisitante($request, $diseno)->delete();
+
+        return response()->json(['borrado' => true]);
+    }
+
+    private function delVisitante(Request $request, string $uuid): Diseno
     {
         $propietario = Propietario::hash($request, crear: false);
         abort_if($propietario === null, 404);
 
-        $diseno = Diseno::where('uuid', $diseno)->where('propietario', $propietario)->firstOrFail();
+        return Diseno::where('uuid', $uuid)->where('propietario', $propietario)->firstOrFail();
+    }
+
+    /** Miniatura de un diseño, solo para su dueño. A los demás les responde 404, sin desvelar que existe. */
+    public function miniatura(Request $request, string $idioma, string $diseno): Response
+    {
+        $diseno = $this->delVisitante($request, $diseno);
 
         return Storage::disk(GuardarDiseno::DISCO)->response($diseno->miniatura, null, [
             'Content-Type' => 'image/webp',

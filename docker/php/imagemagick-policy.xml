@@ -4,7 +4,8 @@
   - Recursos acotados: lo que no cabe en memoria va a la caché en disco y, si
     tampoco, la operación falla con un aviso al cliente (nunca agota la RAM del
     dedicado, que comparten producción, pruebas y MariaDB). El analizador fija
-    además sus propios límites (AnalizadorPng::RECURSOS).
+    además sus propios límites (AnalizadorPng::RECURSOS). Sin límite «time»: cuenta
+    desde que arranca el proceso y PHP-FPM reutiliza sus procesos durante horas.
   - Sin los lectores con historial de fallos graves (ImageTragick y similares):
     la tienda solo lee PNG y escribe PNG/WebP, siempre con el formato forzado.
 -->
@@ -14,7 +15,6 @@
   <policy domain="resource" name="disk" value="4GiB"/>
   <policy domain="resource" name="width" value="16KP"/>
   <policy domain="resource" name="height" value="16KP"/>
-  <policy domain="resource" name="time" value="120"/>
   <policy domain="delegate" rights="none" pattern="*"/>
   <policy domain="path" rights="none" pattern="@*"/>
   <policy domain="coder" rights="none" pattern="{EPHEMERAL,URL,HTTPS,HTTP,FTP,MSL,MVG,TEXT,LABEL,PS,PS2,PS3,EPS,EPI,EPSF,EPSI,PDF,PDFA,XPS,SVG,MSVG,RSVG,SHOW,WIN,PLT,PCL,PWP,CAPTION,PANGO}"/>

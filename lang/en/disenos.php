@@ -46,4 +46,7 @@ return [
     'error_no_disponible' => 'We cannot receive designs right now. Try again later; if it keeps happening, write to us.',
     'error_ocupado' => 'We are checking many designs at once. Wait a few seconds and try again.',
     'error_limite_dia' => 'You have uploaded many designs today. If you need more, write to us and we will help.',
+    'biblioteca_titulo' => 'Your uploaded designs',
+    'biblioteca_quitar' => 'Remove «:nombre» from your designs',
+    'biblioteca_confirmar' => 'Remove «:nombre»? We will delete it from our server.',
 ];

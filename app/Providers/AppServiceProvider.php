@@ -9,6 +9,7 @@ use App\Models\Caja;
 use App\Models\ClaseImpuesto;
 use App\Models\Color;
 use App\Models\Cupon;
+use App\Models\Diseno;
 use App\Models\Familia;
 use App\Models\Foto;
 use App\Models\Pack;
@@ -23,6 +24,7 @@ use App\Models\ZonaEnvio;
 use App\Models\ZonaImpresion;
 use App\Policies\ActividadPolicy;
 use App\Policies\CatalogoPolicy;
+use App\Policies\DisenoPolicy;
 use App\Policies\SeccionPolicy;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
@@ -66,6 +68,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::after(fn (User $usuario, string $habilidad, ?bool $resultado) => $resultado ?? ($usuario->esSuperadministrador() ? true : null));
 
         Gate::policy(Activity::class, ActividadPolicy::class);
+        Gate::policy(Diseno::class, DisenoPolicy::class);
 
         foreach ([Familia::class, Color::class, Talla::class, ZonaImpresion::class, Proveedor::class, Prenda::class, Variante::class, Foto::class] as $modelo) {
             Gate::policy($modelo, CatalogoPolicy::class);

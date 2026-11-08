@@ -71,7 +71,7 @@ return [
     'coleccion_titulo' => 'Your collection',
     'coleccion_texto' => 'Your design in all :n colours of the :prenda. Tap one to see it up close.',
     'ver_en_grande' => 'See it up close: :color',
-    'privacidad' => "Your design never leaves your device: we don't upload or store it. Indicative preview; the quality check happens when you customise.",
+    'privacidad' => 'While you try it on, your design stays on your device. We only upload it when you move on to sizes and colours, to prepare your order, and you can remove it at any time from «Your uploaded designs».',
     'error_archivo' => "That file isn't an image we can show. Try PNG, JPG, SVG or WebP.",
     'error_grande' => 'The file is larger than 20 MB. Try a lighter version.',
     'ajusta' => 'Adjust your design',

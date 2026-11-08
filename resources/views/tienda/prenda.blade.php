@@ -72,6 +72,8 @@
         'error_original' => __('disenos.error_original'),
         'error_no_png' => __('disenos.error_no_png'),
         'error_red' => __('disenos.error_red'),
+        'biblioteca_quitar' => __('disenos.biblioteca_quitar'),
+        'biblioteca_confirmar' => __('disenos.biblioteca_confirmar'),
         'error_pesado' => __('disenos.error_pesado', ['mb' => \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo()]),
     ];
     // Misma regla que App\Dominio\Disenos\Calidad: umbrales de Ajustes y textos de aviso.
@@ -212,7 +214,7 @@
 @endpush
 
 @push('scripts')
-    <script src="@recurso('js/visor.js')?v={{ @filemtime(public_path('js/visor.js')) }}" defer></script>
+    <script src="@recurso('js/visor.js')" defer></script>
 @endpush
 
 <x-tienda :titulo="($prenda->seo_titulo ?: $prenda->nombre).' · Nextgenapparel'" :descripcion="$prenda->seo_descripcion ?: \Illuminate\Support\Str::limit((string) $prenda->descripcion, 155)" :alternos="$alternos" :seo="$seo">
@@ -254,7 +256,7 @@
                 <div class="estudio-escena">
                 <button type="button" class="girar anterior" data-girar aria-label="{{ __('tienda.atajo_girar') }}">‹</button>
                 <div class="marco-visor">
-                <div class="visor" id="visor" data-subida="{{ route('disenos.subir') }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
+                <div class="visor" id="visor" data-subida="{{ route('disenos.subir') }}" data-biblioteca="{{ route('disenos.lista') }}" data-borrar="{{ route('disenos.borrar', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
                     <div class="visor-controles">
                         <div class="segmento" role="group" aria-label="{{ __('tienda.delantera') }} / {{ __('tienda.trasera') }}">
                             <button type="button" class="boton-pildora" data-cara="delantera" aria-pressed="true">{{ __('tienda.delantera') }}</button>

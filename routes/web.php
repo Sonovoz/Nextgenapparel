@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Backend\ArchivoDisenoController;
 use App\Http\Controllers\DisenoController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TiendaController;
@@ -18,6 +19,12 @@ Route::get('/', function (Request $request) {
     return redirect()->route('portada', ['idioma' => $idioma]);
 });
 
+// Backend: archivos privados de la biblioteca de diseños (fase 4), solo con permiso.
+Route::prefix('admin/archivos-disenos/{diseno}')->group(function () {
+    Route::get('/miniatura', [ArchivoDisenoController::class, 'miniatura'])->name('backend.disenos.miniatura');
+    Route::get('/original', [ArchivoDisenoController::class, 'original'])->name('backend.disenos.original');
+});
+
 // SEO técnico (D102): antes de las rutas de la tienda.
 Route::get('/robots.txt', [SeoController::class, 'robots']);
 Route::get('/sitemap.xml', [SeoController::class, 'indice'])->name('sitemap');
@@ -34,6 +41,8 @@ Route::prefix('{idioma}')
         // Diseños del cliente (fase 4): subida y miniatura, solo para su dueño.
         Route::post('/disenos', [DisenoController::class, 'subir'])->name('disenos.subir')->middleware('throttle:disenos');
         Route::get('/disenos/{diseno}/miniatura', [DisenoController::class, 'miniatura'])->name('disenos.miniatura')->whereUuid('diseno');
+        Route::get('/disenos', [DisenoController::class, 'lista'])->name('disenos.lista');
+        Route::delete('/disenos/{diseno}', [DisenoController::class, 'borrar'])->name('disenos.borrar')->whereUuid('diseno');
 
         // Sobre nosotros (D145): /es/sobre-nosotros y /en/about-us; antes de las familias.
         Route::get('/{pagina}', [TiendaController::class, 'nosotros'])

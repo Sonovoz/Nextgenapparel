@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use App\Dominio\Disenos\Calidad;
+use App\Dominio\Disenos\GuardarDiseno;
 use App\Dominio\Disenos\NivelCalidad;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Diseño de un cliente (fase 4). El archivo está en el disco privado «disenos»;
@@ -20,6 +23,20 @@ class Diseno extends Model
     protected $guarded = ['id'];
 
     protected $hidden = ['propietario', 'ruta', 'miniatura', 'sha256'];
+
+    protected static function booted(): void
+    {
+        // Al borrar el diseño se borran sus archivos, tras confirmar la transacción.
+        static::deleted(fn (Diseno $diseno) => DB::afterCommit(
+            fn () => Storage::disk(GuardarDiseno::DISCO)->delete(array_filter([$diseno->ruta, $diseno->miniatura]))
+        ));
+    }
+
+    /** Dueño legible para el backend. */
+    public function dueno(): string
+    {
+        return $this->cliente_id !== null ? 'Cliente nº '.$this->cliente_id : 'Visitante sin cuenta';
+    }
 
     /** El uuid es un identificador público aparte; la clave sigue siendo el id. */
     public function uniqueIds(): array

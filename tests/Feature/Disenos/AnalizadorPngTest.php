@@ -221,6 +221,16 @@ class AnalizadorPngTest extends TestCase
         $this->assertSame(EstadoSalud::Correcto, $estado, $mensaje);
     }
 
+    public function test_no_pone_limite_de_tiempo_a_imagemagick_porque_cuenta_desde_que_arranca_el_proceso(): void
+    {
+        // Con un «time» de 60 s, un proceso de PHP-FPM que lleva más de un minuto
+        // vivo rechazaba todas las imágenes (encontrado en la pasada de navegador).
+        (new AnalizadorPng)->analizar(PngDePrueba::crear(400, 400, 'white'));
+
+        $this->assertGreaterThan(24 * 3600, Imagick::getResourceLimit(Imagick::RESOURCETYPE_TIME));
+        $this->assertEquals(128 * 1024 * 1024, Imagick::getResourceLimit(Imagick::RESOURCETYPE_MEMORY));
+    }
+
     public function test_acepta_png_de_16_bits(): void
     {
         $this->assertSame(16, (new AnalizadorPng)->analizar(PngDePrueba::crear(400, 400, 'transparent', [0, 0, 400, 400], 'png64', 16))->profundidadBits);

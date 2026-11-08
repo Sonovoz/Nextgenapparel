@@ -821,27 +821,100 @@
             URL.revokeObjectURL(url);
 
             var esVectorial = archivo.type === 'image/svg+xml' || (original && original.tipo === 'image/svg+xml');
-            estado.logoTipo = esVectorial ? 'vectorial' : tipoDeFondo(c);
-            estado.logo = recortarMargenes(c);
+            var recortado = recortarMargenes(c);
             // Si llega reducido desde la portada, la calidad se mide con los píxeles del original.
             var factor = original && original.ancho ? original.ancho / w : 1;
-            estado.logoPx = { w: Math.round(estado.logo.width / escala * factor), h: Math.round(estado.logo.height / escala * factor) };
-            estado.nombre = original ? original.nombre : archivo.name;
             // Para el pedido hace falta el archivo original, no la copia reducida de la portada (fase 4).
-            estado.archivo = original ? (original.archivo || null) : archivo;
-            estado.uuid = null;
-            estado.errorSubida = '';
-            if (estado.zonaId !== null) delete estado.ajustes[estado.zonaId];
-            estado.version++;
-            if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
-            elegirHerramienta('ajustar'); // el logo ya está: toca colocarlo
-            sincronizar();
+            ponerLogo({
+                lienzo: recortado,
+                tipo: esVectorial ? 'vectorial' : tipoDeFondo(c),
+                px: { w: Math.round(recortado.width / escala * factor), h: Math.round(recortado.height / escala * factor) },
+                nombre: original ? original.nombre : archivo.name,
+                archivo: original ? (original.archivo || null) : archivo,
+                uuid: null
+            });
         };
         img.onerror = function () { URL.revokeObjectURL(url); ocultarCarga(); mostrarError(textos.error_archivo); };
         img.src = url;
     }
 
+    /** Coloca un logo ya preparado en la zona activa (desde un archivo o desde «Tus diseños»). */
+    function ponerLogo(logo) {
+        estado.logo = logo.lienzo;
+        estado.logoTipo = logo.tipo;
+        estado.logoPx = logo.px;
+        estado.nombre = logo.nombre;
+        estado.archivo = logo.archivo;
+        estado.uuid = logo.uuid;
+        estado.errorSubida = '';
+        if (estado.zonaId !== null) delete estado.ajustes[estado.zonaId];
+        estado.version++;
+        if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
+        elegirHerramienta('ajustar'); // el logo ya está: toca colocarlo
+        sincronizar();
+    }
+
     entrada.addEventListener('change', function () { leerLogo(entrada.files[0]); entrada.value = ''; });
+
+    /* ---------- Tus diseños subidos (fase 4) ----------
+       Los que este visitante ya subió: se colocan sin volver a subirlos (miniatura
+       para verlo y los píxeles del servidor para la calidad) y se pueden quitar. */
+
+    var biblioteca = document.getElementById('biblioteca');
+    var listaBiblioteca = document.getElementById('biblioteca-lista');
+
+    function peticionJson(url, metodo) {
+        var token = document.querySelector('meta[name="csrf-token"]');
+        return fetch(url, {
+            method: metodo || 'GET',
+            credentials: 'same-origin',
+            headers: { Accept: 'application/json', 'X-CSRF-TOKEN': token ? token.content : '' }
+        }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+    }
+
+    function cargarBiblioteca() {
+        if (!biblioteca || !visor.dataset.biblioteca) return;
+        peticionJson(visor.dataset.biblioteca).then(function (datos) { pintarBiblioteca(datos.disenos || []); }, function () {});
+    }
+
+    function pintarBiblioteca(disenos) {
+        listaBiblioteca.replaceChildren();
+        biblioteca.hidden = disenos.length === 0;
+        disenos.forEach(function (d) {
+            var fila = el('li', 'biblioteca-diseno');
+            var usar = el('button', 'biblioteca-usar');
+            usar.type = 'button';
+            var img = el('img');
+            img.src = d.miniatura; img.alt = ''; img.loading = 'lazy';
+            usar.appendChild(img);
+            usar.appendChild(el('span', '', d.nombre));
+            usar.addEventListener('click', function () { usarDeBiblioteca(d); });
+            var quitar = el('button', 'biblioteca-quitar', '×');
+            quitar.type = 'button';
+            quitar.setAttribute('aria-label', texto('biblioteca_quitar', { nombre: d.nombre }));
+            quitar.addEventListener('click', function () {
+                if (!window.confirm(texto('biblioteca_confirmar', { nombre: d.nombre }))) return;
+                peticionJson(visor.dataset.borrar.replace('00000000-0000-0000-0000-000000000000', d.uuid), 'DELETE').then(cargarBiblioteca, function () { mostrarError(textos.error_red); });
+            });
+            fila.appendChild(usar);
+            fila.appendChild(quitar);
+            listaBiblioteca.appendChild(fila);
+        });
+    }
+
+    function usarDeBiblioteca(d) {
+        mostrarError('');
+        abrirEstudio();
+        mostrarCarga();
+        cargarFoto(d.miniatura).then(function (img) {
+            var c = document.createElement('canvas');
+            c.width = img.naturalWidth; c.height = img.naturalHeight;
+            c.getContext('2d').drawImage(img, 0, 0);
+            ponerLogo({ lienzo: c, tipo: d.fondo, px: { w: d.ancho_px, h: d.alto_px }, nombre: d.nombre, archivo: null, uuid: d.uuid });
+        }, function () { ocultarCarga(); mostrarError(textos.error_red); });
+    }
+
+    cargarBiblioteca();
 
     [soltar, visor].forEach(function (destino) {
         destino.addEventListener('dragover', function (e) {
@@ -1441,7 +1514,7 @@
                 }, function () { return fallarSubida(textos.error_red); });
             });
         }, Promise.resolve(true)).then(function (ok) {
-            if (ok) { estado.subiendo = false; pintarCapas(); actualizarAjustador(); }
+            if (ok) { estado.subiendo = false; pintarCapas(); actualizarAjustador(); cargarBiblioteca(); }
             return ok;
         });
     }

@@ -814,3 +814,15 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .casilla-derechos { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.45; color: #DCD8E8; cursor: pointer; }
 .casilla-derechos input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--azul); cursor: pointer; }
 .error-subida { margin: 0; padding: 10px 12px; border-radius: 10px; background: rgba(240, 98, 77, .14); border: 1px solid rgba(240, 98, 77, .5); color: #FFC9C0; font-size: 13px; line-height: 1.45; }
+
+/* Tus diseños subidos (fase 4). */
+.biblioteca { margin-top: 16px; }
+.biblioteca-titulo { margin: 0 0 8px; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #A7A2B5; }
+.biblioteca-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 236px; overflow-y: auto; }
+.biblioteca-diseno { display: flex; align-items: stretch; gap: 6px; }
+.biblioteca-usar { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 12px 6px 6px; border-radius: 12px; border: 1px solid var(--linea-fuerte); background: var(--fondo-suave); color: var(--tinta); font: inherit; font-size: 14px; text-align: left; cursor: pointer; transition: border-color .2s ease; }
+.biblioteca-usar:hover { border-color: var(--neon); }
+.biblioteca-usar img { flex: none; width: 40px; height: 40px; object-fit: contain; border-radius: 8px; background: repeating-conic-gradient(#2C2E42 0 25%, #1B1C29 0 50%) 0 0 / 10px 10px; }
+.biblioteca-usar span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.biblioteca-quitar { flex: none; width: 44px; border-radius: 12px; border: 1px solid var(--linea-fuerte); background: transparent; color: var(--tinta-suave); font-size: 20px; cursor: pointer; }
+.biblioteca-quitar:hover { color: #FFC9C0; border-color: rgba(240, 98, 77, .6); }

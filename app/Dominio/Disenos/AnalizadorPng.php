@@ -39,8 +39,6 @@ class AnalizadorPng
         Imagick::RESOURCETYPE_DISK => 3 * 1024 * 1024 * 1024,
     ];
 
-    private const SEGUNDOS_MAXIMOS = 60;
-
     /**
      * @param  array{max_mb: int, max_px: int, min_px: int}|null  $limites  los de Ajustes si no se indican
      * @param  (callable(Imagick, AnalisisPng): void)|null  $conImagen  trabajo extra con la imagen ya leída
@@ -147,11 +145,10 @@ class AnalizadorPng
 
     private static function limitarRecursos(): void
     {
+        // Sin límite de tiempo: el «time» de ImageMagick cuenta desde que arranca el proceso,
+        // no desde cada operación; en PHP-FPM (procesos largos) acabaría rechazando todas las imágenes.
         foreach (self::RECURSOS as $tipo => $bytes) {
             Imagick::setResourceLimit($tipo, $bytes);
-        }
-        if (defined(Imagick::class.'::RESOURCETYPE_TIME')) {
-            Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, self::SEGUNDOS_MAXIMOS);
         }
     }
 

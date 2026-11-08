@@ -71,7 +71,7 @@ return [
     'coleccion_titulo' => 'Tu colección',
     'coleccion_texto' => 'Tu diseño en los :n colores de :prenda. Pulsa uno para verlo en grande.',
     'ver_en_grande' => 'Ver en grande: :color',
-    'privacidad' => 'Tu diseño no sale de tu dispositivo: no lo subimos ni lo guardamos. Vista previa orientativa; la revisión de calidad se hace al personalizar.',
+    'privacidad' => 'Mientras lo pruebas, tu diseño no sale de tu dispositivo. Solo lo subimos cuando pasas a tallas y colores, para preparar tu pedido, y puedes quitarlo cuando quieras desde «Tus diseños subidos».',
     'error_archivo' => 'Ese archivo no es una imagen que podamos mostrar. Prueba con PNG, JPG, SVG o WebP.',
     'error_grande' => 'El archivo pesa más de 20 MB. Prueba con una versión más ligera.',
     'ajusta' => 'Ajusta tu diseño',

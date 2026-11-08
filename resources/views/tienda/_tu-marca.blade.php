@@ -75,6 +75,12 @@
             <span class="nombre-logo" id="nombre-logo"></span>
         </label>
         <input type="file" id="archivo-diseno" class="oculto" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+
+        {{-- Tus diseños subidos (fase 4): se rellena desde public/js/visor.js. --}}
+        <div class="biblioteca" id="biblioteca" hidden>
+            <p class="biblioteca-titulo">{{ __('disenos.biblioteca_titulo') }}</p>
+            <ul class="biblioteca-lista" id="biblioteca-lista"></ul>
+        </div>
     </div>
 
     <div id="panel-texto" role="tabpanel" aria-labelledby="pestana-texto" hidden>

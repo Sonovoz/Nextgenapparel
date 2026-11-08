@@ -46,4 +46,7 @@ return [
     'error_no_disponible' => 'Ahora mismo no podemos recibir diseños. Inténtalo dentro de un rato; si sigue igual, escríbenos.',
     'error_ocupado' => 'Estamos comprobando muchos diseños a la vez. Espera unos segundos y vuelve a intentarlo.',
     'error_limite_dia' => 'Has subido muchos diseños hoy. Si necesitas más, escríbenos y te ayudamos.',
+    'biblioteca_titulo' => 'Tus diseños subidos',
+    'biblioteca_quitar' => 'Quitar «:nombre» de tus diseños',
+    'biblioteca_confirmar' => '¿Quitar «:nombre»? Lo borraremos de nuestro servidor.',
 ];
