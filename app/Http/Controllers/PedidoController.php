@@ -31,6 +31,10 @@ class PedidoController
         $cliente = $request->user()?->cliente;
         $datos = $request->session()->get(CierreController::SESION);
         // Sin datos del cierre, o calculados por otro (un invitado que entra en su cuenta): al cierre.
+        // Doble clic: la primera petición ya creó el pedido, vació el carrito y olvidó el cierre (M3).
+        if (($carrito === null || $datos === null || ! $carrito->lineas()->exists()) && ($reciente = $this->reciente($request)) !== null) {
+            return redirect(self::url('ver', $reciente));
+        }
         if ($carrito === null || $datos === null || ($datos['cliente_id'] ?? null) !== $cliente?->id
             || CierreController::bloqueoDe($request, $cliente) !== null) {
             return redirect(CarritoController::url('cerrar'));
@@ -40,6 +44,10 @@ class PedidoController
         try {
             $pedido = $crear($carrito, $datos, $cliente, (int) $request->input('total'), app()->getLocale(), $request->ip());
         } catch (PedidoNoCreado $e) {
+            if ($e->motivo === 'vacio' && ($reciente = $this->reciente($request)) !== null) {
+                return redirect(self::url('ver', $reciente));
+            }
+
             return redirect(CarritoController::url($e->motivo === 'vacio' ? 'ver' : 'cerrar').'#total')
                 ->with('aviso_pedido', __('pedidos.no_creado_'.$e->motivo));
         }
@@ -86,6 +94,13 @@ class PedidoController
 
         return ($this->puedeVer($request, $pedido) ? redirect(self::url('ver', $pedido)) : back())
             ->with('estado_pedido', __('pedidos.enlace_enviado'));
+    }
+
+    /** El pedido que este navegador acaba de crear (últimos 5 minutos), si lo hay. */
+    private function reciente(Request $request): ?Pedido
+    {
+        return Pedido::whereIn('uuid', $request->session()->get(self::SESION, []))
+            ->where('created_at', '>=', now()->subMinutes(5))->latest('id')->first();
     }
 
     private function puedeVer(Request $request, Pedido $pedido): bool

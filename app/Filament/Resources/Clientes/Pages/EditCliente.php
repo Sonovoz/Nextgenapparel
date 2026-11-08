@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Clientes\Pages;
 
 use App\Dominio\Clientes\BorrarCliente;
+use App\Dominio\Clientes\ClienteConPedidos;
 use App\Dominio\Clientes\TipoCliente;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Filament\Resources\Clientes\ClienteResource;
@@ -85,7 +86,15 @@ class EditCliente extends EditRecord
                         ->validationMessages(['in' => 'Escribe BORRAR en mayúsculas.']),
                 ])
                 ->action(function (BorrarCliente $borrar): void {
-                    $borrar($this->getRecord(), auth()->user());
+                    try {
+                        $borrar($this->getRecord(), auth()->user());
+                    } catch (ClienteConPedidos) {
+                        Notification::make()->title('No se puede borrar: tiene pedidos')
+                            ->body('Sus pedidos guardan sus datos y la ley obliga a conservar parte de ellos. Se anonimizará cuando el asesor fije el criterio; mientras, desactívalo si lo necesitas.')
+                            ->danger()->persistent()->send();
+
+                        return;
+                    }
                     Notification::make()->title('Cliente borrado')->success()->send();
                     $this->redirect(ClienteResource::getUrl('index'));
                 }),

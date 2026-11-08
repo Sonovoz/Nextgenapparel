@@ -4,6 +4,7 @@ namespace App\Dominio\Clientes;
 
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Cliente;
+use App\Models\Pedido;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
@@ -15,14 +16,18 @@ use Spatie\Activitylog\Models\Activity;
  * actividad pierden sus datos (nombre, correo, NIF…) y se borran sus tokens de contraseña
  * y sus sesiones. Queda un apunte del borrado con la referencia interna.
  *
- * IMPORTANTE para la fase 6: un cliente con pedidos o facturas no se borra: se anonimiza
- * y se conserva lo que obliga la ley (con el criterio del asesor). Aquí habrá que comprobarlo.
+ * Un cliente con pedidos no se borra (revisión N3 del 6.1, A2): sus pedidos guardan una
+ * copia de sus datos (nombre, NIF, dirección, correo, IP). Se anonimizará y se conservará
+ * lo que obliga la ley con el criterio del asesor; hasta entonces, ClienteConPedidos.
  */
 final class BorrarCliente
 {
     public function __invoke(Cliente $cliente, User $quien): void
     {
         $referencia = ['cliente' => $cliente->uuid, 'solicitado_en' => $cliente->borrado_solicitado_en?->toDateTimeString()];
+        if ($cliente->pedidos()->exists() || Pedido::where('correo', $cliente->correo)->exists()) {
+            throw new ClienteConPedidos;
+        }
 
         try {
             DB::transaction(function () use ($cliente): void {

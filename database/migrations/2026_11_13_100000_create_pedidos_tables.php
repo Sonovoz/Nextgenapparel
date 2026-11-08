@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -19,11 +20,13 @@ return new class extends Migration
             $table->string('clave', 30)->primary();
             $table->unsignedBigInteger('valor')->default(0);
         });
+        // La fila existe desde el principio: así se suma con un UPDATE directo (revisión N3 del 6.1, M1).
+        DB::table('contadores')->insert(['clave' => 'pedido', 'valor' => 0]);
 
         Schema::create('pedidos', function (Blueprint $table) {
             $table->id();
             $table->char('uuid', 36)->unique(); // público; char(36) por D148
-            $table->string('numero', 30)->unique();
+            $table->string('numero', 30)->nullable()->unique(); // se pone al final de la transacción (M2)
             // Sin ficha mientras un invitado no confirma su correo (D169): nadie puede
             // colgar pedidos en la cuenta de otro con solo escribir su correo.
             $table->foreignId('cliente_id')->nullable()->constrained('clientes')->nullOnDelete();

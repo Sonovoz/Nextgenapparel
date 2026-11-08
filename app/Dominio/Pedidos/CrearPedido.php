@@ -46,7 +46,8 @@ final class CrearPedido
         $uuid = (string) Str::uuid();
 
         try {
-            return DB::transaction(fn () => $this->crear($carrito, $datos, $cliente, $totalVisto, $idioma, $ip, $uuid));
+            // Hasta 3 intentos si MariaDB detecta un interbloqueo entre dos pedidos (M1).
+            return DB::transaction(fn () => $this->crear($carrito, $datos, $cliente, $totalVisto, $idioma, $ip, $uuid), 3);
         } catch (Throwable $e) {
             Storage::disk(Pedido::DISCO)->deleteDirectory($uuid); // nada a medias
             throw $e;
@@ -55,12 +56,20 @@ final class CrearPedido
 
     private function crear(Carrito $carrito, array $datos, ?Cliente $cliente, int $totalVisto, string $idioma, ?string $ip, string $uuid): Pedido
     {
+        Storage::disk(Pedido::DISCO)->deleteDirectory($uuid); // lo de un intento anterior
+        // Primero los bloqueos y después cualquier lectura normal (revisión N3 del 6.1, A1):
+        // en MariaDB la primera lectura sin bloqueo fija la foto de los datos de toda la
+        // transacción; si se hiciera antes de esperar al cupón, no vería el pedido que acaba
+        // de gastar su último uso ni el de este mismo correo.
         $carrito = Carrito::whereKey($carrito->getKey())->lockForUpdate()->first();
-        if ($carrito === null || ! $carrito->lineas()->exists()) {
+        if ($carrito === null) {
+            throw new PedidoNoCreado('vacio');
+        }
+        $cupon = blank($carrito->cupon) ? null : Cupon::where('codigo', Cupon::normalizar($carrito->cupon))->lockForUpdate()->first();
+        if (! $carrito->lineas()->exists()) {
             throw new PedidoNoCreado('vacio');
         }
         $correo = $cliente !== null ? $cliente->correo : mb_strtolower(trim((string) $datos['correo']));
-        $cupon = blank($carrito->cupon) ? null : Cupon::where('codigo', Cupon::normalizar($carrito->cupon))->lockForUpdate()->first();
         $usados = CuponesUsados::de($cliente, $correo);
         $recargo = $cliente !== null ? (bool) $cliente->recargo_equivalencia : (bool) ($datos['recargo'] ?? false);
 
@@ -72,6 +81,10 @@ final class CrearPedido
         if ($resultado->total() !== $totalVisto) {
             throw new PedidoNoCreado('total_cambiado');
         }
+        // Y el cupón, sobre su fila bloqueada: el último uso no se gasta dos veces (A1).
+        if ($resultado->cupon !== null && ($cupon === null || ($cupon->usos_maximos !== null && $cupon->usos >= $cupon->usos_maximos))) {
+            throw new PedidoNoCreado('total_cambiado');
+        }
 
         $tipo = $cliente !== null ? $cliente->tipo : TipoCliente::from((string) $datos['tipo']);
         $direccion = collect(['nombre', 'empresa', 'direccion', 'direccion_2', 'codigo_postal', 'localidad', 'provincia', 'pais', 'telefono'])
@@ -79,7 +92,6 @@ final class CrearPedido
 
         $pedido = Pedido::create([
             'uuid' => $uuid,
-            'numero' => Numeracion::numeroPedido(Numeracion::siguiente('pedido')),
             // Con cuenta, su ficha (el correo está verificado: lo exige el cierre). Sin cuenta, al confirmar el correo.
             'cliente_id' => $cliente?->id,
             'estado' => EstadoPedido::PendientePago,
@@ -113,7 +125,12 @@ final class CrearPedido
             throw new LogicException('El motor no ha valorado todas las líneas del carrito.');
         }
         foreach ($ordenadas as $i => $linea) {
-            $this->copiarLinea($pedido, $linea, $resultado->lineas[$i], $lineas->search(fn ($l) => $l->is($linea)));
+            $calculada = $resultado->lineas[$i];
+            // Cada línea del motor es la de esta línea del carrito (B2).
+            if ($calculada->tipo !== $linea->tipo->value || $calculada->referencia !== ($linea->tipo === TipoLinea::Pack ? $linea->pack_id : $linea->prenda_id)) {
+                throw new LogicException('Las líneas del motor no corresponden a las del carrito.');
+            }
+            $this->copiarLinea($pedido, $linea, $calculada, $lineas->search(fn ($l) => $l->is($linea)));
         }
 
         if ($cupon !== null && $resultado->cupon !== null) {
@@ -121,6 +138,8 @@ final class CrearPedido
         }
         $pedido->historial()->create(['estado' => EstadoPedido::PendientePago, 'nota' => 'Pedido creado desde la tienda']);
         $carrito->delete(); // con sus líneas e impresiones
+        // El número, lo último: el contador queda bloqueado solo un instante (M2).
+        $pedido->update(['numero' => Numeracion::numeroPedido(Numeracion::siguiente('pedido'))]);
 
         return $pedido;
     }

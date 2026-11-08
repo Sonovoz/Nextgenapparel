@@ -102,7 +102,8 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
             Route::post($tramo('cerrar'), [CierreController::class, 'calcular'])->name('cerrar.calcular')->middleware('throttle:carrito');
             Route::get($tramo('disenos').'/{diseno}', [CarritoController::class, 'miniatura'])->name('miniatura')->whereUuid('diseno');
             // Confirmar el pedido (paso 6.1): crea el pedido; el pago, en la fase 7.
-            Route::post($tramo('cerrar').'/'.$tramo('confirmar'), [PedidoController::class, 'confirmar'])->name('confirmar')->middleware('throttle:carrito');
+            Route::post($tramo('cerrar').'/'.$tramo('confirmar'), [PedidoController::class, 'confirmar'])->name('confirmar')->middleware('throttle:carrito')
+                ->block(10, 10); // un doble clic espera a la primera petición y no pisa la sesión (M3)
         });
 
     // Pedidos (paso 6.1): /es/pedidos/{uuid} y /en/orders/{uuid}, sin indexar.

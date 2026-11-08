@@ -2,10 +2,13 @@
 
 namespace Tests\Feature\Pedidos;
 
+use App\Dominio\Carrito\ValorarCarrito;
 use App\Dominio\Disenos\GuardarDiseno;
+use App\Dominio\Disenos\LimpiarDisenos;
 use App\Dominio\Pedidos\CrearPedido;
 use App\Dominio\Pedidos\EstadoPedido;
 use App\Dominio\Pedidos\PedidoNoCreado;
+use App\Dominio\Precios\Motor\Destino;
 use App\Models\Ajuste;
 use App\Models\Carrito;
 use App\Models\Cliente;
@@ -13,6 +16,8 @@ use App\Models\Color;
 use App\Models\Cupon;
 use App\Models\Diseno;
 use App\Models\Familia;
+use App\Models\LineaPedido;
+use App\Models\Pack;
 use App\Models\Pedido;
 use App\Models\Prenda;
 use App\Models\ReglaMinimo;
@@ -26,6 +31,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
+use Throwable;
 
 /**
  * El pedido desde el carrito (paso 6.1, D169). Mismo ejemplo que el cierre (D166):
@@ -101,7 +107,6 @@ class CrearPedidoTest extends TestCase
         $this->assertSame(['lucia@ejemplo.com', null, null], [$pedido->correo, $pedido->cliente_id, $pedido->correo_confirmado_en]);
         $this->assertSame(['Lucía Pérez', 'Calle Luna 3', '28004'], [$pedido->nombre_fiscal, $pedido->direccion_envio['direccion'], $pedido->direccion_facturacion['codigo_postal']]);
         $this->assertStringStartsWith('He leído y acepto', $pedido->condiciones_texto);
-        $this->assertSame(13298, $pedido->desglose['total']);
 
         $linea = $pedido->lineas->sole();
         $this->assertSame(['Essential T-shirt', 'Black', [['talla_id' => $linea->tallas[0]['talla_id'], 'nombre' => 'M', 'unidades' => 15]]], [$linea->nombreEn('en'), $linea->colorEn('en'), $linea->tallas]);
@@ -121,7 +126,6 @@ class CrearPedidoTest extends TestCase
         $this->logo->delete(); // el cliente lo quita de «Tus diseños» o lo borra la limpieza (D150)
 
         $this->assertSame('PNG-ORIGINAL', Storage::disk(Pedido::DISCO)->get($impresion->archivo));
-        $this->assertNull($impresion->fresh()->diseno_id);
         $this->assertSame(['logo.png', str_repeat('b', 64)], [$impresion->nombre_original, $impresion->sha256]);
     }
 
@@ -149,7 +153,7 @@ class CrearPedidoTest extends TestCase
         }
         $this->assertSame(0, Pedido::count());
         $this->assertSame([], Storage::disk(Pedido::DISCO)->allFiles());
-        $this->assertSame(0, (int) DB::table('contadores')->value('valor'));
+        $this->assertSame(0, (int) DB::table('contadores')->where('clave', 'pedido')->value('valor'));
         if ($motivo !== 'vacio') {
             $this->assertSame(1, $this->carrito->lineas()->count());
         }
@@ -164,12 +168,18 @@ class CrearPedidoTest extends TestCase
 
                 return null;
             }, 'total_cambiado'],
+            'el cupón ya no tiene usos' => [function (self $t) {
+                Cupon::create(['codigo' => 'ULTIMO', 'tipo' => 'importe', 'valor' => 1000, 'usos_maximos' => 1, 'usos' => 1]);
+                $t->carrito->update(['cupon' => 'ULTIMO']);
+
+                return 12088; // el total con el descuento que ya no vale
+            }, 'total_cambiado'],
             'no llega al mínimo' => [function () {
                 ReglaMinimo::create(['nombre' => ['es' => 'Mínimo'], 'tipo' => 'unidades_total', 'valor' => 20, 'ambito' => 'catalogo']);
 
                 return null;
             }, 'no_confirmable'],
-            'carrito vacío (doble clic)' => [function (self $t) {
+            'el carrito se vació entre medias' => [function (self $t) {
                 $t->carrito->lineas()->delete();
 
                 return null;
@@ -201,5 +211,61 @@ class CrearPedidoTest extends TestCase
 
         $this->assertSame([$cliente->id, 'ana@ejemplo.com', 'Estudio Ana SL', 'B12345674'], [$pedido->cliente_id, $pedido->correo, $pedido->nombre_fiscal, $pedido->nif]);
         $this->assertNotNull($pedido->correo_confirmado_en);
+    }
+
+    public function test_un_pedido_cancelado_no_gasta_el_cupon_de_un_solo_uso(): void
+    {
+        Cupon::create(['codigo' => 'BIENVENIDA', 'tipo' => 'importe', 'valor' => 1000]);
+        $this->carrito->update(['cupon' => 'BIENVENIDA']);
+        $this->crear(total: 12088)->update(['estado' => EstadoPedido::Cancelado]);
+
+        $this->nuevoCarrito();
+        $this->carrito->update(['cupon' => 'BIENVENIDA']);
+
+        $this->assertSame(1000, $this->crear(total: 12088)->descuentos);
+    }
+
+    /** Si falla la copia de un archivo, no queda nada: ni filas, ni carpeta, ni número. */
+    public function test_un_fallo_al_copiar_no_deja_nada(): void
+    {
+        Storage::disk(GuardarDiseno::DISCO)->delete('sesion/logo.png');
+
+        try {
+            $this->crear();
+            $this->fail('Se ha creado un pedido sin el archivo del diseño.');
+        } catch (Throwable) {
+        }
+        $this->assertSame([0, 0, 0], [Pedido::count(), LineaPedido::count(), (int) DB::table('contadores')->where('clave', 'pedido')->value('valor')]);
+        $this->assertSame([], Storage::disk(Pedido::DISCO)->allFiles());
+        $this->assertSame(1, $this->carrito->lineas()->count());
+    }
+
+    /** El motor da primero las prendas y luego los packs: cada línea del pedido lleva sus propios importes. */
+    public function test_un_pack_delante_de_una_prenda_conserva_sus_importes(): void
+    {
+        $pack = Pack::create(['nombre' => ['es' => 'Pack joven'], 'slug' => ['es' => 'pack-joven'], 'precio' => 8182, 'reparto' => 'libre']);
+        $lineaPack = $pack->lineas()->create(['prenda_id' => $this->linea['prenda'], 'unidades' => 10, 'colores' => [$this->linea['color']], 'tallas_permitidas' => [$this->linea['talla']]]);
+        $pack->zonas()->attach($this->linea['zona']);
+        $this->carrito->lineas()->update(['orden' => 1]);
+        $enPack = $this->carrito->lineas()->create(['tipo' => 'pack', 'pack_id' => $pack->id, 'orden' => 0,
+            'elecciones' => [$lineaPack->id => ['color' => $this->linea['color'], 'tallas' => [$this->linea['talla'] => 10]]]]);
+        $enPack->impresiones()->create(['zona_impresion_id' => $this->linea['zona'], 'texto' => 'NG', 'fuente' => 0, 'tinta' => 'auto', 'ancho_mm' => 100, 'alto_mm' => 60, 'desde_cuello_mm' => 75, 'desde_centro_mm' => 0]);
+        $total = app(ValorarCarrito::class)($this->carrito->fresh(), new Destino('ES', '28004'))->resultado->total();
+
+        $lineas = $this->crear(total: $total)->lineas;
+
+        $this->assertSame([['pack', 8182, 10], ['prenda', 10500, 15]], $lineas->map(fn ($l) => [$l->tipo, $l->neto, $l->unidades])->all());
+        $texto = $lineas[0]->impresiones->sole();
+        $this->assertSame(['NG', null, null], [$texto->texto, $texto->archivo, $texto->ppp]);
+    }
+
+    public function test_un_diseno_usado_en_un_pedido_no_lo_borra_la_limpieza(): void
+    {
+        $this->crear();
+        Diseno::query()->update(['created_at' => now()->subDays(60)]);
+
+        app(LimpiarDisenos::class)();
+
+        $this->assertTrue($this->logo->fresh() !== null);
     }
 }

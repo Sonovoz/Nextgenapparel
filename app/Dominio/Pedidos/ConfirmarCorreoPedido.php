@@ -4,6 +4,7 @@ namespace App\Dominio\Pedidos;
 
 use App\Models\Cliente;
 use App\Models\Pedido;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -16,6 +17,16 @@ use Illuminate\Support\Facades\DB;
 final class ConfirmarCorreoPedido
 {
     public function __invoke(Pedido $pedido): void
+    {
+        try {
+            $this->confirmar($pedido);
+        } catch (UniqueConstraintViolationException) {
+            // Dos enlaces del mismo correo a la vez: el otro acaba de crear la ficha; ahora la encuentra (B3).
+            $this->confirmar($pedido);
+        }
+    }
+
+    private function confirmar(Pedido $pedido): void
     {
         DB::transaction(function () use ($pedido) {
             $pedido = Pedido::whereKey($pedido->getKey())->lockForUpdate()->firstOrFail();

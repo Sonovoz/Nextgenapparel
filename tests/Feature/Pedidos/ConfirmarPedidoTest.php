@@ -3,6 +3,8 @@
 namespace Tests\Feature\Pedidos;
 
 use App\Dominio\Carrito\CarritoActual;
+use App\Dominio\Clientes\BorrarCliente;
+use App\Dominio\Clientes\ClienteConPedidos;
 use App\Http\Controllers\PedidoController;
 use App\Models\Carrito;
 use App\Models\Cliente;
@@ -175,5 +177,37 @@ class ConfirmarPedidoTest extends TestCase
         Notification::assertNothingSent();
         $this->flushSession();
         $this->actingAs($usuario)->get('/es/pedidos/'.$pedido->uuid)->assertOk()->assertSee('Ana García')->assertDontSee('Enviarme otro enlace');
+    }
+
+    /** Doble clic: la segunda petición lleva al pedido que creó la primera, no a «carrito vacío» (M3). */
+    public function test_el_doble_clic_lleva_al_mismo_pedido(): void
+    {
+        $pedido = $this->pedidoDeInvitado();
+
+        $this->post('/es/carrito/cerrar-pedido/confirmar', ['total' => 13298, 'condiciones' => '1'])->assertRedirect('/es/pedidos/'.$pedido->uuid);
+        $this->assertSame(1, Pedido::count());
+    }
+
+    public function test_si_la_cuenta_se_bloquea_despues_del_cierre_no_se_confirma(): void
+    {
+        $usuario = User::factory()->create(['email' => 'ana@ejemplo.com']);
+        $cliente = Cliente::factory()->create(['user_id' => $usuario->id, 'correo' => 'ana@ejemplo.com']);
+        Carrito::query()->update(['token' => null, 'cliente_id' => $cliente->id]);
+        $this->actingAs($usuario)->post('/es/carrito/cerrar-pedido', $this->datos());
+
+        $cliente->update(['activo' => false]);
+        $this->actingAs($usuario->fresh())->post('/es/carrito/cerrar-pedido/confirmar', ['total' => 13298, 'condiciones' => '1'])->assertRedirect('/es/carrito/cerrar-pedido');
+        $this->assertSame(0, Pedido::count());
+    }
+
+    /** Revisión N3 del 6.1, A2: sus pedidos guardan sus datos; se anonimizará con el criterio del asesor. */
+    public function test_un_cliente_con_pedidos_no_se_borra(): void
+    {
+        $pedido = $this->pedidoDeInvitado();
+        $this->get(PedidoController::enlaceConfirmar($pedido));
+        $cliente = Cliente::sole();
+
+        $this->expectException(ClienteConPedidos::class);
+        app(BorrarCliente::class)($cliente, User::factory()->create());
     }
 }
