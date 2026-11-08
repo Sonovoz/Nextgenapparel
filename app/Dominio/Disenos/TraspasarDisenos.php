@@ -4,6 +4,7 @@ namespace App\Dominio\Disenos;
 
 use App\Models\Cliente;
 use App\Models\Diseno;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -26,8 +27,14 @@ final class TraspasarDisenos
 
                     continue;
                 }
-                $diseno->update(['cliente_id' => $cliente->id, 'propietario' => null]);
-                $traspasados++;
+                try {
+                    // Un punto de guardado por diseño: si choca, se deshace solo este.
+                    DB::transaction(fn () => $diseno->update(['cliente_id' => $cliente->id, 'propietario' => null]));
+                    $traspasados++;
+                } catch (UniqueConstraintViolationException) {
+                    // El mismo archivo llegó a la cuenta mientras tanto (revisión N3, M6).
+                    $diseno->refresh()->delete();
+                }
             }
 
             return $traspasados;

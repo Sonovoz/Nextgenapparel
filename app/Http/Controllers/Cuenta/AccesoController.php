@@ -52,7 +52,21 @@ class AccesoController
             $traspasar($propietario, $cliente);
         }
 
-        return redirect()->intended(RutaCuenta::url('inicio'));
+        return redirect(self::destino($request));
+    }
+
+    /**
+     * Vuelve a donde iba, pero solo si es una página de la tienda (/{idioma}/…): tras una
+     * visita a /admin, un cliente acababa en una página prohibida (revisión N3, M5).
+     */
+    public static function destino(Request $request): string
+    {
+        $intento = (string) $request->session()->pull('url.intended', '');
+        $ruta = (string) parse_url($intento, PHP_URL_PATH);
+        $mismoSitio = str_starts_with($intento, url('/').'/') || str_starts_with($intento, '/');
+        $deLaTienda = (bool) preg_match('#^/('.implode('|', array_keys(config('idiomas.disponibles'))).')(/|$)#', $ruta);
+
+        return $mismoSitio && $deLaTienda ? $intento : RutaCuenta::url('inicio');
     }
 
     public function salir(Request $request): RedirectResponse

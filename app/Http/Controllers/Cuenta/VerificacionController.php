@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Cuenta;
 
 use App\Dominio\Clientes\VincularCliente;
+use App\Dominio\Disenos\Propietario;
+use App\Dominio\Disenos\TraspasarDisenos;
 use App\Models\User;
 use App\Support\RutaCuenta;
 use Illuminate\Http\RedirectResponse;
@@ -15,7 +17,7 @@ class VerificacionController
      * El enlace del correo. No exige haber entrado: se abre a menudo en otro navegador
      * o en el móvil, y la firma de la URL ya demuestra que llegó a ese correo.
      */
-    public function verificar(Request $request, string $id, string $hash, VincularCliente $vincular): RedirectResponse
+    public function verificar(Request $request, string $id, string $hash, VincularCliente $vincular, TraspasarDisenos $traspasar): RedirectResponse
     {
         $destino = auth()->check() ? RutaCuenta::url('inicio') : RutaCuenta::url('entrar');
         $usuario = User::find($id);
@@ -27,7 +29,13 @@ class VerificacionController
         if (! $usuario->hasVerifiedEmail()) {
             $usuario->markEmailAsVerified();
         }
-        $vincular($usuario);
+        $cliente = $vincular($usuario);
+
+        // Si se verifica en el mismo navegador, los diseños que subió antes de tener ficha pasan a ella (B4).
+        $propietario = Propietario::hash($request, crear: false);
+        if ($cliente !== null && $propietario !== null && auth()->id() === $usuario->id) {
+            $traspasar($propietario, $cliente);
+        }
 
         return redirect($destino)->with('estado', __('cuenta.correo_verificado'));
     }

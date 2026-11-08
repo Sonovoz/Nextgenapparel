@@ -2,6 +2,7 @@
 
 use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Sistema\Errores\RegistrarError;
+use App\Http\Middleware\CuentaActiva;
 use App\Support\RutaCuenta;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -9,6 +10,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\AuthenticateSession;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -34,6 +36,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ? (string) $request->segment(1) : config('idiomas.predeterminado');
         $middleware->redirectGuestsTo(fn (Request $request) => RutaCuenta::url('entrar', [], $idiomaDe($request)));
         $middleware->redirectUsersTo(fn (Request $request) => RutaCuenta::url('inicio', [], $idiomaDe($request)));
+
+        // Tienda (revisión N3 de la fase 5): al cambiar la contraseña se cierran las demás sesiones
+        // de ese usuario (AuthenticateSession, A1) y una cuenta desactivada sale al momento (A2).
+        $middleware->web(append: [AuthenticateSession::class, CuentaActiva::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Herramientas → Log de errores (paso 1.4). Laravel sigue escribiendo
@@ -60,7 +66,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            return back()->with('error', __('cuenta.demasiados_intentos', ['segundos' => (int) ($error->getHeaders()['Retry-After'] ?? 60)]));
+            return back()->withInput($request->except(['contrasena', 'contrasena_confirmation', 'token']))
+                ->with('error', __('cuenta.demasiados_intentos', ['segundos' => (int) ($error->getHeaders()['Retry-After'] ?? 60)]));
         });
 
         $exceptions->shouldRenderJsonWhen(

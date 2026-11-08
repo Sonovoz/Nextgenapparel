@@ -8,11 +8,15 @@ use App\Models\Diseno;
 use App\Models\User;
 use App\Notifications\Cuenta\RestablecerContrasena;
 use App\Notifications\Cuenta\VerificarCorreo;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Notifications\ChannelManager;
+use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -291,11 +295,149 @@ class CuentaTest extends TestCase
 
     public function test_los_cambios_de_los_empleados_siguen_en_el_registro_de_actividad(): void
     {
-        $this->assertTrue(method_exists(User::class, 'cliente'));
         $empleado = $this->usuarioConRol(Rol::GestorTienda);
         $empleado->update(['name' => 'Cambio de nombre']);
 
         $this->assertDatabaseHas('activity_log', ['log_name' => 'usuarios', 'description' => 'Usuario modificado', 'subject_id' => $empleado->id]);
+    }
+
+    /* ---------- Revisión N3 de 5.1 y 5.2 ---------- */
+
+    public function test_al_cambiar_la_contrasena_se_cierran_las_demas_sesiones(): void
+    {
+        $usuario = $this->cliente();
+        $this->post('/es/cuenta/entrar', ['correo' => 'cliente@ejemplo.com', 'contrasena' => self::CLAVE]);
+        $this->get('/es/cuenta')->assertOk(); // la sesión guarda la huella de la contraseña
+
+        // Desde otro navegador, alguien restablece la contraseña.
+        $usuario->forceFill(['password' => Hash::make('otra-clave-456')])->save();
+        $this->app['auth']->forgetGuards(); // en producción cada petición vuelve a cargar al usuario
+
+        $this->get('/es/cuenta')->assertRedirect('/es/cuenta/entrar');
+        $this->assertGuest();
+    }
+
+    public function test_una_cuenta_desactivada_sale_aunque_tenga_la_sesion_abierta_y_no_cambia_su_contrasena(): void
+    {
+        $usuario = $this->cliente();
+        $this->actingAs($usuario)->get('/es/cuenta')->assertOk();
+        $usuario->update(['activo' => false]);
+
+        $this->get('/es/cuenta')->assertRedirect('/es/cuenta/entrar');
+        $this->assertGuest();
+
+        $token = Password::createToken($usuario);
+        $this->post('/es/cuenta/nueva-contrasena', ['token' => $token, 'correo' => 'cliente@ejemplo.com', 'contrasena' => 'nueva-clave-456', 'contrasena_confirmation' => 'nueva-clave-456'])
+            ->assertSessionHasErrors('correo');
+        $this->assertTrue(Hash::check(self::CLAVE, $usuario->fresh()->password));
+    }
+
+    public function test_los_correos_de_cuenta_van_por_la_cola_y_la_recuperacion_responde_igual_exista_o_no(): void
+    {
+        $this->assertInstanceOf(ShouldQueue::class, new VerificarCorreo);
+        $this->assertInstanceOf(ShouldQueue::class, new RestablecerContrasena('x'));
+
+        // Con el correo caído (transporte que falla), ni el registro ni la recuperación dan error.
+        Notification::swap(new ChannelManager($this->app));
+        Queue::fake();
+        config(['mail.default' => 'smtp', 'mail.mailers.smtp.host' => '127.0.0.1', 'mail.mailers.smtp.port' => 1]);
+        $this->cliente();
+
+        $this->post('/es/cuenta/registro', $this->datosRegistro())->assertRedirect('/es/cuenta');
+        $this->post('/es/cuenta/salir');
+        foreach (['cliente@ejemplo.com', 'nadie@ejemplo.com'] as $correo) {
+            $this->from('/es/cuenta/recuperar-contrasena')->post('/es/cuenta/recuperar-contrasena', ['correo' => $correo])
+                ->assertRedirect('/es/cuenta/recuperar-contrasena');
+        }
+        Queue::assertPushed(SendQueuedNotifications::class, 2);
+    }
+
+    public function test_un_empleado_que_entra_por_la_tienda_queda_en_el_registro_de_accesos(): void
+    {
+        $empleado = $this->usuarioConRol(Rol::Administrador, ['email' => 'jefa@nga.test', 'password' => Hash::make(self::CLAVE)]);
+
+        $this->post('/es/cuenta/entrar', ['correo' => 'jefa@nga.test', 'contrasena' => 'mal-1']);
+        $this->post('/es/cuenta/entrar', ['correo' => 'jefa@nga.test', 'contrasena' => self::CLAVE]);
+
+        $this->assertSame(1, Activity::where('log_name', 'accesos')->where('description', 'Inicio de sesión')->where('causer_id', $empleado->id)->count());
+        $this->assertSame(1, Activity::where('log_name', 'accesos')->where('description', 'Intento de acceso fallido')->count());
+    }
+
+    public function test_la_baja_de_un_empleado_queda_registrada(): void
+    {
+        $empleado = $this->usuarioConRol(Rol::Produccion);
+        $empleado->delete();
+
+        $this->assertDatabaseHas('activity_log', ['log_name' => 'usuarios', 'description' => 'Usuario eliminado', 'subject_id' => $empleado->id]);
+    }
+
+    public function test_los_clientes_no_aparecen_en_los_usuarios_del_backend(): void
+    {
+        $cliente = $this->cliente();
+        $this->actingAs($this->usuarioConRol());
+
+        $this->get('/admin/usuarios')->assertOk()->assertDontSee('cliente@ejemplo.com');
+        $this->get('/admin/usuarios/'.$cliente->id.'/editar')->assertNotFound();
+    }
+
+    public function test_al_unir_la_ficha_de_invitado_se_conservan_el_tipo_y_el_consentimiento_del_registro(): void
+    {
+        $invitado = Cliente::factory()->create(['correo' => 'nueva@ejemplo.com', 'user_id' => null]);
+        $this->post('/es/cuenta/registro', $this->datosRegistro(['correo' => 'nueva@ejemplo.com', 'tipo' => 'empresa', 'marketing' => '1']));
+        $usuario = User::where('email', 'nueva@ejemplo.com')->sole();
+
+        $this->get($this->enlaceVerificacion($usuario));
+
+        $invitado->refresh();
+        $this->assertSame($usuario->id, $invitado->user_id);
+        $this->assertSame('empresa', $invitado->tipo->value);
+        $this->assertNotNull($invitado->marketing_consentido_en);
+        $this->assertSame('registro', $invitado->marketing_origen);
+        $this->assertNull($usuario->fresh()->registro_pendiente);
+    }
+
+    public static function destinos(): array
+    {
+        return [
+            'el backend no' => ['/admin', '/es/cuenta'],
+            'otro dominio no' => ['https://malo.example/es/x', '/es/cuenta'],
+            'una página de la tienda sí' => ['/es/camisetas', '/es/camisetas'],
+        ];
+    }
+
+    #[DataProvider('destinos')]
+    public function test_tras_entrar_solo_vuelve_a_paginas_de_la_tienda(string $intento, string $destino): void
+    {
+        $this->cliente();
+        $this->withSession(['url.intended' => str_starts_with($intento, 'http') ? $intento : url($intento)])
+            ->post('/es/cuenta/entrar', ['correo' => 'cliente@ejemplo.com', 'contrasena' => self::CLAVE])
+            ->assertRedirect(url($destino));
+    }
+
+    public function test_el_correo_de_un_usuario_se_guarda_en_minusculas(): void
+    {
+        $this->assertSame('ana@ejemplo.com', User::factory()->create(['email' => ' Ana@Ejemplo.COM '])->email);
+    }
+
+    public function test_al_verificar_en_el_mismo_navegador_pasan_a_la_ficha_los_disenos_subidos_antes(): void
+    {
+        Cliente::factory()->create(['correo' => 'nueva@ejemplo.com', 'user_id' => null]);
+        $this->withSession(['disenos.propietario' => 'token-sesion']);
+        $this->post('/es/cuenta/registro', $this->datosRegistro(['correo' => 'nueva@ejemplo.com']));
+        $diseno = $this->diseno(['propietario' => hash('sha256', 'token-sesion'), 'sha256' => str_repeat('d', 64)]);
+        $usuario = User::where('email', 'nueva@ejemplo.com')->sole();
+
+        $this->get($this->enlaceVerificacion($usuario));
+
+        $this->assertSame($usuario->fresh()->cliente->id, $diseno->fresh()->cliente_id);
+    }
+
+    public function test_tras_un_envio_con_errores_hay_un_resumen_que_recibe_el_foco(): void
+    {
+        $this->from('/es/cuenta/registro')->post('/es/cuenta/registro', $this->datosRegistro(['nombre' => '', 'tipo' => 'x']));
+
+        $this->get('/es/cuenta/registro')->assertSee('id="resumen-errores"', false)->assertSee('Revisa estos 2 datos')
+            ->assertSee('href="#grupo-tipo"', false)->assertSee('aria-describedby="error-tipo"', false);
     }
 
     /* ---------- Ayudas ---------- */

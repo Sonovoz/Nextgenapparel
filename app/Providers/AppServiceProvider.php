@@ -97,15 +97,18 @@ class AppServiceProvider extends ServiceProvider
             report(new ErrorDeCopia('La copia de seguridad ha fallado: '.$evento->exception->getMessage(), previous: $evento->exception));
         });
 
-        // Registro de actividad: accesos al backend (los de clientes en la tienda, no).
-        Event::listen(Login::class, function (Login $evento): void {
-            if ($evento->user instanceof User && request()->is('admin', 'admin/*', 'livewire*')) {
+        // Registro de actividad: accesos de los empleados, entren por el backend o por la tienda
+        // (con la misma sesión llegan al backend); los de clientes, no (D154, revisión N3 M1).
+        $esEmpleado = fn ($usuario) => $usuario instanceof User && $usuario->roles()->exists();
+        $enBackend = fn () => request()->is('admin', 'admin/*', 'livewire*');
+        Event::listen(Login::class, function (Login $evento) use ($esEmpleado, $enBackend): void {
+            if ($evento->user instanceof User && ($enBackend() || $esEmpleado($evento->user))) {
                 Actividad::apuntar('accesos', 'Inicio de sesión', $evento->user, quien: $evento->user);
             }
         });
 
-        Event::listen(Failed::class, function (Failed $evento): void {
-            if (! request()->is('admin', 'admin/*', 'livewire*')) {
+        Event::listen(Failed::class, function (Failed $evento) use ($esEmpleado, $enBackend): void {
+            if (! $enBackend() && ! $esEmpleado($evento->user)) {
                 return;
             }
             Actividad::apuntar('accesos', 'Intento de acceso fallido', $evento->user instanceof User ? $evento->user : null, [

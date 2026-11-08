@@ -30,7 +30,14 @@ final class RegistrarCliente
                 'activo' => true,
             ]);
 
-            if (! Cliente::where('correo', $correo)->exists()) {
+            if (Cliente::where('correo', $correo)->exists()) {
+                // Ficha de invitado con este correo: se une al verificar, con estas elecciones.
+                $usuario->forceFill(['registro_pendiente' => [
+                    'tipo' => $tipo->value,
+                    'idioma' => $idioma,
+                    'marketing_consentido_en' => $marketing ? now()->toDateTimeString() : null,
+                ]])->save();
+            } else {
                 Cliente::create([
                     'user_id' => $usuario->id,
                     'correo' => $correo,

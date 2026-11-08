@@ -876,3 +876,6 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .mis-disenos small { color: var(--tinta-suave); }
 .salir-cuenta { margin-top: 36px; }
 .cabecera-cta { white-space: nowrap; }
+.resumen-errores ul { margin: 6px 0 0; padding-left: 18px; }
+.resumen-errores a { color: inherit; }
+.resumen-errores:focus { outline: 2px solid var(--azul); outline-offset: 2px; }

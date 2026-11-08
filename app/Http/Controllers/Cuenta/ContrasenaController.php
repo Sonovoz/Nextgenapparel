@@ -37,7 +37,7 @@ class ContrasenaController
         return view('cuenta.restablecer', [
             'token' => $token,
             'correo' => (string) $request->query('correo'),
-            'alternos' => RutaCuenta::alternos('restablecer', ['token' => $token]),
+            'alternos' => RutaCuenta::alternos('restablecer', ['token' => $token, 'correo' => (string) $request->query('correo')]),
         ]);
     }
 
@@ -50,7 +50,8 @@ class ContrasenaController
         ], [], CamposCuenta::nombres());
 
         $estado = Password::reset(
-            ['email' => mb_strtolower(trim($datos['correo'])), 'password' => $datos['contrasena'], 'password_confirmation' => $datos['contrasena'], 'token' => $datos['token']],
+            // «activo»: una cuenta desactivada tampoco cambia su contraseña (A2).
+            ['email' => mb_strtolower(trim($datos['correo'])), 'activo' => true, 'password' => $datos['contrasena'], 'password_confirmation' => $datos['contrasena'], 'token' => $datos['token']],
             function (User $usuario, string $contrasena): void {
                 $usuario->forceFill(['password' => Hash::make($contrasena), 'remember_token' => Str::random(60)]);
                 // El enlace llegó a su correo: queda verificado.

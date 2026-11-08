@@ -4,7 +4,7 @@
         @csrf
         @include('cuenta._campo', ['nombre' => 'nombre', 'etiqueta' => __('cuenta.nombre'), 'tipo' => 'text', 'autocompletar' => 'name'])
         @include('cuenta._campo', ['nombre' => 'correo', 'etiqueta' => __('cuenta.correo'), 'tipo' => 'email', 'autocompletar' => 'email'])
-        <fieldset class="grupo-cuenta">
+        <fieldset class="grupo-cuenta" id="grupo-tipo" @error('tipo') aria-describedby="error-tipo" @enderror>
             <legend>{{ __('cuenta.tipo') }}</legend>
             <div class="opciones-tipo">
                 @foreach (TipoCliente::cases() as $tipo)

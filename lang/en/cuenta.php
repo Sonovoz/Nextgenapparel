@@ -51,13 +51,16 @@ return [
     'sin_pedidos' => 'Your orders and their status will appear here once you place the first one.',
     // Emails.
     'correo_hola' => 'Hello :nombre,',
-    'correo_verificar_asunto' => 'Confirm your email · Nextgenapparel',
+    'correo_verificar_asunto' => 'Confirm your email · :tienda',
     'correo_verificar_texto' => 'Press the button to confirm your email address.',
     'correo_verificar_boton' => 'Confirm my email',
-    'correo_restablecer_asunto' => 'Your new password · Nextgenapparel',
+    'correo_restablecer_asunto' => 'Your new password · :tienda',
     'correo_restablecer_texto' => 'We received a request to change the password of your account.',
     'correo_restablecer_boton' => 'Create a new password',
     'correo_caduca' => 'The link expires in :minutos minutes.',
+    'correo_verificar_no_fuiste' => 'If you did not create this account, you can ignore this email.',
+    'correo_despedida' => 'Best regards from the :tienda team',
     'correo_no_fuiste' => 'If it was not you, do nothing: your account stays the same.',
     'campo_nombre' => 'Name',
+    'revisa_errores' => '{1} Please check this field:|[2,*] Please check these :n fields:',
 ];

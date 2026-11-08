@@ -11,6 +11,7 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -41,6 +42,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     protected function casts(): array
     {
         return [
+            'registro_pendiente' => 'array',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'activo' => 'boolean',
@@ -54,6 +56,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->activo && $this->hasAnyRole(Rol::valores());
+    }
+
+    /** Siempre en minúsculas: en MariaDB «Ana@x.com» y «ana@x.com» son el mismo; en SQLite, no (revisión N3, B1). */
+    protected function email(): Attribute
+    {
+        return Attribute::set(fn (?string $valor) => $valor === null ? null : mb_strtolower(trim($valor)));
     }
 
     /** Correo de verificación de la tienda (paso 5.2), en el idioma del cliente. */
@@ -79,7 +87,9 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
      */
     protected function shouldLogEvent(string $eventName): bool
     {
-        if ($eventName !== 'created' && ! $this->roles()->exists()) {
+        // Solo los cambios: al borrar, HasRoles ya ha quitado los roles y la baja de un
+        // empleado no se registraría (revisión N3, M2). Las bajas se registran siempre.
+        if ($eventName === 'updated' && ! $this->roles()->exists()) {
             return false;
         }
 

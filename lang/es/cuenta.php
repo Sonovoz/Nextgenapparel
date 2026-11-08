@@ -51,13 +51,16 @@ return [
     'sin_pedidos' => 'Aquí verás tus pedidos y su estado en cuanto hagas el primero.',
     // Correos.
     'correo_hola' => 'Hola, :nombre:',
-    'correo_verificar_asunto' => 'Confirma tu correo · Nextgenapparel',
+    'correo_verificar_asunto' => 'Confirma tu correo · :tienda',
     'correo_verificar_texto' => 'Pulsa el botón para confirmar tu dirección de correo.',
     'correo_verificar_boton' => 'Confirmar mi correo',
-    'correo_restablecer_asunto' => 'Tu nueva contraseña · Nextgenapparel',
+    'correo_restablecer_asunto' => 'Tu nueva contraseña · :tienda',
     'correo_restablecer_texto' => 'Hemos recibido una petición para cambiar la contraseña de tu cuenta.',
     'correo_restablecer_boton' => 'Crear una contraseña nueva',
     'correo_caduca' => 'El enlace caduca en :minutos minutos.',
+    'correo_verificar_no_fuiste' => 'Si no has creado tú esta cuenta, puedes ignorar este correo.',
+    'correo_despedida' => 'Un saludo del equipo de :tienda',
     'correo_no_fuiste' => 'Si no has sido tú, no hagas nada: tu cuenta sigue igual.',
     'campo_nombre' => 'Nombre',
+    'revisa_errores' => '{1} Revisa este dato:|[2,*] Revisa estos :n datos:',
 ];
