@@ -43,4 +43,7 @@ return [
     'comprobando' => 'Checking your design…',
     'error_original' => 'We need the original file of «:nombre» for the order. Choose it again in «My logo».',
     'error_red' => 'We could not check your design right now. Wait a moment and try again.',
+    'error_no_disponible' => 'We cannot receive designs right now. Try again later; if it keeps happening, write to us.',
+    'error_ocupado' => 'We are checking many designs at once. Wait a few seconds and try again.',
+    'error_limite_dia' => 'You have uploaded many designs today. If you need more, write to us and we will help.',
 ];

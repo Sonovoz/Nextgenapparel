@@ -14,9 +14,11 @@ use ImagickException;
  * - Límites antes de descomprimir: bytes y píxeles (Ajustes → General).
  * - Lo que se imprime es el diseño sin sus márgenes transparentes: alfa > 8 de 255 (D114).
  * - Fondo: transparente si más del 0,2 % de los píxeles tiene alfa < 250; si no,
- *   fondo blanco cuando más del 90 % del borde es blanco (> 235 en R, G y B).
+ *   fondo blanco cuando más del 90 % del borde de lo que se imprime es blanco (> 235 en R, G y B).
+ * - ImageMagick trabaja con límites de memoria propios (la suya no cuenta en el memory_limit
+ *   de PHP): lo que no cabe va a la caché en disco y, si tampoco, el cliente recibe un aviso.
  */
-final class AnalizadorPng
+class AnalizadorPng
 {
     public const FIRMA = "\x89PNG\r\n\x1a\n";
 
@@ -30,9 +32,26 @@ final class AnalizadorPng
 
     private const FRACCION_BORDE_BLANCO = 0.9;
 
-    public function analizar(string $ruta): AnalisisPng
+    /** Límites de ImageMagick por proceso (medido: un PNG de 8000 × 8000 a 16 bits pasa de 2 GB a 40 MB de RAM). */
+    private const RECURSOS = [
+        Imagick::RESOURCETYPE_MEMORY => 128 * 1024 * 1024,
+        Imagick::RESOURCETYPE_MAP => 256 * 1024 * 1024,
+        Imagick::RESOURCETYPE_DISK => 3 * 1024 * 1024 * 1024,
+    ];
+
+    private const SEGUNDOS_MAXIMOS = 60;
+
+    /**
+     * @param  array{max_mb: int, max_px: int, min_px: int}|null  $limites  los de Ajustes si no se indican
+     * @param  (callable(Imagick, AnalisisPng): void)|null  $conImagen  trabajo extra con la imagen ya leída
+     *                                                                  (la miniatura), sin leerla otra vez
+     */
+    public function analizar(string $ruta, ?array $limites = null, ?callable $conImagen = null): AnalisisPng
     {
-        $limites = self::limites();
+        if (! extension_loaded('imagick')) {
+            throw new DisenoNoValido('no_disponible');
+        }
+        $limites ??= self::limites();
 
         $bytes = @filesize($ruta);
         if ($bytes === false || $bytes === 0) {
@@ -55,6 +74,7 @@ final class AnalizadorPng
             throw new DisenoNoValido('enorme', ['px' => $limites['max_px']]);
         }
 
+        self::limitarRecursos();
         $imagen = new Imagick;
         try {
             // «png:» obliga a leerlo como PNG; «[0]» se queda con el primer fotograma (APNG).
@@ -68,13 +88,13 @@ final class AnalizadorPng
                 ? $this->conTransparencia($imagen)
                 : [[0, 0, $ancho, $alto], null];
 
-            $fondo ??= $this->fondoOpaco($imagen, $ancho, $alto);
+            $fondo ??= $this->fondoOpaco($imagen, $util);
 
             if (min($util[2], $util[3]) < $limites['min_px']) {
                 throw new DisenoNoValido('pequeno', ['px' => $limites['min_px'], 'ancho' => $util[2], 'alto' => $util[3]]);
             }
 
-            return new AnalisisPng(
+            $analisis = new AnalisisPng(
                 anchoPx: $ancho,
                 altoPx: $alto,
                 utilX: $util[0],
@@ -85,6 +105,12 @@ final class AnalizadorPng
                 perfilColor: $this->perfilColor($ruta),
                 profundidadBits: (int) $imagen->getImageDepth(),
             );
+
+            if ($conImagen !== null) {
+                $conImagen($imagen, $analisis);
+            }
+
+            return $analisis;
         } catch (ImagickException) {
             // Sin memoria o disco para procesarla (límites de ImageMagick): demasiado grande.
             throw new DisenoNoValido('procesar');
@@ -119,6 +145,16 @@ final class AnalizadorPng
         };
     }
 
+    private static function limitarRecursos(): void
+    {
+        foreach (self::RECURSOS as $tipo => $bytes) {
+            Imagick::setResourceLimit($tipo, $bytes);
+        }
+        if (defined(Imagick::class.'::RESOURCETYPE_TIME')) {
+            Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, self::SEGUNDOS_MAXIMOS);
+        }
+    }
+
     /** @return array{max_mb: int, max_px: int, min_px: int} */
     public static function limites(): array
     {
@@ -139,11 +175,10 @@ final class AnalizadorPng
         $q = Imagick::getQuantum();
         $medioNivel = 0.5 * $q / 255;
 
-        // Máscara de alfa en gris: opaco = blanco. (En ImageMagick 6 el canal separado sale invertido.)
+        // Máscara de alfa en gris, opaco = blanco. EXTRACT da lo mismo en ImageMagick 6 y 7
+        // (separar el canal alfa, no: en la 6 sale invertido y en la 7 no).
         $mascara = clone $imagen;
-        $mascara->separateImageChannel(Imagick::CHANNEL_ALPHA);
-        $mascara->setImageAlphaChannel(Imagick::ALPHACHANNEL_DEACTIVATE);
-        $mascara->negateImage(false);
+        $mascara->setImageAlphaChannel(Imagick::ALPHACHANNEL_EXTRACT);
 
         $visible = clone $mascara;
         $visible->thresholdImage(self::ALFA_VISIBLE / 255 * $q + $medioNivel);
@@ -166,13 +201,20 @@ final class AnalizadorPng
         return [$util, $transparente > self::FRACCION_TRANSPARENTE ? 'transparente' : null];
     }
 
-    private function fondoOpaco(Imagick $imagen, int $ancho, int $alto): string
+    /**
+     * Fondo de una imagen opaca, mirando el borde de lo que se imprime (un margen
+     * transparente fino alrededor no cuenta como borde).
+     *
+     * @param  array{0: int, 1: int, 2: int, 3: int}  $util
+     */
+    private function fondoOpaco(Imagick $imagen, array $util): string
     {
+        [$x, $y, $ancho, $alto] = $util;
         $borde = array_merge(
-            $imagen->exportImagePixels(0, 0, $ancho, 1, 'RGB', Imagick::PIXEL_CHAR),
-            $imagen->exportImagePixels(0, $alto - 1, $ancho, 1, 'RGB', Imagick::PIXEL_CHAR),
-            $imagen->exportImagePixels(0, 0, 1, $alto, 'RGB', Imagick::PIXEL_CHAR),
-            $imagen->exportImagePixels($ancho - 1, 0, 1, $alto, 'RGB', Imagick::PIXEL_CHAR),
+            $imagen->exportImagePixels($x, $y, $ancho, 1, 'RGB', Imagick::PIXEL_CHAR),
+            $imagen->exportImagePixels($x, $y + $alto - 1, $ancho, 1, 'RGB', Imagick::PIXEL_CHAR),
+            $imagen->exportImagePixels($x, $y, 1, $alto, 'RGB', Imagick::PIXEL_CHAR),
+            $imagen->exportImagePixels($x + $ancho - 1, $y, 1, $alto, 'RGB', Imagick::PIXEL_CHAR),
         );
 
         $blancos = 0;
@@ -206,7 +248,10 @@ final class AnalizadorPng
                         // Nombre del perfil: hasta 79 bytes Latin-1 terminados en cero.
                         $nombre = strstr((string) fread($archivo, min($largo, 80)), "\0", true);
 
-                        return $nombre !== false && $nombre !== '' ? mb_convert_encoding($nombre, 'UTF-8', 'ISO-8859-1') : 'ICC';
+                        // Viene del archivo del cliente: sin caracteres de control ni de formato (U+202E…).
+                        $nombre = $nombre === false ? '' : trim((string) preg_replace('/[\p{Cc}\p{Cf}]/u', '', mb_convert_encoding($nombre, 'UTF-8', 'ISO-8859-1')));
+
+                        return $nombre !== '' ? $nombre : 'ICC';
                     }
                     fseek($archivo, $largo + 4, SEEK_CUR); // datos + CRC
                 }

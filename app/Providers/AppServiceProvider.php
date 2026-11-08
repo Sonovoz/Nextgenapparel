@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Dominio\Sistema\Errores\ErrorDeCopia;
+use App\Models\Ajuste;
 use App\Models\Caja;
 use App\Models\ClaseImpuesto;
 use App\Models\Color;
@@ -52,7 +53,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Subidas de diseños: un límite por IP frena el abuso sin molestar a quien prueba varias versiones.
-        RateLimiter::for('disenos', fn (Request $request) => Limit::perHour(60)->by($request->ip()));
+        RateLimiter::for('disenos', fn (Request $request) => Limit::perHour(max(1, (int) Ajuste::obtener('disenos.subidas_hora')))->by($request->ip()));
 
         // @recurso('img/portada/macro.webp'): URL pública con la fecha del archivo, para que el
         // navegador no siga mostrando la versión antigua al cambiar una imagen con el mismo nombre (D145).

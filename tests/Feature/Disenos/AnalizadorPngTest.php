@@ -5,6 +5,8 @@ namespace Tests\Feature\Disenos;
 use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Disenos\DisenoNoValido;
 use App\Dominio\Sistema\Acceso\Rol;
+use App\Dominio\Sistema\Salud\Comprobaciones\Imagenes;
+use App\Dominio\Sistema\Salud\EstadoSalud;
 use App\Filament\Pages\AjustesGenerales;
 use App\Models\Ajuste;
 use Filament\Facades\Filament;
@@ -74,6 +76,47 @@ class AnalizadorPngTest extends TestCase
 
         $this->assertSame($esperado, $analisis->fondo);
         $this->assertSame([0, 0, 600, 600], [$analisis->utilX, $analisis->utilY, $analisis->utilAnchoPx, $analisis->utilAltoPx]);
+    }
+
+    public function test_paleta_con_transparencia_y_gris_con_alfa(): void
+    {
+        $paleta = PngDePrueba::crear(800, 600, 'transparent', [100, 50, 400, 300], 'png8');
+        $this->assertSame([100, 50, 400, 300, 'transparente'], $this->util($paleta));
+
+        $gris = new Imagick;
+        $gris->newImage(800, 600, new ImagickPixel('transparent'), 'png');
+        $dibujo = new \ImagickDraw;
+        $dibujo->setFillColor('gray40');
+        $dibujo->rectangle(100, 50, 499, 349);
+        $gris->drawImage($dibujo);
+        $gris->setOption('png:color-type', '4');
+        $ruta = PngDePrueba::archivo('');
+        $gris->writeImage('png:'.$ruta);
+        $this->assertSame(4, ord(file_get_contents($ruta, false, null, 25, 1)));
+        $this->assertSame([100, 50, 400, 300, 'transparente'], $this->util($ruta));
+    }
+
+    public function test_un_margen_transparente_fino_no_se_confunde_con_el_fondo(): void
+    {
+        // 2000 × 2000 blanco con 1 px transparente alrededor: menos del 0,2 % transparente,
+        // así que es una imagen opaca, y su borde es el blanco de dentro, no el margen.
+        $ruta = PngDePrueba::crear(2000, 2000, 'transparent', null);
+        $imagen = new Imagick($ruta);
+        $dibujo = new \ImagickDraw;
+        $dibujo->setFillColor('white');
+        $dibujo->rectangle(1, 1, 1998, 1998);
+        $imagen->drawImage($dibujo);
+        $imagen->writeImage('png32:'.$ruta);
+
+        $this->assertSame([1, 1, 1998, 1998, 'fondo_blanco'], $this->util($ruta));
+    }
+
+    /** @return array{0: int, 1: int, 2: int, 3: int, 4: string} */
+    private function util(string $ruta): array
+    {
+        $a = (new AnalizadorPng)->analizar($ruta);
+
+        return [$a->utilX, $a->utilY, $a->utilAnchoPx, $a->utilAltoPx, $a->fondo];
     }
 
     public static function rechazos(): array
@@ -169,6 +212,13 @@ class AnalizadorPngTest extends TestCase
         $gris->setOption('png:color-type', '0');
         $gris->writeImage('png:'.$ruta);
         $this->assertSame('Gris', (new AnalizadorPng)->analizar($ruta)->perfilColor);
+    }
+
+    public function test_la_salud_del_sistema_analiza_de_verdad_un_png_y_genera_webp(): void
+    {
+        [$estado, $mensaje] = (new Imagenes)->comprobar();
+
+        $this->assertSame(EstadoSalud::Correcto, $estado, $mensaje);
     }
 
     public function test_acepta_png_de_16_bits(): void

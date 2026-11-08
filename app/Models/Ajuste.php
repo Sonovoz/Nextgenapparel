@@ -29,6 +29,9 @@ class Ajuste extends Model
         'disenos.max_px' => 8000, // 67 cm a 300 ppp; más solo cuesta memoria y tiempo
         'disenos.min_px' => 300,
         'disenos.dias_sin_pedido' => 30,
+        // Frenos al abuso: subidas por hora e IP y diseños nuevos por visitante y día.
+        'disenos.subidas_hora' => 60,
+        'disenos.max_dia' => 40,
         // Mejora con IA para el cliente (D143): activa, desde qué nivel y texto propio por idioma (vacío = el de lang/disenos.php).
         'disenos.ia_activa' => true,
         'disenos.ia_desde' => 'justa',

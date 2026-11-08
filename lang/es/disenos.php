@@ -43,4 +43,7 @@ return [
     'comprobando' => 'Comprobando tu diseño…',
     'error_original' => 'Para el pedido necesitamos el archivo original de «:nombre». Vuelve a elegirlo en «Mi logo».',
     'error_red' => 'No hemos podido comprobar tu diseño ahora mismo. Espera un momento y vuelve a intentarlo.',
+    'error_no_disponible' => 'Ahora mismo no podemos recibir diseños. Inténtalo dentro de un rato; si sigue igual, escríbenos.',
+    'error_ocupado' => 'Estamos comprobando muchos diseños a la vez. Espera unos segundos y vuelve a intentarlo.',
+    'error_limite_dia' => 'Has subido muchos diseños hoy. Si necesitas más, escríbenos y te ayudamos.',
 ];

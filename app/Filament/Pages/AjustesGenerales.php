@@ -58,6 +58,8 @@ class AjustesGenerales extends Page implements HasSchemas
             ...Calidad::umbrales(),
             ...AnalizadorPng::limites(),
             'dias_sin_pedido' => (int) Ajuste::obtener('disenos.dias_sin_pedido'),
+            'subidas_hora' => (int) Ajuste::obtener('disenos.subidas_hora'),
+            'max_dia' => (int) Ajuste::obtener('disenos.max_dia'),
             'indexar' => (bool) Ajuste::obtener('seo.indexar'),
             'ia_activa' => MejoraIa::activa(),
             'ia_desde' => MejoraIa::desde(),
@@ -90,6 +92,9 @@ class AjustesGenerales extends Page implements HasSchemas
                         ->helperText('8000 px son 67 cm a 300 ppp. Más solo hace la subida más lenta.'),
                     TextInput::make('min_px')->label('Lado menor, al menos')->integer()->minValue(50)->maxValue(2000)->suffix('px')->required(),
                     TextInput::make('dias_sin_pedido')->label('Guardar sin pedido')->integer()->minValue(1)->maxValue(365)->suffix('días')->required(),
+                    TextInput::make('subidas_hora')->label('Subidas por hora y conexión')->integer()->minValue(5)->maxValue(1000)->required()
+                        ->helperText('Frena el abuso; quien prueba varias versiones de su logo no llega.'),
+                    TextInput::make('max_dia')->label('Diseños nuevos por visitante y día')->integer()->minValue(5)->maxValue(1000)->required(),
                 ]),
             Section::make('Mejorar el diseño con IA')
                 ->description('Si la calidad no llega, el cliente ve un botón con estas instrucciones para mejorar su diseño con su propia herramienta de IA y volver a subirlo. La tienda no envía nada a ninguna IA. Escribe :medida donde va el tamaño de impresión (por ejemplo, «28 × 28 cm»). Si vacías un texto, se usa el de por defecto.')
@@ -137,7 +142,7 @@ class AjustesGenerales extends Page implements HasSchemas
                     Actividad::apuntar('ajustes', 'Umbrales de calidad cambiados', propiedades: ['old' => $umbralesAnteriores, 'attributes' => $umbralesNuevos]);
                 }
 
-                $archivosAnteriores = [...AnalizadorPng::limites(), 'dias_sin_pedido' => (int) Ajuste::obtener('disenos.dias_sin_pedido')];
+                $archivosAnteriores = [...AnalizadorPng::limites(), ...collect(['dias_sin_pedido', 'subidas_hora', 'max_dia'])->mapWithKeys(fn ($c) => [$c => (int) Ajuste::obtener('disenos.'.$c)])->all()];
                 $archivosNuevos = [];
                 foreach (array_keys($archivosAnteriores) as $clave) {
                     $archivosNuevos[$clave] = (int) $datos[$clave];

@@ -2,13 +2,18 @@
 
 namespace Tests\Feature\Disenos;
 
+use App\Dominio\Disenos\AnalisisPng;
+use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Disenos\GuardarDiseno;
 use App\Dominio\Disenos\NivelCalidad;
+use App\Models\Ajuste;
 use App\Models\Diseno;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
+use ImagickException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Tests\Support\PngDePrueba;
@@ -42,7 +47,14 @@ class SubidaDisenoTest extends TestCase
         $this->assertNotNull($diseno->derechos_declarados_en);
         $this->assertSame(file_get_contents($png), Storage::disk('disenos')->get($diseno->ruta));
         $this->assertSame('image/webp', Storage::disk('disenos')->mimeType($diseno->miniatura));
-        $this->assertArrayNotHasKey('ruta', $diseno->toArray());
+        $this->assertSame(__('disenos.derechos_casilla'), $diseno->derechos_texto);
+        // El JSON no lleva nada interno: ni rutas, ni el dueño, ni la huella del archivo.
+        $this->assertEmpty(array_intersect(['ruta', 'miniatura_ruta', 'propietario', 'sha256', 'id'], array_keys($respuesta->json())));
+
+        // La miniatura es lo que se imprime (800 × 600), reducido a 600 px como mucho.
+        $mini = new \Imagick;
+        $mini->readImageBlob(Storage::disk('disenos')->get($diseno->miniatura));
+        $this->assertSame([600, 450], [$mini->getImageWidth(), $mini->getImageHeight()]);
     }
 
     public function test_sin_declarar_los_derechos_no_se_guarda_nada(): void
@@ -108,13 +120,80 @@ class SubidaDisenoTest extends TestCase
         }
     }
 
-    public function test_limita_las_subidas_por_hora(): void
+    public function test_las_subidas_por_hora_salen_de_los_ajustes(): void
     {
-        for ($i = 0; $i < 60; $i++) {
-            $this->postJson('/es/disenos')->assertUnprocessable();
+        Ajuste::guardar('disenos.subidas_hora', 2);
+
+        $this->postJson('/es/disenos')->assertUnprocessable();
+        $this->postJson('/es/disenos')->assertUnprocessable();
+        $this->postJson('/es/disenos')->assertTooManyRequests();
+    }
+
+    public function test_dos_subidas_simultaneas_del_mismo_archivo_dejan_un_solo_diseno(): void
+    {
+        $png = PngDePrueba::crear(600, 600, 'white');
+        // La otra petición crea su fila justo entre la comprobación y la creación de esta.
+        Diseno::creating(function (Diseno $diseno) {
+            if (Diseno::count() === 0) {
+                Diseno::withoutEvents(fn () => Diseno::create([...$diseno->getAttributes(), 'uuid' => 'aaaaaaaa-0000-0000-0000-000000000001']));
+            }
+        });
+
+        $this->subir($png)->assertOk()->assertJson(['uuid' => 'aaaaaaaa-0000-0000-0000-000000000001']);
+
+        $this->assertSame(1, Diseno::count());
+        $this->assertSame([], Storage::disk('disenos')->allFiles()); // los archivos de la otra petición no se crearon en esta prueba
+    }
+
+    public function test_un_fallo_de_imagemagick_al_hacer_la_miniatura_es_un_aviso_y_no_deja_archivos(): void
+    {
+        $this->app->bind(AnalizadorPng::class, fn () => new class extends AnalizadorPng
+        {
+            public function analizar(string $ruta, ?array $limites = null, ?callable $conImagen = null): AnalisisPng
+            {
+                return parent::analizar($ruta, $limites, fn () => throw new ImagickException('sin WebP'));
+            }
+        });
+
+        $this->subir(PngDePrueba::crear(600, 600, 'white'))->assertUnprocessable()->assertJson(['motivo' => 'procesar']);
+        $this->assertNada();
+    }
+
+    public function test_con_todos_los_turnos_de_analisis_ocupados_pide_volver_a_intentarlo(): void
+    {
+        GuardarDiseno::$esperaSegundos = 0;
+        $candados = array_map(fn ($t) => tap(Cache::lock("disenos:analisis:{$t}", 60))->get(), range(1, GuardarDiseno::ANALISIS_SIMULTANEOS));
+
+        try {
+            $this->subir(PngDePrueba::crear(600, 600, 'white'))->assertUnprocessable()->assertJson(['motivo' => 'ocupado']);
+            $this->assertNada();
+        } finally {
+            array_walk($candados, fn ($c) => $c->release());
+            GuardarDiseno::$esperaSegundos = 15;
         }
 
-        $this->postJson('/es/disenos')->assertTooManyRequests();
+        $this->subir(PngDePrueba::crear(600, 600, 'white'))->assertCreated();
+    }
+
+    public function test_hay_un_tope_de_disenos_nuevos_por_visitante_y_dia(): void
+    {
+        Ajuste::guardar('disenos.max_dia', 1);
+
+        $png = PngDePrueba::crear(600, 600, 'white');
+        $this->subir($png)->assertCreated();
+        $this->subir($png)->assertOk(); // el mismo archivo no cuenta como nuevo
+        $this->subir(PngDePrueba::crear(700, 700, 'white'))->assertUnprocessable()->assertJson(['motivo' => 'limite_dia']);
+
+        $this->travel(1)->day();
+        $this->subir(PngDePrueba::crear(700, 700, 'white'))->assertCreated();
+    }
+
+    public function test_un_envio_mayor_que_el_limite_de_php_recibe_el_aviso_de_subida_en_su_idioma(): void
+    {
+        $respuesta = $this->call('POST', '/en/disenos', server: ['CONTENT_LENGTH' => 4 * 1024 ** 3, 'HTTP_ACCEPT' => 'application/json']);
+
+        $respuesta->assertStatus(413)->assertJson(['motivo' => 'subida']);
+        $this->assertStringContainsString('We did not receive the whole file', $respuesta->json('message'));
     }
 
     public static function nombres(): array
@@ -123,6 +202,7 @@ class SubidaDisenoTest extends TestCase
             'con ruta relativa' => ['../../x.png', 'x.png'],
             'con ruta de Windows' => ['C:\\fakepath\\logo.png', 'logo.png'],
             'con caracteres de control' => ["lo\x00go\n.png", 'logo.png'],
+            'con inversión de texto (U+202E)' => ["logo\u{202E}gnp.exe", 'logognp.exe'],
             'vacío' => ['', 'diseno.png'],
         ];
     }
