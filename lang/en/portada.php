@@ -80,4 +80,6 @@ return [
     'final_texto' => 'Choose how you want to start.',
     'pie_texto' => 'Premium production studio for fashion brands. You design; we print it the way you imagine it.',
     'pie_estudio' => 'Studio',
+    'soltar_arrastra' => 'or drag it here',
+    'subiendo' => 'Uploading your logo',
 ];

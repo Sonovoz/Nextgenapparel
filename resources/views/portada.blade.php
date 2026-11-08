@@ -21,9 +21,14 @@
             var zona = caja.querySelector('.soltar-portada');
             var error = caja.querySelector('.error-logo');
 
+            // Animación de subida: dura al menos MINIMO ms para que se vea y se entienda.
+            var MINIMO = 1100;
+            function fallo() { zona.classList.remove('subiendo'); error.textContent = caja.dataset.error; error.hidden = false; }
             function leer(archivo) {
                 error.hidden = true;
-                if (!archivo || !/^image\/(png|jpeg|webp|svg\+xml)$/.test(archivo.type)) { error.textContent = caja.dataset.error; error.hidden = false; return; }
+                if (!archivo || !/^image\/(png|jpeg|webp|svg\+xml)$/.test(archivo.type)) { fallo(); return; }
+                zona.classList.add('subiendo');
+                var inicio = Date.now();
                 var url = URL.createObjectURL(archivo);
                 var img = new Image();
                 img.onload = function () {
@@ -36,9 +41,9 @@
                     try {
                         sessionStorage.setItem('nga.logo', JSON.stringify({ nombre: archivo.name, tipo: archivo.type, datos: c.toDataURL('image/png'), ancho: w, alto: h }));
                     } catch (e) { /* sin espacio: la ficha permite subirlo allí */ }
-                    window.location.href = caja.dataset.destino;
+                    setTimeout(function () { window.location.href = caja.dataset.destino; }, Math.max(0, MINIMO - (Date.now() - inicio)));
                 };
-                img.onerror = function () { URL.revokeObjectURL(url); error.textContent = caja.dataset.error; error.hidden = false; };
+                img.onerror = function () { URL.revokeObjectURL(url); fallo(); };
                 img.src = url;
             }
 
@@ -101,9 +106,17 @@
                         <p class="entradilla" style="font-size: 16px;">{{ __('portada.soltar_texto') }}</p>
                     </div>
                     <label class="soltar-portada" for="logo-portada">
-                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-                        <strong>{{ __('portada.soltar_boton') }}</strong>
-                        <small>{{ __('portada.soltar_privacidad') }}</small>
+                        <span class="en-reposo">
+                            <span class="icono-subir"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 16V4m0 0-5 5m5-5 5 5M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
+                            <span class="boton principal">{{ __('portada.soltar_boton') }}</span>
+                            <small class="arrastra">{{ __('portada.soltar_arrastra') }}</small>
+                            <small>{{ __('portada.soltar_privacidad') }}</small>
+                        </span>
+                        <span class="subiendo-estado" aria-live="polite">
+                            <span class="icono-subir vuela"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 16V4m0 0-5 5m5-5 5 5M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
+                            <strong>{{ __('portada.subiendo') }}</strong>
+                            <span class="barra-subida"><span></span></span>
+                        </span>
                         <small class="error-logo" role="alert" style="color: #C62828;" hidden></small>
                     </label>
                     <input class="oculto" type="file" id="logo-portada" accept="image/png,image/jpeg,image/webp,image/svg+xml">

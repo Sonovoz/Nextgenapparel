@@ -80,4 +80,6 @@ return [
     'final_texto' => 'Elige cómo quieres empezar.',
     'pie_texto' => 'Estudio de producción premium para marcas de moda. Diseñas tú; nosotros lo imprimimos como lo imaginas.',
     'pie_estudio' => 'Estudio',
+    'soltar_arrastra' => 'o arrástralo aquí',
+    'subiendo' => 'Subiendo tu logo',
 ];

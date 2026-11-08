@@ -525,7 +525,7 @@
     // Zonas para elegir
     var grupoZonas = document.getElementById('zonas-diseno');
     zonas.forEach(function (z) {
-        var b = el('button', 'boton-pildora borde', z.nombre);
+        var b = el('button', 'zona-opcion', z.nombre);
         b.type = 'button';
         b.setAttribute('role', 'radio');
         b.setAttribute('aria-checked', 'false');
@@ -581,11 +581,31 @@
             var choca = zonas.filter(function (o) {
                 return usadas.indexOf(o.id) !== -1 && (estado.anadiendo || o.id !== estado.zonaId) && solapan(z, o);
             })[0];
+            var activa = z.id === estado.zonaId && !estado.anadiendo && hayDiseno();
+            var conDisenoAqui = usadas.indexOf(z.id) !== -1;
             b.disabled = !!choca;
-            b.title = choca ? texto('solapa', { zona: z.nombre, otra: choca.nombre }) : '';
-            b.setAttribute('aria-checked', String(z.id === estado.zonaId && !estado.anadiendo));
-            b.classList.toggle('con-diseno', usadas.indexOf(z.id) !== -1);
-            b.replaceChildren(el('span', '', z.nombre), el('small', '', z.precio ? '+' + z.precio : ''));
+            b.setAttribute('aria-checked', String(activa));
+            b.dataset.estado = choca ? 'bloqueada' : (activa ? 'editando' : (conDisenoAqui ? 'con-diseno' : 'libre'));
+
+            // Miniatura de la prenda (en el color elegido) con la zona marcada.
+            var color = colores[estado.color].caras[z.cara] ? colores[estado.color] : colores.filter(function (c) { return c.caras[z.cara]; })[0];
+            var mini = el('span', 'zona-mini');
+            if (color) {
+                var foto = el('img'); foto.src = color.caras[z.cara].url; foto.alt = ''; foto.loading = 'lazy';
+                mini.appendChild(foto);
+            }
+            var marca = el('span', 'zona-mini-marca');
+            marca.style.cssText = 'left:' + z.rect.x + '%;top:' + z.rect.y + '%;width:' + z.rect.ancho + '%;height:' + z.rect.alto + '%';
+            mini.appendChild(marca);
+
+            var info = el('span', 'zona-info');
+            info.appendChild(el('strong', '', z.nombre));
+            var medida = z.rect.ancho_mm ? (z.rect.ancho_mm / 10) + ' × ' + (z.rect.alto_mm / 10) + ' cm' : '';
+            info.appendChild(el('small', '', [medida, z.precio ? '+' + z.precio + ' ' + textos.por_prenda : ''].filter(Boolean).join(' · ')));
+            info.appendChild(el('em', 'zona-estado', choca ? texto('solapa_corto', { otra: choca.nombre })
+                : (activa ? textos.zona_editando : (conDisenoAqui ? textos.zona_con_diseno : textos.zona_libre))));
+            b.setAttribute('aria-label', z.nombre + '. ' + info.lastChild.textContent);
+            b.replaceChildren(mini, info);
         });
         var aviso = document.getElementById('aviso-zona');
         if (aviso) aviso.textContent = estado.anadiendo ? textos.elige_zona_nuevo : '';
@@ -640,7 +660,6 @@
         document.querySelectorAll('#tintas [role="radio"]').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.valor === estado.tinta)); });
         soltar.classList.toggle('con-logo', !!estado.logo);
         document.getElementById('nombre-logo').textContent = estado.logo ? estado.nombre : '';
-        acciones.hidden = !hayDiseno();
         marcarZona();
         pintarCapas();
         avisarListo();
@@ -682,6 +701,11 @@
 
     function avisarListo() {
         actualizarAjustador();
+        // Botones de borrar: visibles con algún diseño; «Quitar» nombra su zona.
+        acciones.hidden = zonasConDiseno().length === 0;
+        var zonaActiva = zonas.filter(function (o) { return o.id === estado.zonaId; })[0];
+        document.getElementById('quitar-texto').textContent = zonaActiva && hayDiseno() ? texto('quitar_diseno_zona', { zona: zonaActiva.nombre }) : textos.quitar_diseno;
+        document.getElementById('quitar-diseno').hidden = !hayDiseno();
         if (!hayDiseno()) { estadoMarca.textContent = ''; return; }
         var color = colores[estado.color];
         var n = zonasConDiseno().length;
@@ -834,6 +858,36 @@
         sincronizar();
         var z = zonas.filter(function (o) { return o.id === estado.zonaId; })[0];
         if (z && z.cara !== estado.cara) { estado.cara = z.cara; pintar('giro'); } else { pintar(); }
+        refrescarColeccion();
+    });
+
+    // Empezar de nuevo: borra todos los diseños (pide un segundo toque para confirmar).
+    var empezar = document.getElementById('empezar-de-nuevo');
+    var esperaConfirmar = null;
+    empezar.addEventListener('click', function () {
+        if (!empezar.classList.contains('confirmar')) {
+            empezar.classList.add('confirmar');
+            document.getElementById('empezar-texto').textContent = textos.confirmar_empezar;
+            clearTimeout(esperaConfirmar);
+            esperaConfirmar = setTimeout(function () {
+                empezar.classList.remove('confirmar');
+                document.getElementById('empezar-texto').textContent = textos.empezar_de_nuevo;
+            }, 3500);
+            return;
+        }
+        clearTimeout(esperaConfirmar);
+        empezar.classList.remove('confirmar');
+        document.getElementById('empezar-texto').textContent = textos.empezar_de_nuevo;
+        estado.disenos = {};
+        estado.ajustes = {};
+        borrador = nuevoDiseno();
+        estado.zonaId = null;
+        estado.zonaElegida = false;
+        estado.anadiendo = false;
+        estado.version++;
+        sincronizar();
+        elegirHerramienta('diseno');
+        if (estado.cara !== 'delantera') { estado.cara = 'delantera'; pintar('giro'); } else { pintar(); }
         refrescarColeccion();
     });
 

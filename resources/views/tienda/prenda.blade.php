@@ -26,6 +26,15 @@
         'solapa' => __('tienda.solapa'),
         'listo_varios' => __('tienda.listo_varios'),
         'pestana_logo' => __('tienda.pestana_logo'),
+        'zona_libre' => __('tienda.zona_libre'),
+        'zona_con_diseno' => __('tienda.zona_con_diseno'),
+        'zona_editando' => __('tienda.zona_editando'),
+        'solapa_corto' => __('tienda.solapa_corto'),
+        'por_prenda' => __('tienda.por_prenda'),
+        'quitar_diseno' => __('tienda.quitar_diseno'),
+        'quitar_diseno_zona' => __('tienda.quitar_diseno_zona'),
+        'empezar_de_nuevo' => __('tienda.empezar_de_nuevo'),
+        'confirmar_empezar' => __('tienda.confirmar_empezar'),
         'decimal' => $idioma === 'en' ? '.' : ',',
     ];
     // Misma regla que App\Dominio\Disenos\Calidad: umbrales de Ajustes y textos de aviso.
