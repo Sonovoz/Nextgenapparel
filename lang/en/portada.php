@@ -92,4 +92,12 @@ return [
     'nivel' => 'Level',
     'seleccionar' => 'Select',
     'modo' => 'Mode',
+    'macro_pie' => 'Close-up · DTI Textile',
+    'error_etiqueta' => 'Off the map',
+    'error_titulo' => 'Game over: this page does not exist',
+    'error_texto' => 'The link leads nowhere or the garment is no longer available. Choose how to keep playing.',
+    'error_inicio' => 'Back to home',
+    'error_inicio_detalle' => 'Start again from the home page',
+    'error_prendas' => 'See the garments',
+    'error_prendas_detalle' => 'T-shirts, polo shirts and sweatshirts',
 ];

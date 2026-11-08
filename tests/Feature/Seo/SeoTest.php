@@ -101,6 +101,28 @@ class SeoTest extends TestCase
         $this->get('http://127.0.0.1/up')->assertOk(); // comprobación de salud del contenedor web
     }
 
+    /** Fallo encontrado en el repaso del frontend: la 404 salía en blanco, en inglés y sin la marca. */
+    #[DataProvider('paginasQueNoExisten')]
+    public function test_la_404_lleva_la_marca_en_su_idioma_y_nunca_se_indexa(string $url, string $idioma, string $titulo): void
+    {
+        $this->get($url)->assertNotFound()
+            ->assertSee('<html lang="'.$idioma.'">', false)
+            ->assertSee($titulo)
+            ->assertSee('<meta name="robots" content="noindex, nofollow">', false)
+            ->assertDontSee('rel="canonical"', false)
+            ->assertSee('class="pie"', false);
+    }
+
+    public static function paginasQueNoExisten(): array
+    {
+        return [
+            'familia que no existe' => ['/es/no-existe', 'es', 'Game over: esta página no existe'],
+            'prenda que no existe' => ['/es/camisetas/no-existe', 'es', 'Game over: esta página no existe'],
+            'en inglés' => ['/en/nothing-here', 'en', 'Game over: this page does not exist'],
+            'idioma que no existe' => ['/xx/algo', 'es', 'Game over: esta página no existe'],
+        ];
+    }
+
     public function test_el_backend_queda_fuera_de_los_buscadores(): void
     {
         $this->get('/admin/login')->assertOk()->assertHeader('X-Robots-Tag', 'noindex, nofollow');

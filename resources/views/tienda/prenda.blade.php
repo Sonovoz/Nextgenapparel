@@ -99,7 +99,7 @@
         .zona-guia { position: absolute; border: 1px dashed rgba(22,22,26,.45); border-radius: 2px; opacity: 0; transition: opacity .2s ease; pointer-events: none; z-index: 2; }
         .visor-lienzo.ajustando .zona-guia { opacity: 1; }
         .ajustador { display: flex; flex-direction: column; gap: 14px; padding-top: 4px; border-top: 1px solid rgba(255,255,255,.14); }
-        .ajustador h3 { margin: 12px 0 0; font-size: 15px; font-weight: 500; }
+        .ajustador h3, .ajustador .ajustador-titulo { margin: 12px 0 0; font-size: 15px; font-weight: 500; font-family: var(--sans); text-transform: none; letter-spacing: 0; }
         .fila-tamano { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .fila-tamano input[type=range] { flex: 1 1 180px; accent-color: #fff; min-height: 32px; }
         .fila-tamano output { font-size: 14px; min-width: 150px; }

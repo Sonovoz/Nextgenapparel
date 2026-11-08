@@ -12,6 +12,13 @@
 
 @push('scripts')
     <script>
+        // La espalda no compite con la carga inicial: su brillo se pide al terminar la página.
+        window.addEventListener('load', function () {
+            document.querySelectorAll('[data-mascara]').forEach(function (e) { e.style.setProperty('--mascara', 'url(' + e.dataset.mascara + ')'); });
+            document.querySelectorAll('img[data-src]').forEach(function (i) { i.srcset = i.dataset.srcset; i.src = i.dataset.src; });
+        });
+    </script>
+    <script>
         // Zona de juego: la camiseta gira sola; con el ratón sigue al puntero y en el
         // móvil se gira arrastrando. Al soltarla, vuelve a girar sola. Sin librerías.
         (function () {
@@ -126,13 +133,15 @@
                     <div class="cara frente">
                         <img class="prenda" src="{{ asset('img/portada/camiseta-dragon-900.webp') }}"
                              srcset="{{ asset('img/portada/camiseta-dragon-560.webp') }} 560w, {{ asset('img/portada/camiseta-dragon-900.webp') }} 900w, {{ asset('img/portada/camiseta-dragon-1120.webp') }} 1120w"
-                             sizes="(min-width: 1024px) 40vw, 82vw" width="900" height="1013" alt="{{ __('portada.hud_alt') }}" fetchpriority="high" draggable="false">
+                             sizes="(min-width: 1024px) 40vw, 82vw" width="900" height="1018" alt="{{ __('portada.hud_alt') }}" fetchpriority="high" draggable="false">
                         <span class="brillo" aria-hidden="true" style="--mascara: url('{{ asset('img/portada/camiseta-dragon-560.webp') }}');"></span>
                     </div>
                     @if ($conEspalda)
                         <div class="cara espalda">
-                            <img class="prenda" src="{{ asset('img/portada/camiseta-dragon-espalda-900.webp') }}" width="900" height="1013" alt="" loading="lazy" draggable="false">
-                            <span class="brillo" aria-hidden="true" style="--mascara: url('{{ asset('img/portada/camiseta-dragon-espalda-900.webp') }}');"></span>
+                            <img class="prenda" data-src="{{ asset('img/portada/camiseta-dragon-espalda-900.webp') }}"
+                                 data-srcset="{{ asset('img/portada/camiseta-dragon-espalda-560.webp') }} 560w, {{ asset('img/portada/camiseta-dragon-espalda-900.webp') }} 900w, {{ asset('img/portada/camiseta-dragon-espalda-1120.webp') }} 1120w"
+                                 sizes="(min-width: 1024px) 40vw, 82vw" width="900" height="1018" alt="" loading="lazy" draggable="false">
+                            <span class="brillo" aria-hidden="true" data-mascara="{{ asset('img/portada/camiseta-dragon-espalda-560.webp') }}"></span>
                         </div>
                     @endif
                 </div>
@@ -253,7 +262,7 @@
         <div class="contenedor calidad-rejilla">
             <figure class="lupa-tejido aparece" style="margin: 0;">
                 <img src="{{ asset('img/portada/macro.webp') }}" alt="" width="900" height="900" loading="lazy">
-                <figcaption>Macro · DTI Textil</figcaption>
+                <figcaption>{{ __('portada.macro_pie') }}</figcaption>
             </figure>
             <div>
                 <p class="etiqueta aparece">{{ __('portada.calidad_etiqueta') }}</p>

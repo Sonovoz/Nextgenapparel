@@ -135,7 +135,7 @@ body.menu-abierto { overflow: hidden; }
 .pie .contenedor { padding-top: 64px; padding-bottom: 28px; }
 .pie-rejilla { display: grid; gap: 40px; grid-template-columns: 1fr; }
 
-.pie h3 { font-family: var(--sans); font-size: 12px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: #9C968F; margin-bottom: 16px; }
+.pie h3, .pie .pie-titulo { font-family: var(--sans); font-size: 12px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: #9C968F; margin-bottom: 16px; }
 .pie ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .pie a { text-decoration: none; color: #E9E4DE; }
 .pie a:hover { color: #fff; }
@@ -732,3 +732,33 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .subir-ia { display: inline-flex; align-items: center; justify-content: center; flex: 1 1 180px; min-height: 46px; cursor: pointer; }
 .aviso-ia { margin: 0; font-size: 12px !important; }
 .boton-ia:focus-visible, .texto-ia:focus-visible, .subir-ia:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* Pie: luz azul que recorre la línea, como el escáner de un juego */
+.pie { position: relative; border-top-color: rgba(142, 160, 255, .14); }
+.pie::before, .pie::after { content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 1px; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(45, 75, 255, .2) 20%, #2D4BFF 45%, #DDE3FF 50%, #2D4BFF 55%, rgba(45, 75, 255, .2) 80%, transparent) no-repeat; background-size: 34% 100%; background-position: -40% 0; animation: barrido-pie 5.5s cubic-bezier(.45, .05, .55, .95) infinite; }
+.pie::after { top: -4px; height: 7px; filter: blur(6px); opacity: .9; }
+@keyframes barrido-pie { 0% { background-position: -40% 0; } 100% { background-position: 140% 0; } }
+@media (prefers-reduced-motion: reduce) {
+    .pie::before, .pie::after { animation: none; background-size: 100% 100%; background-position: 0 0; }
+    .pie::after { opacity: .5; }
+}
+
+/* Página 404 en el estilo de consola */
+.error-404 { min-height: 62vh; display: flex; align-items: center; }
+.error-404 .contenedor { width: 100%; }
+.error-404 .titulo-seccion { max-width: 16ch; margin-left: auto; margin-right: auto; }
+.error-404 .caminos { margin: 36px auto 0; }
+@media (min-width: 768px) { .error-404 .caminos { grid-template-columns: 1fr 1fr; max-width: 760px; } }
+
+/* Zonas táctiles de al menos 44 px (repaso del frontend) */
+.idiomas { gap: 2px; }
+.idiomas a { min-width: 44px; justify-content: center; }
+.ruta a, .estudio-ruta a { display: inline-flex; align-items: center; min-height: 32px; }
+.ruta { padding: 16px 0; align-items: center; }
+
+/* Mayúsculas con tilde (Á, É, Ó…) sin chocar con la línea de arriba (repaso del frontend) */
+.titulo-seccion { line-height: 1.02; }
+.ventajas h3 { line-height: 1.35; }
+/* La espalda, un 2 % más pequeña: al girar no cuenta como un nuevo LCP (la medida de Google se quedaría con ella) */
+.giro .cara.espalda .prenda { transform: scale(.98); }
+.pie .pie-titulo { margin-top: 0; line-height: 1.4; }

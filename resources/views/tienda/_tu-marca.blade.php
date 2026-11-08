@@ -115,7 +115,7 @@
     <div id="hp-ajustar" role="tabpanel" aria-labelledby="h-ajustar" class="herramienta-panel" hidden>
     <p class="claro" id="ajustador-vacio">{{ __('tienda.ajustar_vacio') }}</p>
     <div class="ajustador" id="ajustador" hidden>
-        <h3>{{ __('tienda.ajusta') }}</h3>
+        <h2 class="ajustador-titulo">{{ __('tienda.ajusta') }}</h2>
         <div class="fila-tamano">
             <label for="tamano-diseno" class="oculto">{{ __('tienda.tamano') }}</label>
             <input type="range" id="tamano-diseno" min="20" max="100" step="1" value="100">

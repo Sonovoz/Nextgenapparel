@@ -18,12 +18,15 @@
     <title>{{ $titulo }}</title>
     <meta name="description" content="{{ $descripcionMeta }}">
     {{-- Fuera del índice salvo en producción con el interruptor de Ajustes encendido (D102). --}}
-    <meta name="robots" content="{{ \App\Dominio\Seo\Indexacion::metaRobots() }}">
+    {{-- Las páginas de error nunca se indexan ni declaran URL canónica. --}}
+    <meta name="robots" content="{{ empty($seo['noindex']) ? \App\Dominio\Seo\Indexacion::metaRobots() : 'noindex, nofollow' }}">
+    @empty($seo['noindex'])
     <link rel="canonical" href="{{ $canonical }}">
     @foreach ($alternos as $codigo => $url)
         <link rel="alternate" hreflang="{{ $codigo }}" href="{{ $url }}">
     @endforeach
     <link rel="alternate" hreflang="x-default" href="{{ $alternos[config('idiomas.predeterminado')] }}">
+    @endempty
     <meta property="og:site_name" content="{{ $nombreTienda }}">
     <meta property="og:type" content="{{ $seo['tipo'] ?? 'website' }}">
     <meta property="og:title" content="{{ $titulo }}">
@@ -129,7 +132,7 @@
                     <p style="max-width: 36ch; margin: 22px 0 0; color: #B8B1A9;">{{ __('portada.pie_texto') }}</p>
                 </div>
                 <div>
-                    <h3>{{ __('portada.nav_prendas') }}</h3>
+                    <h2 class="pie-titulo">{{ __('portada.nav_prendas') }}</h2>
                     <ul>
                         @foreach ($familiasMenu as $f)
                             <li><a href="{{ route('tienda.familia', ['familia' => \App\Dominio\Catalogo\Escaparate::slug($f, $idiomaActual)]) }}">{{ $f->nombre }}</a></li>
@@ -137,7 +140,7 @@
                     </ul>
                 </div>
                 <div>
-                    <h3>{{ __('portada.pie_estudio') }}</h3>
+                    <h2 class="pie-titulo">{{ __('portada.pie_estudio') }}</h2>
                     <ul>
                         <li><a href="{{ $portada }}#pasos">{{ __('portada.nav_como') }}</a></li>
                         <li><a href="{{ $portada }}#packs">{{ __('portada.nav_packs') }}</a></li>
@@ -145,7 +148,7 @@
                     </ul>
                 </div>
                 <div>
-                    <h3>{{ __('portada.cambiar_idioma') }}</h3>
+                    <h2 class="pie-titulo">{{ __('portada.cambiar_idioma') }}</h2>
                     <ul>
                         @foreach (config('idiomas.disponibles') as $codigo => $nombre)
                             <li><a href="{{ $alternos[$codigo] }}" hreflang="{{ $codigo }}" lang="{{ $codigo }}">{{ $nombre }}</a></li>

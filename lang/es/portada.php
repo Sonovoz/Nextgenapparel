@@ -92,4 +92,12 @@ return [
     'nivel' => 'Nivel',
     'seleccionar' => 'Seleccionar',
     'modo' => 'Modo',
+    'macro_pie' => 'Primer plano · DTI Textil',
+    'error_etiqueta' => 'Fuera del mapa',
+    'error_titulo' => 'Game over: esta página no existe',
+    'error_texto' => 'El enlace no lleva a ningún sitio o la prenda ya no está disponible. Elige cómo seguir jugando.',
+    'error_inicio' => 'Volver al inicio',
+    'error_inicio_detalle' => 'Empieza de nuevo desde la portada',
+    'error_prendas' => 'Ver las prendas',
+    'error_prendas_detalle' => 'Camisetas, polos y sudaderas',
 ];
