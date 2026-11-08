@@ -57,6 +57,15 @@ class AppServiceProvider extends ServiceProvider
         // Subidas de diseños: un límite por IP frena el abuso sin molestar a quien prueba varias versiones.
         RateLimiter::for('disenos', fn (Request $request) => Limit::perHour(max(1, (int) Ajuste::obtener('disenos.subidas_hora')))->by($request->ip()));
 
+        // Cada limitador lleva su propio contador: con «throttle:6,1» sin nombre todas las rutas
+        // comparten el de la IP y quien se registra, entra y pide otra contraseña se quedaba bloqueado.
+        foreach ([
+            'cuenta-entrar' => 30, 'cuenta-registro' => 10, 'cuenta-recuperar' => 6, 'cuenta-restablecer' => 10,
+            'cuenta-verificar' => 10, 'cuenta-reenviar' => 3, 'disenos-lista' => 120, 'disenos-borrar' => 60, 'precio' => 120,
+        ] as $nombre => $porMinuto) {
+            RateLimiter::for($nombre, fn (Request $request) => Limit::perMinute($porMinuto)->by($nombre.'|'.$request->ip()));
+        }
+
         // @recurso('img/portada/macro.webp'): URL pública con la fecha del archivo, para que el
         // navegador no siga mostrando la versión antigua al cambiar una imagen con el mismo nombre (D145).
         Blade::directive('recurso', fn (string $ruta) => "<?php echo e(asset({$ruta}).'?v='.@filemtime(public_path({$ruta}))); ?>");
@@ -88,14 +97,17 @@ class AppServiceProvider extends ServiceProvider
             report(new ErrorDeCopia('La copia de seguridad ha fallado: '.$evento->exception->getMessage(), previous: $evento->exception));
         });
 
-        // Registro de actividad: accesos al backend.
+        // Registro de actividad: accesos al backend (los de clientes en la tienda, no).
         Event::listen(Login::class, function (Login $evento): void {
-            if ($evento->user instanceof User) {
+            if ($evento->user instanceof User && request()->is('admin', 'admin/*', 'livewire*')) {
                 Actividad::apuntar('accesos', 'Inicio de sesión', $evento->user, quien: $evento->user);
             }
         });
 
         Event::listen(Failed::class, function (Failed $evento): void {
+            if (! request()->is('admin', 'admin/*', 'livewire*')) {
+                return;
+            }
             Actividad::apuntar('accesos', 'Intento de acceso fallido', $evento->user instanceof User ? $evento->user : null, [
                 'email' => mb_substr((string) ($evento->credentials['email'] ?? ''), 0, 255),
                 'ip' => request()->ip(),

@@ -2,10 +2,12 @@
 
 use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Sistema\Errores\RegistrarError;
+use App\Support\RutaCuenta;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\PostTooLargeException;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -25,6 +27,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // 127.0.0.1 para la comprobación de salud del contenedor (compose.yaml).
         // No actúa en local ni en tests.
         $middleware->trustHosts(at: ['^127\.0\.0\.1$'], subdomains: true);
+
+        // Cuenta del cliente (paso 5.2): sin sesión, a «Entrar» en el idioma de la URL;
+        // con sesión, de «Entrar» o «Registro» a «Mi cuenta». El backend tiene sus propias redirecciones.
+        $idiomaDe = fn (Request $request): string => array_key_exists((string) $request->segment(1), config('idiomas.disponibles'))
+            ? (string) $request->segment(1) : config('idiomas.predeterminado');
+        $middleware->redirectGuestsTo(fn (Request $request) => RutaCuenta::url('entrar', [], $idiomaDe($request)));
+        $middleware->redirectUsersTo(fn (Request $request) => RutaCuenta::url('inicio', [], $idiomaDe($request)));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Herramientas → Log de errores (paso 1.4). Laravel sigue escribiendo
@@ -43,6 +52,15 @@ return Application::configure(basePath: dirname(__DIR__))
             app()->setLocale($idioma);
 
             return response()->json(['message' => __('disenos.error_subida', ['mb' => AnalizadorPng::maxMbEfectivo()]), 'motivo' => 'subida'], 413);
+        });
+
+        // Demasiadas peticiones en un formulario de la cuenta: aviso en la propia página, no una 429 en blanco.
+        $exceptions->render(function (ThrottleRequestsException $error, Request $request) {
+            if ($request->expectsJson() || ! str_starts_with((string) $request->route()?->getName(), 'cuenta.')) {
+                return null;
+            }
+
+            return back()->with('error', __('cuenta.demasiados_intentos', ['segundos' => (int) ($error->getHeaders()['Retry-After'] ?? 60)]));
         });
 
         $exceptions->shouldRenderJsonWhen(

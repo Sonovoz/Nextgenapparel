@@ -36,17 +36,17 @@ final class GuardarDiseno
 
     public function __construct(private readonly AnalizadorPng $analizador) {}
 
-    public function __invoke(UploadedFile $archivo, string $propietario): Diseno
+    public function __invoke(UploadedFile $archivo, Dueno $dueno): Diseno
     {
         $origen = (string) $archivo->getRealPath();
         $sha256 = (string) hash_file('sha256', $origen);
 
-        $existente = $this->existente($propietario, $sha256);
+        $existente = $this->existente($dueno, $sha256);
         if ($existente !== null) {
             return $existente;
         }
 
-        $this->comprobarCapacidad($propietario);
+        $this->comprobarCapacidad($dueno);
 
         $miniatura = null;
         // Cierre normal, no «fn»: la miniatura tiene que salir por referencia.
@@ -71,7 +71,7 @@ final class GuardarDiseno
 
             return Diseno::create([
                 'uuid' => $uuid,
-                'propietario' => $propietario,
+                ...$dueno->columnas(),
                 'nombre_original' => self::nombre($archivo->getClientOriginalName()),
                 'ruta' => $rutas['original'],
                 'miniatura' => $rutas['miniatura'],
@@ -85,7 +85,7 @@ final class GuardarDiseno
             // Otra petición igual (doble clic, reintento) llegó antes: se usa la suya.
             $disco->delete(array_values($rutas));
 
-            return $this->existente($propietario, $sha256) ?? throw new DisenoNoValido('no_disponible');
+            return $this->existente($dueno, $sha256) ?? throw new DisenoNoValido('no_disponible');
         } catch (Throwable $error) {
             // Nada a medias: sin fila no quedan archivos huérfanos.
             $disco->delete(array_values($rutas));
@@ -103,12 +103,12 @@ final class GuardarDiseno
         return mb_substr($nombre, 0, 150) ?: 'diseno.png';
     }
 
-    private function existente(string $propietario, string $sha256): ?Diseno
+    private function existente(Dueno $dueno, string $sha256): ?Diseno
     {
-        return Diseno::where('propietario', $propietario)->where('sha256', $sha256)->first();
+        return $dueno->filtrar(Diseno::query())->where('sha256', $sha256)->first();
     }
 
-    private function comprobarCapacidad(string $propietario): void
+    private function comprobarCapacidad(Dueno $dueno): void
     {
         $libre = @disk_free_space(Storage::disk(self::DISCO)->path(''));
         $total = @disk_total_space(Storage::disk(self::DISCO)->path(''));
@@ -116,7 +116,7 @@ final class GuardarDiseno
             throw new DisenoNoValido('no_disponible');
         }
 
-        $hoy = Diseno::where('propietario', $propietario)->where('created_at', '>=', now()->startOfDay())->count();
+        $hoy = $dueno->filtrar(Diseno::query())->where('created_at', '>=', now()->startOfDay())->count();
         if ($hoy >= (int) Ajuste::obtener('disenos.max_dia')) {
             throw new DisenoNoValido('limite_dia');
         }

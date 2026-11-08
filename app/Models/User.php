@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use App\Dominio\Sistema\Acceso\Rol;
+use App\Notifications\Cuenta\RestablecerContrasena;
+use App\Notifications\Cuenta\VerificarCorreo;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,10 +21,12 @@ use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'password', 'activo'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, LogsActivity, Notifiable;
+    use HasFactory, HasRoles, LogsActivity, Notifiable {
+        LogsActivity::shouldLogEvent as private registraEvento;
+    }
 
     /** @var array<string, mixed> */
     protected $attributes = [
@@ -49,6 +54,36 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->activo && $this->hasAnyRole(Rol::valores());
+    }
+
+    /** Correo de verificación de la tienda (paso 5.2), en el idioma del cliente. */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify((new VerificarCorreo)->locale($this->idiomaCorreo()));
+    }
+
+    /** Enlace para restablecer la contraseña desde la tienda (paso 5.2). */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify((new RestablecerContrasena($token))->locale($this->idiomaCorreo()));
+    }
+
+    private function idiomaCorreo(): string
+    {
+        return $this->cliente?->idioma ?? app()->getLocale();
+    }
+
+    /**
+     * Los clientes de la tienda no van al registro de actividad del equipo (D57): sus
+     * cambios no se apuntan (sus altas se crean sin registro, RegistrarCliente).
+     */
+    protected function shouldLogEvent(string $eventName): bool
+    {
+        if ($eventName !== 'created' && ! $this->roles()->exists()) {
+            return false;
+        }
+
+        return $this->registraEvento($eventName);
     }
 
     /** Ficha de cliente de la tienda, si el usuario compra (fase 5). Los clientes no tienen rol. */
