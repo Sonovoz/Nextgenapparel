@@ -48,7 +48,7 @@
     <style>
         .ficha { display: flex; flex-wrap: wrap; gap: 48px 64px; align-items: flex-start; }
         .galeria { flex: 1 1 520px; min-width: 0; }
-        .visor { position: relative; background: radial-gradient(120% 90% at 50% 40%, #FAF9F7 0%, var(--fondo-suave) 70%); border-radius: 4px; aspect-ratio: 5 / 6; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: box-shadow .25s ease; }
+        .visor { position: relative; background: radial-gradient(90% 70% at 50% 40%, #1C1E2C 0%, var(--fondo-suave) 75%); border-radius: 4px; aspect-ratio: 5 / 6; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: box-shadow .25s ease; }
         .visor.soltando { box-shadow: inset 0 0 0 2px var(--tinta); }
         .visor-lienzo { position: relative; width: 86%; aspect-ratio: 5 / 6; transform: perspective(1400px) rotateY(0deg); transition: transform .19s ease-in; touch-action: pan-y; }
         .visor-lienzo.girando { transform: perspective(1400px) rotateY(90deg); }
@@ -130,27 +130,27 @@
         }
         .zona-marca span { position: absolute; left: 0; top: -20px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
         .visor-controles { position: absolute; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-        .segmento { display: flex; background: #fff; border-radius: 999px; padding: 4px; gap: 2px; }
+        .segmento { display: flex; background: var(--papel); border: 1px solid var(--linea); border-radius: 999px; padding: 4px; gap: 2px; }
         .boton-pildora { min-height: 36px; padding: 0 16px; border: 0; border-radius: 999px; cursor: pointer; font: inherit; font-size: 13px; background: transparent; color: var(--tinta); }
-        .boton-pildora[aria-pressed="true"] { background: var(--tinta); color: #fff; }
-        .boton-borde { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--tinta); background: #fff; cursor: pointer; font: inherit; font-size: 13px; }
-        .boton-borde[aria-pressed="true"] { background: var(--tinta); color: #fff; }
+        .boton-pildora[aria-pressed="true"] { background: var(--tinta); color: var(--fondo); }
+        .boton-borde { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--linea-fuerte); background: rgba(8, 8, 13, .6); color: var(--tinta); cursor: pointer; font: inherit; font-size: 13px; }
+        .boton-borde[aria-pressed="true"] { background: var(--tinta); color: var(--fondo); }
         .visor-nota { position: absolute; left: 16px; bottom: 12px; margin: 0; font-size: 12px; color: var(--tinta-suave); }
         .info { flex: 1 1 360px; max-width: 480px; min-width: 0; display: flex; flex-direction: column; gap: 28px; }
-        .info h1 { margin: 0; font-size: clamp(34px, 4vw, 44px); line-height: 1.1; font-weight: 300; }
+        .info h1 { margin: 0; font-size: clamp(34px, 4vw, 52px); line-height: 1; font-weight: 800; text-transform: uppercase; letter-spacing: -.03em; }
         .precio { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
         .precio strong { font-family: var(--serif); font-weight: 400; font-size: 32px; }
         .suave { color: var(--tinta-suave); font-size: 14px; margin: 0; }
         .muestras { display: flex; flex-wrap: wrap; gap: 6px; }
         .muestra { width: 44px; height: 44px; border-radius: 999px; border: 1px solid transparent; background: transparent; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .muestra[aria-checked="true"] { border-color: var(--tinta); }
-        .muestra span { width: 32px; height: 32px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(22,22,26,.14); }
+        .muestra[aria-checked="true"] { border-color: var(--neon); box-shadow: 0 0 12px rgba(142, 160, 255, .5); }
+        .muestra span { width: 32px; height: 32px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.28), 0 0 0 1px rgba(255,255,255,.12); }
         .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-        .chip { min-width: 52px; height: 40px; border: 1px solid #DAD7D0; display: flex; align-items: center; justify-content: center; font-size: 13px; padding: 0 8px; }
+        .chip { min-width: 52px; height: 40px; border: 1px solid var(--linea-fuerte); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; padding: 0 8px; }
         .zonas { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
-        .zona-tarjeta { border: 1px solid #DAD7D0; padding: 12px; display: flex; flex-direction: column; gap: 2px; }
+        .zona-tarjeta { border: 1px solid var(--linea-fuerte); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 2px; }
         .cta { min-height: 56px; background: var(--tinta); color: #fff; border: 0; font: inherit; font-size: 15px; font-weight: 500; cursor: not-allowed; opacity: .85; }
-        .pasos-ficha { list-style: none; margin: 0; padding: 20px; background: #F7F6F3; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; font-size: 13px; line-height: 1.4; counter-reset: paso; }
+        .pasos-ficha { list-style: none; margin: 0; padding: 20px; background: var(--papel); border: 1px solid var(--linea); border-radius: 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; font-size: 13px; line-height: 1.4; counter-reset: paso; }
         .pasos-ficha li { counter-increment: paso; display: flex; flex-direction: column; gap: 6px; }
         .pasos-ficha li::before { content: counter(paso); font-family: var(--serif); font-size: 22px; }
         details { border-bottom: 1px solid var(--linea); }
@@ -159,7 +159,7 @@
         summary::-webkit-details-marker { display: none; }
         summary::after { content: '+'; font-size: 20px; }
         details[open] summary::after { content: '−'; }
-        details ul, details table { margin: 0 0 20px; font-size: 14px; color: #3A3A42; }
+        details ul, details table { margin: 0 0 20px; font-size: 14px; color: var(--tinta-suave); }
         table { border-collapse: collapse; width: 100%; }
         th, td { text-align: left; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--linea); }
         .visor-controles { z-index: 4; }
@@ -271,7 +271,7 @@
                         </div>
                     @endif
                     @if ($prenda->descripcion)
-                        <p style="margin: 16px 0 0; color: #3A3A42;">{{ $prenda->descripcion }}</p>
+                        <p style="margin: 16px 0 0; color: var(--tinta-suave);">{{ $prenda->descripcion }}</p>
                     @endif
                 </div>
 

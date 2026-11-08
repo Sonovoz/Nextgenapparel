@@ -1,5 +1,7 @@
 # Plan visual — NextGen Apparel
 
+> **Actualización (D139, D140):** el cliente decidió un **ambiente de consola al 100 %** (tema oscuro, azul neón, titulares en Jost 800, lenguaje de juego) con una zona de juego en la portada. Lo que sigue sobre crema y serifa de alto contraste queda sustituido; la estructura, los dos caminos y los criterios de rendimiento y accesibilidad se mantienen.
+
 A partir de las maquetas del cliente (8 de noviembre de 2026): la portada «Creamos marcas que comunican», la diapositiva editorial «DTI Textil para marcas que comunican» y el logotipo. Es la guía de diseño para todo el frontend; los cambios se registran en `docs/DECISIONES.md`.
 
 ## 1. Idea y objetivo

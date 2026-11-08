@@ -43,10 +43,9 @@
         <script type="application/ld+json">{!! json_encode($esquema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
     @endforeach
     <link rel="icon" type="image/png" href="{{ asset('img/marca/favicon.png') }}">
-    <link rel="preload" href="{{ asset('fonts/bodoni-moda.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{{ asset('fonts/jost.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ $version('css/tienda.css') }}">
-    <meta name="theme-color" content="#FBF8F4">
+    <meta name="theme-color" content="#07070C">
     {{-- Con JavaScript, las animaciones de entrada; sin él, todo se ve igual. --}}
     <script>document.documentElement.classList.add('js')</script>
     @stack('estilos')

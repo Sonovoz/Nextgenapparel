@@ -12,6 +12,40 @@
 
 @push('scripts')
     <script>
+        // Zona de juego: la camiseta gira sola; con el ratón sigue al puntero y en el
+        // móvil se gira arrastrando. Al soltarla, vuelve a girar sola. Sin librerías.
+        (function () {
+            var escenario = document.getElementById('escenario');
+            var giro = document.getElementById('giro');
+            if (!escenario || !giro || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            var vuelta = null, arrastre = null, angulo = 0;
+            var completa = giro.classList.contains('con-espalda'); // 360° si hay foto de la espalda
+            function poner(ry, rx) {
+                giro.style.setProperty('--ry', ry.toFixed(1) + 'deg');
+                giro.style.setProperty('--rx', rx.toFixed(1) + 'deg');
+                giro.style.setProperty('--brillo', (50 + ry * 1.6).toFixed(0) + '%');
+            }
+            function manual() { escenario.classList.add('manual'); clearTimeout(vuelta); }
+            function soltar() { clearTimeout(vuelta); vuelta = setTimeout(function () { escenario.classList.remove('manual'); }, 1600); }
+
+            escenario.addEventListener('pointermove', function (e) {
+                var r = escenario.getBoundingClientRect();
+                var px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
+                if (e.pointerType === 'mouse') { manual(); angulo = completa ? px * 360 : px * 50; poner(angulo, -py * 14); return; }
+                if (!arrastre) return;
+                angulo = arrastre.angulo + (e.clientX - arrastre.x) * (completa ? 0.8 : 0.45);
+                if (!completa) angulo = Math.max(-60, Math.min(60, angulo));
+                poner(angulo, 0);
+            });
+            escenario.addEventListener('pointerleave', soltar);
+            escenario.addEventListener('pointerdown', function (e) {
+                if (e.pointerType === 'mouse') return;
+                manual(); arrastre = { x: e.clientX, angulo: angulo };
+            });
+            ['pointerup', 'pointercancel'].forEach(function (t) { escenario.addEventListener(t, function () { arrastre = null; soltar(); }); });
+        })();
+    </script>
+    <script>
         // Paso 1 en la portada: el logo se queda en este navegador (sessionStorage)
         // y la ficha lo coloca sobre la prenda al abrirse. No se sube a ningún sitio.
         (function () {
@@ -57,15 +91,22 @@
 
 <x-tienda :titulo="__('portada.titulo_pagina')" :descripcion="__('portada.descripcion')" :alternos="$alternos" :seo="$seo">
 
-    {{-- 1. Portada: la idea y los dos caminos --}}
-    <section class="portada-hero" aria-labelledby="titular">
-        <div class="contenedor hero-rejilla">
-            <div class="hero-texto">
-                <p class="etiqueta aparece">{{ __('portada.hero_etiqueta') }}</p>
+    {{-- 1. Zona de juego: la camiseta como el personaje de la pantalla de inicio de una consola --}}
+    <section class="arena" aria-labelledby="titular">
+        <div class="arena-fondo" aria-hidden="true">
+            <span class="arena-halo uno"></span><span class="arena-halo dos"></span>
+            <span class="arena-suelo"></span>
+            @foreach ([[8, 0], [17, 3.2], [26, 1.4], [35, 5.1], [44, 2.3], [53, 6.4], [62, .8], [71, 4.2], [80, 2.9], [89, 5.7], [22, 7.1], [66, 6.9], [48, 8.2], [93, 1.9]] as [$x, $retraso])
+                <span class="chispa" style="--x: {{ $x }}%; --retraso: {{ $retraso }}s;"></span>
+            @endforeach
+        </div>
+
+        <div class="contenedor arena-rejilla">
+            <div class="arena-texto">
+                <p class="arena-jugador aparece"><span class="vivo" aria-hidden="true"></span>{{ __('portada.juego_linea') }}</p>
                 <h1 id="titular" class="aparece retraso-1">{{ __('portada.hero_titular') }}</h1>
-                <div class="separador corto aparece retraso-1"><span></span></div>
                 <p class="lema aparece retraso-2">{{ __('portada.hero_texto') }}</p>
-                <div class="aparece retraso-3">{!! $caminos() !!}</div>
+                <div class="arena-caminos aparece retraso-3">{!! $caminos('oscuro') !!}</div>
                 <ul class="confianza aparece retraso-3">
                     @if ($minimo)<li>{{ __('portada.confianza_minimo', ['n' => $minimo]) }}</li>@endif
                     <li>{{ __('portada.confianza_calidad') }}</li>
@@ -73,12 +114,37 @@
                     @if ($plazo)<li>{{ __('portada.confianza_plazo', ['dias' => $plazo]) }}</li>@endif
                 </ul>
             </div>
-            <div class="hero-fotos">
-                <img class="principal" src="{{ asset('img/portada/pareja-1024.webp') }}"
-                     srcset="{{ asset('img/portada/pareja-640.webp') }} 640w, {{ asset('img/portada/pareja-1024.webp') }} 1024w, {{ asset('img/portada/pareja-1600.webp') }} 1600w"
-                     sizes="(min-width: 1024px) 46vw, 100vw" width="1600" height="1004" alt="" fetchpriority="high">
-                <img class="secundaria" src="{{ asset('img/portada/sudadera-640.webp') }}" width="640" height="856" alt="" loading="lazy">
-                <p class="sello" aria-hidden="true">DTI Textil<b>{{ __('portada.firma') }}</b></p>
+
+            <div class="escenario" id="escenario">
+                <div class="hud hud-arriba" aria-hidden="true">
+                    <span><b>Skin 01</b> · {{ __('portada.hud_skin') }}</span>
+                    <span class="hud-marca">DTI Textil</span>
+                </div>
+                {{-- Con la foto de la espalda, vuelta completa de 360°; sin ella, giro de lado a lado. --}}
+                @php $conEspalda = is_file(public_path('img/portada/camiseta-dragon-espalda-900.webp')); @endphp
+                <div class="giro{{ $conEspalda ? ' con-espalda' : '' }}" id="giro">
+                    <div class="cara frente">
+                        <img class="prenda" src="{{ asset('img/portada/camiseta-dragon-900.webp') }}"
+                             srcset="{{ asset('img/portada/camiseta-dragon-560.webp') }} 560w, {{ asset('img/portada/camiseta-dragon-900.webp') }} 900w, {{ asset('img/portada/camiseta-dragon-1120.webp') }} 1120w"
+                             sizes="(min-width: 1024px) 40vw, 82vw" width="900" height="1013" alt="{{ __('portada.hud_alt') }}" fetchpriority="high" draggable="false">
+                        <span class="brillo" aria-hidden="true" style="--mascara: url('{{ asset('img/portada/camiseta-dragon-560.webp') }}');"></span>
+                    </div>
+                    @if ($conEspalda)
+                        <div class="cara espalda">
+                            <img class="prenda" src="{{ asset('img/portada/camiseta-dragon-espalda-900.webp') }}" width="900" height="1013" alt="" loading="lazy" draggable="false">
+                            <span class="brillo" aria-hidden="true" style="--mascara: url('{{ asset('img/portada/camiseta-dragon-espalda-900.webp') }}');"></span>
+                        </div>
+                    @endif
+                </div>
+                <span class="sombra" aria-hidden="true"></span>
+                <div class="hud hud-abajo" aria-hidden="true">
+                    <ul class="atributos">
+                        @foreach (['tacto' => 96, 'color' => 98, 'durabilidad' => 92] as $atributo => $nivel)
+                            <li><span>{{ __('portada.stat_'.$atributo) }}</span><span class="barra"><i style="--nivel: {{ $nivel }}%;"></i></span></li>
+                        @endforeach
+                    </ul>
+                    <span class="pista-girar">↻ {{ __('portada.hud_girar') }}</span>
+                </div>
             </div>
         </div>
     </section>
@@ -91,7 +157,7 @@
             <div class="pasos-rejilla">
                 @foreach ([1, 2, 3] as $i)
                     <article class="paso aparece retraso-{{ $i }}">
-                        <span class="numero" aria-hidden="true">0{{ $i }}</span>
+                        <span class="numero" aria-hidden="true"><small>{{ __('portada.nivel') }}</small>0{{ $i }}</span>
                         <h3>{{ __('portada.paso_'.$i) }}</h3>
                         <p>{{ __('portada.paso_'.$i.'_texto') }}</p>
                     </article>
@@ -173,7 +239,7 @@
                                     <h3>{{ $item['familia']->nombre }}</h3>
                                     @if ($item['desde'])<p>{{ __('portada.desde_impresion', ['precio' => $item['desde']]) }}</p>@endif
                                 </span>
-                                <span class="ir" aria-hidden="true">{!! $flecha !!}</span>
+                                <span class="ir" aria-hidden="true"><small>{{ __('portada.seleccionar') }}</small>{!! $flecha !!}</span>
                             </span>
                         </a>
                     @endforeach
@@ -213,6 +279,7 @@
             <div class="quien-rejilla">
                 @foreach ([1, 2, 3] as $i)
                     <article class="aparece retraso-{{ $i }}">
+                        <p class="modo">{{ __('portada.modo') }} 0{{ $i }}</p>
                         <h3>{{ __('portada.quien_'.$i) }}</h3>
                         <p>{{ __('portada.quien_'.$i.'_texto') }}</p>
                     </article>

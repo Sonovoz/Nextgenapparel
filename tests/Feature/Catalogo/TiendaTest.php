@@ -119,8 +119,8 @@ class TiendaTest extends TestCase
 
     public function test_la_portada_muestra_las_familias(): void
     {
-        $this->get('/es')->assertOk()->assertSeeInOrder(['Elige la base de tu marca', 'Camisetas', 'Desde 7,26 € con impresión', 'Polos', 'Sudaderas']);
-        $this->get('/en')->assertOk()->assertSeeInOrder(['Choose the base of your brand', 'T-shirts', 'From €7.26 printed', 'Polo shirts', 'Sweatshirts']);
+        $this->get('/es')->assertOk()->assertSeeInOrder(['Elige tu base', 'Camisetas', 'Desde 7,26 € con impresión', 'Polos', 'Sudaderas']);
+        $this->get('/en')->assertOk()->assertSeeInOrder(['Choose your base', 'T-shirts', 'From €7.26 printed', 'Polo shirts', 'Sweatshirts']);
     }
 
     public function test_la_portada_presenta_los_dos_caminos_con_datos_reales(): void
@@ -133,7 +133,7 @@ class TiendaTest extends TestCase
             ->assertSee('Calidad DTI Textil')
             ->assertSee('Pack joven (ejemplo)')
             ->assertSee('99,00 €') // 81,82 + 21 %
-            ->assertSee('Tu marca en 3 pasos')
+            ->assertSee('Tu marca en 3 niveles')
             ->assertSee("sessionStorage.setItem('nga.logo'", false); // el script del paso 1 llega a la página
     }
 
