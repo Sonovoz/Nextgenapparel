@@ -27,6 +27,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rules\Unique;
 
 /**
@@ -94,6 +95,22 @@ class FotosRelationManager extends RelationManager
                 ->directory(fn () => 'catalogo/'.$this->getOwnerRecord()->getKey())
                 ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
                 ->maxSize(5120)
+                // Una maqueta tiene que ser 5:6 (con un 2 % de margen): el visor y las zonas lo suponen (Gauntlet fase 5, B2).
+                ->rule(fn (Get $get) => function (string $atributo, $valor, Closure $fallo) use ($get, $esMaqueta): void {
+                    if (! $esMaqueta($get)) {
+                        return;
+                    }
+                    // El estado de la subida es una lista de archivos; al editar, la foto guardada es un texto.
+                    foreach (is_array($valor) ? $valor : [$valor] as $archivo) {
+                        if (! $archivo instanceof UploadedFile) {
+                            continue;
+                        }
+                        [$ancho, $alto] = @getimagesize($archivo->getRealPath()) ?: [0, 0];
+                        if ($alto > 0 && abs(($ancho / $alto) / (5 / 6) - 1) > 0.02) {
+                            $fallo("Una maqueta tiene que tener proporción 5:6 (por ejemplo, 1000 × 1200 px). Esta foto es de {$ancho} × {$alto} px.");
+                        }
+                    }
+                })
                 ->helperText('PNG, JPG o WebP de hasta 5 MB. Maqueta: proporción 5:6 (por ejemplo, 1000 × 1200 px), mejor con fondo transparente y la prenda centrada.'),
             CamposTraducibles::texto('texto_alternativo', 'Texto alternativo'),
             TextInput::make('orden')->label('Orden')->numeric()->integer()->minValue(0)->default(0),

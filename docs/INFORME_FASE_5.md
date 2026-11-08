@@ -49,21 +49,22 @@ Todas las hizo el instructor (`.claude/agents/instructor.md`), un subagente inde
 | N3 paso 5.5 | Listo con limitaciones | 3 medios y 8 bajos, corregidos salvo B5, riesgo asumido (D162) |
 | N3 pasos 5.6–5.8 | No listo | 1 alto y 2 medios, corregidos (D167) |
 | Gauntlet ronda 1 (fase completa, en navegador) | No lista | 1 alto, 2 medios y 1 bajo, corregidos (ver abajo) |
-| Gauntlet ronda 2 (solo lo corregido) | _pendiente_ | _pendiente_ |
+| Gauntlet ronda 2 (solo lo corregido, en navegador a 390, 768 y 1366 px) | Lista con limitaciones | 1 bajo, corregido (fotos 5:6 exigidas) |
 
 ## Defectos encontrados y corregidos en el cierre de la fase
 
 | Defecto | Gravedad | Corrección | Comprobación |
 |---|---|---|---|
-| La maqueta del carrito se estiraba desde 640 px: foto recortada y capas descolocadas | Alta | La maqueta se dibuja a la proporción de su foto y no se estira con la fila (`tienda.css`) | Ronda 2 en 768 y 1366 px |
+| La maqueta del carrito se estiraba desde 640 px: foto recortada y capas descolocadas | Alta | La maqueta se dibuja a la proporción de su foto y no se estira con la fila (`tienda.css`) | Ronda 2: proporción de la foto en 390, 768 y 1366 px y capas exactamente en su zona |
 | Se suponía que las fotos de maqueta eran 5:6 sin comprobarlo | Media | El carrito ya no depende de esa proporción; la ayuda de la subida pide fotos 5:6 | Ronda 2 |
 | Un rectángulo de zona con otra proporción que la zona real hacía que el visor y el carrito mostraran tamaños distintos | Media | Regla en Catálogo → Prenda → Fotos: el rectángulo debe tener la proporción de la zona (margen del 5 %) | Test `test_el_rectangulo_de_una_zona_tiene_que_tener_su_proporcion` |
 | Desbordamiento horizontal de 4 px en el carrito en móvil | Baja | `.carrito-rejilla` con `minmax(0, 1fr)` | Ronda 2: `scrollWidth` = 390 |
+| Las fotos 5:6 se pedían pero no se exigían (ronda 2) | Baja | La subida de una maqueta exige 5:6 con un 2 % de margen | Test `test_una_maqueta_tiene_que_ser_5_6` |
 | Una foto que no cargaba dejaba promesas sin capturar y la carga colgada en el visor | Baja | Se captura el fallo y se reintenta al volver a pintar | Pasada de navegador sin errores de página |
 
 ## Pruebas superadas
 
-- **Suite completa en SQLite:** 630 de 630.
+- **Suite completa en SQLite:** 631 de 631.
 - **MariaDB estricta (configuración XAMPP):** 625 superados y 2 saltados (copias SQLite). Se ejecutó tras el paso 5.8; los cambios posteriores no tocan la base de datos.
 - **Migraciones de la fase en MariaDB estricta:** se crean, se deshacen y se rehacen.
 - **Navegador (Playwright, 390 y 1366 px):**
@@ -75,7 +76,7 @@ Todas las hizo el instructor (`.claude/agents/instructor.md`), un subagente inde
   - Se guardan en 280 × 140 mm y 200 × 400 mm.
   - El precio es el mismo en el configurador y en el carrito: 323,68 €.
   - El cierre suma bien: envío 6,90, base 274,40, IVA 57,62 y total 332,02.
-  - En 390 px la maqueta es correcta; en escritorio fallaba, se corrigió y se verifica en la ronda 2.
+  - Maqueta del carrito: en la ronda 1 fallaba en escritorio; tras la corrección, en la ronda 2 las capas caen exactamente en su zona en 390, 768 y 1366 px (frontal 40,0 × 14,7 % de la foto y espalda 26,7 × 44,0 %, como dan los mm).
 
 ## Pruebas no ejecutadas
 
@@ -95,7 +96,7 @@ Todas las hizo el instructor (`.claude/agents/instructor.md`), un subagente inde
 | En un ordenador compartido, el carrito de quien no entró pasa a quien entra (D161) | Baja | Asumido |
 | Si se suben los días del carrito, un carrito de invitado puede durar más que su cookie (D162, B5) | Baja | Asumido |
 | Packs sin ajustador ni zonas extra (D165) | Baja | Si el cliente lo pide |
-| Las fotos de maqueta tienen que ser 5:6 y sus zonas proporcionadas; se pide en el backend, pero las fotos ya subidas no se revisan | Baja | Revisión del catálogo en Herd |
+| Las fotos de maqueta ya subidas no se revisan con las reglas nuevas (5:6 y zonas proporcionadas); las nuevas, sí | Baja | Revisión del catálogo en Herd |
 
 ## Despliegue
 
