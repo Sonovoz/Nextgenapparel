@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DisenoController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TiendaController;
 use App\Http\Middleware\EstablecerIdioma;
@@ -29,6 +30,10 @@ Route::prefix('{idioma}')
     ->middleware(EstablecerIdioma::class)
     ->group(function () {
         Route::get('/', [TiendaController::class, 'portada'])->name('portada');
+
+        // Diseños del cliente (fase 4): subida y miniatura, solo para su dueño.
+        Route::post('/disenos', [DisenoController::class, 'subir'])->name('disenos.subir')->middleware('throttle:disenos');
+        Route::get('/disenos/{diseno}/miniatura', [DisenoController::class, 'miniatura'])->name('disenos.miniatura')->whereUuid('diseno');
 
         // Sobre nosotros (D145): /es/sobre-nosotros y /en/about-us; antes de las familias.
         Route::get('/{pagina}', [TiendaController::class, 'nosotros'])

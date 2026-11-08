@@ -25,9 +25,12 @@ use App\Policies\CatalogoPolicy;
 use App\Policies\SeccionPolicy;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Backup\Events\BackupHasFailed;
@@ -48,6 +51,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Subidas de diseños: un límite por IP frena el abuso sin molestar a quien prueba varias versiones.
+        RateLimiter::for('disenos', fn (Request $request) => Limit::perHour(60)->by($request->ip()));
+
         // @recurso('img/portada/macro.webp'): URL pública con la fecha del archivo, para que el
         // navegador no siga mostrando la versión antigua al cambiar una imagen con el mismo nombre (D145).
         Blade::directive('recurso', fn (string $ruta) => "<?php echo e(asset({$ruta}).'?v='.@filemtime(public_path({$ruta}))); ?>");

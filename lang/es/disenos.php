@@ -35,4 +35,8 @@ return [
     'error_pequeno' => 'Tu diseño mide :ancho × :alto píxeles sin contar los márgenes transparentes. Necesitamos al menos :px píxeles por lado.',
     'error_procesar' => 'La imagen es demasiado grande para procesarla. Redúcela o expórtala de nuevo en PNG de 8 bits por canal.',
     'error_vacio' => 'La imagen es totalmente transparente: no hay nada que imprimir.',
+    'error_sin_archivo' => 'Elige el PNG de tu diseño.',
+    'error_subida' => 'No hemos recibido el archivo completo. Comprueba que pesa menos de :mb MB y vuelve a intentarlo.',
+    'error_derechos' => 'Para subir el diseño, confirma que tienes los derechos sobre él.',
+    'aviso_perfil' => 'Tu archivo usa el perfil de color «:perfil». Imprimimos en sRGB: algunos colores pueden variar un poco. Si puedes, expórtalo en sRGB.',
 ];

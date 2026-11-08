@@ -84,7 +84,7 @@ class AjustesGenerales extends Page implements HasSchemas
                 ->description('Límites de los PNG que suben los clientes. El mínimo se mide sin los márgenes transparentes, sobre lo que se imprime. Los diseños que no llegan a un pedido se borran pasados los días indicados.')
                 ->columns(4)
                 ->schema([
-                    TextInput::make('max_mb')->label('Peso máximo')->integer()->minValue(1)->maxValue(100)->suffix('MB')->required(),
+                    TextInput::make('max_mb')->label('Peso máximo')->integer()->minValue(1)->maxValue(50)->suffix('MB')->required(),
                     TextInput::make('max_px')->label('Lado mayor, como mucho')->integer()->minValue(1000)->maxValue(10000)->suffix('px')->required()
                         ->helperText('8000 px son 67 cm a 300 ppp. Más solo hace la subida más lenta.'),
                     TextInput::make('min_px')->label('Lado menor, al menos')->integer()->minValue(50)->maxValue(2000)->suffix('px')->required(),

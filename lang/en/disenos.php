@@ -35,4 +35,8 @@ return [
     'error_pequeno' => 'Your design is :ancho × :alto pixels without its transparent margins. We need at least :px pixels per side.',
     'error_procesar' => 'The image is too large to process. Make it smaller or export it again as an 8-bit-per-channel PNG.',
     'error_vacio' => 'The image is fully transparent: there is nothing to print.',
+    'error_sin_archivo' => 'Choose the PNG of your design.',
+    'error_subida' => 'We did not receive the whole file. Check it is smaller than :mb MB and try again.',
+    'error_derechos' => 'To upload the design, confirm that you hold the rights to it.',
+    'aviso_perfil' => 'Your file uses the «:perfil» colour profile. We print in sRGB, so some colours may shift slightly. If you can, export it in sRGB.',
 ];
