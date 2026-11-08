@@ -60,7 +60,7 @@ A partir de las maquetas del cliente (8 de noviembre de 2026): la portada «Crea
    - **Dos caminos con el mismo peso:**
      - **«Crear mi colección»** (3 pasos), en azul;
      - **«Ver packs»**, el secundario.
-   - Debajo, la **línea de confianza**: *Desde 15 prendas · Calidad DTF · Pago seguro · Envío en 48–72 h*. Los datos salen de la configuración, nunca escritos en el código.
+   - Debajo, la **línea de confianza**: *Desde 15 prendas · Calidad DTI · Pago seguro · Envío en 48–72 h*. Los datos salen de la configuración, nunca escritos en el código.
    - La foto de estilo de vida con un acercamiento lento, y en móvil la foto arriba y el texto abajo.
 3. **«Tu marca en 3 pasos»**, interactivo.
    - En el paso 1, **una zona para soltar el logo**: lo ve al momento sobre una camiseta (reutiliza «Tu marca, aquí») y el botón le lleva a elegir prendas con el logo ya cargado.
@@ -119,7 +119,7 @@ Cada paso es de nivel N2: suite completa, una pasada de navegador en móvil y es
 
 ## 9. Lo que necesitamos del cliente
 
-1. **¿«DTI» o «DTF»?** La ficha y la web dicen DTF (impresión por transferencia directa a película). Las maquetas dicen «DTI Textil». Si «DTI» es una marca del proveedor (el sello «INNURO Print Partner Center»), hay que confirmar si se puede usar.
+1. ~~**¿«DTI» o «DTF»?**~~ **Resuelto (D146): DTI.** La ficha y la web dicen DTF (impresión por transferencia directa a película). Las maquetas dicen «DTI Textil». Si «DTI» es una marca del proveedor (el sello «INNURO Print Partner Center»), hay que confirmar si se puede usar.
 2. **Logotipo en SVG** (monograma y logotipo completo) y el azul exacto de la marca.
 3. **Fotos propias o con licencia** para la portada y el macro del tejido. Las de las maquetas sirven de provisionales si son vuestras.
 4. **«Proyectos»**, tote bags y uniformes aparecen en las maquetas pero no están en la versión 1. Hasta tener contenido, proponemos dejarlos fuera del menú.

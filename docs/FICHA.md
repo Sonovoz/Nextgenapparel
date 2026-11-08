@@ -7,7 +7,7 @@
 
 ## 1. Qué es y para quién
 
-Portal web para **calcular, vender y gestionar pedidos de prendas personalizadas con impresión DTF** (camisetas, polos y sudaderas). Va dirigido a **pequeños diseñadores** que quieren producir sus colecciones: suben uno o varios diseños en PNG, eligen prenda, color, zonas de impresión y tallas, y el portal calcula el precio, cobra por Redsys, genera la factura y la orden de trabajo. NextGen Apparel imprime y envía.
+Portal web para **calcular, vender y gestionar pedidos de prendas personalizadas con impresión DTI** (tecnología Innuro, evolución del DTF; D146) (camisetas, polos y sudaderas). Va dirigido a **pequeños diseñadores** que quieren producir sus colecciones: suben uno o varios diseños en PNG, eligen prenda, color, zonas de impresión y tallas, y el portal calcula el precio, cobra por Redsys, genera la factura y la orden de trabajo. NextGen Apparel imprime y envía.
 
 **Compra en 3 pasos (D105):** 1) Sube tu diseño · 2) Escoge las prendas · 3) Cierra el pedido. Además, un **selector de Packs** con ofertas cerradas (§ 6 bis) como segunda vía de venta.
 
@@ -38,7 +38,7 @@ Portal web para **calcular, vender y gestionar pedidos de prendas personalizadas
 - Carritos abandonados con cupón, campañas de nueva compra, reactivación.
 - Panel de ventas avanzado con márgenes.
 - Integración con APIs de transportistas y de proveedor de prendas.
-- Pliegos DTF automáticos y tarifas por grupo de cliente.
+- Pliegos DTI automáticos y tarifas por grupo de cliente.
 
 > La base de datos se diseña desde el inicio para soportar la versión 2.
 
@@ -334,7 +334,7 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 - **Correo de marketing** con remitente separado y enlace de baja.
 - **Integraciones**: APIs de transportistas (seguimiento automático) y de proveedor de prendas.
 - **Panel avanzado** con márgenes reales.
-- **Pliegos DTF** automáticos y **tarifas por grupo de cliente**.
+- **Pliegos DTI** automáticos y **tarifas por grupo de cliente**.
 
 ---
 
@@ -362,6 +362,6 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 | Planteamiento | Completado | 2026-11-06 |
 | 1. Base | **Completada con limitaciones** (informe: `docs/INFORME_FASE_1.md`). Criterios de aceptación cumplidos en Docker; pendiente desplegar en OVH y verificar el paso 1.6 en Herd | 2026-11-06 |
 | 2. Catálogo | **Completada con limitaciones** (informe: `docs/INFORME_FASE_2.md`). Criterio de aceptación cumplido con un test de principio a fin, en SQLite y en MariaDB estricta; pendiente la revisión del cliente en Herd de los últimos pasos y el despliegue en OVH | 2026-11-07 |
-| 3. Motor de precios | **Completada con limitaciones** (informe: `docs/INFORME_FASE_3.md`). Casos P1–P7, K1–K4 y E1–E5 como tests en SQLite y MariaDB estricta; pendiente el asesor (IVA del envío y recargo), la pregunta D127 y la revisión en Herd | 2026-11-08 |
+| 3. Motor de precios | **Completada con limitaciones** (informe: `docs/INFORME_FASE_3.md`). Casos P1–P7, K1–K4 y E1–E5 como tests en SQLite y MariaDB estricta; pendiente el asesor (IVA del envío y recargo). D127 confirmada y revisión en Herd hecha | 2026-11-08 |
 | Visual V1 | Completado: sistema de diseño, cabecera, pie y portada premium (`docs/PLAN_VISUAL.md`); pendiente la revisión en Herd | 2026-11-08 |
 | Configurador (adelanto de la fase 5) | **En curso** (D141, D142): el configurador es la página de producto, con 3 niveles (diseño, tallas y colores, resumen) y el precio en directo del motor; pendiente la subida real del PNG (fase 4), el carrito y el pago | 2026-11-08 |

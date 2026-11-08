@@ -12,7 +12,7 @@ use App\Models\FotoZona;
  *
  * Medidas tomadas sobre fotos de 1000 × 1200 con el encuadre uniforme de la
  * ficha (torso de unos 475 px ≈ 54 cm en talla L, es decir ≈ 8,8 px/cm), con
- * las colocaciones habituales en serigrafía y DTF (D99):
+ * las colocaciones habituales en serigrafía y DTF/DTI (D99):
  * - Frontal 28 × 38 cm, centrado, a 7,5 cm bajo el cuello delantero.
  * - Pecho 9 × 9 cm, en el pecho izquierdo de quien la lleva (derecha de la
  *   foto), centrado a 10 cm del centro y a 7,5 cm bajo el cuello.

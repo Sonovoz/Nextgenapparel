@@ -4,7 +4,7 @@ Según la sección 14 de `docs/GAUNTLET.md`. Rama `fase-3-precios`, 8 de noviemb
 
 ## Estado
 
-**Terminado con limitaciones.** El criterio de aceptación («los casos P1–P7 y los de envío pasan como tests automáticos») se cumple. Limitaciones: el asesor debe confirmar el trato del envío y del recargo de equivalencia (D122); el cliente, la regla de mínimos con packs (D127); y falta la revisión en Herd.
+**Terminado con limitaciones.** El criterio de aceptación («los casos P1–P7 y los de envío pasan como tests automáticos») se cumple. Limitaciones: el asesor debe confirmar el trato del envío y del recargo de equivalencia (D122); la regla de mínimos con packs (D127) la confirmó el cliente después del cierre; y falta la revisión en Herd.
 
 | Criterio (ficha § 15) | Resultado | Cómo se comprobó |
 |---|---|---|
@@ -22,7 +22,7 @@ Según la sección 14 de `docs/GAUNTLET.md`. Rama `fase-3-precios`, 8 de noviemb
 
 - Tests y una pasada de navegador por paso.
 - **Gauntlet de cierre en una sola ronda**, a petición del cliente para ahorrar recursos: el agente `instructor`, independiente, centrado en el dinero. Veredicto: «no listo», con 2 defectos críticos y 2 altos.
-- Corregidos todos los defectos salvo dos pendientes (D122 y D127). **No hubo segunda ronda**: las correcciones se comprobaron con tests nuevos.
+- Corregidos todos los defectos salvo dos pendientes (D122 y D127; D127 confirmada después por el cliente). **No hubo segunda ronda**: las correcciones se comprobaron con tests nuevos.
 
 ## Defectos encontrados y corregidos
 
@@ -34,7 +34,7 @@ Según la sección 14 de `docs/GAUNTLET.md`. Rama `fase-3-precios`, 8 de noviemb
 | 4 | Alta | Cantidades con decimales cobraban una cosa y registraban otra | Solo enteros de 1 a 10 000 por talla | Sí, 4 casos |
 | 5 | Media | El porcentaje se redondeaba por línea (2 céntimos de más) | Un redondeo sobre el total y reparto | Sí |
 | 6 | Media | El envío tributaba siempre al tipo general | Reparto proporcional por tipo (D122) | Sí |
-| 7 | Media | Un pack eximía a las sueltas también del mínimo por talla | El mínimo por talla se mantiene (D127, a confirmar) | Sí |
+| 7 | Media | Un pack eximía a las sueltas también del mínimo por talla | El mínimo por talla se mantiene (D127, confirmada por el cliente) | Sí |
 | 8 | Media | El importe mínimo se escribía en céntimos | Se escribe en euros | Sí |
 | 9 | Baja | Ofertas con condiciones mal formadas | No se aplican | Sí |
 | 10 | Baja | Tramos de envío repetidos daban un error SQL | Aviso en el campo | Sí |
@@ -58,7 +58,7 @@ Según la sección 14 de `docs/GAUNTLET.md`. Rama `fase-3-precios`, 8 de noviemb
 | Riesgo | Gravedad | Situación |
 |---|---|---|
 | Trato fiscal del envío y del recargo | Media | Asesor (D122) |
-| Mínimos con packs | Baja | Pregunta al cliente (D127) |
+| Mínimos con packs | — | Cerrado: confirmado por el cliente (D127) |
 | CP vacío aplica la zona general | Baja | Se exigirá en el pago (fase 6) |
 | Uso de cupones por cliente | Baja | La lista de usados la dará el pedido (fase 6) |
 | Destinos fuera de la Península y Baleares | Baja | Cuando se decidan (D123) |
