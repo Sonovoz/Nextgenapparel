@@ -58,6 +58,22 @@ class FotosRelationManager extends RelationManager
             }
         };
 
+        // El rectángulo tiene la proporción de la zona en mm, sobre una foto 5:6 (Gauntlet de la
+        // fase 5, M2): si no, el visor y la maqueta del carrito muestran tamaños distintos.
+        $proporcionada = fn (Get $get) => function (string $atributo, $valor, Closure $fallo) use ($get): void {
+            $zona = ZonaImpresion::find($get('zona_impresion_id'));
+            $ancho = (float) $get('ancho');
+            if ($zona === null || $ancho <= 0 || (float) $valor <= 0) {
+                return;
+            }
+            $enFoto = ($ancho * 5) / ((float) $valor * 6);
+            $real = $zona->ancho_max_mm / max(1, $zona->alto_max_mm);
+            if (abs($enFoto / $real - 1) > 0.05) {
+                $alto = round($ancho * 5 / ($real * 6), 1);
+                $fallo("El rectángulo no tiene la proporción de la zona ({$zona->ancho_max_mm} × {$zona->alto_max_mm} mm). Con ese ancho, el alto debería ser de unos {$alto} %.");
+            }
+        };
+
         return $schema->columns(1)->components([
             Grid::make(3)->schema([
                 Select::make('tipo')->label('Tipo')->options(TipoFoto::class)->default(TipoFoto::Maqueta)->required()->native(false)->live(),
@@ -78,7 +94,7 @@ class FotosRelationManager extends RelationManager
                 ->directory(fn () => 'catalogo/'.$this->getOwnerRecord()->getKey())
                 ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
                 ->maxSize(5120)
-                ->helperText('PNG, JPG o WebP de hasta 5 MB. Maqueta: mejor con fondo transparente y la prenda centrada.'),
+                ->helperText('PNG, JPG o WebP de hasta 5 MB. Maqueta: proporción 5:6 (por ejemplo, 1000 × 1200 px), mejor con fondo transparente y la prenda centrada.'),
             CamposTraducibles::texto('texto_alternativo', 'Texto alternativo'),
             TextInput::make('orden')->label('Orden')->numeric()->integer()->minValue(0)->default(0),
 
@@ -104,7 +120,7 @@ class FotosRelationManager extends RelationManager
                     $porcentaje('x', 'Desde la izquierda'),
                     $porcentaje('y', 'Desde arriba'),
                     $porcentaje('ancho', 'Ancho')->rule($dentro('x', 'Desde la izquierda')),
-                    $porcentaje('alto', 'Alto')->rule($dentro('y', 'Desde arriba')),
+                    $porcentaje('alto', 'Alto')->rule($dentro('y', 'Desde arriba'))->rule($proporcionada),
                 ])
                 ->helperText('En % de la foto. La vista previa cambia al salir de cada casilla.'),
         ]);

@@ -978,3 +978,9 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 /* Cierra el pedido (paso 5.8) */
 .cierre-formulario { display: flex; flex-direction: column; gap: 14px; grid-template-columns: none; }
 .cierre-formulario h2 { margin: 8px 0 0; font-family: var(--display); font-size: 20px; }
+/* Gauntlet de la fase 5: la maqueta del carrito mantiene la proporción de su foto (no se estira con la fila, A1/M1) y la rejilla no se desborda en móvil (B1). */
+.carrito-rejilla { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 980px) { .carrito-rejilla { grid-template-columns: minmax(0, 1fr) 360px; } }
+.carrito-maquetas { align-self: start; align-items: flex-start; }
+.carrito-maquetas .maqueta { aspect-ratio: auto; }
+.carrito-maquetas .maqueta > img:first-child { height: auto; object-fit: initial; }
