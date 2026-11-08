@@ -2,9 +2,10 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "sonovoz/nextgenapparel",
     "type": "project",
-    "description": "NextGen Apparel: portal de pedidos de prendas personalizadas con impresi\u00f3n DTF.",
+    "description": "NextGen Apparel: portal de pedidos de prendas personalizadas con impresi\u00f3n DTI.",
     "keywords": [
         "laravel",
+        "dti",
         "dtf",
         "pedidos"
     ],

@@ -36,7 +36,7 @@ class IdiomasTest extends TestCase
         $this->get('/es')
             ->assertOk()
             ->assertSee('<html lang="es">', false)
-            ->assertSee('Tu colección, impresa como la imaginas.');
+            ->assertSee('Creamos marcas que comunican');
     }
 
     public function test_la_portada_en_ingles(): void
@@ -44,7 +44,7 @@ class IdiomasTest extends TestCase
         $this->get('/en')
             ->assertOk()
             ->assertSee('<html lang="en">', false)
-            ->assertSee('Your collection, printed the way you imagine it.');
+            ->assertSee('We create brands that speak');
     }
 
     public function test_un_idioma_no_disponible_devuelve_404(): void

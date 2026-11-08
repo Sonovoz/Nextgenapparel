@@ -10,12 +10,16 @@ use App\Dominio\Precios\Formato;
 use App\Dominio\Precios\Iva;
 use App\Dominio\Sistema\Acceso\Rol;
 use App\Filament\Pages\AjustesGenerales;
+use App\Filament\Resources\Precios\Pages\ManageClaseImpuesto;
 use App\Models\Ajuste;
+use App\Models\ClaseImpuesto;
 use App\Models\Color;
 use App\Models\Foto;
 use App\Models\FotoZona;
 use App\Models\Prenda;
 use Database\Seeders\EjemplosCatalogoSeeder;
+use Database\Seeders\EjemplosPreciosSeeder;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -71,19 +75,18 @@ class TiendaTest extends TestCase
 
     // ── Ajustes → General ─────────────────────────────────────────────
 
-    public function test_el_iva_se_cambia_en_ajustes_y_queda_en_la_actividad(): void
+    public function test_el_iva_se_cambia_en_ajustes_impuestos_y_queda_en_la_actividad(): void
     {
         Filament::setCurrentPanel('admin');
         $this->actingAs($this->usuarioConRol(Rol::Administrador));
+        $general = ClaseImpuesto::where('clave', 'general')->sole();
 
-        Livewire::test(AjustesGenerales::class)
-            ->assertSchemaStateSet(['iva_general' => 21])
-            ->fillForm(['nombre' => 'NextGen Apparel', 'iva_general' => 10])
-            ->callAction('guardar')
-            ->assertNotified('Ajustes guardados');
+        Livewire::test(ManageClaseImpuesto::class)
+            ->callAction(TestAction::make('edit')->table($general), ['tipo_iva' => '10', 'recargo' => '1,4'])
+            ->assertHasNoFormErrors();
 
-        $this->assertSame(1000, Ajuste::obtener('impuestos.iva_general'));
-        $this->assertSame('IVA general cambiado', Activity::latest('id')->value('description'));
+        $this->assertSame([1000, 140], [$general->fresh()->tipo_iva, $general->fresh()->recargo]);
+        $this->assertSame('Impuestos cambiados', Activity::latest('id')->value('description'));
         $this->get('/es/camisetas')->assertSee('6,60 €'); // (4,20 + pecho 1,80) + 10 %
     }
 
@@ -116,8 +119,38 @@ class TiendaTest extends TestCase
 
     public function test_la_portada_muestra_las_familias(): void
     {
-        $this->get('/es')->assertOk()->assertSeeInOrder(['Nuestras prendas', 'Camisetas', 'Polos', 'Sudaderas']);
-        $this->get('/en')->assertOk()->assertSeeInOrder(['Our garments', 'T-shirts', 'Polo shirts', 'Sweatshirts']);
+        $this->get('/es')->assertOk()->assertSeeInOrder(['Elige tu base', 'Camisetas', 'Desde 7,26 € con impresión', 'Polos', 'Sudaderas']);
+        $this->get('/en')->assertOk()->assertSeeInOrder(['Choose your base', 'T-shirts', 'From €7.26 printed', 'Polo shirts', 'Sweatshirts']);
+    }
+
+    public function test_la_portada_presenta_los_dos_caminos_con_datos_reales(): void
+    {
+        $this->seed(EjemplosPreciosSeeder::class);
+
+        $this->get('/es')->assertOk()
+            ->assertSeeInOrder(['Creamos marcas que comunican', 'Crear mi colección', 'Elegir un pack'])
+            ->assertSee('Desde 15 prendas') // mínimo del backend
+            ->assertSee('Calidad DTI Textil')
+            ->assertSee('Pack joven (ejemplo)')
+            ->assertSee('99,00 €') // 81,82 + 21 %
+            ->assertSee('Tu marca en 3 niveles')
+            ->assertSee("sessionStorage.setItem('nga.logo'", false); // el script del paso 1 llega a la página
+    }
+
+    public function test_sin_reglas_de_minimo_la_portada_no_inventa_uno(): void
+    {
+        $this->get('/es')->assertOk()->assertDontSee('Desde 15 prendas')->assertSee('Combina tallas y colores como quieras.');
+    }
+
+    public function test_el_paso_1_lleva_a_una_prenda_con_maqueta(): void
+    {
+        $this->get('/es')->assertDontSee('id="prueba-logo"', false); // sin maquetas, no se ofrece
+
+        $camiseta = $this->camiseta();
+        $foto = Foto::create(['prenda_id' => $camiseta->id, 'color_id' => $camiseta->variantes()->first()->color_id, 'tipo' => TipoFoto::Maqueta, 'cara' => Cara::Delantera, 'ruta' => 'catalogo/1/x.webp']);
+        FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $camiseta->zonas()->first()->id, 'x' => 3000, 'y' => 2600, 'ancho' => 4000, 'alto' => 4200]);
+
+        $this->get('/es')->assertSee('data-destino="'.url('/es/camisetas/camiseta-essential').'#tu-marca"', false);
     }
 
     public function test_el_listado_muestra_las_prendas_con_precio_con_iva(): void
@@ -189,7 +222,7 @@ class TiendaTest extends TestCase
         $negroEnVisor = collect($colores)->firstWhere('nombre', 'Negro');
         $this->assertStringEndsWith('catalogo/1/negro.webp', $negroEnVisor['caras']['delantera']['url']);
         $zonaFrontal = $camiseta->zonas()->where('clave', 'frontal')->value('zonas_impresion.id');
-        $this->assertSame(['id' => $zonaFrontal, 'nombre' => 'Frontal', 'ancho_mm' => 280, 'alto_mm' => 380, 'x' => 30, 'y' => 26, 'ancho' => 40, 'alto' => 42], $negroEnVisor['caras']['delantera']['zonas'][0]);
+        $this->assertSame(['precio' => '3,63 €', 'id' => $zonaFrontal, 'nombre' => 'Frontal', 'ancho_mm' => 280, 'alto_mm' => 380, 'x' => 30, 'y' => 26, 'ancho' => 40, 'alto' => 42], $negroEnVisor['caras']['delantera']['zonas'][0]);
         $this->assertNull($negroEnVisor['caras']['trasera']);
     }
 
@@ -201,7 +234,9 @@ class TiendaTest extends TestCase
 
     public function test_tu_marca_aparece_solo_si_hay_maquetas_con_zonas(): void
     {
-        $this->get('/es/camisetas/camiseta-essential')->assertDontSee('id="tu-marca"', false);
+        // Sin maquetas no hay configurador: se ve la ficha clásica.
+        $this->get('/es/camisetas/camiseta-essential')->assertDontSee('id="tu-marca"', false)
+            ->assertSee('<section class="info"', false)->assertDontSee('estudio activo pagina', false);
 
         $camiseta = $this->camiseta();
         $color = $camiseta->variantes()->first()->color_id;
@@ -211,7 +246,13 @@ class TiendaTest extends TestCase
         FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $camiseta->zonas()->first()->id, 'x' => 3000, 'y' => 2600, 'ancho' => 4000, 'alto' => 4200]);
         $this->get('/es/camisetas/camiseta-essential')
             ->assertSee('id="tu-marca"', false)
-            ->assertSee('id="coleccion"', false)
+            ->assertSee('id="estudio"', false)
+            ->assertSee('id="pieles"', false)
+            ->assertSee('class="estudio activo pagina"', false) // el configurador es la página
+            ->assertSee('data-salir="'.url('/es/camisetas').'"', false)
+            ->assertSee('id="hp-prenda"', false)
+            ->assertDontSee('<section class="info"', false)
+            ->assertSee('Arrástralo para colocarlo')
             ->assertSee('¿Tienes logo? Míralo puesto.')
             ->assertSee('no lo subimos ni lo guardamos');
         $this->get('/en/t-shirts/essential-t-shirt')->assertSee('Got a logo? See it on.');
@@ -316,7 +357,7 @@ class TiendaTest extends TestCase
             DB::purge('caida');
         }
 
-        $respuesta->assertOk()->assertSee('Tu colección, impresa como la imaginas.')->assertDontSee('id="nuestras-prendas"', false);
+        $respuesta->assertOk()->assertSee('Creamos marcas que comunican')->assertDontSee('id="prendas"', false)->assertDontSee('id="prueba-logo"', false);
     }
 
     public function test_la_tienda_sigue_fuera_del_indice_mientras_esta_en_construccion(): void

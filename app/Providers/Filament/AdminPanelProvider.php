@@ -30,7 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('NextGen Apparel')
+            ->brandName('Nextgenapparel')
             ->defaultAvatarProvider(AvatarIniciales::class)
             ->colors([
                 // Gris neutro para todo el backend: sobrio y coherente con el frontend.

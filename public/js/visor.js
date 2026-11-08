@@ -40,19 +40,48 @@
         color: 0,
         cara: 'delantera',
         zonas: false,
-        modo: 'logo',          // 'logo' | 'texto'
-        logo: null,            // canvas con el logo del cliente
-        texto: '',
-        fuente: 0,
-        tinta: 'auto',
-        zonaId: null,
+        disenos: {},           // un diseño por zona: { zonaId: {modo, logo, texto, fuente, tinta, logoPx, logoTipo, nombre} }
+        anadiendo: false,      // eligiendo la zona de un diseño nuevo
+        zonaId: null,          // zona activa: la del diseño que se edita
         zonaElegida: false,    // el cliente eligió zona: no se cambia sola
-        coleccion: false,
+        lupa: false,           // en el estudio, la lupa se activa a mano
         ajustes: {},           // por zona: { escala (0,2–1), cx, cy (0–1 del hueco libre) }
-        logoPx: null,          // píxeles reales del logo (sin márgenes transparentes)
-        logoTipo: null,        // 'transparente' | 'fondo' | 'fondo_blanco' | 'vectorial'
-        version: 0             // cambia con cada diseño nuevo (invalida la caché)
+        version: 0,            // cambia con cada diseño nuevo (invalida la caché)
+        nivel: 'diseno',       // diseno · cantidades · resumen (D142)
+        lineas: [],            // índices de los colores del pedido, en orden
+        cantidades: {}         // por color: { colorId: { tallaId: unidades } }
     };
+
+    // estado.modo, estado.logo, estado.texto… son los del diseño de la zona activa
+    // (o un borrador mientras aún no hay zona). Así cada zona lleva su propio diseño.
+    function nuevoDiseno() { return { modo: 'logo', logo: null, texto: '', fuente: 0, tinta: 'auto', logoPx: null, logoTipo: null, nombre: '' }; }
+    var borrador = nuevoDiseno();
+    function actual() {
+        if (estado.zonaId === null) return borrador;
+        if (!estado.disenos[estado.zonaId]) estado.disenos[estado.zonaId] = nuevoDiseno();
+        return estado.disenos[estado.zonaId];
+    }
+    ['modo', 'logo', 'texto', 'fuente', 'tinta', 'logoPx', 'logoTipo', 'nombre'].forEach(function (campo) {
+        Object.defineProperty(estado, campo, { get: function () { return actual()[campo]; }, set: function (v) { actual()[campo] = v; } });
+    });
+    function disenoValido(d) { return !!d && (d.modo === 'logo' ? !!d.logo : d.texto.trim() !== ''); }
+    function zonasConDiseno() {
+        return Object.keys(estado.disenos).map(Number).filter(function (id) { return disenoValido(estado.disenos[id]); });
+    }
+    /** Ejecuta fn como si la zona activa fuera zonaId (para pintar los diseños de otras zonas). */
+    function conDiseno(zonaId, fn) {
+        var antes = estado.zonaId;
+        estado.zonaId = zonaId;
+        try { return fn(); } finally { estado.zonaId = antes; }
+    }
+    /** Activa una zona. Si se estaba preparando un diseño sin zona, pasa a esa zona. */
+    function fijarZona(id) {
+        if (estado.zonaId === null && disenoValido(borrador) && !disenoValido(estado.disenos[id])) {
+            estado.disenos[id] = borrador;
+            borrador = nuevoDiseno();
+        }
+        estado.zonaId = id;
+    }
 
     var cacheFotos = {};
     var cacheCapas = {};
@@ -103,7 +132,7 @@
                 (datos ? datos.zonas : []).forEach(function (z) {
                     if (z.id && !vistas[z.id]) {
                         vistas[z.id] = true;
-                        lista.push({ id: z.id, nombre: z.nombre, cara: cara, area: z.ancho * z.alto });
+                        lista.push({ id: z.id, nombre: z.nombre, cara: cara, area: z.ancho * z.alto, precio: z.precio || '', rect: z });
                     }
                 });
             });
@@ -357,23 +386,25 @@
             });
         }
 
-        var zona = hayDiseno() ? zonaEn(color, cara) : null;
-        if (zona && opciones.movible) {
-            var guia = el('div', 'zona-guia');
-            guia.style.cssText = 'left:' + zona.x + '%;top:' + zona.y + '%;width:' + zona.ancho + '%;height:' + zona.alto + '%';
-            escena.appendChild(guia);
-        }
-        if (zona) {
-            capaImpresa(color, cara, zona).then(function (capa) {
-                var c = el('canvas', 'diseno' + (opciones.estampar && !sinMovimiento ? ' estampar' : '') + (opciones.movible ? ' movible' : ''));
+        datos.zonas.forEach(function (zona) {
+            if (!disenoValido(estado.disenos[zona.id])) return;
+            var activa = zona.id === estado.zonaId;
+            if (activa && opciones.movible) {
+                var guia = el('div', 'zona-guia');
+                guia.style.cssText = 'left:' + zona.x + '%;top:' + zona.y + '%;width:' + zona.ancho + '%;height:' + zona.alto + '%';
+                escena.appendChild(guia);
+            }
+            conDiseno(zona.id, function () { return capaImpresa(color, cara, zona); }).then(function (capa) {
+                var c = el('canvas', 'diseno' + (activa && opciones.estampar && !sinMovimiento ? ' estampar' : '') + (opciones.movible ? ' movible' : '') + (activa ? ' activo' : ''));
                 if (opciones.movible) { c.dataset.zona = zona.id; c.dataset.color = indiceColor; }
                 c.width = capa.width; c.height = capa.height;
                 c.getContext('2d').drawImage(capa, 0, 0);
                 c.setAttribute('aria-hidden', 'true');
                 c.style.cssText = 'left:' + zona.x + '%;top:' + zona.y + '%;width:' + zona.ancho + '%;height:' + zona.alto + '%';
                 escena.appendChild(c);
+                if (activa && opciones.movible) ocultarCarga();
             });
-        }
+        });
 
         return escena;
     }
@@ -414,6 +445,7 @@
         }
 
         document.getElementById('nombre-color').textContent = color.nombre;
+        document.querySelectorAll('.piel').forEach(function (b) { b.setAttribute('aria-pressed', String(Number(b.dataset.color) === estado.color)); });
         document.querySelectorAll('.muestra').forEach(function (b) { b.setAttribute('aria-checked', String(Number(b.dataset.color) === estado.color)); });
         document.querySelectorAll('[data-cara]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cara === estado.cara)); });
         document.getElementById('ver-zonas').setAttribute('aria-pressed', String(estado.zonas));
@@ -452,13 +484,16 @@
 
     var lupa = document.getElementById('lupa');
     var arrastre = null;
+    var estudio = document.getElementById('estudio');
+    var enEstudio = function () { return !!estudio && estudio.classList.contains('activo'); };
+    var lupaActiva = function () { return !enEstudio() || estado.lupa; };
     var lupaSucia = true;
     var AUMENTO = 2.4;
 
     if (lupa && conRaton) {
         lienzo.addEventListener('pointermove', function (e) {
             if (e.pointerType !== 'mouse' || !lienzo.querySelector('img')) return;
-            if (arrastre || e.target.classList.contains('movible')) { lupa.hidden = true; return; }
+            if (arrastre || !lupaActiva()) { lupa.hidden = true; return; }
             var r = lienzo.getBoundingClientRect();
             var v = visor.getBoundingClientRect();
             if (lupaSucia) {
@@ -489,25 +524,35 @@
     var estadoMarca = document.getElementById('tu-marca-estado');
     var errorMarca = document.getElementById('tu-marca-error');
     var acciones = document.getElementById('tu-marca-acciones');
-    var botonColeccion = document.getElementById('ver-coleccion');
-    var coleccion = document.getElementById('coleccion');
 
     // Zonas para elegir
     var grupoZonas = document.getElementById('zonas-diseno');
     zonas.forEach(function (z) {
-        var b = el('button', 'boton-pildora borde', z.nombre);
+        var b = el('button', 'zona-opcion', z.nombre);
         b.type = 'button';
         b.setAttribute('role', 'radio');
         b.setAttribute('aria-checked', 'false');
         b.dataset.zona = z.id;
         b.addEventListener('click', function () {
+            if (b.disabled) return;
             apagarMarcas();
-            estado.zonaId = z.id;
+            var ocupada = disenoValido(estado.disenos[z.id]);
+            if (!estado.anadiendo && !ocupada && hayDiseno() && estado.zonaId !== null) {
+                // Mover el diseño actual a esta zona.
+                estado.disenos[z.id] = estado.disenos[estado.zonaId];
+                delete estado.disenos[estado.zonaId];
+                delete estado.ajustes[z.id];
+                estado.zonaId = z.id;
+                estado.version++;
+            } else {
+                fijarZona(z.id); // editar el de esta zona o empezar uno nuevo aquí
+            }
+            estado.anadiendo = false;
             estado.zonaElegida = true;
-            marcarZona();
+            sincronizar();
             if (z.cara !== estado.cara) { estado.cara = z.cara; estampar = true; pintar('giro'); }
             else { estampar = true; pintar(); }
-            avisarListo();
+            if (!hayDiseno()) elegirHerramienta('diseno');
             refrescarColeccion();
         });
         grupoZonas.appendChild(b);
@@ -524,10 +569,114 @@
         esperaGuia = setTimeout(function () { if (!arrastre) lienzo.classList.remove('ajustando'); }, 1200);
     }
 
+    /** ¿Se pisan dos zonas en la prenda? (misma cara y rectángulos que se cruzan) */
+    function solapan(a, b) {
+        if (a.id === b.id || a.cara !== b.cara) return false;
+        var r = a.rect, q = b.rect;
+        return r.x < q.x + q.ancho && q.x < r.x + r.ancho && r.y < q.y + q.alto && q.y < r.y + r.alto;
+    }
+
     function marcarZona() {
+        var usadas = zonasConDiseno();
         grupoZonas.querySelectorAll('[data-zona]').forEach(function (b) {
-            b.setAttribute('aria-checked', String(Number(b.dataset.zona) === estado.zonaId));
+            var z = zonas.filter(function (o) { return o.id === Number(b.dataset.zona); })[0];
+            // Bloqueada si se pisa con otra zona que ya tiene diseño (salvo la que se está moviendo).
+            var choca = zonas.filter(function (o) {
+                return usadas.indexOf(o.id) !== -1 && (estado.anadiendo || o.id !== estado.zonaId) && solapan(z, o);
+            })[0];
+            var activa = z.id === estado.zonaId && !estado.anadiendo && hayDiseno();
+            var conDisenoAqui = usadas.indexOf(z.id) !== -1;
+            b.disabled = !!choca;
+            b.setAttribute('aria-checked', String(activa));
+            b.dataset.estado = choca ? 'bloqueada' : (activa ? 'editando' : (conDisenoAqui ? 'con-diseno' : 'libre'));
+
+            // Miniatura de la prenda (en el color elegido) con la zona marcada.
+            var color = colores[estado.color].caras[z.cara] ? colores[estado.color] : colores.filter(function (c) { return c.caras[z.cara]; })[0];
+            var mini = el('span', 'zona-mini');
+            if (color) {
+                var foto = el('img'); foto.src = color.caras[z.cara].url; foto.alt = ''; foto.loading = 'lazy';
+                mini.appendChild(foto);
+            }
+            var marca = el('span', 'zona-mini-marca');
+            marca.style.cssText = 'left:' + z.rect.x + '%;top:' + z.rect.y + '%;width:' + z.rect.ancho + '%;height:' + z.rect.alto + '%';
+            mini.appendChild(marca);
+
+            var info = el('span', 'zona-info');
+            info.appendChild(el('strong', '', z.nombre));
+            var medida = z.rect.ancho_mm ? (z.rect.ancho_mm / 10) + ' × ' + (z.rect.alto_mm / 10) + ' cm' : '';
+            info.appendChild(el('small', '', [medida, z.precio ? '+' + z.precio + ' ' + textos.por_prenda : ''].filter(Boolean).join(' · ')));
+            info.appendChild(el('em', 'zona-estado', choca ? texto('solapa_corto', { otra: choca.nombre })
+                : (activa ? textos.zona_editando : (conDisenoAqui ? textos.zona_con_diseno : textos.zona_libre))));
+            b.setAttribute('aria-label', z.nombre + '. ' + info.lastChild.textContent);
+            b.replaceChildren(mini, info);
         });
+        var aviso = document.getElementById('aviso-zona');
+        if (aviso) aviso.textContent = estado.anadiendo ? textos.elige_zona_nuevo : '';
+    }
+
+    /** Tarjeta de decisión (D142): tus diseños con lo que suma cada uno, y «¿otro o seguimos?». */
+    function pintarCapas() {
+        var caja = document.getElementById('capas');
+        if (!caja) return;
+        var usadas = zonasConDiseno();
+        caja.replaceChildren();
+        caja.classList.toggle('decision', usadas.length > 0);
+        if (usadas.length === 0) return;
+        var conDisenos = zonas.filter(function (z) { return usadas.indexOf(z.id) !== -1; });
+        caja.appendChild(el('p', 'capas-titulo', usadas.length === 1
+            ? texto('decision_uno', { zona: conDisenos[0].nombre }) : texto('decision_varios', { n: usadas.length })));
+        conDisenos.forEach(function (z) {
+            var d = estado.disenos[z.id];
+            var b = el('button', 'capa-diseno');
+            b.type = 'button';
+            b.setAttribute('aria-pressed', String(z.id === estado.zonaId));
+            b.appendChild(el('strong', '', z.nombre));
+            b.appendChild(el('span', '', d.modo === 'logo' ? (d.nombre || textos.pestana_logo) : '«' + d.texto.trim() + '»'));
+            if (z.precio) b.appendChild(el('small', '', '+' + z.precio + textos.por_unidad));
+            b.addEventListener('click', function () {
+                fijarZona(z.id);
+                estado.anadiendo = false;
+                sincronizar();
+                if (z.cara !== estado.cara) { estado.cara = z.cara; pintar('giro'); } else { pintar(); }
+            });
+            caja.appendChild(b);
+        });
+        var libres = zonas.filter(function (z) { return usadas.indexOf(z.id) === -1 && !zonas.some(function (o) { return usadas.indexOf(o.id) !== -1 && solapan(z, o); }); });
+        var botones = el('div', 'decision-botones');
+        if (libres.length) {
+            caja.appendChild(el('p', 'decision-pregunta', textos.decision_pregunta));
+            var mas = el('button', 'boton-pildora borde anadir', '+ ' + textos.anadir_diseno);
+            mas.type = 'button';
+            mas.addEventListener('click', function () {
+                estado.anadiendo = true;
+                marcarZona();
+                elegirHerramienta('zona');
+            });
+            botones.appendChild(mas);
+        }
+        var seguir = el('button', 'boton-siguiente', textos.siguiente_cantidades + ' →');
+        seguir.type = 'button';
+        seguir.addEventListener('click', function () { irANivel('cantidades'); });
+        botones.appendChild(seguir);
+        caja.appendChild(botones);
+    }
+
+    /** Lleva los controles del panel al diseño de la zona activa. */
+    function sincronizar() {
+        pestanas.forEach(function (o) {
+            var activa = o.dataset.modo === estado.modo;
+            o.setAttribute('aria-selected', String(activa));
+            o.tabIndex = activa ? 0 : -1;
+            document.getElementById(o.getAttribute('aria-controls')).hidden = !activa;
+        });
+        campoTexto.value = estado.texto;
+        document.querySelectorAll('#fuentes [role="radio"]').forEach(function (b) { b.setAttribute('aria-checked', String(Number(b.dataset.valor) === estado.fuente)); });
+        document.querySelectorAll('#tintas [role="radio"]').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.valor === estado.tinta)); });
+        soltar.classList.toggle('con-logo', !!estado.logo);
+        document.getElementById('nombre-logo').textContent = estado.logo ? estado.nombre : '';
+        marcarZona();
+        pintarCapas();
+        avisarListo();
     }
 
     /** Zona de partida: el pecho para un logo; la más grande de delante para un texto. */
@@ -538,7 +687,7 @@
         var elegida = candidatas.reduce(function (a, b) {
             return estado.modo === 'logo' ? (b.area < a.area ? b : a) : (b.area > a.area ? b : a);
         });
-        estado.zonaId = elegida.id;
+        fijarZona(elegida.id);
         marcarZona();
         return elegida;
     }
@@ -554,22 +703,35 @@
         estampar = true;
         if (cara !== estado.cara) { estado.cara = cara; pintar('giro'); } else { pintar(); }
         acciones.hidden = !hayDiseno();
+        marcarZona();
+        pintarCapas();
         avisarListo();
+        if (hayDiseno()) {
+            abrirEstudio();
+            setTimeout(mostrarPista, 700);
+        }
         refrescarColeccion();
     }
 
     function avisarListo() {
         actualizarAjustador();
+        pedirPrecio();
+        // Botones de borrar: visibles con algún diseño; «Quitar» nombra su zona.
+        acciones.hidden = zonasConDiseno().length === 0;
+        var zonaActiva = zonas.filter(function (o) { return o.id === estado.zonaId; })[0];
+        document.getElementById('quitar-texto').textContent = zonaActiva && hayDiseno() ? texto('quitar_diseno_zona', { zona: zonaActiva.nombre }) : textos.quitar_diseno;
+        document.getElementById('quitar-diseno').hidden = !hayDiseno();
         if (!hayDiseno()) { estadoMarca.textContent = ''; return; }
         var color = colores[estado.color];
+        var n = zonasConDiseno().length;
         estadoMarca.replaceChildren(
             el('strong', '', texto('listo', { prenda: textos.prenda, color: color.nombre })),
-            document.createTextNode(' ' + textos.listo_2)
+            document.createTextNode(' ' + (n > 1 ? texto('listo_varios', { n: n }) : textos.listo_2))
         );
     }
 
     // Pestañas: mi logo / escribir mi marca
-    var pestanas = panel.querySelectorAll('[role="tab"]');
+    var pestanas = panel.querySelectorAll('.pestanas [role="tab"]');
     pestanas.forEach(function (p) {
         p.addEventListener('click', function () {
             estado.modo = p.dataset.modo;
@@ -593,11 +755,38 @@
         errorMarca.hidden = !mensaje;
     }
 
-    function leerLogo(archivo) {
+    /* Animación de carga: «Estampando tu diseño…» con un cabezal de luz que barre la
+       prenda. Dura al menos MINIMO_CARGA para que no parpadee con imágenes pequeñas. */
+    var MINIMO_CARGA = 650;
+    var cargando = document.getElementById('cargando');
+    var inicioCarga = 0;
+    var esperaCarga = null;
+    function mostrarCarga() {
+        if (!cargando) return;
+        inicioCarga = Date.now();
+        cargando.hidden = false;
+        cargando.classList.remove('saliendo');
+        clearTimeout(esperaCarga);
+        esperaCarga = setTimeout(ocultarCarga, 8000); // por si algo falla, nunca se queda colgada
+    }
+    function ocultarCarga() {
+        if (!cargando || cargando.hidden) return;
+        var falta = Math.max(0, MINIMO_CARGA - (Date.now() - inicioCarga));
+        clearTimeout(esperaCarga);
+        setTimeout(function () {
+            cargando.classList.add('saliendo');
+            setTimeout(function () { cargando.hidden = true; cargando.classList.remove('saliendo'); }, 380);
+        }, falta);
+    }
+
+    /** @param original  datos del archivo original si llega reducido desde la portada */
+    function leerLogo(archivo, original) {
         mostrarError('');
         if (!archivo) return;
         if (!/^image\/(png|jpeg|webp|svg\+xml|gif)$/.test(archivo.type)) { mostrarError(textos.error_archivo); return; }
         if (archivo.size > PESO_MAXIMO) { mostrarError(textos.error_grande); return; }
+        abrirEstudio();
+        mostrarCarga();
 
         var url = URL.createObjectURL(archivo);
         var img = new Image();
@@ -610,16 +799,20 @@
             c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
             URL.revokeObjectURL(url);
 
-            estado.logoTipo = archivo.type === 'image/svg+xml' ? 'vectorial' : tipoDeFondo(c);
+            var esVectorial = archivo.type === 'image/svg+xml' || (original && original.tipo === 'image/svg+xml');
+            estado.logoTipo = esVectorial ? 'vectorial' : tipoDeFondo(c);
             estado.logo = recortarMargenes(c);
-            estado.logoPx = { w: Math.round(estado.logo.width / escala), h: Math.round(estado.logo.height / escala) };
-            estado.ajustes = {};
+            // Si llega reducido desde la portada, la calidad se mide con los píxeles del original.
+            var factor = original && original.ancho ? original.ancho / w : 1;
+            estado.logoPx = { w: Math.round(estado.logo.width / escala * factor), h: Math.round(estado.logo.height / escala * factor) };
+            estado.nombre = original ? original.nombre : archivo.name;
+            if (estado.zonaId !== null) delete estado.ajustes[estado.zonaId];
             estado.version++;
             if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
-            soltar.classList.add('con-logo');
-            document.getElementById('nombre-logo').textContent = archivo.name;
+            elegirHerramienta('ajustar'); // el logo ya está: toca colocarlo
+            sincronizar();
         };
-        img.onerror = function () { URL.revokeObjectURL(url); mostrarError(textos.error_archivo); };
+        img.onerror = function () { URL.revokeObjectURL(url); ocultarCarga(); mostrarError(textos.error_archivo); };
         img.src = url;
     }
 
@@ -673,22 +866,44 @@
 
     // Quitar el diseño
     document.getElementById('quitar-diseno').addEventListener('click', function () {
-        estado.logo = null;
-        estado.logoPx = null;
-        estado.logoTipo = null;
-        estado.ajustes = {};
-        estado.texto = '';
-        campoTexto.value = '';
-        estado.zonaElegida = false;
+        if (estado.zonaId !== null) { delete estado.disenos[estado.zonaId]; delete estado.ajustes[estado.zonaId]; } else { borrador = nuevoDiseno(); }
         estado.version++;
-        soltar.classList.remove('con-logo');
-        acciones.hidden = true;
-        estado.coleccion = false;
-        coleccion.hidden = true;
-        botonColeccion.setAttribute('aria-expanded', 'false');
-        botonColeccion.textContent = textos.ver_coleccion;
-        avisarListo();
-        pintar();
+        var resto = zonasConDiseno();
+        if (resto.length) { fijarZona(resto[0]); } else { estado.zonaElegida = false; }
+        sincronizar();
+        var z = zonas.filter(function (o) { return o.id === estado.zonaId; })[0];
+        if (z && z.cara !== estado.cara) { estado.cara = z.cara; pintar('giro'); } else { pintar(); }
+        refrescarColeccion();
+    });
+
+    // Empezar de nuevo: borra todos los diseños (pide un segundo toque para confirmar).
+    var empezar = document.getElementById('empezar-de-nuevo');
+    var esperaConfirmar = null;
+    empezar.addEventListener('click', function () {
+        if (!empezar.classList.contains('confirmar')) {
+            empezar.classList.add('confirmar');
+            document.getElementById('empezar-texto').textContent = textos.confirmar_empezar;
+            clearTimeout(esperaConfirmar);
+            esperaConfirmar = setTimeout(function () {
+                empezar.classList.remove('confirmar');
+                document.getElementById('empezar-texto').textContent = textos.empezar_de_nuevo;
+            }, 3500);
+            return;
+        }
+        clearTimeout(esperaConfirmar);
+        empezar.classList.remove('confirmar');
+        document.getElementById('empezar-texto').textContent = textos.empezar_de_nuevo;
+        estado.disenos = {};
+        estado.ajustes = {};
+        borrador = nuevoDiseno();
+        estado.zonaId = null;
+        estado.zonaElegida = false;
+        estado.anadiendo = false;
+        estado.version++;
+        sincronizar();
+        elegirHerramienta('diseno');
+        if (estado.cara !== 'delantera') { estado.cara = 'delantera'; pintar('giro'); } else { pintar(); }
+        refrescarColeccion();
     });
 
     /* ---------- Ajustador y calidad ---------- */
@@ -723,6 +938,15 @@
     function actualizarAjustador() {
         var zona = hayDiseno() ? zonaActual() : null;
         ajustador.hidden = !zona;
+        var vacio = document.getElementById('ajustador-vacio');
+        if (vacio) vacio.hidden = !!zona;
+        if (!hayDiseno()) {
+            bloqueCalidad.dataset.nivel = '';
+            document.getElementById('calidad-etiqueta').textContent = textos.calidad_sin_diseno;
+            ['calidad-ppp', 'calidad-mensaje', 'calidad-consejo', 'calidad-fondo'].forEach(function (id) { document.getElementById(id).textContent = ''; });
+            document.getElementById('calidad-relleno').style.width = '0';
+        }
+        mostrarMejoraIa(null);
         if (!zona) return;
 
         var color = colores[estado.color];
@@ -743,12 +967,14 @@
             bloqueCalidad.dataset.nivel = 'correcta';
             etiqueta.textContent = t.nivel_correcta;
             mensaje.textContent = estado.modo === 'texto' ? t.texto : t.vectorial;
+            document.getElementById('calidad-relleno').style.width = '100%';
             if (estado.logoTipo === 'vectorial' && estado.modo === 'logo') fondo.textContent = t.formato_pedido;
             return;
         }
 
         var valor = Math.min(ppp(estado.logoPx.w, anchoMm), ppp(estado.logoPx.h, altoMm));
         var n = nivel(valor);
+        document.getElementById('calidad-relleno').style.width = Math.min(100, Math.round(valor / calidad.umbrales.correcto * 100)) + '%';
         bloqueCalidad.dataset.nivel = n;
         etiqueta.textContent = t['nivel_' + n];
         detalle.textContent = t.ppp.replace(':ppp', valor);
@@ -760,8 +986,42 @@
         } else {
             consejo.textContent = t.consejo_mejorar.replace(':px', Math.ceil(anchoMm / 25.4 * calidad.umbrales.correcto));
         }
+        mostrarMejoraIa(n, cm(anchoMm) + ' × ' + cm(altoMm) + ' cm');
         if (estado.logoTipo === 'fondo') fondo.textContent = t.fondo;
         if (estado.logoTipo === 'fondo_blanco') fondo.textContent = t.fondo_blanco;
+    }
+
+    /* Mejorar el diseño con IA (D143): si la calidad no llega, las instrucciones del
+       backend con su tamaño de impresión, para copiarlas en su propia herramienta. */
+    var mejoraIa = document.getElementById('mejora-ia');
+    function mostrarMejoraIa(n, medida) {
+        if (!mejoraIa) return;
+        var ia = calidad.ia || { niveles: [] };
+        var ofrecer = !!n && ia.niveles.indexOf(n) !== -1;
+        mejoraIa.hidden = !ofrecer;
+        if (ofrecer) document.getElementById('texto-ia').value = ia.texto.split(':medida').join(medida);
+    }
+    if (mejoraIa) {
+        var abrirIa = document.getElementById('abrir-ia');
+        abrirIa.addEventListener('click', function () {
+            var abierto = abrirIa.getAttribute('aria-expanded') === 'true';
+            abrirIa.setAttribute('aria-expanded', String(!abierto));
+            document.getElementById('panel-ia').hidden = abierto;
+        });
+        var copiarIa = document.getElementById('copiar-ia');
+        copiarIa.addEventListener('click', function () {
+            var campo = document.getElementById('texto-ia');
+            var hecho = function () {
+                copiarIa.textContent = textos.ia_copiado;
+                setTimeout(function () { copiarIa.textContent = textos.ia_copiar; }, 2200);
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(campo.value).then(hecho, function () { campo.select(); });
+            } else {
+                campo.select();
+                try { if (document.execCommand('copy')) hecho(); } catch (e) {}
+            }
+        });
     }
 
     var esperaTamano = null;
@@ -789,9 +1049,16 @@
     // Arrastrar el diseño sobre la prenda (ratón o dedo), sin salir de su zona.
     lienzo.addEventListener('pointerdown', function (e) {
         var c = e.target;
-        if (!c.classList || !c.classList.contains('movible')) return;
+        if (!c.classList || !c.classList.contains('movible') || !enEstudio() || estado.lupa) return;
         var zona = zonaActual();
-        if (!zona || String(zona.id) !== c.dataset.zona) return;
+        if (!zona || String(zona.id) !== c.dataset.zona) {
+            // Pulsar otro de tus diseños sobre la prenda lo elige para editarlo.
+            fijarZona(Number(c.dataset.zona));
+            estado.anadiendo = false;
+            sincronizar();
+            pintar();
+            return;
+        }
         e.preventDefault();
         c.setPointerCapture(e.pointerId);
         var g = geometria(disenoPara(colores[estado.color]), zona);
@@ -821,6 +1088,18 @@
     lienzo.addEventListener('pointerup', soltarArrastre);
     lienzo.addEventListener('pointercancel', soltarArrastre);
 
+    /* ---------- Logo traído desde la portada (paso 1) ---------- */
+
+    try {
+        var guardado = JSON.parse(sessionStorage.getItem('nga.logo') || 'null');
+        if (guardado && guardado.datos) {
+            sessionStorage.removeItem('nga.logo');
+            fetch(guardado.datos).then(function (r) { return r.blob(); }).then(function (b) {
+                leerLogo(new File([b], guardado.nombre || 'logo.png', { type: 'image/png' }), guardado);
+            });
+        }
+    } catch (e) { /* sin sessionStorage: se sube desde la ficha */ }
+
     /* ---------- Tu colección ---------- */
 
     function caraDelDiseno() {
@@ -828,44 +1107,461 @@
         return z ? z.cara : 'delantera';
     }
 
+    /** «Skins»: la prenda en cada color, con el diseño puesto. Pulsar una elige el color. */
     function refrescarColeccion() {
-        if (!estado.coleccion) return;
-        var rejilla = document.getElementById('coleccion-rejilla');
-        var cara = caraDelDiseno();
-        rejilla.replaceChildren();
+        var lista = document.getElementById('pieles-lista');
+        if (!lista || !enEstudio()) return;
+        var cara = hayDiseno() ? caraDelDiseno() : estado.cara;
+        lista.replaceChildren();
         colores.forEach(function (color, i) {
-            var tarjeta = el('button', 'coleccion-tarjeta');
-            tarjeta.type = 'button';
-            tarjeta.setAttribute('aria-label', texto('ver_en_grande', { color: color.nombre }));
-            if (!sinMovimiento) tarjeta.style.animationDelay = (i * 90) + 'ms';
-            var marco = el('div', 'coleccion-foto');
-            var escena = el('div', 'visor-lienzo');
+            var piel = el('button', 'piel');
+            piel.type = 'button';
+            piel.dataset.color = i;
+            piel.setAttribute('aria-pressed', String(i === estado.color));
+            piel.setAttribute('aria-label', color.nombre);
+            var marco = el('span', 'marco');
+            var escena = el('span', 'visor-lienzo');
             escena.appendChild(construirEscena(i, color.caras[cara] ? cara : 'delantera', { decorativa: true }));
             marco.appendChild(escena);
-            tarjeta.appendChild(marco);
-            tarjeta.appendChild(el('span', 'coleccion-nombre', color.nombre));
-            tarjeta.addEventListener('click', function () {
+            piel.appendChild(marco);
+            piel.appendChild(el('span', '', color.nombre));
+            piel.addEventListener('click', function () {
                 estado.color = i;
-                estado.cara = color.caras[cara] ? cara : 'delantera';
+                if (hayDiseno() && color.caras[cara]) estado.cara = cara;
                 pintar('fundido');
                 avisarListo();
-                visor.scrollIntoView({ behavior: sinMovimiento ? 'auto' : 'smooth', block: 'center' });
             });
-            rejilla.appendChild(tarjeta);
+            lista.appendChild(piel);
         });
-        document.getElementById('coleccion-texto').textContent = texto('coleccion_texto', { n: colores.length, prenda: textos.prenda });
+        document.getElementById('coleccion-texto').textContent = hayDiseno()
+            ? texto('coleccion_texto', { n: colores.length, prenda: textos.prenda }) : '';
     }
 
-    botonColeccion.addEventListener('click', function () {
-        estado.coleccion = !estado.coleccion;
-        coleccion.hidden = !estado.coleccion;
-        botonColeccion.setAttribute('aria-expanded', String(estado.coleccion));
-        botonColeccion.textContent = estado.coleccion ? textos.ocultar_coleccion : textos.ver_coleccion;
-        if (estado.coleccion) {
-            refrescarColeccion();
-            coleccion.scrollIntoView({ behavior: sinMovimiento ? 'auto' : 'smooth', block: 'start' });
-        }
+    /* ---------- Estudio: entrar, salir y mandos ---------- */
+
+    var cerrarBoton = document.getElementById('cerrar-estudio');
+    var botonLupa = document.getElementById('boton-lupa');
+    var desdeHistorial = false;
+
+    // En la página de producto, el configurador ES la página: siempre abierto.
+    var esPagina = !!estudio && estudio.classList.contains('pagina');
+
+    function abrirEstudio() {
+        if (!estudio || enEstudio()) return;
+        estudio.classList.add('activo');
+        document.body.classList.add('estudio-abierto');
+        try { history.pushState({ estudio: true }, ''); } catch (e) {}
+        lupaSucia = true;
+        pintar();
+        refrescarColeccion();
+        cerrarBoton.focus({ preventScroll: true });
+    }
+
+    function cerrarEstudio() {
+        if (esPagina) { window.location.href = estudio.dataset.salir; return; }
+        if (!enEstudio()) return;
+        estudio.classList.remove('activo', 'con-lupa');
+        document.body.classList.remove('estudio-abierto');
+        estado.lupa = false;
+        botonLupa.setAttribute('aria-pressed', 'false');
+        lupa.hidden = true;
+        lupaSucia = true;
+        pintar();
+        if (!desdeHistorial) { try { if (history.state && history.state.estudio) history.back(); } catch (e) {} }
+        desdeHistorial = false;
+        var abrir = document.querySelector('[data-abrir-estudio]');
+        if (abrir) abrir.focus({ preventScroll: true });
+    }
+
+    document.querySelectorAll('[data-abrir-estudio]').forEach(function (b) { b.addEventListener('click', abrirEstudio); });
+    cerrarBoton.addEventListener('click', cerrarEstudio);
+    window.addEventListener('popstate', function () { if (enEstudio()) { desdeHistorial = true; cerrarEstudio(); } });
+    document.querySelectorAll('[data-girar]').forEach(function (b) {
+        b.addEventListener('click', function () { cambiarCara(estado.cara === 'delantera' ? 'trasera' : 'delantera'); });
     });
+    function alternarLupa() {
+        estado.lupa = !estado.lupa;
+        botonLupa.setAttribute('aria-pressed', String(estado.lupa));
+        estudio.classList.toggle('con-lupa', estado.lupa);
+        if (!estado.lupa) lupa.hidden = true;
+    }
+    botonLupa.addEventListener('click', alternarLupa);
+
+    // Herramientas: Diseño · Zona · Ajustar
+    var herramientas = panel.querySelectorAll('.herramientas [role="tab"]');
+    function elegirHerramienta(nombre) {
+        herramientas.forEach(function (h) {
+            var activa = h.dataset.herramienta === nombre;
+            h.setAttribute('aria-selected', String(activa));
+            h.tabIndex = activa ? 0 : -1;
+            document.getElementById(h.getAttribute('aria-controls')).hidden = !activa;
+        });
+    }
+    herramientas.forEach(function (h) { h.addEventListener('click', function () { elegirHerramienta(h.dataset.herramienta); }); });
+
+    // Pista animada la primera vez que el diseño cae sobre la prenda.
+    var pistaMostrada = false;
+    function mostrarPista() {
+        var pista = document.getElementById('pista');
+        if (pistaMostrada || !pista || !enEstudio()) return;
+        pistaMostrada = true;
+        pista.classList.remove('visible');
+        void pista.offsetWidth;
+        pista.classList.add('visible');
+    }
+
+    // Mandos de teclado, como en una consola (solo dentro del estudio y fuera de los campos de texto).
+    document.addEventListener('keydown', function (e) {
+        if (!enEstudio()) return;
+        if (e.key === 'Escape') { if (!esPagina) cerrarEstudio(); return; }
+        var etiqueta = (e.target.tagName || '').toLowerCase();
+        if (etiqueta === 'input' || etiqueta === 'textarea' || e.ctrlKey || e.metaKey || e.altKey) return;
+        var zona = hayDiseno() ? zonaActual() : null;
+        var aj = zona ? ajusteDe(zona.id) : null;
+        var paso = e.shiftKey ? 0.1 : 0.025;
+        var tecla = e.key.toLowerCase();
+        var manejado = true;
+        if (aj && e.key === 'ArrowLeft') aj.cx = Math.max(0, aj.cx - paso);
+        else if (aj && e.key === 'ArrowRight') aj.cx = Math.min(1, aj.cx + paso);
+        else if (aj && e.key === 'ArrowUp') aj.cy = Math.max(0, aj.cy - paso);
+        else if (aj && e.key === 'ArrowDown') aj.cy = Math.min(1, aj.cy + paso);
+        else if (aj && (e.key === '+' || e.key === '=')) aj.escala = Math.min(1, Math.round((aj.escala + 0.05) * 100) / 100);
+        else if (aj && (e.key === '-' || e.key === '_')) aj.escala = Math.max(0.2, Math.round((aj.escala - 0.05) * 100) / 100);
+        else if (tecla === 'f') { cambiarCara(estado.cara === 'delantera' ? 'trasera' : 'delantera'); return e.preventDefault(); }
+        else if (tecla === 'c') { estado.color = (estado.color + 1) % colores.length; pintar('fundido'); avisarListo(); return e.preventDefault(); }
+        else if (tecla === 'l') { alternarLupa(); return e.preventDefault(); }
+        else manejado = false;
+        if (!manejado) return;
+        e.preventDefault();
+        mostrarGuia();
+        pintar();
+        actualizarAjustador();
+        clearTimeout(esperaTeclas);
+        esperaTeclas = setTimeout(refrescarColeccion, 250);
+    });
+    var esperaTeclas = null;
+
+
+    /* ---------- Niveles: 1 Diseño · 2 Tallas y colores · 3 Resumen (D142) ----------
+       El precio SIEMPRE lo calcula el servidor (motor de precios); aquí solo se muestra. */
+
+    var urlPrecio = visor.dataset.precio;
+    var botonesNivel = document.querySelectorAll('#niveles [data-nivel]');
+    var precioBarra = {
+        etiqueta: document.getElementById('precio-etiqueta'),
+        importe: document.getElementById('precio-importe'),
+        detalle: document.getElementById('precio-detalle')
+    };
+    var precioInicial = precioBarra.importe ? {
+        etiqueta: precioBarra.etiqueta.textContent, importe: precioBarra.importe.textContent, detalle: precioBarra.detalle.textContent
+    } : null;
+    var pie = document.getElementById('estudio-pie');
+    var pieSiguiente = document.getElementById('pie-siguiente');
+    var precio = null;          // última respuesta del servidor
+    var clavePrecio = '';
+    var esperaPrecio = null;
+    var peticion = null;
+
+    function textoUds(n) { return texto(n === 1 ? 'ud' : 'uds', { n: n }); }
+    function textoDisenos(n) { return n === 1 ? textos.un_diseno : texto('n_disenos', { n: n }); }
+    function unidadesDe(colorId) {
+        var c = estado.cantidades[colorId] || {};
+        return Object.keys(c).reduce(function (s, t) { return s + c[t]; }, 0);
+    }
+
+    function consultaPrecio() {
+        var q = new URLSearchParams();
+        q.append('color', colores[estado.color].id);
+        zonasConDiseno().forEach(function (id) { q.append('zonas[]', id); });
+        estado.lineas.forEach(function (i) {
+            var id = colores[i].id;
+            var c = estado.cantidades[id] || {};
+            Object.keys(c).forEach(function (t) { if (c[t] > 0) q.append('cantidades[' + id + '][' + t + ']', c[t]); });
+        });
+        return q.toString();
+    }
+
+    function pedirPrecio() {
+        if (!urlPrecio || !colores.length) return;
+        if (zonasConDiseno().length === 0 && estado.nivel !== 'diseno') irANivel('diseno');
+        var clave = consultaPrecio();
+        if (clave === clavePrecio) return;
+        clearTimeout(esperaPrecio);
+        esperaPrecio = setTimeout(function () {
+            clavePrecio = clave;
+            if (peticion) peticion.abort();
+            peticion = window.AbortController ? new AbortController() : null;
+            if (estudio) estudio.classList.add('calculando');
+            fetch(urlPrecio + '?' + clave, { headers: { Accept: 'application/json' }, signal: peticion ? peticion.signal : undefined })
+                .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(function (datos) { precio = datos; pintarPrecio(); })
+                .catch(function (e) { if (e.name !== 'AbortError') clavePrecio = ''; })
+                .finally(function () { if (estudio) estudio.classList.remove('calculando'); });
+        }, 160);
+    }
+
+    /** Arriba (y en el pie del móvil): «Desde», «Tu prenda» o el total, según lo configurado. */
+    function resumenPrecio() {
+        var n = zonasConDiseno().length;
+        if (!n || !precio || precio.disenos !== n || (precio.por_unidad === null && precio.total === null)) return null;
+        if (precio.unidades > 0 && precio.total) {
+            return { etiqueta: textos.total, importe: precio.total, detalle: textoUds(precio.unidades) + ' · ' + precio.por_unidad + textos.por_unidad + ' · ' + textos.iva_incluido };
+        }
+        if (precio.por_unidad === null) return null;
+        return { etiqueta: precio.varia ? textos.tu_prenda_desde : textos.tu_prenda, importe: precio.por_unidad, detalle: textos.por_unidad + ' · ' + textoDisenos(n) + ' · ' + textos.iva_incluido };
+    }
+
+    function pintarPrecio() {
+        var r = resumenPrecio();
+        if (precioBarra.importe) {
+            var v = r || precioInicial;
+            var cambia = precioBarra.importe.textContent !== v.importe;
+            precioBarra.etiqueta.textContent = v.etiqueta;
+            precioBarra.importe.textContent = v.importe;
+            precioBarra.detalle.textContent = v.detalle;
+            if (cambia && !sinMovimiento) { precioBarra.importe.classList.remove('latido'); void precioBarra.importe.offsetWidth; precioBarra.importe.classList.add('latido'); }
+        }
+        pintarNiveles();
+        pintarCuenta();
+        pintarResumen();
+        pintarPie(r);
+    }
+
+    function pintarNiveles() {
+        var hay = zonasConDiseno().length > 0;
+        var listo = hay && !!precio && precio.confirmable && precio.disenos === zonasConDiseno().length;
+        botonesNivel.forEach(function (b) {
+            var n = b.dataset.nivel;
+            b.disabled = n === 'cantidades' ? !hay : (n === 'resumen' ? !listo : false);
+            if (n === estado.nivel) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+        });
+        var ir = document.getElementById('ir-resumen');
+        if (ir) ir.disabled = !listo;
+        if (estado.nivel === 'resumen' && !listo) irANivel('cantidades');
+    }
+
+    function irANivel(nombre) {
+        if (nombre !== 'diseno' && zonasConDiseno().length === 0) nombre = 'diseno';
+        estado.nivel = nombre;
+        ['diseno', 'cantidades', 'resumen'].forEach(function (n) {
+            var caja = document.getElementById('nivel-' + n);
+            if (caja) caja.hidden = n !== nombre;
+        });
+        if (nombre === 'cantidades' && estado.lineas.length === 0) anadirLinea(estado.color);
+        var panelEstudio = document.getElementById('estudio-panel');
+        if (panelEstudio) panelEstudio.scrollTop = 0;
+        pintarLineas();
+        pintarPrecio();
+        pedirPrecio();
+    }
+
+    botonesNivel.forEach(function (b) { b.addEventListener('click', function () { irANivel(b.dataset.nivel); }); });
+    document.querySelectorAll('[data-ir]').forEach(function (b) { b.addEventListener('click', function () { irANivel(b.dataset.ir); }); });
+
+    /* Tallas y colores: una línea por color, con las mismas zonas y diseños. */
+    function anadirLinea(i) {
+        if (estado.lineas.indexOf(i) === -1) estado.lineas.push(i);
+        estado.cantidades[colores[i].id] = estado.cantidades[colores[i].id] || {};
+    }
+
+    function verColor(i) {
+        if (estado.color === i) return;
+        estado.color = i;
+        var cara = hayDiseno() ? caraDelDiseno() : estado.cara;
+        if (colores[i].caras[cara]) estado.cara = cara;
+        pintar('fundido');
+        avisarListo();
+    }
+
+    function muestraColor(color) {
+        var m = el('span', 'punto-color');
+        m.style.background = color.hex || '#888';
+        return m;
+    }
+
+    function pintarLineas() {
+        var caja = document.getElementById('lineas-color');
+        if (!caja) return;
+        caja.replaceChildren();
+        estado.lineas.forEach(function (i) {
+            var color = colores[i];
+            var cant = estado.cantidades[color.id];
+            var fila = el('div', 'linea-color');
+            fila.classList.toggle('viendo', i === estado.color);
+            var cabeza = el('div', 'linea-cabeza');
+            var ver = el('button', 'linea-ver');
+            ver.type = 'button';
+            ver.setAttribute('aria-label', texto('ver_en_prenda', { color: color.nombre }));
+            ver.appendChild(muestraColor(color));
+            ver.appendChild(el('strong', '', color.nombre));
+            var cuenta = el('span', 'linea-unidades', textoUds(unidadesDe(color.id)));
+            ver.appendChild(cuenta);
+            ver.addEventListener('click', function () { verColor(i); pintarLineas(); });
+            cabeza.appendChild(ver);
+            if (estado.lineas.length > 1) {
+                var quitar = el('button', 'linea-quitar', '×');
+                quitar.type = 'button';
+                quitar.setAttribute('aria-label', texto('quitar_color', { color: color.nombre }));
+                quitar.addEventListener('click', function () {
+                    estado.lineas.splice(estado.lineas.indexOf(i), 1);
+                    delete estado.cantidades[color.id];
+                    if (estado.color === i) verColor(estado.lineas[0]);
+                    pintarLineas();
+                    pedirPrecio();
+                });
+                cabeza.appendChild(quitar);
+            }
+            fila.appendChild(cabeza);
+            var rejilla = el('div', 'tallas-rejilla');
+            color.tallas.forEach(function (t) {
+                var celda = el('div', 'talla-celda');
+                var id = 'cantidad-' + color.id + '-' + t.id;
+                var etiqueta = el('label', 'talla-nombre', t.nombre);
+                etiqueta.htmlFor = id;
+                var campo = document.createElement('input');
+                campo.type = 'number';
+                campo.id = id;
+                campo.inputMode = 'numeric';
+                campo.min = 0;
+                campo.max = 10000;
+                campo.step = 1;
+                campo.value = cant[t.id] || 0;
+                var fijar = function (n) {
+                    n = Math.max(0, Math.min(10000, Math.floor(Number(n) || 0)));
+                    if (n > 0) cant[t.id] = n; else delete cant[t.id];
+                    campo.value = n;
+                    celda.classList.toggle('con-unidades', n > 0);
+                    cuenta.textContent = textoUds(unidadesDe(color.id));
+                    pedirPrecio();
+                };
+                celda.classList.toggle('con-unidades', (cant[t.id] || 0) > 0);
+                var menos = el('button', 'talla-boton', '−');
+                menos.type = 'button';
+                menos.setAttribute('aria-label', texto('una_menos', { talla: t.nombre }));
+                menos.addEventListener('click', function () { fijar((cant[t.id] || 0) - 1); });
+                var mas = el('button', 'talla-boton', '+');
+                mas.type = 'button';
+                mas.setAttribute('aria-label', texto('una_mas', { talla: t.nombre }));
+                mas.addEventListener('click', function () { fijar((cant[t.id] || 0) + 1); });
+                campo.addEventListener('input', function () { if (campo.value !== '') fijar(campo.value); });
+                campo.addEventListener('change', function () { fijar(campo.value); });
+                campo.addEventListener('focus', function () { campo.select(); });
+                var mando = el('div', 'talla-mando');
+                mando.appendChild(menos);
+                mando.appendChild(campo);
+                mando.appendChild(mas);
+                celda.appendChild(etiqueta);
+                celda.appendChild(mando);
+                rejilla.appendChild(celda);
+            });
+            fila.appendChild(rejilla);
+            caja.appendChild(fila);
+        });
+
+        var libres = document.getElementById('colores-libres');
+        if (!libres) return;
+        libres.replaceChildren();
+        colores.forEach(function (color, i) {
+            if (estado.lineas.indexOf(i) !== -1 || !color.tallas.length) return;
+            var b = el('button', 'boton-pildora borde color-libre');
+            b.type = 'button';
+            b.appendChild(muestraColor(color));
+            b.appendChild(document.createTextNode('+ ' + color.nombre));
+            b.addEventListener('click', function () { anadirLinea(i); verColor(i); pintarLineas(); pedirPrecio(); });
+            libres.appendChild(b);
+        });
+        document.getElementById('anadir-color').hidden = libres.children.length === 0;
+    }
+
+    function listaMensajes(clase, mensajes) {
+        var ul = el('ul', 'mensajes ' + clase);
+        mensajes.forEach(function (m) { ul.appendChild(el('li', '', m)); });
+        return ul;
+    }
+
+    function pintarCuenta() {
+        var caja = document.getElementById('cuenta');
+        if (!caja || estado.nivel !== 'cantidades') return;
+        caja.replaceChildren();
+        var unidades = estado.lineas.reduce(function (s, i) { return s + unidadesDe(colores[i].id); }, 0);
+        if (unidades === 0 || !precio || precio.unidades === 0) {
+            caja.appendChild(el('p', 'claro', textos.elige_cantidades));
+            return;
+        }
+        if (precio.total) {
+            var total = el('p', 'cuenta-total');
+            total.appendChild(el('span', '', textos.total));
+            total.appendChild(el('strong', '', precio.total));
+            caja.appendChild(total);
+            caja.appendChild(el('p', 'claro', textoUds(precio.unidades) + ' · ' + texto('media', { precio: precio.por_unidad }) + ' · ' + textos.iva_incluido));
+        }
+        if (precio.avisos.length) caja.appendChild(listaMensajes('avisos', precio.avisos));
+        if (precio.impedimentos.length) caja.appendChild(listaMensajes('impedimentos', precio.impedimentos));
+    }
+
+    function pintarResumen() {
+        var caja = document.getElementById('resumen');
+        if (!caja || estado.nivel !== 'resumen' || !precio) return;
+        caja.replaceChildren();
+        caja.appendChild(el('h3', '', textos.resumen_disenos));
+        var ul = el('ul', 'resumen-lista');
+        zonas.filter(function (z) { return zonasConDiseno().indexOf(z.id) !== -1; }).forEach(function (z) {
+            var d = estado.disenos[z.id];
+            var li = el('li');
+            li.appendChild(el('strong', '', z.nombre));
+            li.appendChild(el('span', '', d.modo === 'logo' ? (d.nombre || textos.pestana_logo) : '«' + d.texto.trim() + '»'));
+            if (z.precio) li.appendChild(el('small', '', '+' + z.precio + textos.por_unidad));
+            ul.appendChild(li);
+        });
+        caja.appendChild(ul);
+        caja.appendChild(el('h3', '', textos.resumen_prendas));
+        var prendas = el('ul', 'resumen-lista');
+        estado.lineas.forEach(function (i) {
+            var color = colores[i];
+            var c = estado.cantidades[color.id] || {};
+            var partes = color.tallas.filter(function (t) { return c[t.id] > 0; }).map(function (t) { return t.nombre + ' × ' + c[t.id]; });
+            if (!partes.length) return;
+            var li = el('li');
+            var nombre = el('strong');
+            nombre.appendChild(muestraColor(color));
+            nombre.appendChild(document.createTextNode(textos.prenda + ' · ' + color.nombre));
+            li.appendChild(nombre);
+            li.appendChild(el('span', '', partes.join(' · ')));
+            li.appendChild(el('small', '', textoUds(unidadesDe(color.id))));
+            prendas.appendChild(li);
+        });
+        caja.appendChild(prendas);
+        if (precio.avisos.length) caja.appendChild(listaMensajes('avisos', precio.avisos));
+        var total = el('p', 'cuenta-total');
+        total.appendChild(el('span', '', textos.resumen_total));
+        total.appendChild(el('strong', '', precio.total || '—'));
+        caja.appendChild(total);
+        caja.appendChild(el('p', 'claro', textoUds(precio.unidades) + ' · ' + texto('media', { precio: precio.por_unidad })));
+    }
+
+    /** Móvil: barra fija con el precio y el siguiente paso. */
+    function pintarPie(r) {
+        if (!pie) return;
+        var hay = zonasConDiseno().length > 0;
+        pie.hidden = !hay;
+        if (!hay) return;
+        r = r || resumenPrecio();
+        document.getElementById('pie-importe').textContent = r ? r.importe : textos.calculando;
+        document.getElementById('pie-detalle').textContent = r ? r.etiqueta + ' · ' + r.detalle : '';
+        var siguiente = { diseno: ['cantidades', textos.siguiente_cantidades], cantidades: ['resumen', textos.siguiente_resumen], resumen: null }[estado.nivel];
+        pieSiguiente.hidden = !siguiente;
+        if (siguiente) {
+            pieSiguiente.dataset.ir = siguiente[0];
+            pieSiguiente.textContent = siguiente[1] + ' →';
+            pieSiguiente.disabled = siguiente[0] === 'resumen' && !(precio && precio.confirmable);
+        }
+    }
+    if (pieSiguiente) pieSiguiente.addEventListener('click', function () { irANivel(pieSiguiente.dataset.ir); });
+
+    if (esPagina) {
+        document.body.classList.add('estudio-abierto');
+        refrescarColeccion();
+    }
 
     pintar();
 })();

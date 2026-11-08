@@ -7,7 +7,7 @@
 
 ## 1. Qué es y para quién
 
-Portal web para **calcular, vender y gestionar pedidos de prendas personalizadas con impresión DTF** (camisetas, polos y sudaderas). Va dirigido a **pequeños diseñadores** que quieren producir sus colecciones: suben uno o varios diseños en PNG, eligen prenda, color, zonas de impresión y tallas, y el portal calcula el precio, cobra por Redsys, genera la factura y la orden de trabajo. NextGen Apparel imprime y envía.
+Portal web para **calcular, vender y gestionar pedidos de prendas personalizadas con impresión DTI** (tecnología Innuro, evolución del DTF; D146) (camisetas, polos y sudaderas). Va dirigido a **pequeños diseñadores** que quieren producir sus colecciones: suben uno o varios diseños en PNG, eligen prenda, color, zonas de impresión y tallas, y el portal calcula el precio, cobra por Redsys, genera la factura y la orden de trabajo. NextGen Apparel imprime y envía.
 
 **Compra en 3 pasos (D105):** 1) Sube tu diseño · 2) Escoge las prendas · 3) Cierra el pedido. Además, un **selector de Packs** con ofertas cerradas (§ 6 bis) como segunda vía de venta.
 
@@ -38,7 +38,7 @@ Portal web para **calcular, vender y gestionar pedidos de prendas personalizadas
 - Carritos abandonados con cupón, campañas de nueva compra, reactivación.
 - Panel de ventas avanzado con márgenes.
 - Integración con APIs de transportistas y de proveedor de prendas.
-- Pliegos DTF automáticos y tarifas por grupo de cliente.
+- Pliegos DTI automáticos y tarifas por grupo de cliente.
 
 > La base de datos se diseña desde el inicio para soportar la versión 2.
 
@@ -168,7 +168,23 @@ Supuestos: camiseta 4,00 €; polo 7,00 €; sudadera 12,00 €; frontal 3,00 �
 | P6 | 50 camisetas frontal + 15 sudaderas frontal (65 prendas) | Sin descuentos: prendas 380,00 + impresión 195,00 = 575,00 €. Tramo (−10 % en prendas): 342,00 + 195,00 = 537,00 €. Combinada (−12 % en todo): 575,00 × 0,88 = 506,00 €. Se aplica **la combinada (506,00 €)** por ser mejor para el cliente; mensaje «Cumples dos condiciones…» |
 | P7 | P1 para un autónomo con recargo de equivalencia | 105,00 + 22,05 (IVA 21 %) + 5,46 (recargo 5,2 %) = **132,51 €** |
 
-> Los casos P1–P7 se implementan como tests automáticos en la fase 3. Las reglas de combinación entre tramo y oferta (excluyentes o acumulables) se confirmarán con el cliente; por defecto son **excluyentes** y se aplica la mejor.
+> **Fase 6:** en el pago, exigir el código postal cuando el país tenga zonas con prefijos (sin él se aplica la zona general).
+
+#### Envíos y cupones (*ejemplo*, sin IVA)
+
+Supuestos: Península (ES) por peso: hasta 2 kg 4,90 €, hasta 5 kg 6,90 €, hasta 10 kg 9,90 €, 0,80 € por kilo de más, gratis desde 500,00 €. Baleares (CP 07…) por cajas: 12,00 € por caja de 50 prendas o 20 kg. Pesos: camiseta 150 g, sudadera 480 g.
+
+| # | Caso | Resultado esperado |
+|---|---|---|
+| E1 | P1 a Madrid (2,25 kg) | Envío **6,90 €**, con IVA como la mercancía; aviso «Te faltan 395,00 € (sin IVA) para el envío gratis» |
+| E2 | P6 a Sevilla (506,00 €) | Envío **gratis** |
+| E3 | 50 camisetas a Baleares / 65 prendas a Baleares | **1 caja (12,00 €)** / **2 cajas (24,00 €)** |
+| E4 | Pedido a Francia sin zona configurada | **No confirmable**: «Todavía no enviamos a ese destino» |
+| E5 | 25 sudaderas a Madrid (12 kg) | 9,90 + 2 × 0,80 = **11,50 €** |
+| C1 | P1 con cupón «verano10» del 10 % (sin distinguir mayúsculas) | 105,00 − 10,50 = **94,50 €** |
+| C2 | Cupón caducado, inactivo, agotado, ya usado o por debajo de su mínimo | No se aplica, se explica el motivo y **el pedido sigue siendo confirmable** |
+
+> Los casos P1–P7, K1–K4, E1–E5 y C1–C2 son tests automáticos (`tests/Feature/Precios/MotorPreciosTest.php`). Las reglas de combinación entre tramo y oferta (excluyentes o acumulables) se confirmarán con el cliente; por defecto son **excluyentes** y se aplica la mejor.
 
 ---
 
@@ -318,7 +334,7 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 - **Correo de marketing** con remitente separado y enlace de baja.
 - **Integraciones**: APIs de transportistas (seguimiento automático) y de proveedor de prendas.
 - **Panel avanzado** con márgenes reales.
-- **Pliegos DTF** automáticos y **tarifas por grupo de cliente**.
+- **Pliegos DTI** automáticos y **tarifas por grupo de cliente**.
 
 ---
 
@@ -346,3 +362,6 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 | Planteamiento | Completado | 2026-11-06 |
 | 1. Base | **Completada con limitaciones** (informe: `docs/INFORME_FASE_1.md`). Criterios de aceptación cumplidos en Docker; pendiente desplegar en OVH y verificar el paso 1.6 en Herd | 2026-11-06 |
 | 2. Catálogo | **Completada con limitaciones** (informe: `docs/INFORME_FASE_2.md`). Criterio de aceptación cumplido con un test de principio a fin, en SQLite y en MariaDB estricta; pendiente la revisión del cliente en Herd de los últimos pasos y el despliegue en OVH | 2026-11-07 |
+| 3. Motor de precios | **Completada con limitaciones** (informe: `docs/INFORME_FASE_3.md`). Casos P1–P7, K1–K4 y E1–E5 como tests en SQLite y MariaDB estricta; pendiente el asesor (IVA del envío y recargo). D127 confirmada y revisión en Herd hecha | 2026-11-08 |
+| Visual V1 | Completado: sistema de diseño, cabecera, pie y portada premium (`docs/PLAN_VISUAL.md`); pendiente la revisión en Herd | 2026-11-08 |
+| Configurador (adelanto de la fase 5) | **En curso** (D141, D142): el configurador es la página de producto, con 3 niveles (diseño, tallas y colores, resumen) y el precio en directo del motor; pendiente la subida real del PNG (fase 4), el carrito y el pago | 2026-11-08 |

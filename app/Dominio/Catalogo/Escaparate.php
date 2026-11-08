@@ -3,6 +3,7 @@
 namespace App\Dominio\Catalogo;
 
 use App\Dominio\Precios\Formato;
+use App\Dominio\Precios\Impuestos;
 use App\Dominio\Precios\Iva;
 use App\Models\Color;
 use App\Models\Familia;
@@ -89,7 +90,7 @@ class Escaparate
     {
         $sinIva = self::desdeSinIva($prenda);
 
-        return $sinIva === null ? null : Formato::euros(Iva::conIva($sinIva));
+        return $sinIva === null ? null : Formato::euros(Iva::conIva($sinIva, Impuestos::tipoIva($prenda->clase_impuesto_id)));
     }
 
     /** Foto principal: maqueta delantera de un color a la venta; si no, la primera foto que no sea de un color retirado. */
@@ -112,11 +113,19 @@ class Escaparate
     {
         $idsColores = $prenda->variantes()->aLaVenta()->distinct()->pluck('color_id');
         // Solo las zonas que la prenda ofrece ahora (con su precio) y activas.
-        $zonasOfrecidas = $prenda->zonas()->where('zonas_impresion.activa', true)->pluck('zonas_impresion.id')->all();
+        $ofrecidas = $prenda->zonas()->where('zonas_impresion.activa', true)->get();
+        $zonasOfrecidas = $ofrecidas->pluck('id')->all();
+        $tipo = Impuestos::tipoIva($prenda->clase_impuesto_id);
+        // Lo que suma cada zona por prenda, con IVA (calculado aquí, nunca en el navegador).
+        $precioZona = $ofrecidas->mapWithKeys(fn ($z) => [$z->id => Formato::euros(Iva::conIva((int) $z->pivot->precio, $tipo))]);
         $maquetas = $prenda->fotos()->where('tipo', TipoFoto::Maqueta->value)
             ->with(['zonas' => fn ($q) => $q->whereIn('zona_impresion_id', $zonasOfrecidas), 'zonas.zona'])->get();
 
-        return Color::whereIn('id', $idsColores)->orderBy('orden')->get()->map(function (Color $color) use ($maquetas): array {
+        // Tallas a la venta de cada color, para elegir cantidades en el configurador.
+        $tallas = $prenda->variantes()->aLaVenta()->with('talla')->get()->groupBy('color_id')
+            ->map(fn ($vs) => $vs->sortBy(fn ($v) => $v->talla->orden)->map(fn ($v) => ['id' => $v->talla_id, 'nombre' => $v->talla->nombre])->values()->all());
+
+        return Color::whereIn('id', $idsColores)->orderBy('orden')->get()->map(function (Color $color) use ($maquetas, $precioZona, $tallas): array {
             $caras = [];
 
             foreach (Cara::cases() as $cara) {
@@ -125,6 +134,7 @@ class Escaparate
                     'url' => $foto->url(),
                     'alt' => $foto->texto_alternativo ?: null,
                     'zonas' => $foto->zonas->map(fn ($z) => [
+                        'precio' => $precioZona[$z->zona_impresion_id] ?? null,
                         'id' => $z->zona_impresion_id, 'nombre' => $z->zona?->nombre,
                         'ancho_mm' => $z->zona?->ancho_max_mm, 'alto_mm' => $z->zona?->alto_max_mm,
                         'x' => $z->x / 100, 'y' => $z->y / 100, 'ancho' => $z->ancho / 100, 'alto' => $z->alto / 100,
@@ -132,7 +142,7 @@ class Escaparate
                 ];
             }
 
-            return ['id' => $color->id, 'nombre' => $color->nombre, 'hex' => $color->codigo_hex, 'caras' => $caras];
+            return ['id' => $color->id, 'nombre' => $color->nombre, 'hex' => $color->codigo_hex, 'caras' => $caras, 'tallas' => $tallas[$color->id] ?? []];
         })->values()->all();
     }
 }

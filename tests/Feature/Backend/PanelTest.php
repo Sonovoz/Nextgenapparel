@@ -33,7 +33,7 @@ class PanelTest extends TestCase
         $this->get('/admin/login', ['Accept-Language' => 'en-GB,en;q=0.9'])
             ->assertOk()
             ->assertSee('lang="es"', false)
-            ->assertSee('NextGen Apparel')
+            ->assertSee('Nextgenapparel')
             ->assertSee('Correo electrónico');
     }
 
@@ -95,7 +95,7 @@ class PanelTest extends TestCase
     {
         $paginas = self::clasesPendientes();
 
-        $this->assertCount(13, $paginas);
+        $this->assertCount(9, $paginas); // Impuestos, Envío, Cupones y Reglas de precio ya existen (fase 3)
 
         foreach ($paginas as $clase) {
             $this->assertInstanceOf(GrupoNavegacion::class, $clase::getNavigationGroup(), $clase);
@@ -153,7 +153,7 @@ class PanelTest extends TestCase
 
     public function test_el_frontend_no_se_ve_afectado(): void
     {
-        $this->get('/es')->assertOk()->assertSee('Tu colección, impresa como la imaginas.');
+        $this->get('/es')->assertOk()->assertSee('Creamos marcas que comunican');
     }
 
     public static function paginasPendientes(): array

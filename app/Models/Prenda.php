@@ -45,6 +45,11 @@ class Prenda extends Model
     }
 
     /** Zonas en las que se puede imprimir, con su precio y coste. */
+    public function claseImpuesto(): BelongsTo
+    {
+        return $this->belongsTo(ClaseImpuesto::class);
+    }
+
     public function zonas(): BelongsToMany
     {
         return $this->belongsToMany(ZonaImpresion::class, 'prenda_zona')

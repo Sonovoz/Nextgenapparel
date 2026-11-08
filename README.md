@@ -1,6 +1,6 @@
 # NextGen Apparel
 
-Portal de pedidos de prendas personalizadas con impresión DTF (camisetas, polos y sudaderas) para pequeños diseñadores.
+Portal de pedidos de prendas personalizadas con impresión DTI (camisetas, polos y sudaderas) para pequeños diseñadores.
 
 - **Documentación del proyecto:** [`docs/FICHA.md`](docs/FICHA.md) (fuente de verdad), [`docs/DECISIONES.md`](docs/DECISIONES.md) y [`docs/GAUNTLET.md`](docs/GAUNTLET.md).
 - **Instalación local en Windows con Herd:** [`docs/INSTALACION_HERD.md`](docs/INSTALACION_HERD.md).

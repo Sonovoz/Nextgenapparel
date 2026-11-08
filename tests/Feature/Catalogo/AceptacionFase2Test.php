@@ -106,7 +106,7 @@ class AceptacionFase2Test extends TestCase
         $es = $this->get('/es/camisetas-premium/camiseta-heavy')->assertOk()
             ->assertSee('Camiseta Heavy')
             ->assertSee('9,68 €') // (5,00 + frontal 3,00) + 21 %
-            ->assertSee('Hasta 28 × 38 cm')
+            ->assertSee('class="estudio activo pagina"', false) // la prenda abre directamente el configurador
             ->getContent();
         $this->get('/es/camisetas-premium')->assertOk()->assertSee('Camiseta Heavy');
 

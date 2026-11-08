@@ -4,6 +4,7 @@ namespace App\Dominio\Seo;
 
 use App\Dominio\Catalogo\Escaparate;
 use App\Dominio\Catalogo\TipoFoto;
+use App\Dominio\Precios\Impuestos;
 use App\Dominio\Precios\Iva;
 use App\Models\Ajuste;
 use App\Models\Familia;
@@ -85,8 +86,8 @@ final class DatosEstructurados
             $producto['offers'] = [
                 '@type' => 'AggregateOffer',
                 'priceCurrency' => 'EUR',
-                'lowPrice' => self::importe(Iva::conIva($desde)),
-                'highPrice' => self::importe(Iva::conIva($hasta)),
+                'lowPrice' => self::importe(Iva::conIva($desde, Impuestos::tipoIva($prenda->clase_impuesto_id))),
+                'highPrice' => self::importe(Iva::conIva($hasta, Impuestos::tipoIva($prenda->clase_impuesto_id))),
                 'offerCount' => $prenda->variantes()->aLaVenta()->count(),
                 'availability' => 'https://schema.org/InStock',
                 'url' => $url,

@@ -3,19 +3,53 @@
 namespace App\Http\Controllers;
 
 use App\Dominio\Catalogo\Escaparate;
+use App\Dominio\Catalogo\Portada;
+use App\Dominio\Precios\Configurador;
+use App\Dominio\Precios\Formato;
+use App\Dominio\Precios\Motor\MotorPrecios;
 use App\Dominio\Seo\DatosEstructurados;
 use App\Models\Talla;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class TiendaController
 {
     public function portada(string $idioma): View
     {
+        // Si la base de datos no responde, la portada se muestra sin catálogo (autosuficiencia).
+        $datos = rescue(fn () => Portada::datos(), Portada::vacia(), report: false);
+
         return view('portada', [
-            // Si la base de datos no responde, la portada se muestra sin el catálogo.
-            'familias' => rescue(fn () => Escaparate::familias()->map(fn ($f) => ['familia' => $f, 'foto' => Escaparate::prendas($f)->map(fn ($p) => Escaparate::fotoPrincipal($p))->filter()->first()]), collect(), report: false),
+            ...$datos,
             'alternos' => $this->alternos(fn ($i) => route('portada', ['idioma' => $i])),
-            'seo' => ['esquemas' => rescue(fn () => [DatosEstructurados::organizacion(), DatosEstructurados::sitioWeb($idioma)], [], report: false)],
+            'seo' => [
+                'imagen' => asset('img/portada/pareja-1600.webp'),
+                'esquemas' => rescue(fn () => [DatosEstructurados::organizacion(), DatosEstructurados::sitioWeb($idioma)], [], report: false),
+            ],
+        ]);
+    }
+
+    /** Sobre nosotros (D145): página fija, sin base de datos, con la URL traducida en cada idioma. */
+    public function nosotros(string $idioma, string $pagina): View|RedirectResponse
+    {
+        $alternos = $this->alternos(fn ($i) => route('nosotros', ['idioma' => $i, 'pagina' => trans('portada.ruta_nosotros', [], $i)]));
+
+        // /es/about-us lleva a /es/sobre-nosotros: una sola URL por idioma.
+        if ($pagina !== trans('portada.ruta_nosotros', [], $idioma)) {
+            return redirect($alternos[$idioma], 301);
+        }
+
+        return view('nosotros', [
+            'alternos' => $alternos,
+            'seo' => [
+                'imagen' => asset('img/portada/camiseta-dragon-1120.webp'),
+                'esquemas' => [DatosEstructurados::migas([
+                    __('tienda.inicio') => route('portada'),
+                    __('nosotros.titulo_corto') => $alternos[$idioma],
+                ])],
+            ],
         ]);
     }
 
@@ -68,6 +102,35 @@ class TiendaController
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Precio en directo del configurador (D142): una prenda con sus diseños o,
+     * con cantidades, el pedido de esa prenda calculado por el motor.
+     */
+    public function precio(Request $request, Configurador $configurador, string $idioma, string $familia, string $prenda): JsonResponse
+    {
+        $prenda = Escaparate::prenda(Escaparate::familia($familia, $idioma), $prenda, $idioma);
+        $datos = $request->validate([
+            'color' => ['required', 'integer'],
+            'zonas' => ['array', 'max:10'],
+            'zonas.*' => ['integer'],
+            'cantidades' => ['array', 'max:30'],
+            'cantidades.*' => ['array', 'max:20'],
+            'cantidades.*.*' => ['integer', 'min:0', 'max:'.MotorPrecios::MAXIMO_UNIDADES],
+        ]);
+
+        $cantidades = [];
+        foreach ($datos['cantidades'] ?? [] as $color => $tallas) {
+            $claves = [$color, ...array_keys($tallas)];
+            abort_unless(collect($claves)->every(fn ($c) => ctype_digit((string) $c)), 422);
+            $cantidades[(int) $color] = array_map('intval', $tallas);
+        }
+
+        $r = $configurador->calcular($prenda, (int) $datos['color'], array_map('intval', $datos['zonas'] ?? []), $cantidades);
+        $euros = fn (?int $c) => $c === null ? null : Formato::euros($c);
+
+        return response()->json([...$r, 'por_unidad' => $euros($r['por_unidad']), 'total' => $euros($r['total'])]);
     }
 
     /** URL de la misma página en cada idioma (selector de idioma y hreflang). */

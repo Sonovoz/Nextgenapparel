@@ -30,8 +30,14 @@ Route::prefix('{idioma}')
     ->group(function () {
         Route::get('/', [TiendaController::class, 'portada'])->name('portada');
 
+        // Sobre nosotros (D145): /es/sobre-nosotros y /en/about-us; antes de las familias.
+        Route::get('/{pagina}', [TiendaController::class, 'nosotros'])
+            ->where('pagina', implode('|', array_map(fn ($i) => trans('portada.ruta_nosotros', [], $i), array_keys(config('idiomas.disponibles')))))
+            ->name('nosotros');
+
         // Tienda: /es/camisetas y /es/camisetas/camiseta-essential (URL traducida en /en).
         // Las rutas fijas futuras (carrito, cuenta…) se registran antes de estas.
         Route::get('/{familia}', [TiendaController::class, 'familia'])->name('tienda.familia');
         Route::get('/{familia}/{prenda}', [TiendaController::class, 'prenda'])->name('tienda.prenda');
+        Route::get('/{familia}/{prenda}/precio', [TiendaController::class, 'precio'])->name('tienda.precio')->middleware('throttle:120,1');
     });

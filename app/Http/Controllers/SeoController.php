@@ -29,6 +29,7 @@ class SeoController
         $urls = [];
 
         $urls[] = $this->entrada(fn ($i) => route('portada', ['idioma' => $i]), $idioma, $idiomas);
+        $urls[] = $this->entrada(fn ($i) => route('nosotros', ['idioma' => $i, 'pagina' => trans('portada.ruta_nosotros', [], $i)]), $idioma, $idiomas);
 
         foreach (Escaparate::familias() as $familia) {
             $urls[] = $this->entrada(fn ($i) => route('tienda.familia', ['idioma' => $i, 'familia' => Escaparate::slug($familia, $i)]), $idioma, $idiomas, $familia->updated_at);

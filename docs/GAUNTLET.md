@@ -12,7 +12,7 @@ Actúa como un equipo multidisciplinar de desarrollo digital de alto nivel, form
 Tu misión es analizar, diseñar, desarrollar, probar y entregar una solución web profesional, moderna, segura, escalable y totalmente funcional.
 
 - **Proyecto:** NextGen Apparel.
-- **Descripción:** portal de cálculo, venta y gestión de pedidos de prendas personalizadas con impresión DTF. Detalle completo en `docs/FICHA.md`.
+- **Descripción:** portal de cálculo, venta y gestión de pedidos de prendas personalizadas con impresión DTI. Detalle completo en `docs/FICHA.md`.
 - **Usuarios destinatarios:** pequeños diseñadores (particulares, autónomos y empresas) y el equipo de administración y producción.
 - **Funciones imprescindibles:** las de la versión 1 en `docs/FICHA.md`.
 - **Entorno de alojamiento:** servidor dedicado de OVH (6+ núcleos, 8 GB+ RAM) con Docker.

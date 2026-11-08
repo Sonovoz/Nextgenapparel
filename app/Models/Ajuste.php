@@ -15,7 +15,7 @@ class Ajuste extends Model
 {
     /** Valores por defecto mientras no se cambien en el backend. */
     public const POR_DEFECTO = [
-        'tienda.nombre' => 'NextGen Apparel',
+        'tienda.nombre' => 'Nextgenapparel',
         'tienda.correo_contacto' => null,
         // IVA general provisional hasta la fase 3, en centésimas de % (2100 = 21 %) (D75).
         'impuestos.iva_general' => 2100,
@@ -23,6 +23,12 @@ class Ajuste extends Model
         'disenos.ppp_correcto' => 300,
         'disenos.ppp_aceptable' => 200,
         'disenos.ppp_minimo' => 150,
+        // Mejora con IA para el cliente (D143): activa, desde qué nivel y texto propio por idioma (vacío = el de lang/disenos.php).
+        'disenos.ia_activa' => true,
+        'disenos.ia_desde' => 'justa',
+        'disenos.ia_texto' => null,
+        // Ofertas: avisar «te faltan…» desde este avance (centésimas de %, 5000 = 50 %).
+        'ofertas.aviso_cercana' => 5000,
         // Buscadores: apagado hasta la puesta en marcha; solo cuenta en producción (D102).
         'seo.indexar' => false,
     ];

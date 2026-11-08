@@ -19,12 +19,58 @@
         'error_archivo' => __('tienda.error_archivo'),
         'error_grande' => __('tienda.error_grande'),
         'medida_impresion' => __('tienda.medida_impresion'),
+        'calidad_sin_diseno' => __('tienda.calidad_sin_diseno'),
+        'tus_disenos' => __('tienda.tus_disenos'),
+        'anadir_diseno' => __('tienda.anadir_diseno'),
+        'elige_zona_nuevo' => __('tienda.elige_zona_nuevo'),
+        'solapa' => __('tienda.solapa'),
+        'listo_varios' => __('tienda.listo_varios'),
+        'pestana_logo' => __('tienda.pestana_logo'),
+        'zona_libre' => __('tienda.zona_libre'),
+        'zona_con_diseno' => __('tienda.zona_con_diseno'),
+        'zona_editando' => __('tienda.zona_editando'),
+        'solapa_corto' => __('tienda.solapa_corto'),
+        'por_prenda' => __('tienda.por_prenda'),
+        'quitar_diseno' => __('tienda.quitar_diseno'),
+        'quitar_diseno_zona' => __('tienda.quitar_diseno_zona'),
+        'empezar_de_nuevo' => __('tienda.empezar_de_nuevo'),
+        'confirmar_empezar' => __('tienda.confirmar_empezar'),
         'decimal' => $idioma === 'en' ? '.' : ',',
+        // Niveles, precio en directo y cantidades (D142)
+        'desde' => __('tienda.desde'),
+        'por_unidad' => __('tienda.por_unidad'),
+        'iva_incluido' => __('tienda.iva_incluido'),
+        'tu_prenda' => __('tienda.tu_prenda'),
+        'tu_prenda_desde' => __('tienda.tu_prenda_desde'),
+        'un_diseno' => __('tienda.un_diseno'),
+        'n_disenos' => __('tienda.n_disenos'),
+        'total' => __('tienda.total'),
+        'ud' => __('tienda.ud'),
+        'uds' => __('tienda.uds'),
+        'media' => __('tienda.media'),
+        'decision_uno' => __('tienda.decision_uno'),
+        'decision_varios' => __('tienda.decision_varios'),
+        'decision_pregunta' => __('tienda.decision_pregunta'),
+        'siguiente_cantidades' => __('tienda.siguiente_cantidades'),
+        'siguiente_resumen' => __('tienda.siguiente_resumen'),
+        'elige_cantidades' => __('tienda.elige_cantidades'),
+        'quitar_color' => __('tienda.quitar_color'),
+        'una_menos' => __('tienda.una_menos'),
+        'una_mas' => __('tienda.una_mas'),
+        'ver_en_prenda' => __('tienda.ver_en_prenda'),
+        'resumen_disenos' => __('tienda.resumen_disenos'),
+        'resumen_prendas' => __('tienda.resumen_prendas'),
+        'resumen_total' => __('tienda.resumen_total'),
+        'anadir_pedido' => __('tienda.anadir_pedido'),
+        'calculando' => __('tienda.calculando'),
+        'ia_copiar' => __('tienda.ia_copiar'),
+        'ia_copiado' => __('tienda.ia_copiado'),
     ];
     // Misma regla que App\Dominio\Disenos\Calidad: umbrales de Ajustes y textos de aviso.
     $calidadVisor = [
         'umbrales' => \App\Dominio\Disenos\Calidad::umbrales(),
         'textos' => trans('disenos'),
+        'ia' => \App\Dominio\Disenos\MejoraIa::paraVisor(),
     ];
 @endphp
 
@@ -32,7 +78,7 @@
     <style>
         .ficha { display: flex; flex-wrap: wrap; gap: 48px 64px; align-items: flex-start; }
         .galeria { flex: 1 1 520px; min-width: 0; }
-        .visor { position: relative; background: radial-gradient(120% 90% at 50% 40%, #FAF9F7 0%, var(--fondo-suave) 70%); border-radius: 4px; aspect-ratio: 5 / 6; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: box-shadow .25s ease; }
+        .visor { position: relative; background: radial-gradient(90% 70% at 50% 40%, #1C1E2C 0%, var(--fondo-suave) 75%); border-radius: 4px; aspect-ratio: 5 / 6; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: box-shadow .25s ease; }
         .visor.soltando { box-shadow: inset 0 0 0 2px var(--tinta); }
         .visor-lienzo { position: relative; width: 86%; aspect-ratio: 5 / 6; transform: perspective(1400px) rotateY(0deg); transition: transform .19s ease-in; touch-action: pan-y; }
         .visor-lienzo.girando { transform: perspective(1400px) rotateY(90deg); }
@@ -53,7 +99,7 @@
         .zona-guia { position: absolute; border: 1px dashed rgba(22,22,26,.45); border-radius: 2px; opacity: 0; transition: opacity .2s ease; pointer-events: none; z-index: 2; }
         .visor-lienzo.ajustando .zona-guia { opacity: 1; }
         .ajustador { display: flex; flex-direction: column; gap: 14px; padding-top: 4px; border-top: 1px solid rgba(255,255,255,.14); }
-        .ajustador h3 { margin: 12px 0 0; font-size: 15px; font-weight: 500; }
+        .ajustador h3, .ajustador .ajustador-titulo { margin: 12px 0 0; font-size: 15px; font-weight: 500; font-family: var(--sans); text-transform: none; letter-spacing: 0; }
         .fila-tamano { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
         .fila-tamano input[type=range] { flex: 1 1 180px; accent-color: #fff; min-height: 32px; }
         .fila-tamano output { font-size: 14px; min-width: 150px; }
@@ -64,7 +110,7 @@
         .calidad[data-nivel="baja"] { border-left-color: #F0624D; background: rgba(240,98,77,.12); }
         .calidad-cabecera { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
         .calidad-cabecera strong { font-size: 15px; font-weight: 600; }
-        .calidad p:empty, .calidad span:empty { display: none; }
+        .calidad > p:empty, .calidad-cabecera span:empty { display: none; }
         .lupa { position: absolute; width: 170px; height: 170px; border-radius: 999px; overflow: hidden; pointer-events: none; background: #fff; box-shadow: 0 0 0 3px #fff, 0 14px 36px rgba(22,22,26,.35); z-index: 3; }
         .lupa .capa { position: absolute; }
         .lupa .capa img { width: 100%; height: 100%; }
@@ -75,7 +121,7 @@
         .tu-marca .claro { color: #C9C7C0; font-size: 14px; }
         .pestanas { display: flex; gap: 4px; background: rgba(255,255,255,.08); border-radius: 999px; padding: 4px; align-self: flex-start; flex-wrap: wrap; }
         .pestanas [role="tab"] { min-height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: 14px; cursor: pointer; }
-        .pestanas [aria-selected="true"] { background: #fff; color: var(--tinta); }
+        .pestanas [aria-selected="true"] { background: #fff; color: #0B0B10; }
         .tu-marca button:focus-visible, .tu-marca input:focus-visible, .soltar:focus-within { outline: 2px solid #fff; outline-offset: 3px; }
         .soltar { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 140px; padding: 20px; border: 1.5px dashed rgba(255,255,255,.45); border-radius: 4px; text-align: center; cursor: pointer; transition: background .2s ease, border-color .2s ease; }
         .soltar:hover, .soltar.soltando { background: rgba(255,255,255,.06); border-color: #fff; }
@@ -89,7 +135,7 @@
         .grupo > span { font-size: 13px; color: #C9C7C0; }
         .opciones { display: flex; flex-wrap: wrap; gap: 6px; }
         .boton-pildora.borde { border: 1px solid rgba(255,255,255,.35); color: #fff; min-height: 40px; }
-        .boton-pildora.borde[aria-checked="true"] { background: #fff; color: var(--tinta); border-color: #fff; }
+        .boton-pildora.borde[aria-checked="true"] { background: #fff; color: #0B0B10; border-color: #fff; }
         .fuente-muestra { font-size: 18px; min-width: 56px; }
         .tinta-muestra { width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(255,255,255,.35); padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; background: transparent; color: #fff; font: inherit; font-size: 11px; }
         .tinta-muestra[aria-checked="true"] { box-shadow: 0 0 0 2px #16161A, 0 0 0 4px #fff; }
@@ -98,7 +144,7 @@
         .tu-marca-estado { font-size: 15px; animation: aparecer .5s ease both; }
         .tu-marca-error { color: #FFB4A9; font-size: 14px; }
         .acciones-marca { display: flex; flex-wrap: wrap; gap: 8px; }
-        .boton-claro { min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #fff; color: var(--tinta); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .boton-claro { min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #fff; color: #0B0B10; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
         .boton-texto { min-height: 48px; padding: 0 12px; border: 0; background: transparent; color: #C9C7C0; font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
         .coleccion { margin-top: 72px; }
         .coleccion h2 { font-size: clamp(30px, 4vw, 40px); margin: 0; }
@@ -114,27 +160,27 @@
         }
         .zona-marca span { position: absolute; left: 0; top: -20px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
         .visor-controles { position: absolute; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-        .segmento { display: flex; background: #fff; border-radius: 999px; padding: 4px; gap: 2px; }
+        .segmento { display: flex; background: var(--papel); border: 1px solid var(--linea); border-radius: 999px; padding: 4px; gap: 2px; }
         .boton-pildora { min-height: 36px; padding: 0 16px; border: 0; border-radius: 999px; cursor: pointer; font: inherit; font-size: 13px; background: transparent; color: var(--tinta); }
-        .boton-pildora[aria-pressed="true"] { background: var(--tinta); color: #fff; }
-        .boton-borde { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--tinta); background: #fff; cursor: pointer; font: inherit; font-size: 13px; }
-        .boton-borde[aria-pressed="true"] { background: var(--tinta); color: #fff; }
+        .boton-pildora[aria-pressed="true"] { background: var(--tinta); color: var(--fondo); }
+        .boton-borde { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--linea-fuerte); background: rgba(8, 8, 13, .6); color: var(--tinta); cursor: pointer; font: inherit; font-size: 13px; }
+        .boton-borde[aria-pressed="true"] { background: var(--tinta); color: var(--fondo); }
         .visor-nota { position: absolute; left: 16px; bottom: 12px; margin: 0; font-size: 12px; color: var(--tinta-suave); }
         .info { flex: 1 1 360px; max-width: 480px; min-width: 0; display: flex; flex-direction: column; gap: 28px; }
-        .info h1 { margin: 0; font-size: clamp(34px, 4vw, 44px); line-height: 1.1; font-weight: 300; }
+        .info h1 { margin: 0; font-size: clamp(34px, 4vw, 52px); line-height: 1; font-weight: 800; text-transform: uppercase; letter-spacing: -.03em; }
         .precio { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
         .precio strong { font-family: var(--serif); font-weight: 400; font-size: 32px; }
         .suave { color: var(--tinta-suave); font-size: 14px; margin: 0; }
         .muestras { display: flex; flex-wrap: wrap; gap: 6px; }
         .muestra { width: 44px; height: 44px; border-radius: 999px; border: 1px solid transparent; background: transparent; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .muestra[aria-checked="true"] { border-color: var(--tinta); }
-        .muestra span { width: 32px; height: 32px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(22,22,26,.14); }
+        .muestra[aria-checked="true"] { border-color: var(--neon); box-shadow: 0 0 12px rgba(142, 160, 255, .5); }
+        .muestra span { width: 32px; height: 32px; border-radius: 999px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.28), 0 0 0 1px rgba(255,255,255,.12); }
         .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-        .chip { min-width: 52px; height: 40px; border: 1px solid #DAD7D0; display: flex; align-items: center; justify-content: center; font-size: 13px; padding: 0 8px; }
+        .chip { min-width: 52px; height: 40px; border: 1px solid var(--linea-fuerte); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; padding: 0 8px; }
         .zonas { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
-        .zona-tarjeta { border: 1px solid #DAD7D0; padding: 12px; display: flex; flex-direction: column; gap: 2px; }
+        .zona-tarjeta { border: 1px solid var(--linea-fuerte); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 2px; }
         .cta { min-height: 56px; background: var(--tinta); color: #fff; border: 0; font: inherit; font-size: 15px; font-weight: 500; cursor: not-allowed; opacity: .85; }
-        .pasos-ficha { list-style: none; margin: 0; padding: 20px; background: #F7F6F3; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; font-size: 13px; line-height: 1.4; counter-reset: paso; }
+        .pasos-ficha { list-style: none; margin: 0; padding: 20px; background: var(--papel); border: 1px solid var(--linea); border-radius: 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; font-size: 13px; line-height: 1.4; counter-reset: paso; }
         .pasos-ficha li { counter-increment: paso; display: flex; flex-direction: column; gap: 6px; }
         .pasos-ficha li::before { content: counter(paso); font-family: var(--serif); font-size: 22px; }
         details { border-bottom: 1px solid var(--linea); }
@@ -143,7 +189,7 @@
         summary::-webkit-details-marker { display: none; }
         summary::after { content: '+'; font-size: 20px; }
         details[open] summary::after { content: '−'; }
-        details ul, details table { margin: 0 0 20px; font-size: 14px; color: #3A3A42; }
+        details ul, details table { margin: 0 0 20px; font-size: 14px; color: var(--tinta-suave); }
         table { border-collapse: collapse; width: 100%; }
         th, td { text-align: left; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--linea); }
         .visor-controles { z-index: 4; }
@@ -158,20 +204,49 @@
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('js/visor.js') }}?v={{ @filemtime(public_path('js/visor.js')) }}" defer></script>
+    <script src="@recurso('js/visor.js')?v={{ @filemtime(public_path('js/visor.js')) }}" defer></script>
 @endpush
 
-<x-tienda :titulo="($prenda->seo_titulo ?: $prenda->nombre).' · NextGen Apparel'" :descripcion="$prenda->seo_descripcion ?: \Illuminate\Support\Str::limit((string) $prenda->descripcion, 155)" :alternos="$alternos" :seo="$seo">
+<x-tienda :titulo="($prenda->seo_titulo ?: $prenda->nombre).' · Nextgenapparel'" :descripcion="$prenda->seo_descripcion ?: \Illuminate\Support\Str::limit((string) $prenda->descripcion, 155)" :alternos="$alternos" :seo="$seo">
     <div class="contenedor">
+        @unless ($conTuMarca)
         <nav class="ruta" aria-label="Ruta">
             <a href="{{ route('portada') }}">{{ __('tienda.inicio') }}</a><span aria-hidden="true">/</span>
             <a href="{{ route('tienda.familia', ['familia' => Escaparate::slug($familia, $idioma)]) }}">{{ $familia->nombre }}</a><span aria-hidden="true">/</span>
             <span>{{ $prenda->nombre }}</span>
         </nav>
+        @endunless
 
         <div class="ficha">
             <section class="galeria" aria-label="{{ $prenda->nombre }}">
-                <div class="visor" id="visor" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
+                {{-- Estudio: a pantalla completa al diseñar (como la personalización de un videojuego). Fuera de él, la galería de la ficha. --}}
+                @php $urlFamilia = route('tienda.familia', ['familia' => Escaparate::slug($familia, $idioma)]); @endphp
+                <div class="estudio{{ $conTuMarca ? ' activo pagina' : '' }}" id="estudio" aria-label="{{ __('tienda.estudio') }}" data-salir="{{ $urlFamilia }}">
+                <div class="estudio-barra">
+                    <div class="estudio-identidad">
+                        <a class="estudio-inicio" href="{{ route('portada') }}" aria-label="{{ __('tienda.inicio') }}"><img src="@recurso('img/marca/monograma.png')" alt="" width="190" height="147"></a>
+                        <div>
+                            <nav class="estudio-ruta" aria-label="Ruta"><a href="{{ route('portada') }}">{{ __('tienda.inicio') }}</a> / <a href="{{ $urlFamilia }}">{{ $familia->nombre }}</a></nav>
+                            <h1 class="estudio-titulo">{{ $prenda->nombre }}</h1>
+                        </div>
+                    </div>
+                    <p class="estudio-atajos" aria-hidden="true">
+                        <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> {{ __('tienda.atajo_mover') }}</span>
+                        <span><kbd>+</kbd><kbd>−</kbd> {{ __('tienda.atajo_tamano') }}</span>
+                        <span><kbd>F</kbd> {{ __('tienda.atajo_girar') }}</span>
+                        <span><kbd>C</kbd> {{ __('tienda.color') }}</span>
+                        <span><kbd>L</kbd> {{ __('tienda.lupa') }}</span>
+                        <span><kbd>Esc</kbd> {{ __('tienda.atajo_salir') }}</span>
+                    </p>
+                    @if ($precio)
+                        <p class="estudio-precio" id="estudio-precio" aria-live="polite"><span id="precio-etiqueta">{{ __('tienda.desde') }}</span> <strong id="precio-importe">{{ $precio }}</strong> <small id="precio-detalle">{{ __('tienda.por_unidad') }} · {{ __('tienda.iva_incluido') }}</small></p>
+                    @endif
+                    <button type="button" class="estudio-cerrar" id="cerrar-estudio" aria-label="{{ __('tienda.cerrar_estudio') }}">×</button>
+                </div>
+                <div class="estudio-escena">
+                <button type="button" class="girar anterior" data-girar aria-label="{{ __('tienda.atajo_girar') }}">‹</button>
+                <div class="marco-visor">
+                <div class="visor" id="visor" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
                     <div class="visor-controles">
                         <div class="segmento" role="group" aria-label="{{ __('tienda.delantera') }} / {{ __('tienda.trasera') }}">
                             <button type="button" class="boton-pildora" data-cara="delantera" aria-pressed="true">{{ __('tienda.delantera') }}</button>
@@ -190,125 +265,44 @@
                     </div>
                     <div class="lupa" id="lupa" hidden></div>
                     <p class="visor-nota">{{ __('tienda.vista_orientativa') }}</p>
+                    <p class="pista" id="pista" aria-hidden="true">{{ __('tienda.pista_arrastrar') }}</p>
+                    <div class="cargando" id="cargando" role="status" hidden>
+                        <span class="cabezal" aria-hidden="true"></span>
+                        <p>{{ __('tienda.cargando_diseno') }}<span class="puntos" aria-hidden="true"><i></i><i></i><i></i></span></p>
+                    </div>
                 </div>
-
+                </div>
+                <button type="button" class="girar siguiente" data-girar aria-label="{{ __('tienda.atajo_girar') }}">›</button>
+                <button type="button" class="boton-lupa" id="boton-lupa" aria-pressed="false">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                    {{ __('tienda.lupa') }}
+                </button>
+                <div class="pieles" id="pieles" aria-label="{{ __('tienda.coleccion_titulo') }}">
+                    <p class="pieles-titulo"><span>{{ __('tienda.coleccion_titulo') }}</span> <span id="coleccion-texto"></span></p>
+                    <div class="pieles-lista" id="pieles-lista"></div>
+                </div>
+                </div>
                 @if ($conTuMarca)
-                    @include('tienda._tu-marca')
+                    <div class="estudio-panel" id="estudio-panel">
+                        @include('tienda._tu-marca')
+                    </div>
+                    {{-- Móvil: el precio y el siguiente paso, siempre a mano (D142). --}}
+                    <div class="estudio-pie" id="estudio-pie" hidden>
+                        <p class="pie-precio"><strong id="pie-importe"></strong> <small id="pie-detalle"></small></p>
+                        <button type="button" class="boton-siguiente" id="pie-siguiente"></button>
+                    </div>
                 @endif
+                </div>
+
+
             </section>
 
-            <section class="info" aria-label="{{ __('tienda.detalles') }}">
-                <div>
-                    <p class="etiqueta">{{ $familia->nombre }} · DTF</p>
-                    <h1>{{ $prenda->nombre }}</h1>
-                    @if ($precio)
-                        <div class="precio">
-                            <span class="suave">{{ __('tienda.desde') }}</span>
-                            <strong>{{ $precio }}</strong>
-                            <span class="suave">{{ __('tienda.por_unidad') }} · {{ __('tienda.con_impresion') }} · {{ __('tienda.iva_incluido') }}</span>
-                        </div>
-                    @endif
-                    @if ($prenda->descripcion)
-                        <p style="margin: 16px 0 0; color: #3A3A42;">{{ $prenda->descripcion }}</p>
-                    @endif
-                </div>
-
-                @if (count($colores) > 0)
-                    <div>
-                        <p class="suave" style="margin-bottom: 10px;">{{ __('tienda.color') }} · <strong id="nombre-color" style="color: var(--tinta); font-weight: 500;">{{ $primerColor['nombre'] }}</strong></p>
-                        <div class="muestras" role="radiogroup" aria-label="{{ __('tienda.color') }}">
-                            @foreach ($colores as $i => $color)
-                                <button type="button" class="muestra" role="radio" aria-checked="{{ $i === 0 ? 'true' : 'false' }}" aria-label="{{ $color['nombre'] }}" data-color="{{ $i }}">
-                                    <span style="background: {{ $color['hex'] }};"></span>
-                                </button>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                <div>
-                    <p class="suave" style="margin-bottom: 10px;">{{ __('tienda.tallas_disponibles') }}</p>
-                    <div class="chips">
-                        @foreach ($tallas as $talla)
-                            <span class="chip">{{ $talla }}</span>
-                        @endforeach
-                    </div>
-                    <p class="suave" style="margin-top: 10px; font-size: 13px;">{{ __('tienda.tallas_nota') }}</p>
-                </div>
-
-                @if ($prenda->zonas->isNotEmpty())
-                    <div>
-                        <p class="suave" style="margin-bottom: 10px;">{{ __('tienda.donde_imprimimos') }}</p>
-                        <div class="zonas">
-                            @foreach ($prenda->zonas as $zona)
-                                <div class="zona-tarjeta">
-                                    <span style="font-size: 14px; font-weight: 500;">{{ $zona->nombre }}</span>
-                                    <span class="suave" style="font-size: 12px;">{{ __('tienda.hasta', ['medida' => $numero($zona->ancho_max_mm).' × '.$numero($zona->alto_max_mm).' cm']) }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                        <p class="suave" style="margin-top: 10px; font-size: 13px;">{{ __('tienda.zonas_nota') }}</p>
-                    </div>
-                @endif
-
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <button type="button" class="cta" disabled aria-describedby="proximamente">{{ __('tienda.personalizar') }}</button>
-                    <p class="suave" id="proximamente" style="font-size: 13px;">{{ __('tienda.proximamente') }} {{ __('tienda.minimo') }}</p>
-                </div>
-
-                <ol class="pasos-ficha">
-                    <li>{{ __('tienda.paso_1') }}</li>
-                    <li>{{ __('tienda.paso_2') }}</li>
-                    <li>{{ __('tienda.paso_3') }}</li>
-                </ol>
-
-                <div>
-                    <details>
-                        <summary>{{ __('tienda.detalles') }}</summary>
-                        <ul>
-                            @if ($prenda->composicion)<li>{{ __('tienda.composicion') }}: {{ $prenda->composicion }}</li>@endif
-                            @if ($prenda->gramaje)<li>{{ __('tienda.gramaje') }}: {{ $prenda->gramaje }} g/m²</li>@endif
-                            @if ($prenda->detalles)<li>{{ $prenda->detalles }}</li>@endif
-                        </ul>
-                    </details>
-                    @if ($medidas->isNotEmpty())
-                        <details>
-                            <summary>{{ __('tienda.guia_tallas') }}</summary>
-                            <table>
-                                <thead><tr><th scope="col">{{ __('tienda.talla') }}</th><th scope="col">{{ __('tienda.largo') }}</th><th scope="col">{{ __('tienda.ancho') }}</th><th scope="col">{{ __('tienda.manga') }}</th></tr></thead>
-                                <tbody>
-                                    @foreach ($medidas as $medida)
-                                        <tr><th scope="row">{{ $medida->talla->nombre }}</th><td>{{ $cm($medida->largo_mm) }}</td><td>{{ $cm($medida->ancho_mm) }}</td><td>{{ $cm($medida->manga_mm) }}</td></tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </details>
-                    @endif
-                    <details>
-                        <summary>{{ __('tienda.zonas_calidad') }}</summary>
-                        <ul><li>{{ __('tienda.calidad_texto') }}</li></ul>
-                    </details>
-                    <details>
-                        <summary>{{ __('tienda.plazos') }}</summary>
-                        <ul><li>{{ __('tienda.plazo_produccion', ['dias' => $familia->plazo_base_dias]) }}</li><li>{{ __('tienda.plazo_envio') }}</li></ul>
-                    </details>
-                    <details>
-                        <summary>{{ __('tienda.garantia') }}</summary>
-                        <ul><li>{{ __('tienda.garantia_desistimiento') }}</li><li>{{ __('tienda.garantia_defecto') }}</li></ul>
-                    </details>
-                </div>
-
-                <p class="suave" style="font-size: 13px;">{{ __('tienda.pago_seguro') }}</p>
-            </section>
+            @unless ($conTuMarca)
+                <section class="info" aria-label="{{ __('tienda.detalles') }}">
+                    @include('tienda._info-prenda', ['enEstudio' => false])
+                </section>
+            @endunless
         </div>
 
-        @if ($conTuMarca)
-            <section class="coleccion" id="coleccion" aria-labelledby="coleccion-titulo" hidden>
-                <p class="etiqueta">{{ __('tienda.tu_marca_etiqueta') }}</p>
-                <h2 id="coleccion-titulo">{{ __('tienda.coleccion_titulo') }}</h2>
-                <p class="suave" id="coleccion-texto" style="margin-top: 8px;"></p>
-                <div class="coleccion-rejilla" id="coleccion-rejilla"></div>
-            </section>
-        @endif
     </div>
 </x-tienda>

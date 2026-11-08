@@ -3,11 +3,14 @@
 namespace App\Filament\Pages;
 
 use App\Dominio\Disenos\Calidad;
+use App\Dominio\Disenos\MejoraIa;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Filament\Navegacion\GrupoNavegacion;
 use App\Models\Ajuste;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -51,9 +54,11 @@ class AjustesGenerales extends Page implements HasSchemas
         $this->form->fill([
             'nombre' => Ajuste::obtener('tienda.nombre'),
             'correo_contacto' => Ajuste::obtener('tienda.correo_contacto'),
-            'iva_general' => Ajuste::obtener('impuestos.iva_general') / 100,
             ...Calidad::umbrales(),
             'indexar' => (bool) Ajuste::obtener('seo.indexar'),
+            'ia_activa' => MejoraIa::activa(),
+            'ia_desde' => MejoraIa::desde(),
+            'ia_texto' => collect(config('idiomas.disponibles'))->keys()->mapWithKeys(fn ($i) => [$i => MejoraIa::texto($i)])->all(),
         ]);
     }
 
@@ -64,15 +69,6 @@ class AjustesGenerales extends Page implements HasSchemas
                 TextInput::make('nombre')->label('Nombre de la tienda')->required()->maxLength(100),
                 TextInput::make('correo_contacto')->label('Correo de contacto')->email()->maxLength(255),
             ]),
-            Section::make('Impuestos')
-                ->description('IVA provisional para mostrar los precios con IVA en la tienda. En la fase 3 se sustituirá por las clases de impuesto de Ajustes → Impuestos.')
-                ->schema([
-                    TextInput::make('iva_general')->label('IVA general')->suffix('%')->required()
-                        // Como los importes: coma o punto y hasta 2 decimales, sin redondeos silenciosos.
-                        ->rule('regex:/^\d{1,2}([.,]\d{1,2})?$/')
-                        ->validationMessages(['regex' => 'Escribe el tipo con hasta 2 decimales, por ejemplo 21 o 10,5.'])
-                        ->formatStateUsing(fn ($state) => $state === null ? null : str_replace('.', ',', (string) $state)),
-                ]),
             Section::make('Calidad de los diseños')
                 ->description('ppp efectivo mínimo de cada nivel, al tamaño al que se imprime. Por debajo del último, el aviso es fuerte y se recomienda no continuar.')
                 ->columns(3)
@@ -80,6 +76,18 @@ class AjustesGenerales extends Page implements HasSchemas
                     TextInput::make('correcto')->label('Calidad excelente desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required()->gt('aceptable'),
                     TextInput::make('aceptable')->label('Buena calidad desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required()->gt('minimo'),
                     TextInput::make('minimo')->label('Calidad justa desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required(),
+                ]),
+            Section::make('Mejorar el diseño con IA')
+                ->description('Si la calidad no llega, el cliente ve un botón con estas instrucciones para mejorar su diseño con su propia herramienta de IA y volver a subirlo. La tienda no envía nada a ninguna IA. Escribe :medida donde va el tamaño de impresión (por ejemplo, «28 × 28 cm»). Si vacías un texto, se usa el de por defecto.')
+                ->columns(2)
+                ->schema([
+                    Toggle::make('ia_activa')->label('Ofrecer las instrucciones al cliente'),
+                    Select::make('ia_desde')->label('Ofrecerlas cuando la calidad sea')->required()->selectablePlaceholder(false)->options([
+                        'buena' => 'Buena o peor (por debajo de excelente)',
+                        'justa' => 'Justa o baja',
+                        'baja' => 'Solo baja',
+                    ]),
+                    ...collect(config('idiomas.disponibles'))->map(fn ($nombre, $i) => Textarea::make("ia_texto.{$i}")->label("Instrucciones ({$nombre})")->rows(14)->maxLength(5000)->columnSpanFull())->values()->all(),
                 ]),
             Section::make('Buscadores')
                 ->description(app()->environment('production')
@@ -96,12 +104,8 @@ class AjustesGenerales extends Page implements HasSchemas
         return [
             Action::make('guardar')->label('Guardar cambios')->action(function (): void {
                 $datos = $this->form->getState();
-                $ivaAnterior = Ajuste::obtener('impuestos.iva_general');
-                $ivaNuevo = (int) round(((float) str_replace(',', '.', (string) $datos['iva_general'])) * 100);
-
                 Ajuste::guardar('tienda.nombre', $datos['nombre']);
                 Ajuste::guardar('tienda.correo_contacto', $datos['correo_contacto']);
-                Ajuste::guardar('impuestos.iva_general', $ivaNuevo);
 
                 $indexarAnterior = (bool) Ajuste::obtener('seo.indexar');
                 Ajuste::guardar('seo.indexar', (bool) $datos['indexar']);
@@ -119,9 +123,11 @@ class AjustesGenerales extends Page implements HasSchemas
                     Actividad::apuntar('ajustes', 'Umbrales de calidad cambiados', propiedades: ['old' => $umbralesAnteriores, 'attributes' => $umbralesNuevos]);
                 }
 
-                if ($ivaAnterior !== $ivaNuevo) {
-                    Actividad::apuntar('ajustes', 'IVA general cambiado', propiedades: ['old' => ['iva' => $ivaAnterior / 100 .' %'], 'attributes' => ['iva' => $ivaNuevo / 100 .' %']]);
-                }
+                // Mejora con IA: solo se guarda el texto que difiere del de por defecto, para que este pueda mejorar con las versiones.
+                Ajuste::guardar('disenos.ia_activa', (bool) $datos['ia_activa']);
+                Ajuste::guardar('disenos.ia_desde', in_array($datos['ia_desde'], MejoraIa::NIVELES, true) ? $datos['ia_desde'] : 'justa');
+                $textos = collect($datos['ia_texto'] ?? [])->map(fn ($t, $i) => trim((string) $t) === '' || trim((string) $t) === MejoraIa::porDefecto($i) ? null : trim((string) $t))->filter()->all();
+                Ajuste::guardar('disenos.ia_texto', $textos ?: null);
 
                 Notification::make()->title('Ajustes guardados')->success()->send();
             }),

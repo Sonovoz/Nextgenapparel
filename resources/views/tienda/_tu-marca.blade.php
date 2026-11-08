@@ -6,6 +6,61 @@
         <p class="claro" style="margin-top: 8px;">{{ __('tienda.tu_marca_texto') }}</p>
     </div>
 
+    {{-- Niveles del configurador (D142): 1 Diseño · 2 Tallas y colores · 3 Resumen. --}}
+    <ol class="niveles" id="niveles" aria-label="{{ __('tienda.niveles') }}">
+        <li><button type="button" data-nivel="diseno" aria-current="step"><b>1</b> {{ __('tienda.nivel_diseno') }}</button></li>
+        <li><button type="button" data-nivel="cantidades" disabled><b>2</b> {{ __('tienda.nivel_cantidades') }}</button></li>
+        <li><button type="button" data-nivel="resumen" disabled><b>3</b> {{ __('tienda.nivel_resumen') }}</button></li>
+    </ol>
+
+    <div class="nivel" id="nivel-diseno">
+    {{-- Energía de la calidad, siempre a la vista mientras se diseña. --}}
+    <div class="calidad" id="calidad" role="status" aria-live="polite" data-nivel="">
+        <div class="calidad-cabecera"><strong id="calidad-etiqueta">{{ __('tienda.calidad_sin_diseno') }}</strong><span class="claro" id="calidad-ppp"></span></div>
+        <div class="calidad-barra" aria-hidden="true"><span id="calidad-relleno"></span></div>
+        <p id="calidad-mensaje"></p>
+        <p class="claro" id="calidad-consejo"></p>
+        <p id="calidad-fondo"></p>
+    </div>
+
+    {{-- Si la calidad no llega: instrucciones para mejorarlo con su propia IA y volver a subirlo (D143). --}}
+    <div class="mejora-ia" id="mejora-ia" hidden>
+        <button type="button" class="boton-ia" id="abrir-ia" aria-expanded="false" aria-controls="panel-ia">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg>
+            {{ __('tienda.ia_boton') }}
+        </button>
+        <div class="panel-ia" id="panel-ia" hidden>
+            <ol class="pasos-ia">
+                <li>{{ __('tienda.ia_paso_1') }}</li>
+                <li>{{ __('tienda.ia_paso_2') }}</li>
+                <li>{{ __('tienda.ia_paso_3') }}</li>
+            </ol>
+            <label for="texto-ia" class="oculto">{{ __('tienda.ia_boton') }}</label>
+            <textarea id="texto-ia" class="texto-ia" rows="9" readonly></textarea>
+            <div class="acciones-ia">
+                <button type="button" class="boton-siguiente" id="copiar-ia">{{ __('tienda.ia_copiar') }}</button>
+                <label for="archivo-diseno" class="boton-pildora borde subir-ia">{{ __('tienda.ia_subir') }}</label>
+            </div>
+            <p class="claro aviso-ia">{{ __('tienda.ia_aviso') }}</p>
+        </div>
+    </div>
+
+    {{-- Tarjeta de decisión: tus diseños con lo que suman y «¿otro diseño o seguimos?». --}}
+    <div class="capas" id="capas" aria-live="polite"></div>
+
+    <div class="herramientas" role="tablist" aria-label="{{ __('tienda.estudio') }}">
+        <button type="button" role="tab" class="herramienta" id="h-diseno" aria-selected="true" aria-controls="hp-diseno" data-herramienta="diseno">{{ __('tienda.herramienta_diseno') }}</button>
+        <button type="button" role="tab" class="herramienta" id="h-zona" aria-selected="false" aria-controls="hp-zona" data-herramienta="zona" tabindex="-1">{{ __('tienda.herramienta_zona') }}</button>
+        <button type="button" role="tab" class="herramienta" id="h-ajustar" aria-selected="false" aria-controls="hp-ajustar" data-herramienta="ajustar" tabindex="-1">{{ __('tienda.herramienta_ajustar') }}</button>
+        <button type="button" role="tab" class="herramienta" id="h-prenda" aria-selected="false" aria-controls="hp-prenda" data-herramienta="prenda" tabindex="-1">{{ __('tienda.herramienta_prenda') }}</button>
+    </div>
+
+    <div id="hp-prenda" role="tabpanel" aria-labelledby="h-prenda" class="herramienta-panel info-prenda" hidden>
+        @include('tienda._info-prenda', ['enEstudio' => true])
+    </div>
+
+    <div id="hp-diseno" role="tabpanel" aria-labelledby="h-diseno" class="herramienta-panel">
+
     <div class="pestanas" role="tablist" aria-label="{{ __('tienda.tu_marca_etiqueta') }}">
         <button type="button" role="tab" id="pestana-logo" aria-selected="true" aria-controls="panel-logo" data-modo="logo">{{ __('tienda.pestana_logo') }}</button>
         <button type="button" role="tab" id="pestana-texto" aria-selected="false" aria-controls="panel-texto" data-modo="texto" tabindex="-1">{{ __('tienda.pestana_texto') }}</button>
@@ -13,8 +68,9 @@
 
     <div id="panel-logo" role="tabpanel" aria-labelledby="pestana-logo">
         <label class="soltar" id="soltar" for="archivo-diseno">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-            <strong>{{ __('tienda.soltar') }}</strong>
+            <span class="icono-subir"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 16V4m0 0-5 5m5-5 5 5M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
+            <strong class="boton-soltar">{{ __('tienda.soltar_boton') }}</strong>
+            <span class="claro">{{ __('tienda.soltar_arrastra') }}</span>
             <span class="claro">{{ __('tienda.soltar_formatos') }}</span>
             <span class="nombre-logo" id="nombre-logo"></span>
         </label>
@@ -46,20 +102,20 @@
         </div>
     </div>
 
-    <div class="grupo">
-        <span>{{ __('tienda.donde') }}</span>
-        <div class="opciones" id="zonas-diseno" role="radiogroup" aria-label="{{ __('tienda.donde') }}"></div>
     </div>
 
-    <div class="ajustador" id="ajustador" hidden>
-        <div class="calidad" id="calidad" role="status" aria-live="polite">
-            <div class="calidad-cabecera"><strong id="calidad-etiqueta"></strong><span class="claro" id="calidad-ppp"></span></div>
-            <p id="calidad-mensaje"></p>
-            <p class="claro" id="calidad-consejo"></p>
-            <p id="calidad-fondo"></p>
+    <div id="hp-zona" role="tabpanel" aria-labelledby="h-zona" class="herramienta-panel" hidden>
+        <p class="aviso-zona" id="aviso-zona" aria-live="polite"></p>
+        <div class="grupo">
+            <span>{{ __('tienda.donde') }}</span>
+            <div class="opciones" id="zonas-diseno" role="radiogroup" aria-label="{{ __('tienda.donde') }}"></div>
         </div>
+    </div>
 
-        <h3>{{ __('tienda.ajusta') }}</h3>
+    <div id="hp-ajustar" role="tabpanel" aria-labelledby="h-ajustar" class="herramienta-panel" hidden>
+    <p class="claro" id="ajustador-vacio">{{ __('tienda.ajustar_vacio') }}</p>
+    <div class="ajustador" id="ajustador" hidden>
+        <h2 class="ajustador-titulo">{{ __('tienda.ajusta') }}</h2>
         <div class="fila-tamano">
             <label for="tamano-diseno" class="oculto">{{ __('tienda.tamano') }}</label>
             <input type="range" id="tamano-diseno" min="20" max="100" step="1" value="100">
@@ -71,14 +127,42 @@
             <button type="button" class="boton-pildora borde" id="arriba-diseno">{{ __('tienda.subir') }}</button>
         </div>
     </div>
+    </div>
 
     <p class="tu-marca-error" id="tu-marca-error" role="alert" hidden></p>
     <p class="tu-marca-estado" id="tu-marca-estado" aria-live="polite"></p>
 
     <div class="acciones-marca" id="tu-marca-acciones" hidden>
-        <button type="button" class="boton-claro" id="ver-coleccion" aria-expanded="false" aria-controls="coleccion">{{ __('tienda.ver_tu_coleccion') }}</button>
-        <button type="button" class="boton-texto" id="quitar-diseno">{{ __('tienda.quitar_diseno') }}</button>
+        <button type="button" class="accion-borrar" id="quitar-diseno"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg><span id="quitar-texto">{{ __('tienda.quitar_diseno') }}</span></button>
+        <button type="button" class="accion-reiniciar" id="empezar-de-nuevo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M20 10A8 8 0 0 0 6.3 6.3L4 10m16 4-2.3 3.7A8 8 0 0 1 4 14"/></svg><span id="empezar-texto">{{ __('tienda.empezar_de_nuevo') }}</span></button>
     </div>
 
     <p class="claro" style="font-size: 13px;">{{ __('tienda.privacidad') }}</p>
+    </div>
+
+    <div class="nivel" id="nivel-cantidades" hidden>
+        <div>
+            <h2 class="nivel-titulo">{{ __('tienda.nivel_cantidades') }}</h2>
+            <p class="claro">{{ __('tienda.cantidades_texto') }}</p>
+        </div>
+        <div class="lineas-color" id="lineas-color"></div>
+        <div class="grupo" id="anadir-color">
+            <span>{{ __('tienda.anadir_color') }}</span>
+            <div class="opciones" id="colores-libres"></div>
+        </div>
+        <div class="cuenta" id="cuenta" aria-live="polite"></div>
+        <div class="nivel-acciones">
+            <button type="button" class="boton-texto" data-ir="diseno">← {{ __('tienda.volver_diseno') }}</button>
+            <button type="button" class="boton-siguiente" id="ir-resumen" data-ir="resumen" disabled>{{ __('tienda.siguiente_resumen') }} <span aria-hidden="true">→</span></button>
+        </div>
+    </div>
+
+    <div class="nivel" id="nivel-resumen" hidden>
+        <h2 class="nivel-titulo">{{ __('tienda.resumen_titulo') }}</h2>
+        <div class="resumen" id="resumen"></div>
+        <p class="claro">{{ __('tienda.envio_al_cerrar') }}</p>
+        <button type="button" class="boton-siguiente" id="anadir-pedido" disabled aria-describedby="anadir-pronto">{{ __('tienda.anadir_pedido') }}</button>
+        <p class="claro" id="anadir-pronto">{{ __('tienda.anadir_pronto') }}</p>
+        <button type="button" class="boton-texto" data-ir="cantidades">← {{ __('tienda.cambiar_cantidades') }}</button>
+    </div>
 </section>

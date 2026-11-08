@@ -1,6 +1,6 @@
 # NextGen Apparel — instrucciones del proyecto
 
-Portal de pedidos de prendas personalizadas con impresión DTF (camisetas, polos y sudaderas) para pequeños diseñadores. Laravel + Filament, en Docker sobre un servidor dedicado de OVH.
+Portal de pedidos de prendas personalizadas con impresión DTI (camisetas, polos y sudaderas) para pequeños diseñadores. Laravel + Filament, en Docker sobre un servidor dedicado de OVH.
 
 **Lee siempre antes de trabajar:**
 - `docs/FICHA.md`: alcance, modelo de datos, reglas de negocio y fases. Es la fuente de verdad.
