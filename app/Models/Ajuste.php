@@ -23,6 +23,10 @@ class Ajuste extends Model
         'disenos.ppp_correcto' => 300,
         'disenos.ppp_aceptable' => 200,
         'disenos.ppp_minimo' => 150,
+        // Mejora con IA para el cliente (D143): activa, desde qué nivel y texto propio por idioma (vacío = el de lang/disenos.php).
+        'disenos.ia_activa' => true,
+        'disenos.ia_desde' => 'justa',
+        'disenos.ia_texto' => null,
         // Ofertas: avisar «te faltan…» desde este avance (centésimas de %, 5000 = 50 %).
         'ofertas.aviso_cercana' => 5000,
         // Buscadores: apagado hasta la puesta en marcha; solo cuenta en producción (D102).

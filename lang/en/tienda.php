@@ -148,4 +148,13 @@ return [
     'anadir_pronto' => 'Soon you will be able to save it to your cart and pay. For now, review your order here.',
     'cambiar_cantidades' => 'Change sizes & colours',
     'calculando' => 'Calculating…',
+    // Improve the design with AI (D143)
+    'ia_boton' => 'Improve my design with AI',
+    'ia_paso_1' => 'Copy these instructions: they already include your print size.',
+    'ia_paso_2' => 'Open your AI image tool, attach your original design and paste the instructions.',
+    'ia_paso_3' => 'Come back and upload the PNG it gives you: we check its quality instantly.',
+    'ia_copiar' => 'Copy instructions',
+    'ia_copiado' => 'Copied!',
+    'ia_subir' => 'Upload the improved design',
+    'ia_aviso' => 'AI can change details: check that the result is faithful to your design. You can only print designs you hold the rights to.',
 ];

@@ -17,4 +17,14 @@ return [
     'fondo' => 'Your image has a background: the whole rectangle would be printed. For the order, upload it as a PNG with a transparent background.',
     'fondo_blanco' => 'Your image seems to have a white background: on coloured garments you would see a box. For the order, upload it as a PNG with a transparent background.',
     'formato_pedido' => "For the order we'll need your design as a PNG.",
+    // Instrucciones para mejorar el diseño con IA (D143); «:medida» es el tamaño de impresión.
+    'ia_texto' => 'I am going to attach an image that I want to print on a garment. Improve its quality and prepare it for textile printing following these instructions:
+
+1. Faithfully preserve the original design: its composition, colours, proportions and details. Do not change logos, lettering or symbols, and do not add new elements.
+2. Improve sharpness, definition and edges. Reduce pixelation, noise and compression artefacts, avoiding an artificial or over-sharpened look.
+3. Prepare the design at the highest real resolution available. The goal is 300 pixels per inch at the final print size. My desired size is: :medida.
+4. If the original image does not have enough quality for that size, tell me so and tell me the approximate maximum size that would allow printing at 300 ppi. Do not claim to have recovered details that do not exist in the original.
+5. Give me the design as a PNG file, with a transparent background if the design allows it. Do not include the T-shirt, a mock-up, shadows, frames or backgrounds that are not part of the design.
+6. Check that the lettering is legible and that no details are missing. If any element cannot be reproduced faithfully, let me know.
+7. State the final file dimensions in pixels and the approximate size at which it can be printed at 300 ppi.',
 ];

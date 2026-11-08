@@ -63,11 +63,14 @@
         'resumen_total' => __('tienda.resumen_total'),
         'anadir_pedido' => __('tienda.anadir_pedido'),
         'calculando' => __('tienda.calculando'),
+        'ia_copiar' => __('tienda.ia_copiar'),
+        'ia_copiado' => __('tienda.ia_copiado'),
     ];
     // Misma regla que App\Dominio\Disenos\Calidad: umbrales de Ajustes y textos de aviso.
     $calidadVisor = [
         'umbrales' => \App\Dominio\Disenos\Calidad::umbrales(),
         'textos' => trans('disenos'),
+        'ia' => \App\Dominio\Disenos\MejoraIa::paraVisor(),
     ];
 @endphp
 

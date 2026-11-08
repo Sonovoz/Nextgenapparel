@@ -946,6 +946,7 @@
             ['calidad-ppp', 'calidad-mensaje', 'calidad-consejo', 'calidad-fondo'].forEach(function (id) { document.getElementById(id).textContent = ''; });
             document.getElementById('calidad-relleno').style.width = '0';
         }
+        mostrarMejoraIa(null);
         if (!zona) return;
 
         var color = colores[estado.color];
@@ -985,8 +986,42 @@
         } else {
             consejo.textContent = t.consejo_mejorar.replace(':px', Math.ceil(anchoMm / 25.4 * calidad.umbrales.correcto));
         }
+        mostrarMejoraIa(n, cm(anchoMm) + ' × ' + cm(altoMm) + ' cm');
         if (estado.logoTipo === 'fondo') fondo.textContent = t.fondo;
         if (estado.logoTipo === 'fondo_blanco') fondo.textContent = t.fondo_blanco;
+    }
+
+    /* Mejorar el diseño con IA (D143): si la calidad no llega, las instrucciones del
+       backend con su tamaño de impresión, para copiarlas en su propia herramienta. */
+    var mejoraIa = document.getElementById('mejora-ia');
+    function mostrarMejoraIa(n, medida) {
+        if (!mejoraIa) return;
+        var ia = calidad.ia || { niveles: [] };
+        var ofrecer = !!n && ia.niveles.indexOf(n) !== -1;
+        mejoraIa.hidden = !ofrecer;
+        if (ofrecer) document.getElementById('texto-ia').value = ia.texto.split(':medida').join(medida);
+    }
+    if (mejoraIa) {
+        var abrirIa = document.getElementById('abrir-ia');
+        abrirIa.addEventListener('click', function () {
+            var abierto = abrirIa.getAttribute('aria-expanded') === 'true';
+            abrirIa.setAttribute('aria-expanded', String(!abierto));
+            document.getElementById('panel-ia').hidden = abierto;
+        });
+        var copiarIa = document.getElementById('copiar-ia');
+        copiarIa.addEventListener('click', function () {
+            var campo = document.getElementById('texto-ia');
+            var hecho = function () {
+                copiarIa.textContent = textos.ia_copiado;
+                setTimeout(function () { copiarIa.textContent = textos.ia_copiar; }, 2200);
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(campo.value).then(hecho, function () { campo.select(); });
+            } else {
+                campo.select();
+                try { if (document.execCommand('copy')) hecho(); } catch (e) {}
+            }
+        });
     }
 
     var esperaTamano = null;

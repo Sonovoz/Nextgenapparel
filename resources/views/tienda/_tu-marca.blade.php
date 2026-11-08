@@ -23,6 +23,28 @@
         <p id="calidad-fondo"></p>
     </div>
 
+    {{-- Si la calidad no llega: instrucciones para mejorarlo con su propia IA y volver a subirlo (D143). --}}
+    <div class="mejora-ia" id="mejora-ia" hidden>
+        <button type="button" class="boton-ia" id="abrir-ia" aria-expanded="false" aria-controls="panel-ia">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg>
+            {{ __('tienda.ia_boton') }}
+        </button>
+        <div class="panel-ia" id="panel-ia" hidden>
+            <ol class="pasos-ia">
+                <li>{{ __('tienda.ia_paso_1') }}</li>
+                <li>{{ __('tienda.ia_paso_2') }}</li>
+                <li>{{ __('tienda.ia_paso_3') }}</li>
+            </ol>
+            <label for="texto-ia" class="oculto">{{ __('tienda.ia_boton') }}</label>
+            <textarea id="texto-ia" class="texto-ia" rows="9" readonly></textarea>
+            <div class="acciones-ia">
+                <button type="button" class="boton-siguiente" id="copiar-ia">{{ __('tienda.ia_copiar') }}</button>
+                <label for="archivo-diseno" class="boton-pildora borde subir-ia">{{ __('tienda.ia_subir') }}</label>
+            </div>
+            <p class="claro aviso-ia">{{ __('tienda.ia_aviso') }}</p>
+        </div>
+    </div>
+
     {{-- Tarjeta de decisión: tus diseños con lo que suman y «¿otro diseño o seguimos?». --}}
     <div class="capas" id="capas" aria-live="polite"></div>
 

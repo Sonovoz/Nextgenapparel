@@ -148,4 +148,13 @@ return [
     'anadir_pronto' => 'Muy pronto podrás guardarlo en tu carrito y pagar. De momento, revisa aquí tu pedido.',
     'cambiar_cantidades' => 'Cambiar tallas y colores',
     'calculando' => 'Calculando…',
+    // Mejorar el diseño con IA (D143)
+    'ia_boton' => 'Mejorar mi diseño con IA',
+    'ia_paso_1' => 'Copia estas instrucciones: ya llevan tu tamaño de impresión.',
+    'ia_paso_2' => 'Abre tu herramienta de IA de imágenes, adjunta tu diseño original y pega las instrucciones.',
+    'ia_paso_3' => 'Vuelve aquí y sube el PNG que te devuelva: medimos su calidad al momento.',
+    'ia_copiar' => 'Copiar instrucciones',
+    'ia_copiado' => '¡Copiadas!',
+    'ia_subir' => 'Subir el diseño mejorado',
+    'ia_aviso' => 'La IA puede cambiar detalles: revisa que el resultado sea fiel a tu diseño. Solo puedes imprimir diseños sobre los que tengas derechos.',
 ];
