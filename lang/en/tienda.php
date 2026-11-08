@@ -111,4 +111,6 @@ return [
     'confirmar_empezar' => 'Delete all your designs? Tap again',
     'soltar_boton' => 'Choose my logo',
     'soltar_arrastra' => 'or drag it onto the garment',
+    'herramienta_prenda' => 'Garment',
+    'volver_listado' => 'Back to :familia',
 ];

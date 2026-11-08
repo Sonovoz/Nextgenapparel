@@ -91,7 +91,7 @@
         .tu-marca .claro { color: #C9C7C0; font-size: 14px; }
         .pestanas { display: flex; gap: 4px; background: rgba(255,255,255,.08); border-radius: 999px; padding: 4px; align-self: flex-start; flex-wrap: wrap; }
         .pestanas [role="tab"] { min-height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: 14px; cursor: pointer; }
-        .pestanas [aria-selected="true"] { background: #fff; color: var(--tinta); }
+        .pestanas [aria-selected="true"] { background: #fff; color: #0B0B10; }
         .tu-marca button:focus-visible, .tu-marca input:focus-visible, .soltar:focus-within { outline: 2px solid #fff; outline-offset: 3px; }
         .soltar { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 140px; padding: 20px; border: 1.5px dashed rgba(255,255,255,.45); border-radius: 4px; text-align: center; cursor: pointer; transition: background .2s ease, border-color .2s ease; }
         .soltar:hover, .soltar.soltando { background: rgba(255,255,255,.06); border-color: #fff; }
@@ -105,7 +105,7 @@
         .grupo > span { font-size: 13px; color: #C9C7C0; }
         .opciones { display: flex; flex-wrap: wrap; gap: 6px; }
         .boton-pildora.borde { border: 1px solid rgba(255,255,255,.35); color: #fff; min-height: 40px; }
-        .boton-pildora.borde[aria-checked="true"] { background: #fff; color: var(--tinta); border-color: #fff; }
+        .boton-pildora.borde[aria-checked="true"] { background: #fff; color: #0B0B10; border-color: #fff; }
         .fuente-muestra { font-size: 18px; min-width: 56px; }
         .tinta-muestra { width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(255,255,255,.35); padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; background: transparent; color: #fff; font: inherit; font-size: 11px; }
         .tinta-muestra[aria-checked="true"] { box-shadow: 0 0 0 2px #16161A, 0 0 0 4px #fff; }
@@ -114,7 +114,7 @@
         .tu-marca-estado { font-size: 15px; animation: aparecer .5s ease both; }
         .tu-marca-error { color: #FFB4A9; font-size: 14px; }
         .acciones-marca { display: flex; flex-wrap: wrap; gap: 8px; }
-        .boton-claro { min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #fff; color: var(--tinta); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .boton-claro { min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #fff; color: #0B0B10; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
         .boton-texto { min-height: 48px; padding: 0 12px; border: 0; background: transparent; color: #C9C7C0; font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
         .coleccion { margin-top: 72px; }
         .coleccion h2 { font-size: clamp(30px, 4vw, 40px); margin: 0; }
@@ -179,18 +179,27 @@
 
 <x-tienda :titulo="($prenda->seo_titulo ?: $prenda->nombre).' · Nextgenapparel'" :descripcion="$prenda->seo_descripcion ?: \Illuminate\Support\Str::limit((string) $prenda->descripcion, 155)" :alternos="$alternos" :seo="$seo">
     <div class="contenedor">
+        @unless ($conTuMarca)
         <nav class="ruta" aria-label="Ruta">
             <a href="{{ route('portada') }}">{{ __('tienda.inicio') }}</a><span aria-hidden="true">/</span>
             <a href="{{ route('tienda.familia', ['familia' => Escaparate::slug($familia, $idioma)]) }}">{{ $familia->nombre }}</a><span aria-hidden="true">/</span>
             <span>{{ $prenda->nombre }}</span>
         </nav>
+        @endunless
 
         <div class="ficha">
             <section class="galeria" aria-label="{{ $prenda->nombre }}">
                 {{-- Estudio: a pantalla completa al diseñar (como la personalización de un videojuego). Fuera de él, la galería de la ficha. --}}
-                <div class="estudio" id="estudio" aria-label="{{ __('tienda.estudio') }}">
+                @php $urlFamilia = route('tienda.familia', ['familia' => Escaparate::slug($familia, $idioma)]); @endphp
+                <div class="estudio{{ $conTuMarca ? ' activo pagina' : '' }}" id="estudio" aria-label="{{ __('tienda.estudio') }}" data-salir="{{ $urlFamilia }}">
                 <div class="estudio-barra">
-                    <p class="estudio-titulo"><span>{{ __('tienda.estudio') }}</span> {{ $prenda->nombre }}</p>
+                    <div class="estudio-identidad">
+                        <a class="estudio-inicio" href="{{ route('portada') }}" aria-label="{{ __('tienda.inicio') }}"><img src="{{ asset('img/marca/monograma.png') }}" alt="" width="190" height="147"></a>
+                        <div>
+                            <nav class="estudio-ruta" aria-label="Ruta"><a href="{{ route('portada') }}">{{ __('tienda.inicio') }}</a> / <a href="{{ $urlFamilia }}">{{ $familia->nombre }}</a></nav>
+                            <h1 class="estudio-titulo">{{ $prenda->nombre }}</h1>
+                        </div>
+                    </div>
                     <p class="estudio-atajos" aria-hidden="true">
                         <span><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> {{ __('tienda.atajo_mover') }}</span>
                         <span><kbd>+</kbd><kbd>−</kbd> {{ __('tienda.atajo_tamano') }}</span>
@@ -199,6 +208,9 @@
                         <span><kbd>L</kbd> {{ __('tienda.lupa') }}</span>
                         <span><kbd>Esc</kbd> {{ __('tienda.atajo_salir') }}</span>
                     </p>
+                    @if ($precio)
+                        <p class="estudio-precio"><span>{{ __('tienda.desde') }}</span> <strong>{{ $precio }}</strong> <small>{{ __('tienda.por_unidad') }} · {{ __('tienda.iva_incluido') }}</small></p>
+                    @endif
                     <button type="button" class="estudio-cerrar" id="cerrar-estudio" aria-label="{{ __('tienda.cerrar_estudio') }}">×</button>
                 </div>
                 <div class="estudio-escena">
@@ -247,125 +259,14 @@
                 @endif
                 </div>
 
-                @if ($conTuMarca)
-                    <div class="invitacion-estudio">
-                        <div>
-                            <p class="etiqueta">{{ __('tienda.tu_marca_etiqueta') }}</p>
-                            <p class="invitacion-titulo">{{ __('tienda.tu_marca_titulo') }}</p>
-                            <p class="suave">{{ __('tienda.invitacion_texto') }}</p>
-                        </div>
-                        <button type="button" class="boton principal" data-abrir-estudio>{{ __('tienda.abrir_estudio') }}</button>
-                    </div>
-                @endif
+
             </section>
 
-            <section class="info" aria-label="{{ __('tienda.detalles') }}">
-                <div>
-                    <p class="etiqueta">{{ $familia->nombre }} · DTI Textil</p>
-                    <h1>{{ $prenda->nombre }}</h1>
-                    @if ($precio)
-                        <div class="precio">
-                            <span class="suave">{{ __('tienda.desde') }}</span>
-                            <strong>{{ $precio }}</strong>
-                            <span class="suave">{{ __('tienda.por_unidad') }} · {{ __('tienda.con_impresion') }} · {{ __('tienda.iva_incluido') }}</span>
-                        </div>
-                    @endif
-                    @if ($prenda->descripcion)
-                        <p style="margin: 16px 0 0; color: var(--tinta-suave);">{{ $prenda->descripcion }}</p>
-                    @endif
-                </div>
-
-                @if (count($colores) > 0)
-                    <div>
-                        <p class="suave" style="margin-bottom: 10px;">{{ __('tienda.color') }} · <strong id="nombre-color" style="color: var(--tinta); font-weight: 500;">{{ $primerColor['nombre'] }}</strong></p>
-                        <div class="muestras" role="radiogroup" aria-label="{{ __('tienda.color') }}">
-                            @foreach ($colores as $i => $color)
-                                <button type="button" class="muestra" role="radio" aria-checked="{{ $i === 0 ? 'true' : 'false' }}" aria-label="{{ $color['nombre'] }}" data-color="{{ $i }}">
-                                    <span style="background: {{ $color['hex'] }};"></span>
-                                </button>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                <div>
-                    <p class="suave" style="margin-bottom: 10px;">{{ __('tienda.tallas_disponibles') }}</p>
-                    <div class="chips">
-                        @foreach ($tallas as $talla)
-                            <span class="chip">{{ $talla }}</span>
-                        @endforeach
-                    </div>
-                    <p class="suave" style="margin-top: 10px; font-size: 13px;">{{ __('tienda.tallas_nota') }}</p>
-                </div>
-
-                @if ($prenda->zonas->isNotEmpty())
-                    <div>
-                        <p class="suave" style="margin-bottom: 10px;">{{ __('tienda.donde_imprimimos') }}</p>
-                        <div class="zonas">
-                            @foreach ($prenda->zonas as $zona)
-                                <div class="zona-tarjeta">
-                                    <span style="font-size: 14px; font-weight: 500;">{{ $zona->nombre }}</span>
-                                    <span class="suave" style="font-size: 12px;">{{ __('tienda.hasta', ['medida' => $numero($zona->ancho_max_mm).' × '.$numero($zona->alto_max_mm).' cm']) }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                        <p class="suave" style="margin-top: 10px; font-size: 13px;">{{ __('tienda.zonas_nota') }}</p>
-                    </div>
-                @endif
-
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    @if ($conTuMarca)
-                        <button type="button" class="boton principal" data-abrir-estudio style="width: 100%;">{{ __('tienda.abrir_estudio') }}</button>
-                    @else
-                        <button type="button" class="boton inactivo" disabled style="width: 100%;">{{ __('tienda.personalizar') }}</button>
-                    @endif
-                    <p class="suave" id="proximamente" style="font-size: 13px;">{{ __('tienda.proximamente') }} {{ __('tienda.minimo') }}</p>
-                </div>
-
-                <ol class="pasos-ficha">
-                    <li>{{ __('tienda.paso_1') }}</li>
-                    <li>{{ __('tienda.paso_2') }}</li>
-                    <li>{{ __('tienda.paso_3') }}</li>
-                </ol>
-
-                <div>
-                    <details>
-                        <summary>{{ __('tienda.detalles') }}</summary>
-                        <ul>
-                            @if ($prenda->composicion)<li>{{ __('tienda.composicion') }}: {{ $prenda->composicion }}</li>@endif
-                            @if ($prenda->gramaje)<li>{{ __('tienda.gramaje') }}: {{ $prenda->gramaje }} g/m²</li>@endif
-                            @if ($prenda->detalles)<li>{{ $prenda->detalles }}</li>@endif
-                        </ul>
-                    </details>
-                    @if ($medidas->isNotEmpty())
-                        <details>
-                            <summary>{{ __('tienda.guia_tallas') }}</summary>
-                            <table>
-                                <thead><tr><th scope="col">{{ __('tienda.talla') }}</th><th scope="col">{{ __('tienda.largo') }}</th><th scope="col">{{ __('tienda.ancho') }}</th><th scope="col">{{ __('tienda.manga') }}</th></tr></thead>
-                                <tbody>
-                                    @foreach ($medidas as $medida)
-                                        <tr><th scope="row">{{ $medida->talla->nombre }}</th><td>{{ $cm($medida->largo_mm) }}</td><td>{{ $cm($medida->ancho_mm) }}</td><td>{{ $cm($medida->manga_mm) }}</td></tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </details>
-                    @endif
-                    <details>
-                        <summary>{{ __('tienda.zonas_calidad') }}</summary>
-                        <ul><li>{{ __('tienda.calidad_texto') }}</li></ul>
-                    </details>
-                    <details>
-                        <summary>{{ __('tienda.plazos') }}</summary>
-                        <ul><li>{{ __('tienda.plazo_produccion', ['dias' => $familia->plazo_base_dias]) }}</li><li>{{ __('tienda.plazo_envio') }}</li></ul>
-                    </details>
-                    <details>
-                        <summary>{{ __('tienda.garantia') }}</summary>
-                        <ul><li>{{ __('tienda.garantia_desistimiento') }}</li><li>{{ __('tienda.garantia_defecto') }}</li></ul>
-                    </details>
-                </div>
-
-                <p class="suave" style="font-size: 13px;">{{ __('tienda.pago_seguro') }}</p>
-            </section>
+            @unless ($conTuMarca)
+                <section class="info" aria-label="{{ __('tienda.detalles') }}">
+                    @include('tienda._info-prenda', ['enEstudio' => false])
+                </section>
+            @endunless
         </div>
 
     </div>

@@ -111,4 +111,6 @@ return [
     'confirmar_empezar' => '¿Borrar todos tus diseños? Pulsa otra vez',
     'soltar_boton' => 'Elegir mi logo',
     'soltar_arrastra' => 'o arrástralo sobre la prenda',
+    'herramienta_prenda' => 'Prenda',
+    'volver_listado' => 'Volver a :familia',
 ];

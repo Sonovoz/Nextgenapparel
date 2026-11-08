@@ -19,6 +19,11 @@
         <button type="button" role="tab" class="herramienta" id="h-diseno" aria-selected="true" aria-controls="hp-diseno" data-herramienta="diseno">{{ __('tienda.herramienta_diseno') }}</button>
         <button type="button" role="tab" class="herramienta" id="h-zona" aria-selected="false" aria-controls="hp-zona" data-herramienta="zona" tabindex="-1">{{ __('tienda.herramienta_zona') }}</button>
         <button type="button" role="tab" class="herramienta" id="h-ajustar" aria-selected="false" aria-controls="hp-ajustar" data-herramienta="ajustar" tabindex="-1">{{ __('tienda.herramienta_ajustar') }}</button>
+        <button type="button" role="tab" class="herramienta" id="h-prenda" aria-selected="false" aria-controls="hp-prenda" data-herramienta="prenda" tabindex="-1">{{ __('tienda.herramienta_prenda') }}</button>
+    </div>
+
+    <div id="hp-prenda" role="tabpanel" aria-labelledby="h-prenda" class="herramienta-panel info-prenda" hidden>
+        @include('tienda._info-prenda', ['enEstudio' => true])
     </div>
 
     <div id="hp-diseno" role="tabpanel" aria-labelledby="h-diseno" class="herramienta-panel">

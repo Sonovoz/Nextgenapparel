@@ -234,7 +234,9 @@ class TiendaTest extends TestCase
 
     public function test_tu_marca_aparece_solo_si_hay_maquetas_con_zonas(): void
     {
-        $this->get('/es/camisetas/camiseta-essential')->assertDontSee('id="tu-marca"', false);
+        // Sin maquetas no hay configurador: se ve la ficha clásica.
+        $this->get('/es/camisetas/camiseta-essential')->assertDontSee('id="tu-marca"', false)
+            ->assertSee('<section class="info"', false)->assertDontSee('estudio activo pagina', false);
 
         $camiseta = $this->camiseta();
         $color = $camiseta->variantes()->first()->color_id;
@@ -246,8 +248,10 @@ class TiendaTest extends TestCase
             ->assertSee('id="tu-marca"', false)
             ->assertSee('id="estudio"', false)
             ->assertSee('id="pieles"', false)
-            ->assertSee('data-abrir-estudio', false)
-            ->assertSee('Diseñar mi prenda')
+            ->assertSee('class="estudio activo pagina"', false) // el configurador es la página
+            ->assertSee('data-salir="'.url('/es/camisetas').'"', false)
+            ->assertSee('id="hp-prenda"', false)
+            ->assertDontSee('<section class="info"', false)
             ->assertSee('Arrástralo para colocarlo')
             ->assertSee('¿Tienes logo? Míralo puesto.')
             ->assertSee('no lo subimos ni lo guardamos');

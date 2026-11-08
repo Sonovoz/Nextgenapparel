@@ -1093,6 +1093,9 @@
     var botonLupa = document.getElementById('boton-lupa');
     var desdeHistorial = false;
 
+    // En la página de producto, el configurador ES la página: siempre abierto.
+    var esPagina = !!estudio && estudio.classList.contains('pagina');
+
     function abrirEstudio() {
         if (!estudio || enEstudio()) return;
         estudio.classList.add('activo');
@@ -1105,6 +1108,7 @@
     }
 
     function cerrarEstudio() {
+        if (esPagina) { window.location.href = estudio.dataset.salir; return; }
         if (!enEstudio()) return;
         estudio.classList.remove('activo', 'con-lupa');
         document.body.classList.remove('estudio-abierto');
@@ -1159,7 +1163,7 @@
     // Mandos de teclado, como en una consola (solo dentro del estudio y fuera de los campos de texto).
     document.addEventListener('keydown', function (e) {
         if (!enEstudio()) return;
-        if (e.key === 'Escape') { cerrarEstudio(); return; }
+        if (e.key === 'Escape') { if (!esPagina) cerrarEstudio(); return; }
         var etiqueta = (e.target.tagName || '').toLowerCase();
         if (etiqueta === 'input' || etiqueta === 'textarea' || e.ctrlKey || e.metaKey || e.altKey) return;
         var zona = hayDiseno() ? zonaActual() : null;
@@ -1186,6 +1190,11 @@
         esperaTeclas = setTimeout(refrescarColeccion, 250);
     });
     var esperaTeclas = null;
+
+    if (esPagina) {
+        document.body.classList.add('estudio-abierto');
+        refrescarColeccion();
+    }
 
     pintar();
 })();

@@ -298,7 +298,7 @@ body.estudio-abierto { overflow: hidden; }
 .estudio-atajos { display: none; margin: 0; gap: 18px; font-size: 12px; color: #A7A2B5; }
 .estudio-atajos kbd { display: inline-flex; min-width: 22px; height: 22px; align-items: center; justify-content: center; padding: 0 5px; margin-right: 3px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, .22); border-bottom-width: 2px; font: 500 11px var(--sans); color: #fff; }
 .estudio-cerrar { width: 44px; height: 44px; border-radius: 99px; border: 1px solid rgba(255, 255, 255, .2); background: transparent; color: #fff; font-size: 24px; cursor: pointer; flex-shrink: 0; }
-.estudio-cerrar:hover { background: #fff; color: var(--tinta); }
+.estudio-cerrar:hover { background: #fff; color: #0B0B10; }
 
 /* Escenario: foco de luz sobre la prenda, como el personaje en su pedestal. */
 .estudio.activo .estudio-escena { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; background: radial-gradient(60% 55% at 50% 42%, #2C2E3F 0%, #15151D 55%, #0B0B10 100%); overflow: hidden; }
@@ -309,11 +309,11 @@ body.estudio-abierto { overflow: hidden; }
 .estudio.activo .visor-controles { top: 8px; left: 8px; right: 8px; }
 .estudio.activo .visor-lienzo { width: 92%; z-index: 1; }
 .estudio.activo .girar { display: inline-flex; position: absolute; top: 42%; z-index: 3; width: 48px; height: 48px; border-radius: 99px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .06); color: #fff; font-size: 28px; line-height: 1; align-items: center; justify-content: center; cursor: pointer; transition: background .2s ease, transform .2s ease; }
-.estudio.activo .girar:hover { background: #fff; color: var(--tinta); transform: scale(1.06); }
+.estudio.activo .girar:hover { background: #fff; color: #0B0B10; transform: scale(1.06); }
 .estudio.activo .girar.anterior { left: 8px; }
 .estudio.activo .girar.siguiente { right: 8px; }
 .estudio.activo .boton-lupa { display: none; position: absolute; right: 16px; bottom: 108px; z-index: 3; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: 99px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(11, 11, 16, .6); color: #fff; font: 500 12px var(--sans); letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
-.estudio.activo .boton-lupa[aria-pressed="true"] { background: #fff; color: var(--tinta); }
+.estudio.activo .boton-lupa[aria-pressed="true"] { background: #fff; color: #0B0B10; }
 .estudio.activo .pista { display: block; position: absolute; left: 50%; top: 58%; z-index: 4; transform: translate(-50%, 0); margin: 0; padding: 10px 16px; border-radius: 99px; background: var(--azul); color: #fff; font-size: 13px; letter-spacing: .08em; white-space: nowrap; pointer-events: none; opacity: 0; }
 .estudio.activo .pista.visible { animation: pista 3.6s ease both; }
 @keyframes pista { 0% { opacity: 0; transform: translate(-50%, 8px); } 12%, 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -6px); } }
@@ -341,7 +341,7 @@ body.estudio-abierto { overflow: hidden; }
 .estudio.activo .tu-marca > div:first-child { display: none; }
 .herramientas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 14px; background: rgba(255, 255, 255, .06); position: sticky; top: 0; z-index: 2; }
 .herramienta { min-height: 42px; border: 0; border-radius: 10px; background: transparent; color: #C9C5D6; font: 500 12px var(--sans); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; }
-.herramienta[aria-selected="true"] { background: #fff; color: var(--tinta); }
+.herramienta[aria-selected="true"] { background: #fff; color: #0B0B10; }
 .herramienta-panel { display: flex; flex-direction: column; gap: 16px; }
 .calidad-barra { height: 6px; border-radius: 99px; background: rgba(255, 255, 255, .1); overflow: hidden; margin: 6px 0 2px; }
 .calidad-barra span { display: block; height: 100%; width: 0; border-radius: inherit; background: #8F8D87; transition: width .5s cubic-bezier(.2, .8, .2, 1), background .3s ease; }
@@ -488,7 +488,7 @@ body.estudio-abierto { overflow: hidden; }
 /* En el Estudio, «Elegir mi logo» también es un botón claro. */
 .soltar .icono-subir { width: 56px; height: 56px; color: #fff; background: rgba(142, 160, 255, .18); }
 .soltar .icono-subir::before { border-color: rgba(142, 160, 255, .5); }
-.boton-soltar { display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 99px; background: #fff; color: var(--tinta); font-size: 12px !important; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; transition: background .2s ease, color .2s ease; }
+.boton-soltar { display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 99px; background: #fff; color: #0B0B10; font-size: 12px !important; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; transition: background .2s ease, color .2s ease; }
 .soltar:hover .boton-soltar { background: var(--azul); color: #fff; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -524,7 +524,7 @@ body.estudio-abierto { overflow: hidden; }
 .arena-caminos { order: 5; }
 .arena .caminos { margin-top: 0; }
 .arena .camino:not(.principal) { border-color: rgba(255, 255, 255, .5); color: #fff; }
-.arena .camino:not(.principal):hover { background: #fff; color: var(--tinta); }
+.arena .camino:not(.principal):hover { background: #fff; color: #0B0B10; }
 .arena .confianza { order: 6; margin-top: 0; color: #A7A2B5; }
 .arena .confianza li::before { background: #8EA0FF; }
 
@@ -619,3 +619,25 @@ body.estudio-abierto { overflow: hidden; }
 .preguntas details { border-color: var(--linea-fuerte); }
 .final .titulo-seccion { background: linear-gradient(90deg, #fff, var(--neon)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .invitacion-estudio { background: var(--papel); border-color: var(--linea-fuerte); }
+
+/* El configurador como página de producto (D141) */
+.estudio-identidad { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.estudio-inicio img { height: 30px; width: auto; filter: invert(1) hue-rotate(180deg) brightness(1.1); display: block; }
+.estudio-identidad > div { min-width: 0; }
+.estudio-ruta { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #8E8BA3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.estudio-ruta a { color: #8E8BA3; text-decoration: none; }
+.estudio-ruta a:hover { color: #fff; }
+h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; line-height: 1.2; color: #fff; }
+.estudio-precio { display: none; margin: 0 0 0 auto; align-items: baseline; gap: 6px; white-space: nowrap; font-size: 12px; color: #A7A2B5; }
+.estudio-precio strong { font-family: var(--display); font-size: 20px; font-weight: 800; color: #fff; }
+.estudio-precio small { font-size: 11px; }
+.estudio-atajos { margin: 0 auto; }
+.info-prenda { gap: 22px; }
+.info-prenda .titulo-prenda { font-size: 28px; text-transform: uppercase; }
+.info-prenda .chip { border-color: rgba(255, 255, 255, .2); color: #fff; }
+.info-prenda summary { color: #fff; }
+.info-prenda details { border-color: rgba(255, 255, 255, .12); }
+.herramientas { grid-template-columns: repeat(4, 1fr); }
+.herramienta { letter-spacing: .1em; font-size: 11px; }
+@media (min-width: 700px) { .estudio-precio { display: inline-flex; } }
+@media (max-width: 1023px) { .estudio-ruta { display: none; } .estudio.activo .estudio-barra { gap: 10px; } }
