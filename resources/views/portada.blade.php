@@ -19,37 +19,94 @@
         });
     </script>
     <script>
-        // Zona de juego: la camiseta gira sola; con el ratón sigue al puntero y en el
-        // móvil se gira arrastrando. Al soltarla, vuelve a girar sola. Sin librerías.
+        // Zona de juego: la camiseta gira sola. Al pasar el ratón se vuelve hacia ti y se
+        // inclina un poco siguiendo el puntero, con un movimiento suavizado; para darle la
+        // vuelta se arrastra (ratón o dedo). Al salir, vuelve sin saltos a su giro. Sin librerías.
         (function () {
             var escenario = document.getElementById('escenario');
             var giro = document.getElementById('giro');
             if (!escenario || !giro || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-            var vuelta = null, arrastre = null, angulo = 0;
             var completa = giro.classList.contains('con-espalda'); // 360° si hay foto de la espalda
+            var INCLINACION = 18;   // grados máximos al seguir el ratón
+            var ARRASTRE = completa ? 0.35 : 0.25; // grados por píxel arrastrado
+            var SUAVIDAD = 0.07;    // fracción del camino que recorre en cada fotograma
+            var INICIO = completa ? { ry: -14, rx: 3 } : { ry: -26, rx: 3 }; // primer fotograma del giro automático
+            var actual = { ry: 0, rx: 0 }, objetivo = { ry: 0, rx: 0 };
+            var base = 0, puntero = { x: 0, y: 0 }, arrastre = null, volviendo = false, cuadro = null, espera = null;
+
             function poner(ry, rx) {
-                giro.style.setProperty('--ry', ry.toFixed(1) + 'deg');
-                giro.style.setProperty('--rx', rx.toFixed(1) + 'deg');
-                giro.style.setProperty('--brillo', (50 + ry * 1.6).toFixed(0) + '%');
+                giro.style.setProperty('--ry', ry.toFixed(2) + 'deg');
+                giro.style.setProperty('--rx', rx.toFixed(2) + 'deg');
+                var cara = ((ry % 360) + 540) % 360 - 180; // -180…180 respecto a la cara visible
+                if (Math.abs(cara) > 90) cara = cara > 0 ? cara - 180 : cara + 180;
+                giro.style.setProperty('--brillo', (50 + cara * 1.6).toFixed(0) + '%');
             }
-            function manual() { escenario.classList.add('manual'); clearTimeout(vuelta); }
-            function soltar() { clearTimeout(vuelta); vuelta = setTimeout(function () { escenario.classList.remove('manual'); }, 1600); }
+            // Ángulo real en este instante (aunque lo esté moviendo la animación CSS).
+            function anguloActual() {
+                var m = getComputedStyle(giro).transform;
+                if (!m || m === 'none') return 0;
+                var v = m.replace(/^matrix(3d)?\(|\)$/g, '').split(',').map(Number);
+                return v.length === 16 ? Math.atan2(-v[2], v[0]) * 180 / Math.PI : 0;
+            }
+            function cercano(angulo, referencia) { return angulo + Math.round((referencia - angulo) / 360) * 360; }
+            function bucle() {
+                actual.ry += (objetivo.ry - actual.ry) * SUAVIDAD;
+                actual.rx += (objetivo.rx - actual.rx) * SUAVIDAD;
+                poner(actual.ry, actual.rx);
+                if (volviendo && Math.abs(objetivo.ry - actual.ry) < 0.4 && Math.abs(objetivo.rx - actual.rx) < 0.4) {
+                    volviendo = false; cuadro = null;
+                    escenario.classList.remove('manual'); // la animación arranca en su primer fotograma: sin salto
+                    return;
+                }
+                cuadro = requestAnimationFrame(bucle);
+            }
+            function tomar() {
+                clearTimeout(espera); volviendo = false;
+                if (!escenario.classList.contains('manual')) {
+                    actual.ry = anguloActual(); actual.rx = 0;
+                    poner(actual.ry, actual.rx);
+                    escenario.classList.add('manual');
+                    // De frente o de espaldas: la cara más cercana a como está ahora.
+                    base = completa ? Math.round(actual.ry / 180) * 180 : 0;
+                }
+                if (!cuadro) cuadro = requestAnimationFrame(bucle);
+            }
+            function apuntar() {
+                objetivo.ry = base + puntero.x * INCLINACION * 2;
+                objetivo.rx = -puntero.y * INCLINACION * 0.6;
+            }
+            function soltar() {
+                clearTimeout(espera);
+                espera = setTimeout(function () {
+                    volviendo = true;
+                    objetivo.ry = cercano(INICIO.ry, actual.ry); objetivo.rx = INICIO.rx;
+                    if (!cuadro) cuadro = requestAnimationFrame(bucle);
+                }, 1400);
+            }
 
             escenario.addEventListener('pointermove', function (e) {
                 var r = escenario.getBoundingClientRect();
-                var px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
-                if (e.pointerType === 'mouse') { manual(); angulo = completa ? px * 360 : px * 50; poner(angulo, -py * 14); return; }
-                if (!arrastre) return;
-                angulo = arrastre.angulo + (e.clientX - arrastre.x) * (completa ? 0.8 : 0.45);
-                if (!completa) angulo = Math.max(-60, Math.min(60, angulo));
-                poner(angulo, 0);
+                puntero.x = (e.clientX - r.left) / r.width - 0.5;
+                puntero.y = (e.clientY - r.top) / r.height - 0.5;
+                if (arrastre) {
+                    base = arrastre.base + (e.clientX - arrastre.x) * ARRASTRE;
+                    if (!completa) base = Math.max(-45, Math.min(45, base));
+                    apuntar(); return;
+                }
+                if (e.pointerType === 'mouse') { tomar(); apuntar(); }
             });
-            escenario.addEventListener('pointerleave', soltar);
             escenario.addEventListener('pointerdown', function (e) {
-                if (e.pointerType === 'mouse') return;
-                manual(); arrastre = { x: e.clientX, angulo: angulo };
+                tomar(); arrastre = { x: e.clientX, base: base };
+                try { escenario.setPointerCapture(e.pointerId); } catch (err) {}
+                if (e.pointerType === 'mouse') escenario.classList.add('arrastrando');
             });
-            ['pointerup', 'pointercancel'].forEach(function (t) { escenario.addEventListener(t, function () { arrastre = null; soltar(); }); });
+            ['pointerup', 'pointercancel'].forEach(function (t) {
+                escenario.addEventListener(t, function (e) {
+                    arrastre = null; escenario.classList.remove('arrastrando');
+                    if (e.pointerType !== 'mouse') soltar();
+                });
+            });
+            escenario.addEventListener('pointerleave', function () { arrastre = null; escenario.classList.remove('arrastrando'); soltar(); });
         })();
     </script>
     <script>

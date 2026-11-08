@@ -532,7 +532,9 @@ body.estudio-abierto { overflow: hidden; }
 .escenario { order: 3; position: relative; height: min(64vh, 560px); display: flex; align-items: center; justify-content: center; perspective: 1100px; touch-action: pan-y; cursor: grab; user-select: none; }
 .escenario:active { cursor: grabbing; }
 .giro { --ry: 0deg; --rx: 0deg; --brillo: 50%; position: relative; height: 82%; aspect-ratio: 900 / 1013; transform-style: preserve-3d; animation: girar 9s ease-in-out infinite alternate, flotar-prenda 5s ease-in-out infinite; }
-.escenario.manual .giro { animation: none; transform: rotateY(var(--ry)) rotateX(var(--rx)); transition: transform .25s ease-out; }
+.escenario.manual .giro { animation: flotar-prenda 5s ease-in-out infinite; transform: rotateY(var(--ry)) rotateX(var(--rx)); }
+.escenario { cursor: grab; user-select: none; -webkit-user-select: none; touch-action: pan-y; }
+.escenario.arrastrando { cursor: grabbing; }
 @keyframes girar { 0% { transform: rotateY(-26deg) rotateX(3deg); --brillo: 10%; } 100% { transform: rotateY(26deg) rotateX(-2deg); --brillo: 90%; } }
 @keyframes flotar-prenda { 50% { translate: 0 -12px; } }
 .giro .cara { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
