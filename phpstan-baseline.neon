@@ -37,12 +37,6 @@ parameters:
 			path: app/Dominio/Catalogo/Escaparate.php
 
 		-
-			message: '#^Method App\\Dominio\\Catalogo\\Escaparate\:\:familia\(\) should return App\\Models\\Familia but returns Illuminate\\Database\\Eloquent\\Model\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Dominio/Catalogo/Escaparate.php
-
-		-
 			message: '#^Method App\\Dominio\\Catalogo\\Escaparate\:\:fotoPrincipal\(\) should return App\\Models\\Foto\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
 			identifier: return.type
 			count: 1

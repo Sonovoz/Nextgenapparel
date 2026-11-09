@@ -17,7 +17,7 @@ class ClienteOpenAi
      * @param  list<array<string, mixed>>  $herramientas
      * @return array{mensaje: array<string, mixed>, entrada: int, salida: int}
      */
-    public function chat(array $mensajes, array $herramientas = []): array
+    public function chat(array $mensajes, array $herramientas = [], bool $json = false): array
     {
         $clave = (string) config('ia.openai_key');
         if ($clave === '') {
@@ -28,6 +28,7 @@ class ClienteOpenAi
                 'model' => (string) Ajuste::obtener('ia.modelo'),
                 'messages' => $mensajes,
                 'tools' => $herramientas === [] ? null : $herramientas,
+                'response_format' => $json ? ['type' => 'json_object'] : null,
                 'temperature' => 0.3,
             ], fn ($v) => $v !== null));
         } catch (ConnectionException $e) {

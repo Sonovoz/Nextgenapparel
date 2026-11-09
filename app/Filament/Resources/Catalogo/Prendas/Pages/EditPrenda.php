@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Catalogo\Prendas\Pages;
 
+use App\Filament\Concerns\AccionSeoIa;
 use App\Filament\Concerns\CamposTraducibles;
 use App\Filament\Resources\Catalogo\Prendas\PrendaResource;
 use Filament\Actions\DeleteAction;
@@ -30,6 +31,7 @@ class EditPrenda extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            AccionSeoIa::make('una prenda', ['nombre', 'descripcion', 'composicion', 'detalles'], ['nombre', 'descripcion', 'composicion', 'detalles']),
             DeleteAction::make()->label('Mover a la papelera'),
             RestoreAction::make(),
         ];
