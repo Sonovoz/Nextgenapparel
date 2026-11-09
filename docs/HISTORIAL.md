@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **PDF del presupuesto con la foto de lo creado**: cada línea lleva la maqueta de cada cara con los diseños del cliente. | `pdf-maquetas` | D200 |
 | 09/11 | **Portada**: entre la cabecera y «Cómo configurar tu marca en 3 pasos», la misma línea con luz que recorre el pie. | `portada-separador` | — |
 | 09/11 | **Estudio**: panel de control más ancho (440-620 px) con el orden de los pasos (pasos, herramienta, calidad) y «Siguiente: tallas y colores» siempre visible abajo; «Foto próximamente» ya no se sale de la miniatura. | `estudio-panel` | — |
 | 09/11 | **Portada**: «Cómo se juega» pasa a «Cómo configurar tu marca en 3 pasos» (en inglés, «How to set up your brand in 3 steps»). | `frontend-ajustes` | — |

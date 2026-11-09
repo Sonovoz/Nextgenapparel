@@ -7,6 +7,7 @@ use App\Dominio\Disenos\Dueno;
 use App\Dominio\Facturacion\Emisor;
 use App\Dominio\Precios\Formato;
 use App\Dominio\Presupuestos\CrearPresupuesto;
+use App\Dominio\Presupuestos\MaquetasPresupuesto;
 use App\Dominio\Presupuestos\PasarAlCarrito;
 use App\Models\Presupuesto;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -40,9 +41,10 @@ class PresupuestoController
             'alternos' => collect(config('idiomas.disponibles'))->keys()->mapWithKeys(fn ($i) => [$i => self::url('ver', $presupuesto, $i)])->all()]);
     }
 
-    public function pdf(Presupuesto $presupuesto): Response
+    public function pdf(Presupuesto $presupuesto, MaquetasPresupuesto $maquetas): Response
     {
-        $pdf = Pdf::loadView('pdf.presupuesto', ['presupuesto' => $presupuesto, 'emisor' => Emisor::datos(), 'enlace' => self::url('ver', $presupuesto, $presupuesto->idioma)])
+        $pdf = Pdf::loadView('pdf.presupuesto', ['presupuesto' => $presupuesto, 'emisor' => Emisor::datos(), 'enlace' => self::url('ver', $presupuesto, $presupuesto->idioma),
+            'maquetas' => $maquetas($presupuesto)])
             ->setPaper('a4')->setOption(['defaultFont' => 'DejaVu Sans', 'isRemoteEnabled' => false, 'isFontSubsettingEnabled' => true]);
 
         return response($pdf->output(), 200, ['Content-Type' => 'application/pdf',
