@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **Portada**: «Cómo se juega» pasa a «Cómo configurar tu marca en 3 pasos» (en inglés, «How to set up your brand in 3 steps»). | `frontend-ajustes` | — |
 | 09/11 | **Puesta en marcha**: *Herramientas → Puesta en marcha* con los 14 pasos para abrir la tienda (y la IA, opcional), que se marcan solos al hacerlos, con enlace a cada ajuste y el número de pendientes en el menú. | `v2-puesta-en-marcha` | D196 |
 | 09/11 | **V2 · Asistente SEO con IA y blog**: «Proponer SEO con IA» en prendas y entradas (título, metadescripción y traducción al inglés; solo propone, se guarda al revisar); *Marketing → Blog* con entradas es/en en Markdown, `/es/blog` y sitemap. | `v2-seo-blog` | D195 |
 | 09/11 | **V2 · Asistente IA de venta (OpenAI)**: chat para clientes con cuenta que consulta catálogo, motor de precios y packs con herramientas (nunca inventa precios); límites por día y de gasto al mes; se oculta si OpenAI falla; *Ajustes → IA*. | `v2-asistente-ia` | D194 |
