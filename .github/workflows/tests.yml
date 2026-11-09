@@ -36,10 +36,9 @@ jobs:
       - name: Formato del código (Pint)
         run: vendor/bin/pint --test
 
-      # Informativo hasta tener la línea base (phpstan-baseline.neon): después, obligatorio.
+      # Obligatorio (D171): lo que ya había está en phpstan-baseline.neon; nada nuevo puede añadirse.
       - name: Análisis estático (Larastan)
         if: matrix.php == '8.3'
-        continue-on-error: true
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 
       - name: Tests (SQLite)

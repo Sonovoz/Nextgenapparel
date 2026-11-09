@@ -1,1 +1,1813 @@
-parameters: {}
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$alto_mm\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ancho_mm\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$desde_centro_mm\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$desde_cuello_mm\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$diseno_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fuente\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$texto\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tinta\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$zona_impresion_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:aLaVenta\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Dominio\\Carrito\\TipoLinea\:\:Pack will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Dominio/Carrito/ComprobarLinea.php
+
+		-
+			message: '#^Anonymous function should return App\\Models\\LineaCarrito but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Dominio/Carrito/EditarCarrito.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:impresiones\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Carrito/EditarCarrito.php
+
+		-
+			message: '#^Method App\\Dominio\\Carrito\\EditarCarrito\:\:linea\(\) should return App\\Models\\LineaCarrito but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Dominio/Carrito/EditarCarrito.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Dominio\\Carrito\\TipoLinea\:\:Prenda will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Dominio/Carrito/EditarCarrito.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Dominio/Carrito/EditarCarrito.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$zona\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Dominio/Carrito/Maqueta.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$zona_impresion_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/Maqueta.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:lineas\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Carrito/Maqueta.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Dominio/Carrito/Maqueta.php
+
+		-
+			message: '#^Offset ''color'' on non\-empty\-string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Dominio/Carrito/Maqueta.php
+
+		-
+			message: '#^Parameter \#1 \$i of static method App\\Dominio\\Carrito\\Maqueta\:\:posicion\(\) expects App\\Models\\ImpresionCarrito, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Carrito/Maqueta.php
+
+		-
+			message: '#^Parameter \#1 \$zona of static method App\\Dominio\\Carrito\\Maqueta\:\:rectangulo\(\) expects App\\Models\\ZonaImpresion, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Carrito/Maqueta.php
+
+		-
+			message: '#^Parameter \#2 \$rect of static method App\\Dominio\\Carrito\\Maqueta\:\:posicion\(\) expects App\\Models\\FotoZona, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Carrito/Maqueta.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Carrito\\TipoLinea\:\:Prenda will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Dominio/Carrito/Maqueta.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$alto_mm\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ancho_mm\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$color_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$diseno\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$impresiones\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pack\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pack_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tipo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$zona_impresion_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:unidadesPorTalla\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Parameter \#1 \$linea of method App\\Dominio\\Carrito\\ComprobarLinea\:\:linea\(\) expects App\\Models\\LineaCarrito, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Parameter \#1 \$linea of method App\\Dominio\\Carrito\\ValorarCarrito\:\:calidades\(\) expects App\\Models\\LineaCarrito, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Parameter \#1 \$lineas of class App\\Dominio\\Carrito\\Valoracion constructor expects list\<array\{linea\: App\\Models\\LineaCarrito, problemas\: list\<string\>, calidades\: array\<int, array\{ppp\: int, nivel\: App\\Dominio\\Disenos\\NivelCalidad\}\>\}\>, list\<array\{linea\: Illuminate\\Database\\Eloquent\\Model, problemas\: list\<string\>, calidades\: array\}\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Carrito/ValorarCarrito.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pivot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$texto_alternativo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$zonas\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:aLaVenta\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:url\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:aLaVenta\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Method App\\Dominio\\Catalogo\\Escaparate\:\:familia\(\) should return App\\Models\\Familia but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Method App\\Dominio\\Catalogo\\Escaparate\:\:fotoPrincipal\(\) should return App\\Models\\Foto\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Method App\\Dominio\\Catalogo\\Escaparate\:\:prenda\(\) should return App\\Models\\Prenda but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Method App\\Dominio\\Catalogo\\Escaparate\:\:prendas\(\) should return Illuminate\\Support\\Collection\<int, App\\Models\\Prenda\> but returns Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Color\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:filter\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: bool\)\|null, Closure\(App\\Models\\Foto\)\: bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:first\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: bool\)\|null, Closure\(App\\Models\\Foto\)\: false given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:sortBy\(\) expects array\<array\{string, ''asc''\|''desc''\|SortDirection\}\|\(callable\(Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Model\)\: mixed\)\|\(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: mixed\)\|string\>\|\(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: mixed\)\|int\|string, Closure\(App\\Models\\Foto\)\: \(int\|string\|false\) given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Catalogo\\TipoFoto\:\:Maqueta will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string\|null and App\\Dominio\\Catalogo\\Cara\:\:Delantera will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string\|null and App\\Dominio\\Catalogo\\Cara\:\:Delantera\|App\\Dominio\\Catalogo\\Cara\:\:Trasera will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Dominio/Catalogo/Escaparate.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: \(lowercase\-string&non\-falsy\-string&uppercase\-string\), Closure\(App\\Models\\Variante\)\: \(lowercase\-string&non\-falsy\-string&uppercase\-string\) given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Catalogo/GenerarVariantes.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Dominio/Catalogo/Portada.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:aLaVenta\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Catalogo/Portada.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: string, Closure\(App\\Models\\ZonaImpresion\)\: string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Catalogo/Portada.php
+
+		-
+			message: '#^Parameter \#1 \$modelo of static method App\\Dominio\\Catalogo\\Escaparate\:\:slug\(\) expects App\\Models\\Familia\|App\\Models\\Prenda, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Catalogo/Portada.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getTranslation\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Catalogo/Sku.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$clave\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Catalogo/ZonasPorDefecto.php
+
+		-
+			message: '#^Result of \|\| is always true\.$#'
+			identifier: booleanOr.alwaysTrue
+			count: 1
+			path: app/Dominio/Catalogo/ZonasPorDefecto.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Dominio\\Catalogo\\TipoFoto\:\:Maqueta will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Dominio/Catalogo/ZonasPorDefecto.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Dominio/Catalogo/ZonasPorDefecto.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$correo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Clientes/BorrarCliente.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$correo_pendiente\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Clientes/BorrarCliente.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Clientes/BorrarCliente.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Clientes/BorrarCliente.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:roles\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Clientes/BorrarCliente.php
+
+		-
+			message: '#^Cannot call method toDateTimeString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Dominio/Clientes/BorrarCliente.php
+
+		-
+			message: '#^Parameter \#2 \$usuario of method App\\Dominio\\Clientes\\BorrarCliente\:\:vaciarRegistro\(\) expects App\\Models\\User\|null, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Clientes/BorrarCliente.php
+
+		-
+			message: '#^Parameter \#1 \$cliente of method App\\Dominio\\Clientes\\Direcciones\:\:asegurarPredeterminada\(\) expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Clientes/Direcciones.php
+
+		-
+			message: '#^Parameter \#1 \$cliente of method App\\Dominio\\Clientes\\Direcciones\:\:unicaPredeterminada\(\) expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Clientes/Direcciones.php
+
+		-
+			message: '#^Parameter \#2 \$tipo of method App\\Dominio\\Clientes\\Direcciones\:\:asegurarPredeterminada\(\) expects App\\Dominio\\Clientes\\TipoDireccion, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Dominio/Clientes/Direcciones.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: app/Dominio/Clientes/Direcciones.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Dominio\\Clientes\\TipoDireccion will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Dominio/Clientes/Direcciones.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string\|null and App\\Dominio\\Clientes\\TipoDireccion will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Dominio/Clientes/Direcciones.php
+
+		-
+			message: '#^Method App\\Dominio\\Clientes\\VincularCliente\:\:__invoke\(\) should return App\\Models\\Cliente\|null but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Dominio/Clientes/VincularCliente.php
+
+		-
+			message: '#^Offset ''marketing_consentido_en'' does not exist on array\{\}\|string\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: app/Dominio/Clientes/VincularCliente.php
+
+		-
+			message: '#^Offset ''marketing…'' on array\{\}\|string in empty\(\) does not exist\.$#'
+			identifier: empty.offset
+			count: 1
+			path: app/Dominio/Clientes/VincularCliente.php
+
+		-
+			message: '#^Offset ''tipo'' on array\{\}\|string in isset\(\) does not exist\.$#'
+			identifier: isset.offset
+			count: 1
+			path: app/Dominio/Clientes/VincularCliente.php
+
+		-
+			message: '#^Property App\\Models\\Cliente\:\:\$tipo \(string\) does not accept App\\Dominio\\Clientes\\TipoCliente\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Dominio/Clientes/VincularCliente.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: app/Dominio/Clientes/VincularCliente.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Disenos/Dueno.php
+
+		-
+			message: '#^Template type T of method App\\Dominio\\Disenos\\Dueno\:\:filtrar\(\) is not referenced in a parameter\.$#'
+			identifier: method.templateTypeNotInParameter
+			count: 1
+			path: app/Dominio/Disenos/Dueno.php
+
+		-
+			message: '#^Method App\\Dominio\\Disenos\\GuardarDiseno\:\:existente\(\) should return App\\Models\\Diseno\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Dominio/Disenos/GuardarDiseno.php
+
+		-
+			message: '#^Cannot call method cuentaComoUso\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Dominio/Pedidos/CambiarEstado.php
+
+		-
+			message: '#^Cannot call method etiqueta\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Dominio/Pedidos/CambiarEstado.php
+
+		-
+			message: '#^Cannot call method siguientes\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Dominio/Pedidos/CambiarEstado.php
+
+		-
+			message: '#^Offset ''telefono'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Dominio/Pedidos/ConfirmarCorreoPedido.php
+
+		-
+			message: '#^Cannot call method locale\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Dominio/Pedidos/CorreosPedido.php
+
+		-
+			message: '#^Cannot call method visible\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Dominio/Pedidos/CorreosPedido.php
+
+		-
+			message: '#^Offset ''nombre'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Dominio/Pedidos/CorreosPedido.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$correo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$nif\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cara\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$codigo_hex\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$familia\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$miniatura\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre_original\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pack_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ruta\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sha256\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tipo\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$util_alto_px\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$util_ancho_px\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$util_x\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$util_y\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:calidad\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getTranslations\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Parameter \#2 \$linea of method App\\Dominio\\Pedidos\\CrearPedido\:\:copiarImpresion\(\) expects App\\Models\\LineaPedido, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Parameter \#2 \$linea of method App\\Dominio\\Pedidos\\CrearPedido\:\:copiarLinea\(\) expects App\\Models\\LineaCarrito, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Parameter \#3 \$impresion of method App\\Dominio\\Pedidos\\CrearPedido\:\:copiarImpresion\(\) expects App\\Models\\ImpresionCarrito, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Carrito\\TipoLinea\:\:Pack will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Ternary operator condition is always false\.$#'
+			identifier: ternary.alwaysFalse
+			count: 1
+			path: app/Dominio/Pedidos/CrearPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$impresiones\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Pedidos/GenerarMaquetas.php
+
+		-
+			message: '#^Offset ''color'' on non\-empty\-string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Dominio/Pedidos/GenerarMaquetas.php
+
+		-
+			message: '#^Parameter \#2 \$linea of method App\\Dominio\\Pedidos\\GenerarMaquetas\:\:cara\(\) expects App\\Models\\LineaPedido, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Pedidos/GenerarMaquetas.php
+
+		-
+			message: '#^Parameter \#2 \$rect of static method App\\Dominio\\Carrito\\Maqueta\:\:rectangulo\(\) expects App\\Models\\FotoZona, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Pedidos/GenerarMaquetas.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pivot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Precios/Configurador.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:aLaVenta\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Precios/Configurador.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$colores\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$hasta_gramos\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pivot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$precio\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unidades\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:aLaVenta\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Match arm comparison between string and App\\Dominio\\Precios\\AplicaA\:\:Impresion is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Match arm comparison between string and App\\Dominio\\Precios\\AplicaA\:\:Prendas is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Match arm comparison between string and App\\Dominio\\Precios\\AplicaA\:\:Todo is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Match expression does not handle remaining value\: string$#'
+			identifier: match.unhandled
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Offset ''grupos'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Offset ''minimo_unidades'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Parameter \#1 \$ambito of method App\\Dominio\\Precios\\Motor\\MotorPrecios\:\:nombreGrupo\(\) expects App\\Dominio\\Precios\\Ambito, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Parameter \#1 \$efecto of static method App\\Dominio\\Precios\\Motor\\MotorPrecios\:\:descontar\(\) expects App\\Dominio\\Precios\\Efecto, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Parameter \#2 \$ambito of method App\\Dominio\\Precios\\Motor\\MotorPrecios\:\:enAmbito\(\) expects App\\Dominio\\Precios\\Ambito, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 2
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Dominio\\Precios\\Ambito\:\:Catalogo will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Dominio\\Precios\\TipoMinimo\:\:UnidadesPorTalla will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between array\{\} and array\{\} will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Precios\\Ambito\:\:Catalogo will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Precios\\MetodoEnvio\:\:PorKilo will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Precios\\RepartoPack\:\:Fijo will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Precios\\TipoRegla\:\:Combinada will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Precios\\TipoRegla\:\:TramoCantidad will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tipo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Seo/DatosEstructurados.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:aLaVenta\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Seo/DatosEstructurados.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Support\\HigherOrderCollectionProxy\<string, Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\>\:\:url\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Dominio/Seo/DatosEstructurados.php
+
+		-
+			message: '#^Parameter \#1 \$array \(array\{App\\Filament\\Navegacion\\GrupoNavegacion\:\:Pedidos, App\\Filament\\Navegacion\\GrupoNavegacion\:\:Produccion, App\\Filament\\Navegacion\\GrupoNavegacion\:\:Clientes, App\\Filament\\Navegacion\\GrupoNavegacion\:\:Productos, App\\Filament\\Navegacion\\GrupoNavegacion\:\:Marketing, App\\Filament\\Navegacion\\GrupoNavegacion\:\:Analiticas, App\\Filament\\Navegacion\\GrupoNavegacion\:\:Ajustes, App\\Filament\\Navegacion\\GrupoNavegacion\:\:Herramientas\}\) of array_values is already a list, call has no effect\.$#'
+			identifier: arrayValues.list
+			count: 1
+			path: app/Dominio/Sistema/Acceso/Rol.php
+
+		-
+			message: '#^Method App\\Dominio\\Sistema\\Errores\\RegistrarError\:\:url\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Dominio/Sistema/Errores/RegistrarError.php
+
+		-
+			message: '#^Offset ''function'' on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Dominio/Sistema/Errores/RegistrarError.php
+
+		-
+			message: '#^Result of \|\| is always true\.$#'
+			identifier: booleanOr.alwaysTrue
+			count: 1
+			path: app/Dominio/Sistema/Errores/RegistrarError.php
+
+		-
+			message: '#^Right side of \|\| is always false\.$#'
+			identifier: booleanOr.rightAlwaysFalse
+			count: 1
+			path: app/Dominio/Sistema/Errores/RegistrarError.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Dominio\\Sistema\\Errores\\NivelError\:\:Critico will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Dominio/Sistema/Errores/RegistrarError.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Sistema\\Errores\\EstadoError\:\:Resuelto will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Dominio/Sistema/Errores/RegistrarError.php
+
+		-
+			message: '#^Ternary operator condition is always false\.$#'
+			identifier: ternary.alwaysFalse
+			count: 2
+			path: app/Dominio/Sistema/Errores/RegistrarError.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Dominio/Sistema/Errores/RegistrarError.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\ConnectionInterface\:\:getDriverName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Concerns/BusquedaTraducible.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getTranslations\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Concerns/CamposTraducibles.php
+
+		-
+			message: '#^Access to an undefined property App\\Filament\\Pages\\AjustesCorreos\:\:\$form\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Filament/Pages/AjustesCorreos.php
+
+		-
+			message: '#^Access to an undefined property App\\Filament\\Pages\\AjustesGenerales\:\:\$form\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Filament/Pages/AjustesGenerales.php
+
+		-
+			message: '#^Access to an undefined property App\\Filament\\Pages\\SimuladorPrecios\:\:\$form\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Filament/Pages/SimuladorPrecios.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$colores\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Pages/SimuladorPrecios.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Pages/SimuladorPrecios.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 4
+			path: app/Filament/Pages/SimuladorPrecios.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: app/Filament/Pages/SimuladorPrecios.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string\|null and App\\Dominio\\Precios\\RepartoPack\:\:Libre will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 3
+			path: app/Filament/Pages/SimuladorPrecios.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>colores" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Filament/Pages/SimuladorPrecios.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$translatable\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/Catalogo/Prendas/Pages/EditPrenda.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 1
+			path: app/Filament/Resources/Catalogo/Prendas/RelationManagers/FotosRelationManager.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string\|null and App\\Dominio\\Catalogo\\TipoFoto\:\:Maqueta will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 3
+			path: app/Filament/Resources/Catalogo/Prendas/RelationManagers/FotosRelationManager.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 2
+			path: app/Filament/Resources/Catalogo/Prendas/RelationManagers/VariantesRelationManager.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:fotos\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Filament/Resources/Catalogo/Prendas/RelationManagers/ZonasRelationManager.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$correo\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Filament/Resources/Clientes/ClienteResource.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:hasVerifiedEmail\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Filament/Resources/Clientes/ClienteResource.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Filament/Resources/Clientes/ClienteResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$borrado_solicitado_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/Clientes/Pages/EditCliente.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/Clientes/Pages/EditCliente.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:roles\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Resources/Clientes/Pages/EditCliente.php
+
+		-
+			message: '#^Parameter \#1 \$cliente of callable App\\Dominio\\Clientes\\BorrarCliente expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Resources/Clientes/Pages/EditCliente.php
+
+		-
+			message: '#^Parameter \#1 \$cliente of method App\\Dominio\\Clientes\\Direcciones\:\:guardar\(\) expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Resources/Clientes/RelationManagers/DireccionesRelationManager.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre_original\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/Disenos/Pages/ViewDiseno.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$numero\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/Pedidos/Pages/ViewPedido.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Filament/Resources/Pedidos/Pages/ViewPedido.php
+
+		-
+			message: '#^Cannot call method siguientes\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Filament/Resources/Pedidos/Pages/ViewPedido.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$numero\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Cannot call method visible\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Method Filament\\Notifications\\Notification\:\:persistent\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Offset ''codigo_postal'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Offset ''direccion'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Offset ''direccion_2'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Offset ''empresa'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Offset ''localidad'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Offset ''nombre'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Offset ''pais'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 3
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Offset ''provincia'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Offset ''telefono'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Parameter \#1 \$pedido of callable App\\Dominio\\Pedidos\\CambiarEstado expects App\\Models\\Pedido, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Resources/Pedidos/PedidoResource.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Precios\\Efecto\:\:Porcentaje will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Filament/Resources/Precios/CuponResource.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 3
+			path: app/Filament/Resources/Precios/PackResource.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 2
+			path: app/Filament/Resources/Precios/RecursoPrecios.php
+
+		-
+			message: '#^Cannot call method permiso\(\) on string\|UnitEnum\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Filament/Resources/Precios/RecursoPrecios.php
+
+		-
+			message: '#^Unsafe call to private method App\\Filament\\Resources\\Precios\\RecursoPrecios\:\:ambito\(\) through static\:\:\.$#'
+			identifier: staticClassAccess.privateMethod
+			count: 4
+			path: app/Filament/Resources/Precios/RecursoPrecios.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Precios\\TipoMinimo\:\:ImporteMinimo will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Filament/Resources/Precios/ReglaMinimoResource.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string\|null and App\\Dominio\\Precios\\TipoMinimo\:\:ImporteMinimo will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Filament/Resources/Precios/ReglaMinimoResource.php
+
+		-
+			message: '#^Unsafe call to private method App\\Filament\\Resources\\Precios\\ReglaMinimoResource\:\:esImporte\(\) through static\:\:\.$#'
+			identifier: staticClassAccess.privateMethod
+			count: 4
+			path: app/Filament/Resources/Precios/ReglaMinimoResource.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 2
+			path: app/Filament/Resources/Precios/ReglaPrecioResource.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Precios\\Efecto\:\:Porcentaje will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Filament/Resources/Precios/ReglaPrecioResource.php
+
+		-
+			message: '#^Parameter \#1 \$column of method Filament\\Forms\\Components\\Repeater\:\:orderColumn\(\) expects Closure\|string\|null, false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Resources/Precios/ZonaEnvioResource.php
+
+		-
+			message: '#^Unsafe call to private method App\\Filament\\Resources\\Precios\\ZonaEnvioResource\:\:metodo\(\) through static\:\:\.$#'
+			identifier: staticClassAccess.privateMethod
+			count: 4
+			path: app/Filament/Resources/Precios/ZonaEnvioResource.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Sistema\\Errores\\EstadoError\:\:Pendiente will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Filament/Resources/RegistroErrors/Pages/ViewRegistroError.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Sistema\\Errores\\EstadoError\:\:Resuelto will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Filament/Resources/RegistroErrors/Pages/ViewRegistroError.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Filament/Resources/RegistroErrors/Schemas/RegistroErrorInfolist.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:each\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\|string\)\: mixed, Closure\(App\\Models\\RegistroError\)\: void given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Resources/RegistroErrors/Tables/RegistroErrorsTable.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:role\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Resources/Users/Tables/UsersTable.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pedido_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Backend/ArchivoPedidoController.php
+
+		-
+			message: '#^Offset ''es'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/Backend/ArchivoPedidoController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:variantes\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/CarritoController.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/CarritoController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Carrito\\TipoLinea\:\:Prenda will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/CarritoController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>lineas" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/CarritoController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$correo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$nif\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$codigo_postal\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$direccion\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$direccion_2\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$empresa\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$localidad\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pais\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$provincia\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$telefono\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CierreController\:\:cliente\(\) should return App\\Models\\Cliente\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Dominio\\Clientes\\TipoCliente\:\:Particular will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>correo" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>nombre" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>pais" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>telefono" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/CierreController.php
+
+		-
+			message: '#^Parameter \#1 \$diseno of static method App\\Http\\Controllers\\DisenoController\:\:datos\(\) expects App\\Models\\Diseno, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Cuenta/CuentaController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$nif\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Cuenta/DatosController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Controllers/Cuenta/DatosController.php
+
+		-
+			message: '#^Cannot call method admiteRecargo\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Cuenta/DatosController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tipo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Cuenta/DireccionesController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Cuenta\\DireccionesController\:\:suya\(\) should return App\\Models\\Direccion but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/Cuenta/DireccionesController.php
+
+		-
+			message: '#^Parameter \#1 \$cliente of method App\\Dominio\\Clientes\\Direcciones\:\:guardar\(\) expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Cuenta/DireccionesController.php
+
+		-
+			message: '#^Parameter \#1 \$diseno of static method App\\Http\\Controllers\\DisenoController\:\:datos\(\) expects App\\Models\\Diseno, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Cuenta/MisDisenosController.php
+
+		-
+			message: '#^Parameter \#2 \$cliente of callable App\\Dominio\\Carrito\\FusionarCarrito expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Cuenta/RegistroController.php
+
+		-
+			message: '#^Parameter \#2 \$cliente of callable App\\Dominio\\Disenos\\TraspasarDisenos expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Cuenta/RegistroController.php
+
+		-
+			message: '#^Parameter \#3 \$cliente of static method App\\Http\\Controllers\\Cuenta\\DatosController\:\:correoOcupado\(\) expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Cuenta/VerificacionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\DisenoController\:\:delVisitante\(\) should return App\\Models\\Diseno but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/DisenoController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/PackController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/PackController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$util_alto_px\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/PackController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$util_ancho_px\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/PackController.php
+
+		-
+			message: '#^Parameter \#1 \$zona of static method App\\Dominio\\Carrito\\ColocacionInicial\:\:en\(\) expects App\\Models\\ZonaImpresion, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/PackController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Precios\\RepartoPack\:\:Libre will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 2
+			path: app/Http/Controllers/PackController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/PedidoController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pedido_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/PedidoController.php
+
+		-
+			message: '#^Parameter \#2 \$cliente of static method App\\Http\\Controllers\\CierreController\:\:bloqueoDe\(\) expects App\\Models\\Cliente\|null, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/PedidoController.php
+
+		-
+			message: '#^Parameter \#3 \$cliente of callable App\\Dominio\\Pedidos\\CrearPedido expects App\\Models\\Cliente\|null, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/PedidoController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$talla\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/TiendaController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:aLaVenta\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/TiendaController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$nif\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Cliente.php
+
+		-
+			message: '#^Cannot call method admiteRecargo\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/Cliente.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: app/Models/Foto.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and App\\Dominio\\Catalogo\\TipoFoto\:\:Maqueta will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: app/Models/Foto.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Dominio\\Catalogo\\TipoFoto\:\:Maqueta will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/Foto.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<0, max\> and 0 is always false\.$#'
+			identifier: smaller.alwaysFalse
+			count: 2
+			path: app/Models/FotoZona.php
+
+		-
+			message: '#^Offset ''es'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Models/ImpresionPedido.php
+
+		-
+			message: '#^Offset string on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Models/ImpresionPedido.php
+
+		-
+			message: '#^Parameter \#1 \$array of function reset expects array\|object, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/ImpresionPedido.php
+
+		-
+			message: '#^Offset ''es'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/Models/LineaPedido.php
+
+		-
+			message: '#^Offset string on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/Models/LineaPedido.php
+
+		-
+			message: '#^Parameter \#1 \$array of function reset expects array\|object, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Models/LineaPedido.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:aLaVenta\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Models/Prenda.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$idioma\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>idioma" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Parameter \#1 \$value of function collect expects Illuminate\\Contracts\\Support\\Arrayable\<\(int\|string\), mixed\>\|iterable\<\(int\|string\), mixed\>\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/ZonaEnvio.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and array\{\} will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/ZonaEnvio.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Notifications/AlertaErrorCritico.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$correo\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/Cuenta/SolicitudBorrado.php
+
+		-
+			message: '#^Offset ''nombre'' on string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Notifications/Pedidos/ConfirmaTuCorreo.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:withTrashed\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Policies/CatalogoPolicy.php
+
+		-
+			message: '#^Parameter \#2 \$cliente of callable App\\Dominio\\Carrito\\FusionarCarrito expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Providers/AppServiceProvider.php
+
+		-
+			message: '#^Parameter \#2 \$cliente of callable App\\Dominio\\Disenos\\TraspasarDisenos expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Providers/AppServiceProvider.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Providers/AppServiceProvider.php

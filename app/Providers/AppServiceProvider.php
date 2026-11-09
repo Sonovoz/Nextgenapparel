@@ -6,6 +6,7 @@ use App\Dominio\Carrito\FusionarCarrito;
 use App\Dominio\Disenos\Propietario;
 use App\Dominio\Disenos\TraspasarDisenos;
 use App\Dominio\Sistema\Actividad\Actividad;
+use App\Dominio\Sistema\Correo\Smtp;
 use App\Dominio\Sistema\Errores\ErrorDeCopia;
 use App\Models\Ajuste;
 use App\Models\Caja;
@@ -18,6 +19,7 @@ use App\Models\Diseno;
 use App\Models\Familia;
 use App\Models\Foto;
 use App\Models\Pack;
+use App\Models\Pedido;
 use App\Models\Prenda;
 use App\Models\Proveedor;
 use App\Models\ReglaMinimo;
@@ -32,6 +34,7 @@ use App\Policies\CatalogoPolicy;
 use App\Policies\ClientePolicy;
 use App\Policies\DireccionPolicy;
 use App\Policies\DisenoPolicy;
+use App\Policies\PedidoPolicy;
 use App\Policies\SeccionPolicy;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
@@ -62,6 +65,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // SMTP escrito en Ajustes → Correos (paso 6.4): manda sobre el .env, al crear el correo.
+        $smtpAplicado = false;
+        $this->app->beforeResolving('mail.manager', function () use (&$smtpAplicado): void {
+            if (! $smtpAplicado) {
+                $smtpAplicado = true;
+                rescue(fn () => Smtp::aplicar(), report: false);
+            }
+        });
+
         // Subidas de diseños: un límite por IP frena el abuso sin molestar a quien prueba varias versiones.
         RateLimiter::for('disenos', fn (Request $request) => Limit::perHour(max(1, (int) Ajuste::obtener('disenos.subidas_hora')))->by($request->ip()));
 
@@ -89,6 +101,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Activity::class, ActividadPolicy::class);
         Gate::policy(Diseno::class, DisenoPolicy::class);
         Gate::policy(Cliente::class, ClientePolicy::class);
+        Gate::policy(Pedido::class, PedidoPolicy::class);
         Gate::policy(Direccion::class, DireccionPolicy::class);
 
         foreach ([Familia::class, Color::class, Talla::class, ZonaImpresion::class, Proveedor::class, Prenda::class, Variante::class, Foto::class] as $modelo) {

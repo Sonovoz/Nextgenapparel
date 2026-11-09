@@ -11,7 +11,9 @@
         <div class="contenedor">
             <p class="etiqueta">{{ __('pedidos.recibido') }}</p>
             <h1 class="titulo-cuenta" id="titulo-pedido">{{ __('pedidos.titulo', ['numero' => $pedido->numero]) }}</h1>
-            <p class="entradilla">{{ __('pedidos.estado') }}: <strong>{{ $pedido->estado->visible() }}</strong> · {{ __('pedidos.fecha') }}: {{ $pedido->created_at->locale(app()->getLocale())->isoFormat('LL') }}</p>
+            <p class="entradilla">{{ __('pedidos.estado') }}: <strong>{{ $pedido->estado->visible() }}</strong> · {{ __('pedidos.fecha') }}: {{ $pedido->created_at->locale(app()->getLocale())->isoFormat('LL') }}
+                @if ($pedido->fecha_estimada_entrega) · {{ __('pedidos.entrega_estimada') }}: <strong>{{ $pedido->fecha_estimada_entrega->locale(app()->getLocale())->isoFormat('LL') }}</strong>@endif
+                @if ($pedido->numero_seguimiento)<br>{{ __('pedidos.seguimiento', ['transportista' => $pedido->transportista, 'numero' => $pedido->numero_seguimiento]) }}@endif</p>
 
             @if (session('estado_pedido'))
                 <p class="aviso-cuenta correcto" role="status">{{ session('estado_pedido') }}</p>
@@ -23,6 +25,17 @@
                 </div>
             @endunless
             <p class="aviso-cuenta verificar">{{ __('pedidos.pago_pronto') }}</p>
+            @php $novedades = $pedido->notas()->where('tipo', 'cliente')->get(); @endphp
+            @if ($novedades->isNotEmpty())
+                <section class="pedido-novedades" aria-labelledby="titulo-novedades">
+                    <h2 id="titulo-novedades">{{ __('pedidos.novedades') }}</h2>
+                    <ul>
+                        @foreach ($novedades as $nota)
+                            <li><time datetime="{{ $nota->created_at->toIso8601String() }}">{{ $nota->created_at->locale(app()->getLocale())->isoFormat('LL') }}</time> {{ $nota->texto }}</li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
 
             <div class="carrito-rejilla">
                 <div class="pedido-lineas">

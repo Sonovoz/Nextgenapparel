@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Dominio\Carrito\CarritoActual;
 use App\Dominio\Pedidos\ConfirmarCorreoPedido;
+use App\Dominio\Pedidos\CorreoPedido;
 use App\Dominio\Pedidos\CrearPedido;
 use App\Dominio\Pedidos\PedidoNoCreado;
 use App\Models\Ajuste;
 use App\Models\MaquetaPedido;
 use App\Models\Pedido;
 use App\Notifications\Pedidos\ConfirmaTuCorreo;
+use App\Notifications\Pedidos\CorreoDelPedido;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
@@ -96,11 +98,26 @@ class PedidoController
         return redirect(self::url('ver', $pedido))->with('estado_pedido', __('pedidos.correo_confirmado'));
     }
 
-    /** Otro enlace al correo del pedido. Mismo mensaje pase lo que pase: no dice nada a quien no es su dueño. */
+    /** El enlace privado de los correos (paso 6.4): abre el pedido en cualquier navegador sin cuenta. */
+    public function acceso(Request $request, Pedido $pedido): View|RedirectResponse
+    {
+        if (! $request->hasValidSignature()) {
+            return view('pedidos.enlace-caducado', ['pedido' => $pedido, 'alternos' => $this->alternos('ver', $pedido)]);
+        }
+        if (! in_array($pedido->uuid, $request->session()->get(self::SESION, []), true)) {
+            $request->session()->push(self::SESION, $pedido->uuid);
+        }
+
+        return redirect(self::url('ver', $pedido));
+    }
+
+    /** Otro enlace al correo del pedido (para confirmarlo o, si ya lo está, para verlo). Mismo mensaje pase lo que pase. */
     public function reenviar(Request $request, Pedido $pedido): RedirectResponse
     {
         if (! $pedido->correoConfirmado()) {
             self::enviarConfirmacion($pedido);
+        } else {
+            CorreoPedido::enviar($pedido, new CorreoDelPedido($pedido, 'enlace'));
         }
 
         return ($this->puedeVer($request, $pedido) ? redirect(self::url('ver', $pedido)) : back())
@@ -130,6 +147,12 @@ class PedidoController
     public static function enlaceConfirmar(Pedido $pedido): string
     {
         return URL::temporarySignedRoute("pedidos.{$pedido->idioma}.confirmar-correo", now()->addDays(self::diasEnlace()), ['pedido' => $pedido->uuid]);
+    }
+
+    /** Enlace privado y firmado al pedido, para los correos (90 días). */
+    public static function enlacePrivado(Pedido $pedido): string
+    {
+        return URL::temporarySignedRoute("pedidos.{$pedido->idioma}.acceso", now()->addDays(90), ['pedido' => $pedido->uuid]);
     }
 
     public static function diasEnlace(): int

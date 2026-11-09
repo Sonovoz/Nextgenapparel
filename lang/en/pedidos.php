@@ -46,4 +46,7 @@ return [
     'sin_iva' => 'excl. VAT',
     'maqueta_delantera' => 'Front mock-up of :prenda',
     'maqueta_trasera' => 'Back mock-up of :prenda',
+    'entrega_estimada' => 'Estimated delivery',
+    'seguimiento' => 'Shipped with :transportista · tracking :numero',
+    'novedades' => 'Order updates',
 ];

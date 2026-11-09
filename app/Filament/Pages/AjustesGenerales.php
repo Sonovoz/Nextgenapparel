@@ -11,6 +11,7 @@ use App\Filament\Navegacion\GrupoNavegacion;
 use App\Models\Ajuste;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -64,6 +65,10 @@ class AjustesGenerales extends Page implements HasSchemas
             'subidas_hora' => (int) Ajuste::obtener('disenos.subidas_hora'),
             'max_dia' => (int) Ajuste::obtener('disenos.max_dia'),
             'indexar' => (bool) Ajuste::obtener('seo.indexar'),
+            'pedidos_prefijo' => Ajuste::obtener('pedidos.prefijo'),
+            'pedidos_dias_confirmar' => Ajuste::obtener('pedidos.dias_confirmar_correo'),
+            'pedidos_dias_sin_pago' => Ajuste::obtener('pedidos.dias_sin_pago'),
+            'pedidos_tramos' => (array) Ajuste::obtener('pedidos.plazo_tramos'),
             'ia_activa' => MejoraIa::activa(),
             'ia_desde' => MejoraIa::desde(),
             'ia_texto' => collect(config('idiomas.disponibles'))->keys()->mapWithKeys(fn ($i) => [$i => MejoraIa::texto($i)])->all(),
@@ -111,6 +116,21 @@ class AjustesGenerales extends Page implements HasSchemas
                 ->description('Lo que el cliente deja en el carrito, con cuenta o sin ella, se guarda este tiempo desde la última vez que lo usa. Después se borra. Los diseños de visitantes sin cuenta que solo estaban en ese carrito se borran cuando además superan los días de «Guardar sin pedido».')
                 ->schema([
                     TextInput::make('carrito_dias')->label('Guardar el carrito')->integer()->minValue(1)->maxValue(365)->suffix('días')->required(),
+                ]),
+            Section::make('Pedidos')
+                ->description('Número de los pedidos, plazos para confirmar el correo y para pagar, y días extra de producción según las unidades (se suman al plazo de la familia y del transportista, en días laborables).')
+                ->columns(3)
+                ->schema([
+                    TextInput::make('pedidos_prefijo')->label('Prefijo del número')->required()->maxLength(10)->regex('/^[A-Z0-9-]+$/')->helperText('PED- da PED-0001.'),
+                    TextInput::make('pedidos_dias_confirmar')->label('Días del enlace para confirmar el correo')->integer()->minValue(1)->maxValue(60)->required(),
+                    TextInput::make('pedidos_dias_sin_pago')->label('Cancelar sin pagar a los')->integer()->minValue(1)->maxValue(60)->suffix('días')->required()
+                        ->helperText('Se cancela solo y devuelve el uso del cupón.'),
+                    Repeater::make('pedidos_tramos')->label('Días extra según las unidades')->columnSpanFull()->columns(2)->defaultItems(0)
+                        ->addActionLabel('Añadir tramo')->reorderable(false)
+                        ->schema([
+                            TextInput::make('desde')->label('Desde (unidades)')->integer()->minValue(1)->required(),
+                            TextInput::make('dias')->label('Días extra')->integer()->minValue(0)->maxValue(60)->required(),
+                        ]),
                 ]),
             Section::make('Mejorar el diseño con IA')
                 ->description('Si la calidad no llega, el cliente ve un botón con estas instrucciones para mejorar su diseño con su propia herramienta de IA y volver a subirlo. La tienda no envía nada a ninguna IA. Escribe :medida donde va el tamaño de impresión (por ejemplo, «28 × 28 cm»). Si vacías un texto, se usa el de por defecto.')
@@ -179,6 +199,12 @@ class AjustesGenerales extends Page implements HasSchemas
                 if ($carritoAntes !== CarritoActual::dias()) {
                     Actividad::apuntar('ajustes', 'Días que se guarda el carrito cambiados', propiedades: ['old' => ['carrito_dias' => $carritoAntes], 'attributes' => ['carrito_dias' => CarritoActual::dias()]]);
                 }
+
+                Ajuste::guardar('pedidos.prefijo', $datos['pedidos_prefijo']);
+                Ajuste::guardar('pedidos.dias_confirmar_correo', (int) $datos['pedidos_dias_confirmar']);
+                Ajuste::guardar('pedidos.dias_sin_pago', (int) $datos['pedidos_dias_sin_pago']);
+                Ajuste::guardar('pedidos.plazo_tramos', collect($datos['pedidos_tramos'] ?? [])
+                    ->map(fn ($t) => ['desde' => (int) $t['desde'], 'dias' => (int) $t['dias']])->sortBy('desde')->values()->all());
 
                 // Mejora con IA: solo se guarda el texto que difiere del de por defecto, para que este pueda mejorar con las versiones.
                 Ajuste::guardar('disenos.ia_activa', (bool) $datos['ia_activa']);

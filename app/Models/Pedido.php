@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Dominio\Clientes\TipoCliente;
 use App\Dominio\Pedidos\EstadoPedido;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 /** Pedido (paso 6.1, D169): copia congelada de lo que el cliente confirmó. */
 class Pedido extends Model
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     public const DISCO = 'pedidos';
 
@@ -48,6 +49,11 @@ class Pedido extends Model
     public function lineas(): HasMany
     {
         return $this->hasMany(LineaPedido::class)->orderBy('orden');
+    }
+
+    public function notas(): HasMany
+    {
+        return $this->hasMany(NotaPedido::class)->latest('id');
     }
 
     public function historial(): HasMany

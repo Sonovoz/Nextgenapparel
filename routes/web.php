@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Backend\ArchivoDisenoController;
+use App\Http\Controllers\Backend\ArchivoPedidoController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\CierreController;
 use App\Http\Controllers\Cuenta\AccesoController;
@@ -37,6 +38,12 @@ Route::get('/', function (Request $request) {
 Route::prefix('admin/archivos-disenos/{diseno}')->group(function () {
     Route::get('/miniatura', [ArchivoDisenoController::class, 'miniatura'])->name('backend.disenos.miniatura');
     Route::get('/original', [ArchivoDisenoController::class, 'original'])->name('backend.disenos.original');
+});
+
+// Backend: archivos privados de los pedidos (paso 6.3): maquetas y originales, solo con permiso.
+Route::prefix('admin/archivos-pedidos/{pedido}')->group(function () {
+    Route::get('/maquetas/{maqueta}', [ArchivoPedidoController::class, 'maqueta'])->name('backend.pedidos.maqueta')->whereNumber('maqueta');
+    Route::get('/impresiones/{impresion}/original', [ArchivoPedidoController::class, 'original'])->name('backend.pedidos.original')->whereNumber('impresion');
 });
 
 // Cuenta del cliente (paso 5.2), con la URL traducida en cada idioma:
@@ -114,6 +121,7 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
             Route::get('/{pedido}', [PedidoController::class, 'ver'])->name('ver')->whereUuid('pedido');
             Route::get('/{pedido}/'.$tramo('confirmar_correo_pedido'), [PedidoController::class, 'confirmarCorreo'])->name('confirmar-correo')->whereUuid('pedido')->middleware('throttle:cuenta-verificar');
             Route::post('/{pedido}/'.$tramo('reenviar_enlace'), [PedidoController::class, 'reenviar'])->name('reenviar')->whereUuid('pedido')->middleware('throttle:cuenta-reenviar');
+            Route::get('/{pedido}/'.$tramo('acceso'), [PedidoController::class, 'acceso'])->name('acceso')->whereUuid('pedido')->middleware('throttle:cuenta-verificar');
             Route::get('/{pedido}/'.$tramo('maquetas').'/{maqueta}', [PedidoController::class, 'maqueta'])->name('maqueta')->whereUuid('pedido')->whereNumber('maqueta');
         });
 

@@ -47,4 +47,7 @@ return [
     'sin_iva' => 'sin IVA',
     'maqueta_delantera' => 'Maqueta delantera de :prenda',
     'maqueta_trasera' => 'Maqueta trasera de :prenda',
+    'entrega_estimada' => 'Entrega estimada',
+    'seguimiento' => 'Enviado con :transportista · seguimiento :numero',
+    'novedades' => 'Novedades de tu pedido',
 ];

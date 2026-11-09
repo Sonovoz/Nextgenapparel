@@ -14,6 +14,7 @@ use App\Models\Cliente;
 use App\Models\Cupon;
 use App\Models\ImpresionCarrito;
 use App\Models\LineaCarrito;
+use App\Models\LineaPack;
 use App\Models\LineaPedido;
 use App\Models\Pedido;
 use App\Models\Talla;
@@ -142,6 +143,10 @@ final class CrearPedido
             $cupon->increment('usos');
         }
         $pedido->historial()->create(['estado' => EstadoPedido::PendientePago, 'nota' => 'Pedido creado desde la tienda']);
+        // Fecha estimada de entrega (ficha § 8): familia más lenta + unidades + transportista.
+        $familias = $pedido->lineas()->with('prenda.familia')->get()->flatMap(fn ($l) => $l->prenda !== null ? [$l->prenda->familia] : ($l->pack_id === null ? [] : LineaPack::where('pack_id', $l->pack_id)->with('prenda.familia')->get()->map(fn ($lp) => $lp->prenda?->familia)))
+            ->filter()->map(fn ($f) => (int) $f->plazo_base_dias)->values()->all();
+        $pedido->update(['fecha_estimada_entrega' => PlazoEntrega::fecha($familias, $resultado->unidades(), (int) ($resultado->envio['plazo_dias'] ?? 0), now())]);
         $carrito->delete(); // con sus líneas e impresiones
         // El número, lo último: el contador queda bloqueado solo un instante (M2).
         $pedido->update(['numero' => Numeracion::numeroPedido(Numeracion::siguiente('pedido'))]);
