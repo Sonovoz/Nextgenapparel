@@ -14,40 +14,6 @@
     </ol>
 
     <div class="nivel" id="nivel-diseno">
-    {{-- Energía de la calidad, siempre a la vista mientras se diseña. --}}
-    <div class="calidad" id="calidad" role="status" aria-live="polite" data-nivel="">
-        <div class="calidad-cabecera"><strong id="calidad-etiqueta">{{ __('tienda.calidad_sin_diseno') }}</strong><span class="claro" id="calidad-ppp"></span></div>
-        <div class="calidad-barra" aria-hidden="true"><span id="calidad-relleno"></span></div>
-        <p id="calidad-mensaje"></p>
-        <p class="claro" id="calidad-consejo"></p>
-        <p id="calidad-fondo"></p>
-    </div>
-
-    {{-- Si la calidad no llega: instrucciones para mejorarlo con su propia IA y volver a subirlo (D143). --}}
-    <div class="mejora-ia" id="mejora-ia" hidden>
-        <button type="button" class="boton-ia" id="abrir-ia" aria-expanded="false" aria-controls="panel-ia">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg>
-            {{ __('tienda.ia_boton') }}
-        </button>
-        <div class="panel-ia" id="panel-ia" hidden>
-            <ol class="pasos-ia">
-                <li>{{ __('tienda.ia_paso_1') }}</li>
-                <li>{{ __('tienda.ia_paso_2') }}</li>
-                <li>{{ __('tienda.ia_paso_3') }}</li>
-            </ol>
-            <label for="texto-ia" class="oculto">{{ __('tienda.ia_boton') }}</label>
-            <textarea id="texto-ia" class="texto-ia" rows="9" readonly></textarea>
-            <div class="acciones-ia">
-                <button type="button" class="boton-siguiente" id="copiar-ia">{{ __('tienda.ia_copiar') }}</button>
-                <label for="archivo-diseno" class="boton-pildora borde subir-ia">{{ __('tienda.ia_subir') }}</label>
-            </div>
-            <p class="claro aviso-ia">{{ __('tienda.ia_aviso') }}</p>
-        </div>
-    </div>
-
-    {{-- Tarjeta de decisión: tus diseños con lo que suman y «¿otro diseño o seguimos?». --}}
-    <div class="capas" id="capas" aria-live="polite"></div>
-
     <div class="herramientas" role="tablist" aria-label="{{ __('tienda.estudio') }}">
         <button type="button" role="tab" class="herramienta" id="h-diseno" aria-selected="true" aria-controls="hp-diseno" data-herramienta="diseno">{{ __('tienda.herramienta_diseno') }}</button>
         <button type="button" role="tab" class="herramienta" id="h-zona" aria-selected="false" aria-controls="hp-zona" data-herramienta="zona" tabindex="-1">{{ __('tienda.herramienta_zona') }}</button>
@@ -135,6 +101,37 @@
     </div>
     </div>
 
+    {{-- Energía de la calidad, debajo de la herramienta y a la vista mientras se diseña. --}}
+    <div class="calidad" id="calidad" role="status" aria-live="polite" data-nivel="">
+        <div class="calidad-cabecera"><strong id="calidad-etiqueta">{{ __('tienda.calidad_sin_diseno') }}</strong><span class="claro" id="calidad-ppp"></span></div>
+        <div class="calidad-barra" aria-hidden="true"><span id="calidad-relleno"></span></div>
+        <p id="calidad-mensaje"></p>
+        <p class="claro" id="calidad-consejo"></p>
+        <p id="calidad-fondo"></p>
+    </div>
+
+    {{-- Si la calidad no llega: instrucciones para mejorarlo con su propia IA y volver a subirlo (D143). --}}
+    <div class="mejora-ia" id="mejora-ia" hidden>
+        <button type="button" class="boton-ia" id="abrir-ia" aria-expanded="false" aria-controls="panel-ia">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/></svg>
+            {{ __('tienda.ia_boton') }}
+        </button>
+        <div class="panel-ia" id="panel-ia" hidden>
+            <ol class="pasos-ia">
+                <li>{{ __('tienda.ia_paso_1') }}</li>
+                <li>{{ __('tienda.ia_paso_2') }}</li>
+                <li>{{ __('tienda.ia_paso_3') }}</li>
+            </ol>
+            <label for="texto-ia" class="oculto">{{ __('tienda.ia_boton') }}</label>
+            <textarea id="texto-ia" class="texto-ia" rows="9" readonly></textarea>
+            <div class="acciones-ia">
+                <button type="button" class="boton-siguiente" id="copiar-ia">{{ __('tienda.ia_copiar') }}</button>
+                <label for="archivo-diseno" class="boton-pildora borde subir-ia">{{ __('tienda.ia_subir') }}</label>
+            </div>
+            <p class="claro aviso-ia">{{ __('tienda.ia_aviso') }}</p>
+        </div>
+    </div>
+
     <p class="tu-marca-error" id="tu-marca-error" role="alert" hidden></p>
     <p class="tu-marca-estado" id="tu-marca-estado" aria-live="polite"></p>
 
@@ -144,6 +141,9 @@
     </div>
 
     <p class="claro" style="font-size: 13px;">{{ trans_choice('tienda.privacidad', $diasDisenos = (int) \App\Models\Ajuste::obtener('disenos.dias_sin_pedido'), ['dias' => $diasDisenos]) }}</p>
+    {{-- Tarjeta de decisión: tus diseños con lo que suman y «¿otro diseño o seguimos?»; en el escritorio, fija abajo. --}}
+    <div class="capas" id="capas" aria-live="polite"></div>
+
     </div>
 
     <div class="nivel" id="nivel-cantidades" hidden>
