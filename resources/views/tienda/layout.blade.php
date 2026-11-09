@@ -142,6 +142,9 @@
         {{ $slot }}
     </main>
 
+    @if (\App\Dominio\Asistente\AsistenteVenta::disponible(auth()->user()?->cliente))
+        @include('tienda.asistente')
+    @endif
     <footer class="pie">
         <div class="contenedor">
             <div class="pie-rejilla">
@@ -167,6 +170,7 @@
                         <li><a href="{{ $portada }}#packs">{{ __('portada.nav_packs') }}</a></li>
                         <li><a href="{{ $portada }}#calidad">{{ __('portada.nav_calidad') }}</a></li>
                         <li><a href="{{ $urlNosotros }}">{{ __('portada.nav_nosotros') }}</a></li>
+                        <li><a href="{{ route('blog') }}">{{ __('blog.blog') }}</a></li>
                     </ul>
                 </div>
                 <div>

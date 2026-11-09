@@ -68,6 +68,11 @@ class PrendaResource extends Resource
                 ]),
                 CamposTraducibles::texto('detalles', 'Otros detalles (corte, cuidados…)', largo: true),
             ]),
+            // SEO como Yoast (v2, D195): si se dejan vacíos, se usan el nombre y la descripción.
+            Section::make('SEO')->description('Título para buscadores (60 caracteres) y metadescripción (155). «Proponer SEO con IA» los rellena para revisar.')->schema([
+                CamposTraducibles::texto('seo_titulo', 'Título SEO'),
+                CamposTraducibles::texto('seo_descripcion', 'Metadescripción', largo: true),
+            ]),
         ]);
     }
 

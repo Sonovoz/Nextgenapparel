@@ -1,10 +1,12 @@
 <?php
 
 use App\Dominio\Legal\PaginaLegal;
+use App\Http\Controllers\AsistenteController;
 use App\Http\Controllers\Backend\ArchivoDisenoController;
 use App\Http\Controllers\Backend\ArchivoPedidoController;
 use App\Http\Controllers\Backend\ProduccionController;
 use App\Http\Controllers\BajaComercialController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\CierreController;
 use App\Http\Controllers\Cuenta\AccesoController;
@@ -202,6 +204,13 @@ Route::prefix('{idioma}')
         Route::get('/packs/{pack}', [PackController::class, 'ver'])->name('packs.ver');
         Route::post('/packs/{pack}', [PackController::class, 'anadir'])->name('packs.anadir')->middleware('throttle:carrito');
         Route::post('/packs/{pack}/diseno', [PackController::class, 'subir'])->name('packs.subir')->middleware('throttle:disenos');
+
+        // Asistente IA de venta (v2, D194): solo con cuenta; antes de las familias.
+        Route::post('/asistente', AsistenteController::class)->name('asistente')->middleware(['auth', 'throttle:carrito']);
+
+        // Blog (v2, D195): /es/blog y /es/blog/{slug}; antes de las familias.
+        Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+        Route::get('/blog/{slug}', [BlogController::class, 'ver'])->name('blog.ver');
 
         // Textos legales (paso 8.1): /es/legal/privacidad…; antes de las familias.
         Route::get('/legal/{pagina}', [LegalController::class, 'ver'])->name('legal')->whereIn('pagina', array_column(PaginaLegal::cases(), 'value'));

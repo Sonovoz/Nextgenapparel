@@ -1071,3 +1071,20 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .texto-legal table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; display: block; overflow-x: auto; }
 .texto-legal th, .texto-legal td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--linea); vertical-align: top; }
 .texto-legal a { color: var(--neon); }
+
+/* Asistente IA de venta (v2, D194) */
+.asistente { position: fixed; right: 16px; bottom: 16px; z-index: 60; }
+.asistente-abrir { min-height: 48px; padding: 0 20px; border-radius: 999px; border: 0; background: var(--azul); color: #fff; font: 500 14px var(--sans); cursor: pointer; box-shadow: var(--sombra); }
+.asistente-panel { position: absolute; right: 0; bottom: 60px; width: min(360px, calc(100vw - 32px)); max-height: min(520px, 70vh); display: flex; flex-direction: column; border: 1px solid var(--linea-fuerte); border-radius: 16px; background: var(--papel); box-shadow: var(--sombra); overflow: hidden; }
+.asistente-panel[hidden] { display: none; }
+.asistente-panel header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--linea); }
+.asistente-panel h2 { margin: 0; font: 600 15px var(--sans); text-transform: none; letter-spacing: 0; }
+.asistente-cerrar { min-width: 44px; min-height: 44px; border: 0; background: none; color: var(--tinta); font-size: 22px; cursor: pointer; }
+.asistente-mensajes { list-style: none; margin: 0; padding: 12px 16px; overflow-y: auto; flex: 1; display: grid; gap: 8px; font-size: 14px; }
+.asistente-mensajes li { padding: 8px 12px; border-radius: 12px; max-width: 85%; white-space: pre-wrap; }
+.asistente-mensajes .asistente { background: var(--fondo-suave); justify-self: start; }
+.asistente-mensajes .cliente { background: var(--azul-suave); justify-self: end; }
+.asistente-formulario { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--linea); }
+.asistente-formulario input { flex: 1; min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--linea-fuerte); background: var(--fondo); color: var(--tinta); font: inherit; font-size: 16px; }
+.asistente-formulario button { min-height: 44px; padding: 0 14px; border-radius: 10px; border: 0; background: var(--azul); color: #fff; font: inherit; cursor: pointer; }
+.asistente-aviso { margin: 0; padding: 0 16px 10px; font-size: 11px; color: var(--tinta-suave); }

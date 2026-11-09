@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Dominio\Catalogo\Escaparate;
 use App\Dominio\Seo\Indexacion;
+use App\Models\EntradaBlog;
 use Illuminate\Http\Response;
 
 /** robots.txt y sitemaps por idioma (ficha § 12). */
@@ -42,6 +43,12 @@ class SeoController
                 $entrada['imagen'] = Escaparate::fotoPrincipal($prenda)?->url();
                 $urls[] = $entrada;
             }
+        }
+
+        // Blog (D195): el índice y cada entrada publicada.
+        $urls[] = $this->entrada(fn ($i) => route('blog', ['idioma' => $i]), $idioma, $idiomas);
+        foreach (EntradaBlog::publicadas()->get() as $articulo) {
+            $urls[] = $this->entrada(fn ($i) => route('blog.ver', ['idioma' => $i, 'slug' => Escaparate::slug($articulo, $i)]), $idioma, $idiomas, $articulo->updated_at);
         }
 
         return $this->xml(view('seo.sitemap', ['urls' => $urls]));

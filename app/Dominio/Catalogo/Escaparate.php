@@ -6,6 +6,7 @@ use App\Dominio\Precios\Formato;
 use App\Dominio\Precios\Impuestos;
 use App\Dominio\Precios\Iva;
 use App\Models\Color;
+use App\Models\EntradaBlog;
 use App\Models\Familia;
 use App\Models\Foto;
 use App\Models\Prenda;
@@ -18,7 +19,14 @@ use Illuminate\Support\Collection;
  */
 class Escaparate
 {
-    /** Busca por la URL en el idioma; si el inglés no tiene URL propia, vale la española. */
+    /**
+     * Busca por la URL en el idioma; si el inglés no tiene URL propia, vale la española.
+     *
+     * @template TModelo of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  Builder<TModelo>  $consulta
+     * @return Builder<TModelo>
+     */
     public static function porSlug(Builder $consulta, string $slug, string $idioma): Builder
     {
         return $consulta->where(fn (Builder $q) => $q
@@ -52,7 +60,7 @@ class Escaparate
             ->firstOrFail();
     }
 
-    public static function slug(Familia|Prenda $modelo, string $idioma): string
+    public static function slug(Familia|Prenda|EntradaBlog $modelo, string $idioma): string
     {
         return $modelo->getTranslation('slug', $idioma, false) ?: $modelo->getTranslation('slug', 'es');
     }
