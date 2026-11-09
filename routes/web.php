@@ -1,5 +1,6 @@
 <?php
 
+use App\Dominio\Legal\PaginaLegal;
 use App\Http\Controllers\Backend\ArchivoDisenoController;
 use App\Http\Controllers\Backend\ArchivoPedidoController;
 use App\Http\Controllers\Backend\ProduccionController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Cuenta\MisDisenosController;
 use App\Http\Controllers\Cuenta\RegistroController;
 use App\Http\Controllers\Cuenta\VerificacionController;
 use App\Http\Controllers\DisenoController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PackController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PedidoController;
@@ -185,6 +187,9 @@ Route::prefix('{idioma}')
         Route::get('/packs/{pack}', [PackController::class, 'ver'])->name('packs.ver');
         Route::post('/packs/{pack}', [PackController::class, 'anadir'])->name('packs.anadir')->middleware('throttle:carrito');
         Route::post('/packs/{pack}/diseno', [PackController::class, 'subir'])->name('packs.subir')->middleware('throttle:disenos');
+
+        // Textos legales (paso 8.1): /es/legal/privacidad…; antes de las familias.
+        Route::get('/legal/{pagina}', [LegalController::class, 'ver'])->name('legal')->whereIn('pagina', array_column(PaginaLegal::cases(), 'value'));
 
         // Sobre nosotros (D145): /es/sobre-nosotros y /en/about-us; antes de las familias.
         Route::get('/{pagina}', [TiendaController::class, 'nosotros'])

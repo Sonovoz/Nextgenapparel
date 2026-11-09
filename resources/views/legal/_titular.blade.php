@@ -1,0 +1,1 @@
+{{ $tienda }} ({{ $web }}) es la tienda en línea de prendas personalizadas con impresión DTI de **{!! $f($e['razon_social'], 'razón social') !!}**, que es quien vende, cobra, fabrica, envía y factura todos los pedidos.
