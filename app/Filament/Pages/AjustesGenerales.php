@@ -68,6 +68,7 @@ class AjustesGenerales extends Page implements HasSchemas
             'pedidos_prefijo' => Ajuste::obtener('pedidos.prefijo'),
             'pedidos_dias_confirmar' => Ajuste::obtener('pedidos.dias_confirmar_correo'),
             'pedidos_dias_sin_pago' => Ajuste::obtener('pedidos.dias_sin_pago'),
+            'incidencias_dias' => Ajuste::obtener('incidencias.dias'),
             'pedidos_tramos' => (array) Ajuste::obtener('pedidos.plazo_tramos'),
             'ia_activa' => MejoraIa::activa(),
             'ia_desde' => MejoraIa::desde(),
@@ -125,6 +126,8 @@ class AjustesGenerales extends Page implements HasSchemas
                     TextInput::make('pedidos_dias_confirmar')->label('Días del enlace para confirmar el correo')->integer()->minValue(1)->maxValue(60)->required(),
                     TextInput::make('pedidos_dias_sin_pago')->label('Cancelar sin pagar a los')->integer()->minValue(1)->maxValue(60)->suffix('días')->required()
                         ->helperText('Se cancela solo y devuelve el uso del cupón.'),
+                    TextInput::make('incidencias_dias')->label('Plazo para abrir una incidencia')->integer()->minValue(1)->maxValue(90)->suffix('días')->required()
+                        ->helperText('Desde la entrega (o desde el envío si no se marcó).'),
                     Repeater::make('pedidos_tramos')->label('Días extra según las unidades')->columnSpanFull()->columns(2)->defaultItems(0)
                         ->addActionLabel('Añadir tramo')->reorderable(false)
                         ->schema([
@@ -203,6 +206,7 @@ class AjustesGenerales extends Page implements HasSchemas
                 Ajuste::guardar('pedidos.prefijo', $datos['pedidos_prefijo']);
                 Ajuste::guardar('pedidos.dias_confirmar_correo', (int) $datos['pedidos_dias_confirmar']);
                 Ajuste::guardar('pedidos.dias_sin_pago', (int) $datos['pedidos_dias_sin_pago']);
+                Ajuste::guardar('incidencias.dias', (int) $datos['incidencias_dias']);
                 Ajuste::guardar('pedidos.plazo_tramos', collect($datos['pedidos_tramos'] ?? [])
                     ->map(fn ($t) => ['desde' => (int) $t['desde'], 'dias' => (int) $t['dias']])->sortBy('desde')->values()->all());
 

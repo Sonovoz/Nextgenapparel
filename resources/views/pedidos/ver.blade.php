@@ -74,6 +74,55 @@
                 </section>
             @endif
 
+            @if ($pedido->incidencias->isNotEmpty() || $puedeIncidencia)
+                <section class="pedido-novedades pedido-incidencias" id="incidencias" aria-labelledby="titulo-incidencias">
+                    <h2 id="titulo-incidencias">{{ __('incidencias.titulo') }}</h2>
+                    @foreach ($pedido->incidencias as $incidencia)
+                        <article class="incidencia">
+                            <p><strong>{{ $incidencia->codigo }}</strong> · {{ $incidencia->motivo->etiqueta() }}
+                                <time datetime="{{ $incidencia->created_at->toIso8601String() }}">{{ $incidencia->created_at->locale(app()->getLocale())->isoFormat('LL') }} ·
+                                    {{ $incidencia->abierta() ? __('incidencias.estado_abierta') : __('incidencias.estado_resuelta').' · '.$incidencia->resolucion?->etiqueta() }}
+                                    @if ($incidencia->importe_reembolso) ({{ Formato::euros($incidencia->importe_reembolso) }})@endif</time></p>
+                            <p class="claro">{{ $incidencia->descripcion }}</p>
+                            @if ($incidencia->fotos->isNotEmpty())
+                                <div class="incidencia-fotos">
+                                    @foreach ($incidencia->fotos as $foto)
+                                        <a href="{{ route('pedidos.'.app()->getLocale().'.foto-incidencia', ['pedido' => $pedido->uuid, 'foto' => $foto->id]) }}" target="_blank" rel="noopener">
+                                            <img src="{{ route('pedidos.'.app()->getLocale().'.foto-incidencia', ['pedido' => $pedido->uuid, 'foto' => $foto->id]) }}" alt="{{ __('incidencias.foto_alt', ['n' => $loop->iteration, 'codigo' => $incidencia->codigo]) }}" width="{{ $foto->ancho_px }}" height="{{ $foto->alto_px }}" loading="lazy"></a>
+                                    @endforeach
+                                </div>
+                            @endif
+                            @if ($incidencia->respuesta)
+                                <p><strong>{{ __('incidencias.respuesta') }}:</strong> {{ $incidencia->respuesta }}</p>
+                            @endif
+                        </article>
+                    @endforeach
+                    @if ($puedeIncidencia)
+                        <details class="pedido-cancelar" @if ($errors->has('incidencia') || $errors->has('motivo') || $errors->has('descripcion') || $errors->has('fotos') || $errors->has('fotos.*')) open @endif>
+                            <summary>{{ __('incidencias.abrir') }}</summary>
+                            <form method="POST" action="{{ route('pedidos.'.app()->getLocale().'.incidencia', ['pedido' => $pedido->uuid]) }}" enctype="multipart/form-data">@csrf
+                                <p class="claro">{{ __('incidencias.abrir_texto', ['fecha' => $plazoIncidencia?->locale(app()->getLocale())->isoFormat('LL')]) }}</p>
+                                @if ($errors->any())
+                                    <div class="aviso-cuenta error" role="alert"><ul>@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
+                                @endif
+                                <label for="motivo-incidencia">{{ __('incidencias.motivo') }}</label>
+                                <select id="motivo-incidencia" name="motivo" required>
+                                    @foreach (\App\Dominio\Incidencias\MotivoIncidencia::cases() as $motivo)
+                                        <option value="{{ $motivo->value }}" @selected(old('motivo') === $motivo->value)>{{ $motivo->etiqueta() }}</option>
+                                    @endforeach
+                                </select>
+                                <label for="descripcion-incidencia">{{ __('incidencias.descripcion') }}</label>
+                                <textarea id="descripcion-incidencia" name="descripcion" rows="4" maxlength="2000" minlength="10" required>{{ old('descripcion') }}</textarea>
+                                <label for="fotos-incidencia">{{ __('incidencias.fotos', ['n' => \App\Dominio\Incidencias\AbrirIncidencia::MAX_FOTOS]) }}</label>
+                                <input id="fotos-incidencia" type="file" name="fotos[]" accept="image/jpeg,image/png,image/webp" multiple aria-describedby="fotos-ayuda">
+                                <small id="fotos-ayuda" class="claro">{{ __('incidencias.fotos_ayuda') }}</small>
+                                <button type="submit" class="boton">{{ __('incidencias.enviar') }}</button>
+                            </form>
+                        </details>
+                    @endif
+                </section>
+            @endif
+
             <div class="carrito-rejilla">
                 <div class="pedido-lineas">
                     @foreach ($pedido->lineas as $linea)

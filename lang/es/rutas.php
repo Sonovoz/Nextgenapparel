@@ -32,4 +32,6 @@ return [
     'facturas' => 'facturas',
     'cancelar' => 'cancelar',
     'repetir' => 'repetir',
+    'incidencias' => 'incidencias',
+    'fotos' => 'fotos',
 ];

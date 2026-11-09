@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Dominio\Facturacion\PdfFactura;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Factura;
+use App\Models\FotoIncidencia;
 use App\Models\ImpresionPedido;
 use App\Models\MaquetaPedido;
 use App\Models\Pedido;
@@ -50,6 +51,15 @@ class ArchivoPedidoController
             'Content-Disposition' => 'inline; filename="'.$factura->nombreArchivo().'"',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    /** Una foto de una incidencia del pedido (paso 6.6b). */
+    public function fotoIncidencia(Pedido $pedido, FotoIncidencia $foto): Response
+    {
+        $this->comprobarAcceso($pedido);
+        abort_unless($foto->incidencia->pedido_id === $pedido->id, 404);
+
+        return Storage::disk(Pedido::DISCO)->response($foto->ruta, null, ['Content-Type' => 'image/webp', 'Cache-Control' => 'private, max-age=86400', 'X-Content-Type-Options' => 'nosniff']);
     }
 
     /** Como en los diseños: usuario activo con acceso al panel y permiso del pedido (estas rutas no pasan por Filament). */

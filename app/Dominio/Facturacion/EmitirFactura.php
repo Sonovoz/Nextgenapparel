@@ -16,8 +16,9 @@ use LogicException;
  * - **Factura** al darlo por pagado: completa (F1) si hay NIF, simplificada (F2) si no.
  *   Los importes y el desglose de impuestos (IVA y recargo por tipo) son los del pedido,
  *   tal como los calculó el motor: la factura cuadra con él al céntimo.
- * - **Rectificativa** por diferencias, en negativo y del total, al cancelar un pedido ya
- *   facturado (R1 de una completa, R5 de una simplificada).
+ * - **Rectificativa** por diferencias, en negativo, al cancelar un pedido ya facturado (R1 de una
+ *   completa, R5 de una simplificada): del total, o del resto si hubo reembolsos parciales.
+ * - **Rectificativa parcial** por un reembolso de una incidencia (D178).
  * - Idempotente; numeración correlativa por serie y año y huella encadenada bajo bloqueo.
  * - Sin datos fiscales completos no se factura (EmisorIncompleto): `facturas:emitir-pendientes`.
  */
@@ -54,28 +55,87 @@ final class EmitirFactura
         return $this->escribir($pedido, $tipo, $lineas, $desglose);
     }
 
+    /**
+     * Rectificativa de lo que queda al cancelar (D175): del total si no hubo reembolsos parciales y,
+     * si los hubo, del resto (D178). Una sola por factura; si ya no queda nada, ninguna.
+     */
     public function rectificativa(Pedido $pedido, string $motivo): ?Factura
     {
-        $original = Factura::with('lineas')->where('pedido_id', $pedido->id)->whereIn('tipo', [TipoFactura::Completa->value, TipoFactura::Simplificada->value])->first();
+        // Bajo el bloqueo del pedido, como los reembolsos parciales: nunca se rectifica dos veces lo mismo.
+        return DB::transaction(fn () => $this->rectificarResto(Pedido::whereKey($pedido->id)->lockForUpdate()->firstOrFail(), $motivo));
+    }
+
+    private function rectificarResto(Pedido $pedido, string $motivo): ?Factura
+    {
+        $original = $this->original($pedido);
         if ($original === null) {
             return null; // nunca se facturó: no hay nada que rectificar
         }
-        if (($ya = Factura::where('rectifica_id', $original->id)->first()) !== null) {
+        if (($ya = Factura::where('rectifica_id', $original->id)->where('parcial', false)->first()) !== null) {
             return $ya;
         }
+        $parciales = Factura::where('rectifica_id', $original->id)->where('parcial', true)->orderBy('id')->get();
+        $pendiente = RepartoReembolso::pendiente($original->desglose, $parciales->map(fn (Factura $f) => $f->desglose)->all());
+        if ($pendiente === []) {
+            return null; // ya se devolvió todo con reembolsos parciales
+        }
         $tipo = $original->tipo === TipoFactura::Completa ? TipoFactura::Rectificativa : TipoFactura::RectificativaSimplificada;
-        $lineas = $original->lineas->map(fn ($l) => ['descripcion' => $l->descripcion, 'cantidad' => -$l->cantidad, 'precio_unitario' => $l->precio_unitario,
-            'tipo_iva' => $l->tipo_iva, 'base' => -$l->base])->all();
-        $desglose = array_map(fn ($d) => [...$d, 'base' => -$d['base'], 'cuota' => -$d['cuota'], 'cuota_recargo' => -$d['cuota_recargo']], $original->desglose);
+        $lineas = $parciales->isEmpty()
+            ? $original->lineas->map(fn ($l) => ['descripcion' => $l->descripcion, 'cantidad' => -$l->cantidad, 'precio_unitario' => $l->precio_unitario,
+                'tipo_iva' => $l->tipo_iva, 'base' => -$l->base])->all()
+            : array_map(fn (array $g) => ['descripcion' => __('facturas.anulacion_resto', [], $pedido->idioma), 'cantidad' => -1, 'precio_unitario' => $g['base'],
+                'tipo_iva' => $g['tipo_iva'], 'base' => -$g['base']], $pendiente);
+        $desglose = array_map(fn ($d) => [...$d, 'base' => -$d['base'], 'cuota' => -$d['cuota'], 'cuota_recargo' => -$d['cuota_recargo']], $pendiente);
 
         return $this->escribir($pedido, $tipo, $lineas, $desglose, $original, $motivo);
+    }
+
+    /**
+     * Rectificativa parcial por un reembolso (incidencias, paso 6.6b, D178): el importe con impuestos
+     * se reparte entre los tipos de IVA en proporción a lo que queda por rectificar.
+     */
+    public function rectificativaParcial(Pedido $pedido, int $importe, string $concepto, string $motivo): Factura
+    {
+        return DB::transaction(function () use ($pedido, $importe, $concepto, $motivo) {
+            // El pedido bloqueado: dos reembolsos a la vez no se pasan de lo cobrado.
+            $pedido = Pedido::whereKey($pedido->id)->lockForUpdate()->firstOrFail();
+            $original = $this->original($pedido) ?? throw new LogicException("El pedido {$pedido->numero} no tiene factura que rectificar.");
+            if (Factura::where('rectifica_id', $original->id)->where('parcial', false)->exists()) {
+                throw new LogicException("El pedido {$pedido->numero} ya está rectificado entero.");
+            }
+            $rectificadas = Factura::where('rectifica_id', $original->id)->where('parcial', true)->pluck('desglose')->all();
+            $reparto = RepartoReembolso::repartir(RepartoReembolso::pendiente($original->desglose, $rectificadas), $importe);
+
+            $tipo = $original->tipo === TipoFactura::Completa ? TipoFactura::Rectificativa : TipoFactura::RectificativaSimplificada;
+            $lineas = array_map(fn (array $g) => ['descripcion' => $concepto, 'cantidad' => -1, 'precio_unitario' => $g['base'], 'tipo_iva' => $g['tipo_iva'], 'base' => -$g['base']], $reparto);
+            $desglose = array_map(fn ($d) => [...$d, 'base' => -$d['base'], 'cuota' => -$d['cuota'], 'cuota_recargo' => -$d['cuota_recargo']], $reparto);
+
+            return $this->escribir($pedido, $tipo, $lineas, $desglose, $original, $motivo, parcial: true);
+        });
+    }
+
+    /** Lo que queda por devolver de un pedido facturado, con impuestos (0 si no hay factura o ya está rectificado entero). */
+    public function pendienteDeRectificar(Pedido $pedido): int
+    {
+        $original = $this->original($pedido);
+        if ($original === null || Factura::where('rectifica_id', $original->id)->where('parcial', false)->exists()) {
+            return 0;
+        }
+        $pendiente = RepartoReembolso::pendiente($original->desglose, Factura::where('rectifica_id', $original->id)->where('parcial', true)->pluck('desglose')->all());
+
+        return array_sum(array_map(fn (array $g) => $g['base'] + $g['cuota'] + $g['cuota_recargo'], $pendiente));
+    }
+
+    private function original(Pedido $pedido): ?Factura
+    {
+        return Factura::with('lineas')->where('pedido_id', $pedido->id)->whereIn('tipo', [TipoFactura::Completa->value, TipoFactura::Simplificada->value])->first();
     }
 
     /**
      * @param  list<array{descripcion: string, cantidad: int, precio_unitario: int, tipo_iva: ?int, base: int}>  $lineas
      * @param  list<array{tipo_iva: int, recargo: int, base: int, cuota: int, cuota_recargo: int}>  $desglose
      */
-    private function escribir(Pedido $pedido, TipoFactura $tipo, array $lineas, array $desglose, ?Factura $rectifica = null, ?string $motivo = null): Factura
+    private function escribir(Pedido $pedido, TipoFactura $tipo, array $lineas, array $desglose, ?Factura $rectifica = null, ?string $motivo = null, bool $parcial = false): Factura
     {
         if (($falta = Emisor::falta()) !== []) {
             throw new EmisorIncompleto('Faltan datos fiscales de la tienda: '.implode(', ', $falta).'.');
@@ -83,12 +143,12 @@ final class EmitirFactura
         $base = array_sum(array_column($desglose, 'base'));
         $iva = array_sum(array_column($desglose, 'cuota'));
         $recargo = array_sum(array_column($desglose, 'cuota_recargo'));
-        $esperado = $rectifica === null ? $pedido->total : -$rectifica->total;
-        if ($base + $iva + $recargo !== $esperado) {
+        // La factura cuadra con el pedido; una rectificativa nunca devuelve más de lo facturado.
+        if ($rectifica === null ? $base + $iva + $recargo !== $pedido->total : $base + $iva + $recargo >= 0 || -($base + $iva + $recargo) > $rectifica->total) {
             throw new LogicException("La factura del pedido {$pedido->numero} no cuadra con su total.");
         }
 
-        return DB::transaction(function () use ($pedido, $tipo, $lineas, $desglose, $rectifica, $motivo, $base, $iva, $recargo) {
+        return DB::transaction(function () use ($pedido, $tipo, $lineas, $desglose, $rectifica, $motivo, $base, $iva, $recargo, $parcial) {
             // Primero el contador de la cadena: así las facturas se encadenan de una en una (sin huecos ni dos con la misma huella anterior).
             Numeracion::siguiente('facturas');
             $anterior = Factura::latest('id')->first();
@@ -107,7 +167,7 @@ final class EmitirFactura
             $factura = Factura::create([
                 'uuid' => (string) Str::uuid(),
                 'serie' => $serie, 'anio' => $anio, 'numero' => $numero, 'codigo' => $codigo, 'tipo' => $tipo,
-                'pedido_id' => $pedido->id, 'rectifica_id' => $rectifica?->id, 'motivo' => $motivo === null ? null : mb_substr($motivo, 0, 255),
+                'pedido_id' => $pedido->id, 'rectifica_id' => $rectifica?->id, 'parcial' => $parcial, 'motivo' => $motivo === null ? null : mb_substr($motivo, 0, 255),
                 'emitida_en' => $ahora, 'idioma' => $pedido->idioma, 'emisor' => $emisor,
                 'destinatario' => ['nombre' => $pedido->nombre_fiscal, 'nif' => $pedido->nif, 'direccion' => $pedido->direccion_facturacion, 'correo' => $pedido->correo],
                 'base_imponible' => $base, 'iva' => $iva, 'recargo' => $recargo, 'total' => $total, 'desglose' => $desglose,

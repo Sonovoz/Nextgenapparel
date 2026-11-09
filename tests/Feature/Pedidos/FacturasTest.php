@@ -5,6 +5,7 @@ namespace Tests\Feature\Pedidos;
 use App\Dominio\Facturacion\EmisorIncompleto;
 use App\Dominio\Facturacion\EmitirFactura;
 use App\Dominio\Facturacion\PdfFactura;
+use App\Dominio\Facturacion\RepartoReembolso;
 use App\Dominio\Facturacion\TipoFactura;
 use App\Dominio\Facturacion\Verifactu;
 use App\Dominio\Pedidos\CambiarEstado;
@@ -111,6 +112,87 @@ class FacturasTest extends TestCase
         $this->assertSame([-15, -10500], [$rectificativa->lineas[0]->cantidad, $rectificativa->lineas[0]->base]);
         $this->assertTrue(app(EmitirFactura::class)->rectificativa($pedido, 'Otra vez')->is($rectificativa));
         $this->assertNull(app(EmitirFactura::class)->rectificativa($this->pedido(), 'Sin factura'));
+    }
+
+    /**
+     * Reembolso parcial (D178): el importe con impuestos se reparte entre los tipos en proporción a lo
+     * que queda (mayor resto) y base + IVA + recargo = importe al céntimo.
+     */
+    #[DataProvider('repartos')]
+    public function test_el_reembolso_parcial_se_reparte_sin_errores_de_redondeo(array $pendiente, int $importe, array $esperado): void
+    {
+        $reparto = RepartoReembolso::repartir($pendiente, $importe);
+
+        $this->assertSame($esperado, array_map(fn ($g) => [$g['base'], $g['cuota'], $g['cuota_recargo']], $reparto));
+        $this->assertSame($importe, array_sum(array_map(fn ($g) => $g['base'] + $g['cuota'] + $g['cuota_recargo'], $reparto)));
+    }
+
+    public static function repartos(): array
+    {
+        $iva21 = ['tipo_iva' => 2100, 'recargo' => 0, 'base' => 10000, 'cuota' => 2100, 'cuota_recargo' => 0];
+
+        return [
+            '21 %: 20,00 €' => [[$iva21], 2000, [[1653, 347, 0]]],
+            '21 % con recargo 5,2 %: 20,00 €' => [[['tipo_iva' => 2100, 'recargo' => 520, 'base' => 10000, 'cuota' => 2100, 'cuota_recargo' => 520]], 2000, [[1585, 333, 82]]],
+            'dos tipos: el céntimo sobrante, al resto mayor' => [[$iva21, ['tipo_iva' => 1000, 'recargo' => 0, 'base' => 1000, 'cuota' => 100, 'cuota_recargo' => 0]], 1000, [[758, 159, 0], [75, 8, 0]]],
+            'todo lo que queda' => [[$iva21], 12100, [[10000, 2100, 0]]],
+        ];
+    }
+
+    #[DataProvider('importesNoValidos')]
+    public function test_un_reembolso_no_pasa_de_lo_que_queda(int $importe): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        RepartoReembolso::repartir([['tipo_iva' => 2100, 'recargo' => 0, 'base' => 10000, 'cuota' => 2100, 'cuota_recargo' => 0]], $importe);
+    }
+
+    public static function importesNoValidos(): array
+    {
+        return ['cero' => [0], 'negativo' => [-100], 'más de lo facturado' => [12101]];
+    }
+
+    /** Dos reembolsos parciales y luego la cancelación: la rectificativa final es del resto y todo suma lo facturado. */
+    public function test_reembolsos_parciales_y_cancelacion_suman_lo_facturado(): void
+    {
+        $pedido = $this->pedido(['nif' => 'B87654321']);
+        $emitir = app(EmitirFactura::class);
+        $factura = $emitir->delPedido($pedido);
+
+        $primera = $emitir->rectificativaParcial($pedido, 2000, 'Reembolso parcial por la incidencia INC-0001', 'Incidencia INC-0001');
+        $segunda = $emitir->rectificativaParcial($pedido, 1000, 'Reembolso parcial por la incidencia INC-0002', 'Incidencia INC-0002');
+        $this->assertSame([TipoFactura::Rectificativa, true, -2000, -1653, -347, $factura->id], [$primera->tipo, $primera->parcial, $primera->total, $primera->base_imponible, $primera->iva, $primera->rectifica_id]);
+        $this->assertSame([-1, -1653, 'Reembolso parcial por la incidencia INC-0001'], [$primera->lineas->sole()->cantidad, $primera->lineas->sole()->base, $primera->lineas->sole()->descripcion]);
+        $this->assertSame(13298 - 3000, $emitir->pendienteDeRectificar($pedido));
+
+        try {
+            $emitir->rectificativaParcial($pedido, 10299, 'Demasiado', 'Demasiado');
+            $this->fail('Un reembolso no puede pasar de lo que queda.');
+        } catch (\InvalidArgumentException) {
+        }
+
+        $resto = $emitir->rectificativa($pedido, 'Cancelación');
+        $this->assertSame([false, -10298], [$resto->parcial, $resto->total]);
+        $this->assertSame(['Anulación del pedido (descontados los reembolsos ya rectificados)'], $resto->lineas->pluck('descripcion')->all());
+        $this->assertSame([0, 0, 0], [
+            $factura->base_imponible + $primera->base_imponible + $segunda->base_imponible + $resto->base_imponible,
+            $factura->iva + $primera->iva + $segunda->iva + $resto->iva,
+            $factura->total + $primera->total + $segunda->total + $resto->total,
+        ]);
+        $this->assertSame(0, $emitir->pendienteDeRectificar($pedido));
+        $this->expectException(LogicException::class);
+        $emitir->rectificativaParcial($pedido, 100, 'Tras cancelar', 'Tras cancelar');
+    }
+
+    public function test_si_los_reembolsos_cubren_todo_no_hay_rectificativa_al_cancelar(): void
+    {
+        $pedido = $this->pedido();
+        $emitir = app(EmitirFactura::class);
+        $emitir->delPedido($pedido);
+        $emitir->rectificativaParcial($pedido, 13298, 'Todo', 'Todo');
+
+        $this->assertNull($emitir->rectificativa($pedido, 'Cancelación'));
+        $this->assertSame(0, $emitir->pendienteDeRectificar($pedido));
     }
 
     public function test_una_factura_no_se_cambia_ni_se_borra(): void

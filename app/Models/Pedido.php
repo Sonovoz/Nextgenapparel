@@ -47,6 +47,7 @@ use Illuminate\Support\Facades\Storage;
  * @property-read ?Cliente $cliente
  * @property-read Collection<int, LineaPedido> $lineas
  * @property-read Collection<int, Factura> $facturas
+ * @property-read Collection<int, Incidencia> $incidencias
  */
 class Pedido extends Model
 {
@@ -94,6 +95,12 @@ class Pedido extends Model
     public function notas(): HasMany
     {
         return $this->hasMany(NotaPedido::class)->latest('id');
+    }
+
+    /** @return HasMany<Incidencia, $this> */
+    public function incidencias(): HasMany
+    {
+        return $this->hasMany(Incidencia::class)->orderBy('id');
     }
 
     public function historial(): HasMany

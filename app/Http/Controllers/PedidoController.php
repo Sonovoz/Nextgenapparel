@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Dominio\Carrito\CarritoActual;
 use App\Dominio\Disenos\Dueno;
 use App\Dominio\Facturacion\PdfFactura;
+use App\Dominio\Incidencias\AbrirIncidencia;
+use App\Dominio\Incidencias\IncidenciaNoValida;
+use App\Dominio\Incidencias\MotivoIncidencia;
 use App\Dominio\Pedidos\CambioNoValido;
 use App\Dominio\Pedidos\CancelarPorCliente;
 use App\Dominio\Pedidos\ConfirmarCorreoPedido;
@@ -14,6 +17,7 @@ use App\Dominio\Pedidos\PedidoNoCreado;
 use App\Dominio\Pedidos\RepetirPedido;
 use App\Models\Ajuste;
 use App\Models\Factura;
+use App\Models\FotoIncidencia;
 use App\Models\MaquetaPedido;
 use App\Models\Pedido;
 use App\Notifications\Pedidos\ConfirmaTuCorreo;
@@ -23,6 +27,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -76,9 +81,10 @@ class PedidoController
     public function ver(Request $request, Pedido $pedido): View
     {
         abort_unless($this->puedeVer($request, $pedido), 404);
-        $pedido->load('lineas.impresiones', 'lineas.maquetas', 'facturas', 'historial');
+        $pedido->load('lineas.impresiones', 'lineas.maquetas', 'facturas', 'historial', 'incidencias.fotos');
 
-        return view('pedidos.ver', ['pedido' => $pedido, 'alternos' => $this->alternos('ver', $pedido), 'puedeCancelar' => CancelarPorCliente::puede($pedido)]);
+        return view('pedidos.ver', ['pedido' => $pedido, 'alternos' => $this->alternos('ver', $pedido), 'puedeCancelar' => CancelarPorCliente::puede($pedido),
+            'puedeIncidencia' => AbrirIncidencia::puede($pedido), 'plazoIncidencia' => AbrirIncidencia::plazoHasta($pedido)]);
     }
 
     /** Cancelar desde el visor (paso 6.6, D177): al momento si no está pagado; si lo está, la petición al equipo. */
@@ -93,6 +99,34 @@ class PedidoController
         }
 
         return redirect(self::url('ver', $pedido))->with('estado_pedido', __('pedidos.cancelar_'.$resultado));
+    }
+
+    /** Abrir una incidencia con fotos (paso 6.6b, D178). */
+    public function abrirIncidencia(Request $request, Pedido $pedido, AbrirIncidencia $abrir): RedirectResponse
+    {
+        abort_unless($this->puedeVer($request, $pedido), 404);
+        $datos = $request->validate([
+            'motivo' => ['required', Rule::enum(MotivoIncidencia::class)],
+            'descripcion' => ['required', 'string', 'max:2000'],
+            'fotos' => ['nullable', 'array', 'max:'.AbrirIncidencia::MAX_FOTOS],
+            'fotos.*' => ['file', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+        ], [], ['motivo' => __('incidencias.motivo'), 'descripcion' => __('incidencias.descripcion'), 'fotos' => __('incidencias.titulo')]);
+        try {
+            $incidencia = $abrir($pedido, MotivoIncidencia::from($datos['motivo']), $datos['descripcion'], array_values($request->file('fotos', [])));
+        } catch (IncidenciaNoValida $e) {
+            return redirect(self::url('ver', $pedido).'#incidencias')->withInput()
+                ->withErrors(['incidencia' => __('incidencias.'.$e->motivo, ['n' => AbrirIncidencia::MAX_FOTOS])]);
+        }
+
+        return redirect(self::url('ver', $pedido).'#incidencias')->with('estado_pedido', __('incidencias.abierta_ok', ['codigo' => $incidencia->codigo]));
+    }
+
+    /** Una foto de una incidencia: del disco privado, solo para quien puede ver el pedido. */
+    public function fotoIncidencia(Request $request, Pedido $pedido, FotoIncidencia $foto): Response
+    {
+        abort_unless($this->puedeVer($request, $pedido) && $foto->incidencia->pedido_id === $pedido->id, 404);
+
+        return Storage::disk(Pedido::DISCO)->response($foto->ruta, null, ['Content-Type' => 'image/webp', 'Cache-Control' => 'private, max-age=86400', 'X-Content-Type-Options' => 'nosniff']);
     }
 
     /** «Repetir pedido» (paso 6.6): las mismas líneas al carrito de quien lo pide, con el precio de hoy. */

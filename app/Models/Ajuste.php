@@ -41,6 +41,8 @@ class Ajuste extends Model
         // y días extra de producción según las unidades: [{desde: 100, dias: 2}, …] (vacío: ninguno).
         'pedidos.dias_sin_pago' => 7,
         'pedidos.plazo_tramos' => [],
+        // Paso 6.6b: días desde la entrega (o el envío) para abrir una incidencia (D178).
+        'incidencias.dias' => 14,
         // Paso 6.4: SMTP del panel (contraseña cifrada), estados que avisan al cliente, plantillas
         // propias por estado e idioma y nombres visibles de los estados (vacíos: los de lang/).
         'correo.smtp' => [],
