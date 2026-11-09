@@ -21,6 +21,7 @@ use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PackController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\PresupuestoController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TiendaController;
 use App\Http\Middleware\EstablecerIdioma;
@@ -131,6 +132,17 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
                 ->block(10, 10); // un doble clic espera a la primera petición y no pisa la sesión (M3)
         });
 
+    // Presupuestos (D187): /es/presupuestos/{uuid} y /en/quotes/{uuid}, sin indexar.
+    Route::prefix($idioma.'/'.$tramo('presupuestos'))
+        ->name("presupuestos.{$idioma}.")
+        ->middleware(EstablecerIdioma::class)
+        ->group(function () {
+            Route::post('/', [PresupuestoController::class, 'crear'])->name('crear')->middleware('throttle:carrito');
+            Route::get('/{presupuesto}', [PresupuestoController::class, 'ver'])->name('ver')->whereUuid('presupuesto');
+            Route::get('/{presupuesto}/pdf', [PresupuestoController::class, 'pdf'])->name('pdf')->whereUuid('presupuesto');
+            Route::post('/{presupuesto}/carrito', [PresupuestoController::class, 'pasar'])->name('pasar')->whereUuid('presupuesto')->middleware('throttle:carrito');
+        });
+
     // Pedidos (paso 6.1): /es/pedidos/{uuid} y /en/orders/{uuid}, sin indexar.
     Route::prefix($idioma.'/'.$tramo('pedidos'))
         ->name("pedidos.{$idioma}.")
@@ -154,7 +166,7 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
         });
 
     // El idioma va en la ruta (para EstablecerIdioma y las URL), no en un parámetro de la URL.
-    foreach ([$idioma.'/'.$tramo('cuenta'), $idioma.'/'.$tramo('carrito'), $idioma.'/'.$tramo('pedidos')] as $prefijo) {
+    foreach ([$idioma.'/'.$tramo('cuenta'), $idioma.'/'.$tramo('carrito'), $idioma.'/'.$tramo('pedidos'), $idioma.'/'.$tramo('presupuestos')] as $prefijo) {
         foreach (Route::getRoutes()->getRoutes() as $ruta) {
             if (str_starts_with($ruta->uri(), $prefijo)) {
                 $ruta->defaults('idioma', $idioma);

@@ -5,7 +5,10 @@ namespace Tests\Feature\Backend;
 use App\Dominio\Sistema\Acceso\Rol;
 use App\Dominio\Sistema\Acceso\SincronizarRoles;
 use App\Filament\Navegacion\GrupoNavegacion;
-use App\Filament\Pages\Pendientes\PaginaPendiente;
+use App\Filament\Pages\AjustesGenerales;
+use App\Filament\Pages\CopiasSeguridad;
+use App\Filament\Pages\Informes;
+use App\Filament\Pages\Produccion\OrdenesTrabajo;
 use App\Filament\Pages\RolesPermisos;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
@@ -84,7 +87,8 @@ class RolesTest extends TestCase
     {
         $this->actingAs($this->usuarioConRol($rol));
 
-        foreach (self::paginasPendientes() as $clase) {
+        // Una sección de cada grupo con páginas propias.
+        foreach ([AjustesGenerales::class, OrdenesTrabajo::class, Informes::class, CopiasSeguridad::class] as $clase) {
             $respuesta = $this->get($clase::getUrl(panel: 'admin'));
 
             $rol->puedeVer($clase::getNavigationGroup())
@@ -126,21 +130,5 @@ class RolesTest extends TestCase
             array_map(fn (Rol $r) => $r->value, Rol::cases()),
             array_map(fn (Rol $r) => [$r], Rol::cases()),
         );
-    }
-
-    /** @return list<class-string<PaginaPendiente>> */
-    private static function paginasPendientes(): array
-    {
-        $clases = [];
-
-        foreach (glob(dirname(__DIR__, 3).'/app/Filament/Pages/Pendientes/*.php') ?: [] as $archivo) {
-            $clase = 'App\\Filament\\Pages\\Pendientes\\'.basename($archivo, '.php');
-
-            if ($clase !== PaginaPendiente::class) {
-                $clases[] = $clase;
-            }
-        }
-
-        return $clases;
     }
 }

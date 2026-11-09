@@ -149,6 +149,7 @@
 
                         @if ($valoracion->confirmable())
                             <a class="boton principal" href="{{ CarritoController::url('cerrar') }}">{{ __('carrito.cerrar_pedido') }} <span class="flecha" aria-hidden="true">→</span></a>
+                            <form method="POST" action="{{ route('presupuestos.'.app()->getLocale().'.crear') }}">@csrf<button type="submit" class="boton-texto">{{ __('presupuestos.boton') }}</button></form>
                         @else
                             <p class="carrito-siguiente">{{ __('carrito.revisa_antes') }}</p>
                         @endif

@@ -45,6 +45,8 @@ class Ajuste extends Model
         'incidencias.dias' => 14,
         // Paso 7.2 (D182): el cliente cancela un pedido pagado y sin producir al momento (devolución automática) o lo pide al equipo.
         'pagos.cancelacion_automatica' => false,
+        // D187: días que vale un presupuesto.
+        'presupuestos.dias_validez' => 15,
         // Paso 6.4: SMTP del panel (contraseña cifrada), estados que avisan al cliente, plantillas
         // propias por estado e idioma y nombres visibles de los estados (vacíos: los de lang/).
         'correo.smtp' => [],
