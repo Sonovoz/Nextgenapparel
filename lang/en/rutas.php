@@ -32,4 +32,6 @@ return [
     'facturas' => 'invoices',
     'cancelar' => 'cancel',
     'repetir' => 'repeat',
+    'incidencias' => 'issues',
+    'fotos' => 'photos',
 ];

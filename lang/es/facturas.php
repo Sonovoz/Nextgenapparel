@@ -25,6 +25,8 @@ return [
     'recargo' => 'Recargo de equivalencia',
     'total' => 'Total',
     'envio' => 'Envío',
+    'anulacion_resto' => 'Anulación del pedido (descontados los reembolsos ya rectificados)',
+    'reembolso_incidencia' => 'Reembolso parcial por la incidencia :codigo',
     'segun_desglose' => 'según desglose',
     'impresion' => 'impresión en :zonas',
     'descuento' => 'descuento −:importe',

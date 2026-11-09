@@ -46,6 +46,7 @@ Route::prefix('admin/archivos-pedidos/{pedido}')->group(function () {
     Route::get('/maquetas/{maqueta}', [ArchivoPedidoController::class, 'maqueta'])->name('backend.pedidos.maqueta')->whereNumber('maqueta');
     Route::get('/impresiones/{impresion}/original', [ArchivoPedidoController::class, 'original'])->name('backend.pedidos.original')->whereNumber('impresion');
     Route::get('/facturas/{factura:uuid}', [ArchivoPedidoController::class, 'factura'])->name('backend.pedidos.factura')->whereUuid('factura');
+    Route::get('/incidencias/fotos/{foto}', [ArchivoPedidoController::class, 'fotoIncidencia'])->name('backend.pedidos.foto-incidencia')->whereNumber('foto');
 });
 
 // Backend: documentos de producción (paso 6.5b), con la sección Producción.
@@ -136,6 +137,9 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
             // Visor del cliente (paso 6.6): cancelar (o pedir que se cancele) y repetir.
             Route::post('/{pedido}/'.$tramo('cancelar'), [PedidoController::class, 'cancelar'])->name('cancelar')->whereUuid('pedido')->middleware('throttle:carrito');
             Route::post('/{pedido}/'.$tramo('repetir'), [PedidoController::class, 'repetir'])->name('repetir')->whereUuid('pedido')->middleware('throttle:carrito');
+            // Incidencias con fotos (paso 6.6b).
+            Route::post('/{pedido}/'.$tramo('incidencias'), [PedidoController::class, 'abrirIncidencia'])->name('incidencia')->whereUuid('pedido')->middleware('throttle:carrito');
+            Route::get('/{pedido}/'.$tramo('incidencias').'/'.$tramo('fotos').'/{foto}', [PedidoController::class, 'fotoIncidencia'])->name('foto-incidencia')->whereUuid('pedido')->whereNumber('foto');
         });
 
     // El idioma va en la ruta (para EstablecerIdioma y las URL), no en un parámetro de la URL.

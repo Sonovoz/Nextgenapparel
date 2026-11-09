@@ -19,6 +19,7 @@ use LogicException;
  * @property TipoFactura $tipo
  * @property int $pedido_id
  * @property ?int $rectifica_id
+ * @property bool $parcial
  * @property ?string $motivo
  * @property Carbon $emitida_en
  * @property string $idioma
@@ -79,6 +80,6 @@ class Factura extends Model
 
     protected function casts(): array
     {
-        return ['tipo' => TipoFactura::class, 'emitida_en' => 'datetime', 'emisor' => 'array', 'destinatario' => 'array', 'desglose' => 'array', 'verifactu' => 'boolean'];
+        return ['tipo' => TipoFactura::class, 'emitida_en' => 'datetime', 'emisor' => 'array', 'destinatario' => 'array', 'desglose' => 'array', 'verifactu' => 'boolean', 'parcial' => 'boolean'];
     }
 }

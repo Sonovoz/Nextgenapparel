@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **6.6b Incidencias con fotos**: el cliente la abre desde su pedido entregado (fotos sin metadatos) y el equipo la resuelve en *Pedidos → Incidencias* con reimpresión, reembolso parcial (rectificativa parcial al momento) o rechazo, con respuesta por correo. Plazo en *Ajustes → General*. | `fase-6-incidencias` | D178 |
 | 09/11 | **6.6a Visor del cliente**: línea de progreso con fechas, «Mis pedidos» en la cuenta, repetir pedido (al carrito con el precio de hoy) y cancelar (al momento sin pagar; si está pagado, petición al equipo con aviso y filtro en *Pedidos*). | `fase-6-visor-cliente` | D177 |
 | 09/11 | **6.5b Documentos de producción**: órdenes de trabajo con PDF y paquete ZIP, y hoja de compra en pantalla y CSV, en *Producción* (el rol Producción no ve los datos de los clientes). Los PDF pesan ~30 KB (antes ~900 KB, fuente recortada). | `fase-6-produccion` | D176 |
 | 09/11 | **6.5a Facturas**: completa con NIF y simplificada sin él, rectificativa al cancelar, desglose de impuestos del pedido, numeración correlativa, Veri*Factu preparado (desactivado), PDF en el correo, en el pedido y en *Pedidos → Facturas*, y *Ajustes → Facturación*. Larastan ya corre también en local. | `fase-6-facturas` | D175 |

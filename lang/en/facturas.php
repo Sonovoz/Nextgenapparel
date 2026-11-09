@@ -24,6 +24,8 @@ return [
     'recargo' => 'Equivalence surcharge',
     'total' => 'Total',
     'envio' => 'Shipping',
+    'anulacion_resto' => 'Order cancellation (less refunds already credited)',
+    'reembolso_incidencia' => 'Partial refund for issue :codigo',
     'segun_desglose' => 'per breakdown',
     'impresion' => 'printed on :zonas',
     'descuento' => 'discount −:importe',

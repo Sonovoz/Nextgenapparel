@@ -1043,3 +1043,12 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .mis-pedidos a:hover, .mis-pedidos a:focus-visible { border-color: var(--neon); }
 .mis-pedidos small { color: var(--tinta-suave); font-size: 13px; }
 .mis-pedidos .importe { text-align: right; font-weight: 600; }
+
+/* Incidencias del pedido (paso 6.6b) */
+.pedido-incidencias .incidencia { padding: 12px 0; border-top: 1px solid var(--linea); font-size: 14px; }
+.pedido-incidencias .incidencia:first-of-type { border-top: 0; padding-top: 0; }
+.pedido-incidencias .incidencia p { margin: 0 0 6px; }
+.incidencia-fotos { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.incidencia-fotos img { width: 88px; height: 88px; object-fit: cover; border-radius: 10px; background: var(--fondo-suave); }
+.pedido-cancelar select, .pedido-cancelar input[type="file"] { min-height: 46px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--linea-fuerte); background: var(--fondo); color: var(--tinta); font: inherit; font-size: 16px; }
+.pedido-incidencias .boton { min-height: 46px; font-size: 12px; justify-self: start; }
