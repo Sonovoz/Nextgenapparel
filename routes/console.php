@@ -58,6 +58,11 @@ Schedule::command('carritos:limpiar')
     ->dailyAt('03:35')
     ->withoutOverlapping();
 
+Schedule::command('carritos:avisar')
+    ->description('Avisos de carritos abandonados (Marketing → Carritos abandonados)')
+    ->hourly()
+    ->withoutOverlapping();
+
 Schedule::command('pedidos:caducar')
     ->description('Cancelar los pedidos sin pagar pasados los días de Ajustes → General (devuelven el cupón)')
     ->dailyAt('03:25')

@@ -4,6 +4,7 @@ use App\Dominio\Legal\PaginaLegal;
 use App\Http\Controllers\Backend\ArchivoDisenoController;
 use App\Http\Controllers\Backend\ArchivoPedidoController;
 use App\Http\Controllers\Backend\ProduccionController;
+use App\Http\Controllers\BajaComercialController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\CierreController;
 use App\Http\Controllers\Cuenta\AccesoController;
@@ -52,6 +53,9 @@ Route::prefix('admin/archivos-pedidos/{pedido}')->group(function () {
     Route::get('/facturas/{factura:uuid}', [ArchivoPedidoController::class, 'factura'])->name('backend.pedidos.factura')->whereUuid('factura');
     Route::get('/incidencias/fotos/{foto}', [ArchivoPedidoController::class, 'fotoIncidencia'])->name('backend.pedidos.foto-incidencia')->whereNumber('foto');
 });
+
+// Baja de los correos comerciales (v2, D189): enlace firmado de cada correo, sin entrar.
+Route::get('/marketing/baja/{cliente}', BajaComercialController::class)->name('marketing.baja')->whereUuid('cliente');
 
 // Pagos (fase 7): el aviso firmado de la pasarela (sin CSRF ni sesión) y la página del pago simulado.
 // Sin CSRF por `preventRequestForgery(except:)` en bootstrap/app.php (auditoría final, C1).

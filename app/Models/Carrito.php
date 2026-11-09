@@ -26,6 +26,7 @@ class Carrito extends Model
         return ['uuid'];
     }
 
+    /** @return BelongsTo<Cliente, $this> */
     public function cliente(): BelongsTo
     {
         return $this->belongsTo(Cliente::class);

@@ -145,44 +145,8 @@ parameters:
 			path: app/Dominio/Catalogo/ZonasPorDefecto.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$correo\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Clientes/BorrarCliente.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$correo_pendiente\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Clientes/BorrarCliente.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Clientes/BorrarCliente.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Clientes/BorrarCliente.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:roles\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Dominio/Clientes/BorrarCliente.php
-
-		-
 			message: '#^Cannot call method toDateTimeString\(\) on string\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: app/Dominio/Clientes/BorrarCliente.php
-
-		-
-			message: '#^Parameter \#2 \$usuario of method App\\Dominio\\Clientes\\BorrarCliente\:\:vaciarRegistro\(\) expects App\\Models\\User\|null, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Dominio/Clientes/BorrarCliente.php
 
@@ -263,12 +227,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: app/Dominio/Disenos/GuardarDiseno.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$correo\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$nif\.$#'
@@ -565,18 +523,6 @@ parameters:
 			path: app/Filament/Resources/Catalogo/Prendas/RelationManagers/ZonasRelationManager.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$correo\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Filament/Resources/Clientes/ClienteResource.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:hasVerifiedEmail\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/Filament/Resources/Clientes/ClienteResource.php
-
-		-
 			message: '#^Cannot call method format\(\) on string\.$#'
 			identifier: method.nonObject
 			count: 2
@@ -591,12 +537,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Filament/Resources/Clientes/Pages/EditCliente.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:roles\(\)\.$#'
-			identifier: method.notFound
 			count: 1
 			path: app/Filament/Resources/Clientes/Pages/EditCliente.php
 
@@ -749,12 +689,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Controllers/CarritoController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$correo\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/CierreController.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$nif\.$#'
@@ -989,12 +923,6 @@ parameters:
 			identifier: method.nonObject
 			count: 1
 			path: app/Notifications/AlertaErrorCritico.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$correo\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/Cuenta/SolicitudBorrado.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:withTrashed\(\)\.$#'
