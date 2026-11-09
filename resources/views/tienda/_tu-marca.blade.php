@@ -14,9 +14,10 @@
     </ol>
 
     <div class="nivel" id="nivel-diseno">
+    <p class="claro nivel-ayuda">{{ __('tienda.ayuda_diseno') }}</p>
+    {{-- Herramientas del paso 1: Diseño (subir y dónde va) y Ajustar (tamaño y posición, opcional). --}}
     <div class="herramientas" role="tablist" aria-label="{{ __('tienda.estudio') }}">
         <button type="button" role="tab" class="herramienta" id="h-diseno" aria-selected="true" aria-controls="hp-diseno" data-herramienta="diseno">{{ __('tienda.herramienta_diseno') }}</button>
-        <button type="button" role="tab" class="herramienta" id="h-zona" aria-selected="false" aria-controls="hp-zona" data-herramienta="zona" tabindex="-1">{{ __('tienda.herramienta_zona') }}</button>
         <button type="button" role="tab" class="herramienta" id="h-ajustar" aria-selected="false" aria-controls="hp-ajustar" data-herramienta="ajustar" tabindex="-1">{{ __('tienda.herramienta_ajustar') }}</button>
         <button type="button" role="tab" class="herramienta" id="h-prenda" aria-selected="false" aria-controls="hp-prenda" data-herramienta="prenda" tabindex="-1">{{ __('tienda.herramienta_prenda') }}</button>
     </div>
@@ -27,10 +28,18 @@
 
     <div id="hp-diseno" role="tabpanel" aria-labelledby="h-diseno" class="herramienta-panel">
 
-    <div class="pestanas" role="tablist" aria-label="{{ __('tienda.tu_marca_etiqueta') }}">
+    {{-- «Escribir mi marca» oculto por ahora (D199): el código sigue para una futura actualización; para
+         volver a ofrecerlo, quitar «hidden». Sin la pestaña, el diseño siempre es un logo. --}}
+    <div class="pestanas" role="tablist" aria-label="{{ __('tienda.tu_marca_etiqueta') }}" hidden>
         <button type="button" role="tab" id="pestana-logo" aria-selected="true" aria-controls="panel-logo" data-modo="logo">{{ __('tienda.pestana_logo') }}</button>
         <button type="button" role="tab" id="pestana-texto" aria-selected="false" aria-controls="panel-texto" data-modo="texto" tabindex="-1">{{ __('tienda.pestana_texto') }}</button>
     </div>
+
+    {{-- Declaración de derechos al subir el logo, antes de elegirlo (fase 4): vale para los logos que se suben con ella marcada. --}}
+    <label class="casilla-derechos" for="derechos-diseno">
+        <input type="checkbox" id="derechos-diseno">
+        <span>{{ __('disenos.derechos_casilla') }}</span>
+    </label>
 
     <div id="panel-logo" role="tabpanel" aria-labelledby="pestana-logo">
         <label class="soltar" id="soltar" for="archivo-diseno">
@@ -74,14 +83,12 @@
         </div>
     </div>
 
-    </div>
-
-    <div id="hp-zona" role="tabpanel" aria-labelledby="h-zona" class="herramienta-panel" hidden>
+    {{-- ¿Dónde lo ponemos? (Frontal, Pecho, Espalda…) en el mismo paso, con su dibujo y su precio (D198). --}}
+    <div class="grupo donde">
+        <span class="donde-titulo">{{ __('tienda.donde') }}</span>
         <p class="aviso-zona" id="aviso-zona" aria-live="polite"></p>
-        <div class="grupo">
-            <span>{{ __('tienda.donde') }}</span>
-            <div class="opciones" id="zonas-diseno" role="radiogroup" aria-label="{{ __('tienda.donde') }}"></div>
-        </div>
+        <div class="opciones" id="zonas-diseno" role="radiogroup" aria-label="{{ __('tienda.donde') }}"></div>
+    </div>
     </div>
 
     <div id="hp-ajustar" role="tabpanel" aria-labelledby="h-ajustar" class="herramienta-panel" hidden>
@@ -143,6 +150,8 @@
     <p class="claro" style="font-size: 13px;">{{ trans_choice('tienda.privacidad', $diasDisenos = (int) \App\Models\Ajuste::obtener('disenos.dias_sin_pedido'), ['dias' => $diasDisenos]) }}</p>
     {{-- Tarjeta de decisión: tus diseños con lo que suman y «¿otro diseño o seguimos?»; en el escritorio, fija abajo. --}}
     <div class="capas" id="capas" aria-live="polite"></div>
+    {{-- Abajo, fija y fina: qué llevas, el error si lo hay y «Siguiente: tallas y colores». --}}
+    <div class="capas-pie" id="capas-pie" aria-live="polite" hidden></div>
 
     </div>
 
