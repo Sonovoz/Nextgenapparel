@@ -27,7 +27,6 @@ return [
     'reenviar_enlace' => 'Send me another link',
     'correo_confirmado' => 'Thank you: your email is confirmed.',
     'enlace_enviado' => 'If the order is awaiting confirmation, we have just sent a new link to its email.',
-    'pago_pronto' => 'Card and Bizum payment will be available very soon. We will let you know by email.',
     'prendas' => 'Garments',
     'impresion' => 'Printing',
     'unidades' => '{1} :n garment|[2,*] :n garments',
@@ -72,4 +71,5 @@ return [
     'cancelar_solicitado' => 'We have received your request. We will write to you as soon as we have reviewed it.',
     'cancelar_no_puede' => 'This order can no longer be cancelled here. Write to us and we will look into it.',
     'cancelacion_pedida' => 'You asked to cancel this order on :fecha. We are reviewing it.',
+    'cancelar_cancelado_devolucion' => 'Your order has been cancelled. We are refunding you to the same card or Bizum; it may take a few days to show.',
 ];

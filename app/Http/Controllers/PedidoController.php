@@ -214,7 +214,7 @@ class PedidoController
             ->where('created_at', '>=', now()->subMinutes(5))->latest('id')->first();
     }
 
-    private function puedeVer(Request $request, Pedido $pedido): bool
+    public function puedeVer(Request $request, Pedido $pedido): bool
     {
         $cliente = $request->user()?->cliente;
         if ($cliente !== null && ! $cliente->activo) {

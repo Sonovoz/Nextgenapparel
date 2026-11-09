@@ -55,7 +55,7 @@ class ViewIncidencia extends ViewRecord
                         })
                         ->visible(fn (Get $get) => $get('resolucion') === ResolucionIncidencia::Reembolso->value)
                         ->required(fn (Get $get) => $get('resolucion') === ResolucionIncidencia::Reembolso->value)
-                        ->helperText('Como mucho '.Formato::euros($maximo, 'es').'. Se emite la rectificativa parcial; el dinero se devuelve en el TPV hasta que llegue Redsys.'),
+                        ->helperText('Como mucho '.Formato::euros($maximo, 'es').'. Se devuelve por la pasarela y se emite la rectificativa parcial.'),
                     Textarea::make('respuesta')->label('Respuesta para el cliente')->required()->maxLength(2000)->rows(4),
                 ])
                 ->action(function (array $data) use ($incidencia): void {

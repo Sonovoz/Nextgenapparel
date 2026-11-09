@@ -1052,3 +1052,11 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .incidencia-fotos img { width: 88px; height: 88px; object-fit: cover; border-radius: 10px; background: var(--fondo-suave); }
 .pedido-cancelar select, .pedido-cancelar input[type="file"] { min-height: 46px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--linea-fuerte); background: var(--fondo); color: var(--tinta); font: inherit; font-size: 16px; }
 .pedido-incidencias .boton { min-height: 46px; font-size: 12px; justify-self: start; }
+
+/* Pagar el pedido (fase 7) */
+.pedido-pagar { display: grid; gap: 10px; }
+.pedido-pagar p { margin: 0; }
+.pedido-pagar fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.pedido-pagar label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+.pedido-pagar input[type="radio"] { width: 18px; height: 18px; accent-color: var(--azul); }
+.pedido-pagar .boton { justify-self: start; min-height: 46px; background: var(--azul); border-color: var(--azul); }

@@ -5,6 +5,9 @@ namespace App\Providers;
 use App\Dominio\Carrito\FusionarCarrito;
 use App\Dominio\Disenos\Propietario;
 use App\Dominio\Disenos\TraspasarDisenos;
+use App\Dominio\Pagos\Pasarela;
+use App\Dominio\Pagos\PasarelaRedsys;
+use App\Dominio\Pagos\PasarelaSimulada;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Dominio\Sistema\Correo\Smtp;
 use App\Dominio\Sistema\Errores\ErrorDeCopia;
@@ -48,6 +51,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use LogicException;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Backup\Events\BackupHasFailed;
 use Spatie\Translatable\Facades\Translatable;
@@ -59,7 +63,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Pasarela de pago (fase 7, D181): Redsys con los datos del .env; la simulada nunca en producción.
+        $this->app->singleton(Pasarela::class, function (): Pasarela {
+            if (config('pagos.pasarela') === 'redsys') {
+                $c = (array) config('pagos.redsys');
+
+                return new PasarelaRedsys((string) $c['comercio'], (string) $c['terminal'], (string) $c['clave'], (string) $c['entorno'], (bool) $c['tarjeta'], (bool) $c['bizum'], (string) $c['nombre']);
+            }
+            if ($this->app->isProduction()) {
+                throw new LogicException('En producción la pasarela de pago es Redsys (PAGOS_PASARELA=redsys).');
+            }
+
+            return new PasarelaSimulada;
+        });
     }
 
     /**

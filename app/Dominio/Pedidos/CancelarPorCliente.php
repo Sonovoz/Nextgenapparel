@@ -33,7 +33,7 @@ final class CancelarPorCliente
             || (in_array($pedido->estado, self::CON_PETICION, true) && $pedido->cancelacion_solicitada_en === null);
     }
 
-    /** @return 'cancelado'|'solicitado' */
+    /** @return 'cancelado'|'cancelado_devolucion'|'solicitado' */
     public function __invoke(Pedido $pedido, ?string $motivo): string
     {
         $motivo = trim((string) $motivo) === '' ? null : mb_substr(trim((string) $motivo), 0, 500);
@@ -43,14 +43,16 @@ final class CancelarPorCliente
             if (! self::puede($pedido)) {
                 throw new CambioNoValido('cancelar_no_puede');
             }
-            if (in_array($pedido->estado, self::AL_MOMENTO, true)) {
+            // Sin pagar, o pagado con la cancelación automática de Ajustes → General (el dinero vuelve solo, D182).
+            if (in_array($pedido->estado, self::AL_MOMENTO, true) || (bool) Ajuste::obtener('pagos.cancelacion_automatica')) {
+                $pagado = ! in_array($pedido->estado, self::AL_MOMENTO, true);
                 ($this->cambiarEstado)($pedido, EstadoPedido::Cancelado, null, 'Cancelado por el cliente.'.($motivo ? " Motivo: {$motivo}" : ''));
 
-                return 'cancelado';
+                return $pagado ? 'cancelado_devolucion' : 'cancelado';
             }
             $pedido->update(['cancelacion_solicitada_en' => now(), 'motivo_cancelacion' => $motivo]);
             $pedido->notas()->create(['tipo' => 'privada', 'texto' => mb_substr('El cliente pide cancelar el pedido.'.($motivo ? " Motivo: {$motivo}" : '')
-                .' Cancélalo aquí (se emite la rectificativa) y devuelve el dinero en el TPV hasta que llegue Redsys.', 0, 500)]);
+                .' Si aún no está en producción, cancélalo aquí: se emite la rectificativa y el dinero se devuelve solo.', 0, 500)]);
 
             return 'solicitado';
         });

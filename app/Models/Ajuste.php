@@ -43,6 +43,8 @@ class Ajuste extends Model
         'pedidos.plazo_tramos' => [],
         // Paso 6.6b: días desde la entrega (o el envío) para abrir una incidencia (D178).
         'incidencias.dias' => 14,
+        // Paso 7.2 (D182): el cliente cancela un pedido pagado y sin producir al momento (devolución automática) o lo pide al equipo.
+        'pagos.cancelacion_automatica' => false,
         // Paso 6.4: SMTP del panel (contraseña cifrada), estados que avisan al cliente, plantillas
         // propias por estado e idioma y nombres visibles de los estados (vacíos: los de lang/).
         'correo.smtp' => [],

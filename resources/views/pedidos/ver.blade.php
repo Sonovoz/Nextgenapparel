@@ -33,8 +33,22 @@
                     <form method="POST" action="{{ PedidoController::url('reenviar', $pedido) }}">@csrf <button type="submit" class="boton-texto">{{ __('pedidos.reenviar_enlace') }}</button></form>
                 </div>
             @endunless
-            @if ($pedido->estado === E::PendientePago)
-                <p class="aviso-cuenta verificar">{{ __('pedidos.pago_pronto') }}</p>
+            @if (session('aviso_pago'))
+                <p class="aviso-cuenta error" role="alert">{{ session('aviso_pago') }}</p>
+            @endif
+            @if ($pedido->estado === E::PendientePago && $pedido->correoConfirmado())
+                @php $pasarela = app(\App\Dominio\Pagos\Pasarela::class); @endphp
+                <form class="aviso-cuenta verificar pedido-pagar" method="POST" action="{{ route('pedidos.'.app()->getLocale().'.pagar', ['pedido' => $pedido->uuid]) }}">@csrf
+                    <p><strong>{{ __('pagos.pagar_titulo', ['total' => Formato::euros($pedido->total)]) }}</strong></p>
+                    <fieldset>
+                        <legend class="oculto">{{ __('pagos.metodo') }}</legend>
+                        @foreach ($pasarela->metodos() as $clave => $nombre)
+                            <label><input type="radio" name="metodo" value="{{ $clave }}" @checked($loop->first)> {{ __('pagos.metodo_'.$clave) }}</label>
+                        @endforeach
+                    </fieldset>
+                    <button type="submit" class="boton">{{ __('pagos.pagar') }}</button>
+                    <p class="claro">{{ __('pagos.pagar_nota') }}@if ($pasarela->pruebas()) · <strong>{{ __('pagos.modo_pruebas') }}</strong>@endif</p>
+                </form>
             @endif
             @if ($pedido->cancelacion_solicitada_en && ! $cancelado)
                 <p class="aviso-cuenta verificar" role="status">{{ __('pedidos.cancelacion_pedida', ['fecha' => $pedido->cancelacion_solicitada_en->locale(app()->getLocale())->isoFormat('LL')]) }}</p>

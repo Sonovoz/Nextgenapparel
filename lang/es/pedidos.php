@@ -28,7 +28,6 @@ return [
     'reenviar_enlace' => 'Enviarme otro enlace',
     'correo_confirmado' => 'Gracias: tu correo está confirmado.',
     'enlace_enviado' => 'Si el pedido está pendiente de confirmar, acabamos de enviar un enlace nuevo a su correo.',
-    'pago_pronto' => 'El pago con tarjeta o Bizum estará disponible muy pronto. Te avisaremos por correo.',
     'prendas' => 'Prendas',
     'impresion' => 'Impresión',
     'unidades' => '{1} :n prenda|[2,*] :n prendas',
@@ -73,4 +72,5 @@ return [
     'cancelar_solicitado' => 'Hemos recibido tu petición. Te escribiremos en cuanto la revisemos.',
     'cancelar_no_puede' => 'Este pedido ya no se puede cancelar desde aquí. Escríbenos y lo vemos.',
     'cancelacion_pedida' => 'Pediste cancelar este pedido el :fecha. Lo estamos revisando.',
+    'cancelar_cancelado_devolucion' => 'Tu pedido está cancelado. Te devolvemos el dinero en la misma tarjeta o Bizum; puede tardar unos días en verse.',
 ];

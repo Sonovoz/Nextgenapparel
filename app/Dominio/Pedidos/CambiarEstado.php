@@ -2,6 +2,7 @@
 
 namespace App\Dominio\Pedidos;
 
+use App\Jobs\DevolverPedido;
 use App\Jobs\EmitirFacturaPedido;
 use App\Models\Cupon;
 use App\Models\Pedido;
@@ -60,6 +61,7 @@ final class CambiarEstado
             } elseif ($nuevo === EstadoPedido::Cancelado && in_array($actual, [EstadoPedido::Pagado, EstadoPedido::DisenoEnRevision, EstadoPedido::RequiereCambios], true)) {
                 // Motivo fijo y en el idioma del cliente: la nota interna se queda en el historial (M2).
                 EmitirFacturaPedido::dispatch($pedido->id, 'rectificativa', __('facturas.motivo_cancelacion', ['numero' => $pedido->numero], $pedido->idioma))->afterCommit();
+                DevolverPedido::dispatch($pedido->id)->afterCommit(); // el dinero, por la pasarela (D182)
             }
             // El correo del estado, si está activo en Ajustes → Correos (sale al confirmar la transacción).
             $avisado = CorreosPedido::activo($nuevo) && CorreoPedido::enviar($pedido, new CorreoDelPedido($pedido, 'estado', $nuevo));
