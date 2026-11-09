@@ -37,9 +37,9 @@ class CarritosAbandonados extends Page implements HasSchemas
 
     protected static string|UnitEnum|null $navigationGroup = GrupoNavegacion::Marketing;
 
-    protected static ?string $navigationLabel = 'Carritos abandonados';
+    protected static ?string $navigationLabel = 'Correos automáticos';
 
-    protected static ?string $title = 'Carritos abandonados';
+    protected static ?string $title = 'Correos automáticos';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingCart;
 
@@ -57,13 +57,16 @@ class CarritosAbandonados extends Page implements HasSchemas
 
     public function mount(): void
     {
-        $this->form->fill(['activos' => (bool) Ajuste::obtener('carritos.avisos_activos'), 'secuencia' => array_values((array) Ajuste::obtener('carritos.secuencia'))]);
+        $this->form->fill(['activos' => (bool) Ajuste::obtener('carritos.avisos_activos'), 'secuencia' => array_values((array) Ajuste::obtener('carritos.secuencia')),
+            'nueva_compra_activa' => (bool) Ajuste::obtener('campanas.nueva_compra_activa'), 'nueva_compra_dias' => Ajuste::obtener('campanas.nueva_compra_dias'),
+            'reactivacion_activa' => (bool) Ajuste::obtener('campanas.reactivacion_activa'), 'reactivacion_dias' => Ajuste::obtener('campanas.reactivacion_dias'),
+            'reactivacion_cupon' => Ajuste::obtener('campanas.reactivacion_cupon')]);
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema->statePath('data')->components([
-            Section::make('Avisos')
+            Section::make('Carritos abandonados')
                 ->description('Se envían a los clientes con cuenta, el correo verificado y el consentimiento comercial que dejan prendas en el carrito. Cuentan desde el último cambio del carrito; si compra, se paran solos. Cada correo lleva el enlace para darse de baja.')
                 ->schema([
                     Toggle::make('activos')->label('Enviar avisos de carritos abandonados'),
@@ -73,6 +76,20 @@ class CarritosAbandonados extends Page implements HasSchemas
                             Select::make('cupon')->label('Cupón (opcional)')->native(false)->placeholder('Sin cupón')
                                 ->options(fn () => Cupon::where('activo', true)->orderBy('codigo')->pluck('codigo', 'codigo')->all()),
                         ]),
+                ]),
+            Section::make('Nueva compra')->columns(2)
+                ->description('Tras la entrega, un correo con el enlace a su pedido para repetirlo. Una vez por pedido.')
+                ->schema([
+                    Toggle::make('nueva_compra_activa')->label('Enviar tras la entrega'),
+                    TextInput::make('nueva_compra_dias')->label('Días después de la entrega')->integer()->minValue(1)->maxValue(365)->required(),
+                ]),
+            Section::make('Reactivación')->columns(3)
+                ->description('A quien no ha comprado en estos días. Como mucho una vez por periodo.')
+                ->schema([
+                    Toggle::make('reactivacion_activa')->label('Enviar reactivación'),
+                    TextInput::make('reactivacion_dias')->label('Días sin comprar')->integer()->minValue(30)->maxValue(730)->required(),
+                    Select::make('reactivacion_cupon')->label('Cupón (opcional)')->native(false)->placeholder('Sin cupón')
+                        ->options(fn () => Cupon::where('activo', true)->orderBy('codigo')->pluck('codigo', 'codigo')->all()),
                 ]),
         ]);
     }
@@ -85,7 +102,12 @@ class CarritosAbandonados extends Page implements HasSchemas
                 $secuencia = collect($datos['secuencia'] ?? [])->map(fn ($p) => ['horas' => (int) $p['horas'], 'cupon' => $p['cupon'] ?? null])->sortBy('horas')->values()->all();
                 Ajuste::guardar('carritos.avisos_activos', (bool) $datos['activos']);
                 Ajuste::guardar('carritos.secuencia', $secuencia);
-                Actividad::apuntar('ajustes', 'Carritos abandonados: ajustes guardados', propiedades: ['activos' => (bool) $datos['activos'], 'secuencia' => $secuencia]);
+                Ajuste::guardar('campanas.nueva_compra_activa', (bool) $datos['nueva_compra_activa']);
+                Ajuste::guardar('campanas.nueva_compra_dias', (int) $datos['nueva_compra_dias']);
+                Ajuste::guardar('campanas.reactivacion_activa', (bool) $datos['reactivacion_activa']);
+                Ajuste::guardar('campanas.reactivacion_dias', (int) $datos['reactivacion_dias']);
+                Ajuste::guardar('campanas.reactivacion_cupon', $datos['reactivacion_cupon'] ?? null);
+                Actividad::apuntar('ajustes', 'Correos automáticos: ajustes guardados', propiedades: ['activos' => (bool) $datos['activos'], 'secuencia' => $secuencia]);
                 Notification::make()->title('Ajustes guardados')->success()->send();
             }),
         ];

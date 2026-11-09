@@ -63,6 +63,11 @@ Schedule::command('carritos:avisar')
     ->hourly()
     ->withoutOverlapping();
 
+Schedule::command('campanas:automaticas')
+    ->description('Correos de nueva compra y de reactivación (Marketing → Correos automáticos)')
+    ->dailyAt('10:20')
+    ->withoutOverlapping();
+
 Schedule::command('pedidos:caducar')
     ->description('Cancelar los pedidos sin pagar pasados los días de Ajustes → General (devuelven el cupón)')
     ->dailyAt('03:25')
