@@ -25,6 +25,11 @@ class LineaPedido extends Model
         return $this->belongsTo(Pedido::class);
     }
 
+    public function prenda(): BelongsTo
+    {
+        return $this->belongsTo(Prenda::class);
+    }
+
     public function impresiones(): HasMany
     {
         return $this->hasMany(ImpresionPedido::class)->orderBy('id');

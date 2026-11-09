@@ -40,6 +40,37 @@ enum EstadoPedido: string
         return __('pedidos.estado_'.$this->value, [], $idioma);
     }
 
+    /**
+     * Los cambios que puede hacer el equipo (ficha § 8). Se cancela hasta que empieza la
+     * producción; «Reembolsado» llega con los pagos (fase 7).
+     *
+     * @return list<self>
+     */
+    public function siguientes(): array
+    {
+        return match ($this) {
+            self::PendientePago => [self::Pagado, self::Cancelado],
+            self::Pagado => [self::DisenoEnRevision, self::EnProduccion, self::Cancelado],
+            self::DisenoEnRevision => [self::RequiereCambios, self::EnProduccion, self::Cancelado],
+            self::RequiereCambios => [self::DisenoEnRevision, self::Cancelado],
+            self::EnProduccion => [self::Enviado],
+            self::Enviado => [self::Entregado],
+            self::Entregado, self::Cancelado, self::Reembolsado => [],
+        };
+    }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::PendientePago => 'gray',
+            self::Pagado, self::DisenoEnRevision => 'info',
+            self::RequiereCambios => 'warning',
+            self::EnProduccion, self::Enviado => 'primary',
+            self::Entregado => 'success',
+            self::Cancelado, self::Reembolsado => 'danger',
+        };
+    }
+
     /** Un pedido cancelado o reembolsado no cuenta como uso de un cupón. */
     public function cuentaComoUso(): bool
     {

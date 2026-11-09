@@ -114,6 +114,8 @@ class CrearPedidoTest extends TestCase
         $impresion = $linea->impresiones->sole();
         $this->assertSame(['Frontal', 100, 75, 305, 'correcta'], [$impresion->zonaEn('es'), $impresion->ancho_mm, $impresion->desde_cuello_mm, $impresion->ppp, $impresion->nivel_calidad]);
 
+        // Familia (2 días por defecto) + transportista (2): 4 días laborables.
+        $this->assertTrue($pedido->fresh()->fecha_estimada_entrega->greaterThan(now()->addDays(3)));
         $this->assertSame(EstadoPedido::PendientePago, $pedido->historial->sole()->estado);
         $this->assertNull(Carrito::find($this->carrito->id));
     }

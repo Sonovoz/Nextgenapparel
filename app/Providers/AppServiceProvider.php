@@ -18,6 +18,7 @@ use App\Models\Diseno;
 use App\Models\Familia;
 use App\Models\Foto;
 use App\Models\Pack;
+use App\Models\Pedido;
 use App\Models\Prenda;
 use App\Models\Proveedor;
 use App\Models\ReglaMinimo;
@@ -32,6 +33,7 @@ use App\Policies\CatalogoPolicy;
 use App\Policies\ClientePolicy;
 use App\Policies\DireccionPolicy;
 use App\Policies\DisenoPolicy;
+use App\Policies\PedidoPolicy;
 use App\Policies\SeccionPolicy;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
@@ -89,6 +91,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Activity::class, ActividadPolicy::class);
         Gate::policy(Diseno::class, DisenoPolicy::class);
         Gate::policy(Cliente::class, ClientePolicy::class);
+        Gate::policy(Pedido::class, PedidoPolicy::class);
         Gate::policy(Direccion::class, DireccionPolicy::class);
 
         foreach ([Familia::class, Color::class, Talla::class, ZonaImpresion::class, Proveedor::class, Prenda::class, Variante::class, Foto::class] as $modelo) {

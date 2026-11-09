@@ -37,6 +37,10 @@ class Ajuste extends Model
         // Pedidos (D169): prefijo del número y días que vale el enlace para que un invitado confirme su correo.
         'pedidos.prefijo' => 'PED-',
         'pedidos.dias_confirmar_correo' => 7,
+        // Paso 6.3: días sin pagar tras los que el pedido se cancela solo (y devuelve el cupón, D173),
+        // y días extra de producción según las unidades: [{desde: 100, dias: 2}, …] (vacío: ninguno).
+        'pedidos.dias_sin_pago' => 7,
+        'pedidos.plazo_tramos' => [],
         // Recargo de equivalencia (paso 5.4): «equipo» (lo activa el equipo en la ficha) o «cliente» (lo marca él).
         'clientes.recargo_lo_indica' => 'equipo',
         // Mejora con IA para el cliente (D143): activa, desde qué nivel y texto propio por idioma (vacío = el de lang/disenos.php).

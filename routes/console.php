@@ -58,6 +58,11 @@ Schedule::command('carritos:limpiar')
     ->dailyAt('03:35')
     ->withoutOverlapping();
 
+Schedule::command('pedidos:caducar')
+    ->description('Cancelar los pedidos sin pagar pasados los días de Ajustes → General (devuelven el cupón)')
+    ->dailyAt('03:25')
+    ->withoutOverlapping();
+
 Schedule::command('disenos:limpiar')
     ->description('Borrar diseños sin pedido de visitantes sin cuenta y archivos huérfanos')
     ->dailyAt('03:40')
