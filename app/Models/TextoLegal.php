@@ -13,6 +13,7 @@ use LogicException;
  *
  * @property int $id
  * @property PaginaLegal $pagina
+ * @property string $idioma
  * @property int $version
  * @property string $contenido
  * @property ?list<string> $pendientes
@@ -43,14 +44,14 @@ class TextoLegal extends Model
         static::deleting(fn (): never => throw new LogicException('Los textos legales no se borran: quedan como historial.'));
     }
 
-    public static function actual(PaginaLegal $pagina): ?self
+    public static function actual(PaginaLegal $pagina, string $idioma = 'es'): ?self
     {
-        return self::where('pagina', $pagina->value)->latest('version')->first();
+        return self::where('pagina', $pagina->value)->where('idioma', $idioma)->latest('version')->first();
     }
 
     /** Lo que se guarda en el pedido: qué condiciones aceptó el cliente. */
     public function etiqueta(): string
     {
-        return $this->pagina->value.' v'.$this->version;
+        return $this->pagina->value.($this->idioma === 'es' ? '' : '-'.$this->idioma).' v'.$this->version;
     }
 }

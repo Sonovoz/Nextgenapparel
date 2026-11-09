@@ -1,6 +1,6 @@
 # Envíos e incidencias
 
-@include('legal._titular')
+@include('legal.es._titular')
 
 ## Envíos
 

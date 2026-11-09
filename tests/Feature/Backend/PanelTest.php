@@ -4,7 +4,6 @@ namespace Tests\Feature\Backend;
 
 use App\Filament\AvatarIniciales;
 use App\Filament\Navegacion\GrupoNavegacion;
-use App\Filament\Pages\Pendientes\PaginaPendiente;
 use App\Http\Middleware\IdiomaBackend;
 use App\Models\User;
 use Filament\Auth\Pages\Login;
@@ -16,7 +15,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Livewire\Livewire;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class PanelTest extends TestCase
@@ -81,27 +79,10 @@ class PanelTest extends TestCase
             ->assertSeeInOrder(['Escritorio', ...$etiquetas]);
     }
 
-    #[DataProvider('paginasPendientes')]
-    public function test_cada_seccion_pendiente_explica_cuando_llega(string $clase): void
+    /** Versión 1 completa (D187): ya no queda ninguna sección «Disponible en la fase…» en el menú. */
+    public function test_no_quedan_secciones_pendientes(): void
     {
-        $this->actingAs($this->usuarioConRol())
-            ->get($clase::getUrl(panel: 'admin'))
-            ->assertOk()
-            ->assertSee($clase::getNavigationLabel())
-            ->assertSee('Disponible en la '.$clase::getDisponibleEn());
-    }
-
-    public function test_todas_las_secciones_tienen_grupo_icono_y_descripcion(): void
-    {
-        $paginas = self::clasesPendientes();
-
-        $this->assertCount(1, $paginas); // Presupuestos (aplazado, D168)
-
-        foreach ($paginas as $clase) {
-            $this->assertInstanceOf(GrupoNavegacion::class, $clase::getNavigationGroup(), $clase);
-            $this->assertNotNull($clase::getNavigationIcon(), $clase);
-            $this->assertNotSame('', $clase::getDescripcion(), $clase);
-        }
+        $this->assertDirectoryDoesNotExist(dirname(__DIR__, 3).'/app/Filament/Pages/Pendientes');
     }
 
     public function test_el_backend_no_carga_nada_de_servidores_externos(): void
@@ -154,33 +135,6 @@ class PanelTest extends TestCase
     public function test_el_frontend_no_se_ve_afectado(): void
     {
         $this->get('/es')->assertOk()->assertSee('Creamos marcas que comunican');
-    }
-
-    public static function paginasPendientes(): array
-    {
-        $datos = [];
-
-        foreach (self::clasesPendientes() as $clase) {
-            $datos[class_basename($clase)] = [$clase];
-        }
-
-        return $datos;
-    }
-
-    /** @return list<class-string<PaginaPendiente>> */
-    private static function clasesPendientes(): array
-    {
-        $clases = [];
-
-        foreach (glob(dirname(__DIR__, 3).'/app/Filament/Pages/Pendientes/*.php') ?: [] as $archivo) {
-            $clase = 'App\\Filament\\Pages\\Pendientes\\'.basename($archivo, '.php');
-
-            if ($clase !== PaginaPendiente::class) {
-                $clases[] = $clase;
-            }
-        }
-
-        return $clases;
     }
 
     protected function setUp(): void

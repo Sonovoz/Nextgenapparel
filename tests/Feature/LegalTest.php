@@ -22,17 +22,19 @@ class LegalTest extends TestCase
     public function test_se_generan_con_los_datos_del_sistema_y_marcan_lo_que_falta(): void
     {
         app(GenerarTextosLegales::class)();
-        $this->assertSame(5, TextoLegal::count());
+        $this->assertSame(10, TextoLegal::count()); // 5 textos × es y en
         $condiciones = TextoLegal::actual(PaginaLegal::Condiciones);
         $this->assertContains('razón social', $condiciones->pendientes);
         $this->assertStringContainsString('103.c', $condiciones->contenido);
 
         Ajuste::guardar('facturacion.emisor', ['razon_social' => 'DTI Textil SL', 'nif' => 'B12345674', 'direccion' => 'Calle Industria 4', 'codigo_postal' => '28001', 'localidad' => 'Madrid', 'correo' => 'hola@dti.es']);
-        $this->assertSame(5, app(GenerarTextosLegales::class)()); // todas cambian: versión nueva
+        $this->assertSame(10, app(GenerarTextosLegales::class)()); // todas cambian: versión nueva
         $this->assertSame(0, app(GenerarTextosLegales::class)()); // sin cambios: ninguna
         $condiciones = TextoLegal::actual(PaginaLegal::Condiciones);
         $this->assertSame([2, null], [$condiciones->version, $condiciones->pendientes]);
         $this->assertStringContainsString('DTI Textil SL, NIF B12345674', $condiciones->contenido);
+        $this->assertStringContainsString('DTI Textil SL, tax ID B12345674', TextoLegal::actual(PaginaLegal::Condiciones, 'en')->contenido);
+        $this->assertSame('condiciones-de-venta-en v2', TextoLegal::actual(PaginaLegal::Condiciones, 'en')->etiqueta());
     }
 
     public function test_un_texto_no_se_modifica_ni_se_borra(): void
@@ -48,7 +50,7 @@ class LegalTest extends TestCase
     {
         $this->get('/es/legal/privacidad')->assertOk()->assertSee('Política de privacidad')->assertSee(__('legal.borrador'))
             ->assertSee('/es/legal/condiciones-de-venta', false); // enlaces del pie
-        $this->get('/en/legal/privacidad')->assertOk()->assertSee(__('legal.solo_es', [], 'en'));
+        $this->get('/en/legal/privacidad')->assertOk()->assertSee('Privacy policy')->assertSee('Spanish Data Protection Agency')->assertDontSee('Responsable del tratamiento');
         $this->get('/es/legal/otra-cosa')->assertNotFound();
     }
 
