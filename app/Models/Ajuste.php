@@ -47,6 +47,9 @@ class Ajuste extends Model
         'pagos.cancelacion_automatica' => false,
         // D187: días que vale un presupuesto.
         'presupuestos.dias_validez' => 15,
+        // v2 (D189): carritos abandonados. Desactivado hasta que el equipo lo active; horas desde el último cambio y cupón opcional.
+        'carritos.avisos_activos' => false,
+        'carritos.secuencia' => [['horas' => 1, 'cupon' => null], ['horas' => 24, 'cupon' => null], ['horas' => 72, 'cupon' => null]],
         // Paso 6.4: SMTP del panel (contraseña cifrada), estados que avisan al cliente, plantillas
         // propias por estado e idioma y nombres visibles de los estados (vacíos: los de lang/).
         'correo.smtp' => [],

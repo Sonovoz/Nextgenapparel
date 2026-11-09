@@ -15,6 +15,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 /**
  * Cliente de la tienda (fase 5, D153): con cuenta (user_id) o invitado. Los datos
  * fiscales (NIF, recargo de equivalencia) se piden al cerrar el pedido.
+ *
+ * @property int $id
+ * @property string $uuid
+ * @property string $correo
+ * @property string $nombre
+ * @property ?string $idioma
+ * @property bool $activo
+ * @property-read ?User $usuario
  */
 class Cliente extends Model
 {
