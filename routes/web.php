@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Backend\ArchivoDisenoController;
 use App\Http\Controllers\Backend\ArchivoPedidoController;
+use App\Http\Controllers\Backend\ProduccionController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\CierreController;
 use App\Http\Controllers\Cuenta\AccesoController;
@@ -45,6 +46,13 @@ Route::prefix('admin/archivos-pedidos/{pedido}')->group(function () {
     Route::get('/maquetas/{maqueta}', [ArchivoPedidoController::class, 'maqueta'])->name('backend.pedidos.maqueta')->whereNumber('maqueta');
     Route::get('/impresiones/{impresion}/original', [ArchivoPedidoController::class, 'original'])->name('backend.pedidos.original')->whereNumber('impresion');
     Route::get('/facturas/{factura:uuid}', [ArchivoPedidoController::class, 'factura'])->name('backend.pedidos.factura')->whereUuid('factura');
+});
+
+// Backend: documentos de producción (paso 6.5b), con la sección Producción.
+Route::prefix('admin/produccion')->group(function () {
+    Route::get('/pedidos/{pedido}/orden-de-trabajo', [ProduccionController::class, 'orden'])->name('backend.produccion.orden');
+    Route::get('/pedidos/{pedido}/paquete', [ProduccionController::class, 'paquete'])->name('backend.produccion.paquete');
+    Route::get('/hoja-de-compra.csv', [ProduccionController::class, 'hojaCompra'])->name('backend.produccion.hoja');
 });
 
 // Cuenta del cliente (paso 5.2), con la URL traducida en cada idioma:

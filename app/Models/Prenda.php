@@ -12,7 +12,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-/** Producto variable: sus variaciones son las combinaciones color × talla. */
+/**
+ * Producto variable: sus variaciones son las combinaciones color × talla.
+ *
+ * @property bool $activa
+ * @property ?string $referencia_proveedor
+ * @property-read ?Proveedor $proveedor
+ */
 class Prenda extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes, Traducible;
@@ -34,11 +40,13 @@ class Prenda extends Model
         return $this->belongsTo(Familia::class);
     }
 
+    /** @return BelongsTo<Proveedor, $this> */
     public function proveedor(): BelongsTo
     {
         return $this->belongsTo(Proveedor::class);
     }
 
+    /** @return HasMany<Variante, $this> */
     public function variantes(): HasMany
     {
         return $this->hasMany(Variante::class);
@@ -50,6 +58,7 @@ class Prenda extends Model
         return $this->belongsTo(ClaseImpuesto::class);
     }
 
+    /** @return BelongsToMany<ZonaImpresion, $this, PrendaZona> */
     public function zonas(): BelongsToMany
     {
         return $this->belongsToMany(ZonaImpresion::class, 'prenda_zona')

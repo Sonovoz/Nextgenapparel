@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **6.5b Documentos de producción**: órdenes de trabajo con PDF y paquete ZIP, y hoja de compra en pantalla y CSV, en *Producción* (el rol Producción no ve los datos de los clientes). Los PDF pesan ~30 KB (antes ~900 KB, fuente recortada). | `fase-6-produccion` | D176 |
 | 09/11 | **6.5a Facturas**: completa con NIF y simplificada sin él, rectificativa al cancelar, desglose de impuestos del pedido, numeración correlativa, Veri*Factu preparado (desactivado), PDF en el correo, en el pedido y en *Pedidos → Facturas*, y *Ajustes → Facturación*. Larastan ya corre también en local. | `fase-6-facturas` | D175 |
 | 09/11 | **6.4 Correos del pedido**: SMTP en *Ajustes → Correos* (portado de Clave de Alma) con correo de prueba, plantillas es/en por estado editables, nombres de los estados para el cliente, notas por correo y enlace privado al pedido en cada correo. | `fase-6-correos` | D174 |
 | 09/11 | **6.3 Backend de Pedidos**: lista y ficha como WooCommerce, cambio de estado (también en bloque), notas privadas y para el cliente, fecha estimada de entrega, cancelación que devuelve el cupón y caducidad de los pedidos sin pagar. | `fase-6-backend-pedidos` | D173 |
