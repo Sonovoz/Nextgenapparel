@@ -1,6 +1,6 @@
 # PROMPT MAESTRO — GAUNTLET WEB ENGINEERING
 
-> Instrucción permanente: aplica este protocolo SIEMPRE que se cree, rediseñe o mejore cualquier parte de NextGen Apparel. Responde en castellano de España.
+> **Desde D171 (9 de noviembre de 2026) ya no se aplica en cada entrega.** La puerta de cada entrega es la CI (`CLAUDE.md`, «Cómo se entrega y se verifica»). Este documento queda como **lista de comprobación de la auditoría final** (fase 9) y como referencia de calidad. Responde en castellano de España.
 
 Desarrollo web profesional con revisión adversarial y mejora continua.
 Versión 1.0 — Protocolo de calidad, arquitectura y verificación.
