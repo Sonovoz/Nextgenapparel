@@ -242,15 +242,25 @@ class CrearPedidoTest extends TestCase
         $this->assertSame(1, $this->carrito->lineas()->count());
     }
 
-    /** El motor da primero las prendas y luego los packs: cada línea del pedido lleva sus propios importes. */
-    public function test_un_pack_delante_de_una_prenda_conserva_sus_importes(): void
+    public static function repartos(): array
     {
-        $pack = Pack::create(['nombre' => ['es' => 'Pack joven'], 'slug' => ['es' => 'pack-joven'], 'precio' => 8182, 'reparto' => 'libre']);
-        $lineaPack = $pack->lineas()->create(['prenda_id' => $this->linea['prenda'], 'unidades' => 10, 'colores' => [$this->linea['color']], 'tallas_permitidas' => [$this->linea['talla']]]);
+        return ['reparto libre' => ['libre'], 'reparto fijo' => ['fijo']];
+    }
+
+    /**
+     * El motor da primero las prendas y luego los packs: cada línea del pedido lleva sus propios
+     * importes. Y el reparto del pack queda congelado (prenda, color y tallas), también el fijo.
+     */
+    #[DataProvider('repartos')]
+    public function test_un_pack_delante_de_una_prenda_conserva_sus_importes_y_su_reparto(string $reparto): void
+    {
+        $pack = Pack::create(['nombre' => ['es' => 'Pack joven'], 'slug' => ['es' => 'pack-joven'], 'precio' => 8182, 'reparto' => $reparto]);
+        $lineaPack = $pack->lineas()->create(['prenda_id' => $this->linea['prenda'], 'unidades' => 10, 'colores' => [$this->linea['color']], 'tallas_permitidas' => [$this->linea['talla']],
+            'reparto_tallas' => $reparto === 'fijo' ? [$this->linea['talla'] => 10] : null]);
         $pack->zonas()->attach($this->linea['zona']);
         $this->carrito->lineas()->update(['orden' => 1]);
         $enPack = $this->carrito->lineas()->create(['tipo' => 'pack', 'pack_id' => $pack->id, 'orden' => 0,
-            'elecciones' => [$lineaPack->id => ['color' => $this->linea['color'], 'tallas' => [$this->linea['talla'] => 10]]]]);
+            'elecciones' => $reparto === 'fijo' ? [] : [$lineaPack->id => ['color' => $this->linea['color'], 'tallas' => [$this->linea['talla'] => 10]]]]);
         $enPack->impresiones()->create(['zona_impresion_id' => $this->linea['zona'], 'texto' => 'NG', 'fuente' => 0, 'tinta' => 'auto', 'ancho_mm' => 100, 'alto_mm' => 60, 'desde_cuello_mm' => 75, 'desde_centro_mm' => 0]);
         $total = app(ValorarCarrito::class)($this->carrito->fresh(), new Destino('ES', '28004'))->resultado->total();
 
@@ -259,6 +269,7 @@ class CrearPedidoTest extends TestCase
         $this->assertSame([['pack', 8182, 10], ['prenda', 10500, 15]], $lineas->map(fn ($l) => [$l->tipo, $l->neto, $l->unidades])->all());
         $texto = $lineas[0]->impresiones->sole();
         $this->assertSame(['NG', null, null], [$texto->texto, $texto->archivo, $texto->ppp]);
+        $this->assertEquals([$lineaPack->id => ['prenda' => $this->linea['prenda'], 'color' => $this->linea['color'], 'tallas' => [$this->linea['talla'] => 10]]], $lineas[0]->elecciones);
     }
 
     public function test_un_diseno_usado_en_un_pedido_no_lo_borra_la_limpieza(): void

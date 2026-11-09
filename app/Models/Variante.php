@@ -40,16 +40,19 @@ class Variante extends Model
         ];
     }
 
+    /** @return BelongsTo<Prenda, $this> */
     public function prenda(): BelongsTo
     {
         return $this->belongsTo(Prenda::class);
     }
 
+    /** @return BelongsTo<Color, $this> */
     public function color(): BelongsTo
     {
         return $this->belongsTo(Color::class);
     }
 
+    /** @return BelongsTo<Talla, $this> */
     public function talla(): BelongsTo
     {
         return $this->belongsTo(Talla::class);

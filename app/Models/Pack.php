@@ -13,7 +13,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-/** Productos → Packs: oferta cerrada con precio fijo (ficha § 6 bis, D105–D107). */
+/**
+ * Productos → Packs: oferta cerrada con precio fijo (ficha § 6 bis, D105–D107).
+ *
+ * @property RepartoPack $reparto
+ */
 class Pack extends Model
 {
     use LogsActivity, SoftDeletes, Traducible;
@@ -30,6 +34,7 @@ class Pack extends Model
         return ['precio' => 'integer', 'reparto' => RepartoPack::class, 'activo' => 'boolean', 'desde' => 'datetime', 'hasta' => 'datetime'];
     }
 
+    /** @return HasMany<LineaPack, $this> */
     public function lineas(): HasMany
     {
         return $this->hasMany(LineaPack::class);

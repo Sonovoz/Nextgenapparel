@@ -16,7 +16,7 @@ final class PdfFactura
 
         return Pdf::loadView('pdf.factura', ['factura' => $factura, 'qr' => $qr])
             ->setPaper('a4')
-            ->setOption(['defaultFont' => 'DejaVu Sans', 'isRemoteEnabled' => false])
+            ->setOption(['defaultFont' => 'DejaVu Sans', 'isRemoteEnabled' => false, 'isFontSubsettingEnabled' => true])
             ->output();
     }
 }

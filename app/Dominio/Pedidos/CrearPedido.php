@@ -8,6 +8,7 @@ use App\Dominio\Clientes\TipoCliente;
 use App\Dominio\Disenos\GuardarDiseno;
 use App\Dominio\Precios\Motor\Destino;
 use App\Dominio\Precios\Motor\LineaCalculada;
+use App\Dominio\Precios\RepartoPack;
 use App\Jobs\GenerarMaquetasPedido;
 use App\Models\Carrito;
 use App\Models\Cliente;
@@ -16,6 +17,7 @@ use App\Models\ImpresionCarrito;
 use App\Models\LineaCarrito;
 use App\Models\LineaPack;
 use App\Models\LineaPedido;
+use App\Models\Pack;
 use App\Models\Pedido;
 use App\Models\Talla;
 use Illuminate\Support\Facades\DB;
@@ -174,7 +176,7 @@ final class CrearPedido
             'color_nombre' => $linea->color?->getTranslations('nombre'),
             'color_hex' => $linea->color?->codigo_hex,
             'tallas' => $tallas,
-            'elecciones' => $linea->elecciones,
+            'elecciones' => $esPack ? self::repartoPack($linea) : $linea->elecciones,
             'unidades' => $calculada->unidades,
             'prendas' => $calculada->prendas,
             'impresion' => $calculada->impresion,
@@ -188,6 +190,29 @@ final class CrearPedido
         foreach ($linea->impresiones as $impresion) {
             $this->copiarImpresion($pedido, $copia, $impresion);
         }
+    }
+
+    /**
+     * Reparto congelado del pack (6.5b): por cada línea del pack, la prenda, el color y las
+     * tallas, también en los de reparto fijo, para que producción y la hoja de compra no
+     * dependan de cómo quede el pack después.
+     *
+     * @return array<int, array{prenda: int, color: int, tallas: array<int, int>}>
+     */
+    private static function repartoPack(LineaCarrito $linea): array
+    {
+        $fijo = Pack::find($linea->pack_id)?->reparto === RepartoPack::Fijo;
+        $reparto = [];
+        foreach (LineaPack::where('pack_id', $linea->pack_id)->orderBy('id')->get() as $lineaPack) {
+            $eleccion = $linea->elecciones[$lineaPack->id] ?? [];
+            $reparto[$lineaPack->id] = [
+                'prenda' => $lineaPack->prenda_id,
+                'color' => (int) ($fijo ? ($lineaPack->colores[0] ?? 0) : ($eleccion['color'] ?? ($lineaPack->colores[0] ?? 0))),
+                'tallas' => array_map('intval', $fijo ? ($lineaPack->reparto_tallas ?? []) : ($eleccion['tallas'] ?? [])),
+            ];
+        }
+
+        return $reparto;
     }
 
     private function copiarImpresion(Pedido $pedido, LineaPedido $linea, ImpresionCarrito $impresion): void
