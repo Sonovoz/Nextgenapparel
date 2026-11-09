@@ -28,7 +28,9 @@
 
     <div id="hp-diseno" role="tabpanel" aria-labelledby="h-diseno" class="herramienta-panel">
 
-    <div class="pestanas" role="tablist" aria-label="{{ __('tienda.tu_marca_etiqueta') }}">
+    {{-- «Escribir mi marca» oculto por ahora (D199): el código sigue para una futura actualización; para
+         volver a ofrecerlo, quitar «hidden». Sin la pestaña, el diseño siempre es un logo. --}}
+    <div class="pestanas" role="tablist" aria-label="{{ __('tienda.tu_marca_etiqueta') }}" hidden>
         <button type="button" role="tab" id="pestana-logo" aria-selected="true" aria-controls="panel-logo" data-modo="logo">{{ __('tienda.pestana_logo') }}</button>
         <button type="button" role="tab" id="pestana-texto" aria-selected="false" aria-controls="panel-texto" data-modo="texto" tabindex="-1">{{ __('tienda.pestana_texto') }}</button>
     </div>
