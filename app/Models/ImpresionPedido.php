@@ -5,6 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property ?int $zona_impresion_id
+ * @property array<string, string> $zona_nombre
+ * @property ?string $cara
+ * @property ?string $archivo
+ * @property ?string $nombre_original
+ * @property ?int $util_x
+ * @property ?int $util_y
+ * @property ?int $util_ancho_px
+ * @property ?int $util_alto_px
+ * @property ?int $ppp
+ * @property ?string $texto
+ * @property ?int $fuente
+ * @property ?string $tinta
+ * @property int $ancho_mm
+ * @property int $alto_mm
+ * @property int $desde_cuello_mm
+ * @property int $desde_centro_mm
+ * @property-read ?LineaPedido $linea
+ */
 class ImpresionPedido extends Model
 {
     protected $table = 'impresiones_pedido';

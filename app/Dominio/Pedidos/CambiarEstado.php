@@ -2,6 +2,7 @@
 
 namespace App\Dominio\Pedidos;
 
+use App\Jobs\EmitirFacturaPedido;
 use App\Models\Cupon;
 use App\Models\Pedido;
 use App\Models\User;
@@ -46,6 +47,12 @@ final class CambiarEstado
                 Cupon::where('codigo', $pedido->cupon)->where('usos', '>', 0)->decrement('usos');
             }
             $pedido->update($cambios);
+            // Factura al darlo por pagado; rectificativa si se cancela uno ya pagado (D175). En la cola, tras confirmar.
+            if ($nuevo === EstadoPedido::Pagado) {
+                EmitirFacturaPedido::dispatch($pedido->id)->afterCommit();
+            } elseif ($nuevo === EstadoPedido::Cancelado && in_array($actual, [EstadoPedido::Pagado, EstadoPedido::DisenoEnRevision, EstadoPedido::RequiereCambios], true)) {
+                EmitirFacturaPedido::dispatch($pedido->id, 'rectificativa', trim('Cancelación del pedido '.$pedido->numero.(blank($nota) ? '' : ': '.trim($nota))))->afterCommit();
+            }
             // El correo del estado, si está activo en Ajustes → Correos (sale al confirmar la transacción).
             $avisado = CorreosPedido::activo($nuevo) && CorreoPedido::enviar($pedido, new CorreoDelPedido($pedido, 'estado', $nuevo));
             $pedido->historial()->create(['estado' => $nuevo, 'user_id' => $quien?->id, 'nota' => blank($nota) ? null : trim($nota), 'notificado_cliente' => $avisado]);

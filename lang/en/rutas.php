@@ -29,4 +29,5 @@ return [
     'reenviar_enlace' => 'resend-link',
     'maquetas' => 'mockups',
     'acceso' => 'access',
+    'facturas' => 'invoices',
 ];

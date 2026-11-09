@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Dominio\Carrito\CarritoActual;
+use App\Dominio\Facturacion\PdfFactura;
 use App\Dominio\Pedidos\ConfirmarCorreoPedido;
 use App\Dominio\Pedidos\CorreoPedido;
 use App\Dominio\Pedidos\CrearPedido;
 use App\Dominio\Pedidos\PedidoNoCreado;
 use App\Models\Ajuste;
+use App\Models\Factura;
 use App\Models\MaquetaPedido;
 use App\Models\Pedido;
 use App\Notifications\Pedidos\ConfirmaTuCorreo;
@@ -70,7 +72,7 @@ class PedidoController
     public function ver(Request $request, Pedido $pedido): View
     {
         abort_unless($this->puedeVer($request, $pedido), 404);
-        $pedido->load('lineas.impresiones', 'lineas.maquetas');
+        $pedido->load('lineas.impresiones', 'lineas.maquetas', 'facturas');
 
         return view('pedidos.ver', ['pedido' => $pedido, 'alternos' => $this->alternos('ver', $pedido)]);
     }
@@ -81,6 +83,18 @@ class PedidoController
         abort_unless($this->puedeVer($request, $pedido) && $maqueta->linea?->pedido_id === $pedido->id, 404);
 
         return Storage::disk(Pedido::DISCO)->response($maqueta->ruta, null, ['Cache-Control' => 'private, max-age=86400']);
+    }
+
+    /** El PDF de una factura del pedido (paso 6.5a): solo para quien puede ver el pedido. */
+    public function factura(Request $request, Pedido $pedido, Factura $factura): Response
+    {
+        abort_unless($this->puedeVer($request, $pedido) && $factura->pedido_id === $pedido->id, 404);
+
+        return response(PdfFactura::generar($factura), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$factura->nombreArchivo().'"',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     /** El enlace del correo: confirma el correo del invitado y le enseña su pedido. */

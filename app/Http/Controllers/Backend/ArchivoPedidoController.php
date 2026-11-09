@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Dominio\Facturacion\PdfFactura;
 use App\Dominio\Sistema\Actividad\Actividad;
+use App\Models\Factura;
 use App\Models\ImpresionPedido;
 use App\Models\MaquetaPedido;
 use App\Models\Pedido;
@@ -34,6 +36,18 @@ class ArchivoPedidoController
 
         return Storage::disk(Pedido::DISCO)->download($impresion->archivo, str_replace(['/', '\\'], '-', $nombre), [
             'Content-Type' => 'image/png',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    public function factura(Pedido $pedido, Factura $factura): Response
+    {
+        $this->comprobarAcceso($pedido);
+        abort_unless($factura->pedido_id === $pedido->id, 404);
+
+        return response(PdfFactura::generar($factura), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$factura->nombreArchivo().'"',
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }

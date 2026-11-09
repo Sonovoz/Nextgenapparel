@@ -547,48 +547,6 @@ parameters:
 			path: app/Dominio/Disenos/GuardarDiseno.php
 
 		-
-			message: '#^Cannot call method cuentaComoUso\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Dominio/Pedidos/CambiarEstado.php
-
-		-
-			message: '#^Cannot call method etiqueta\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Dominio/Pedidos/CambiarEstado.php
-
-		-
-			message: '#^Cannot call method siguientes\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Dominio/Pedidos/CambiarEstado.php
-
-		-
-			message: '#^Offset ''telefono'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Dominio/Pedidos/ConfirmarCorreoPedido.php
-
-		-
-			message: '#^Cannot call method locale\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Dominio/Pedidos/CorreosPedido.php
-
-		-
-			message: '#^Cannot call method visible\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Dominio/Pedidos/CorreosPedido.php
-
-		-
-			message: '#^Offset ''nombre'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Dominio/Pedidos/CorreosPedido.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Cliente\:\:\$correo\.$#'
 			identifier: property.notFound
 			count: 1
@@ -749,24 +707,6 @@ parameters:
 			identifier: ternary.alwaysFalse
 			count: 1
 			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$impresiones\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/GenerarMaquetas.php
-
-		-
-			message: '#^Offset ''color'' on non\-empty\-string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Dominio/Pedidos/GenerarMaquetas.php
-
-		-
-			message: '#^Parameter \#2 \$linea of method App\\Dominio\\Pedidos\\GenerarMaquetas\:\:cara\(\) expects App\\Models\\LineaPedido, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Dominio/Pedidos/GenerarMaquetas.php
 
 		-
 			message: '#^Parameter \#2 \$rect of static method App\\Dominio\\Carrito\\Maqueta\:\:rectangulo\(\) expects App\\Models\\FotoZona, Illuminate\\Database\\Eloquent\\Model given\.$#'
@@ -1189,92 +1129,14 @@ parameters:
 			path: app/Filament/Resources/Pedidos/Pages/ViewPedido.php
 
 		-
-			message: '#^Cannot call method format\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Filament/Resources/Pedidos/Pages/ViewPedido.php
-
-		-
-			message: '#^Cannot call method siguientes\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: app/Filament/Resources/Pedidos/Pages/ViewPedido.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$numero\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Filament/Resources/Pedidos/PedidoResource.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Filament/Resources/Pedidos/PedidoResource.php
-
-		-
-			message: '#^Cannot call method visible\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Filament/Resources/Pedidos/PedidoResource.php
-
-		-
 			message: '#^Method Filament\\Notifications\\Notification\:\:persistent\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
-			count: 1
-			path: app/Filament/Resources/Pedidos/PedidoResource.php
-
-		-
-			message: '#^Offset ''codigo_postal'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Resources/Pedidos/PedidoResource.php
-
-		-
-			message: '#^Offset ''direccion'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Resources/Pedidos/PedidoResource.php
-
-		-
-			message: '#^Offset ''direccion_2'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Resources/Pedidos/PedidoResource.php
-
-		-
-			message: '#^Offset ''empresa'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Resources/Pedidos/PedidoResource.php
-
-		-
-			message: '#^Offset ''localidad'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: app/Filament/Resources/Pedidos/PedidoResource.php
-
-		-
-			message: '#^Offset ''nombre'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Resources/Pedidos/PedidoResource.php
-
-		-
-			message: '#^Offset ''pais'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 3
-			path: app/Filament/Resources/Pedidos/PedidoResource.php
-
-		-
-			message: '#^Offset ''provincia'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Filament/Resources/Pedidos/PedidoResource.php
-
-		-
-			message: '#^Offset ''telefono'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
 			count: 1
 			path: app/Filament/Resources/Pedidos/PedidoResource.php
 
@@ -1385,18 +1247,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/Filament/Resources/Users/Tables/UsersTable.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pedido_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Controllers/Backend/ArchivoPedidoController.php
-
-		-
-			message: '#^Offset ''es'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Http/Controllers/Backend/ArchivoPedidoController.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:variantes\(\)\.$#'
@@ -1639,12 +1489,6 @@ parameters:
 			path: app/Http/Controllers/PedidoController.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pedido_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/PedidoController.php
-
-		-
 			message: '#^Parameter \#2 \$cliente of static method App\\Http\\Controllers\\CierreController\:\:bloqueoDe\(\) expects App\\Models\\Cliente\|null, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1705,42 +1549,6 @@ parameters:
 			path: app/Models/FotoZona.php
 
 		-
-			message: '#^Offset ''es'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Models/ImpresionPedido.php
-
-		-
-			message: '#^Offset string on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Models/ImpresionPedido.php
-
-		-
-			message: '#^Parameter \#1 \$array of function reset expects array\|object, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/ImpresionPedido.php
-
-		-
-			message: '#^Offset ''es'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: app/Models/LineaPedido.php
-
-		-
-			message: '#^Offset string on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: app/Models/LineaPedido.php
-
-		-
-			message: '#^Parameter \#1 \$array of function reset expects array\|object, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Models/LineaPedido.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:aLaVenta\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -1781,12 +1589,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Notifications/Cuenta/SolicitudBorrado.php
-
-		-
-			message: '#^Offset ''nombre'' on string on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Notifications/Pedidos/ConfirmaTuCorreo.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:withTrashed\(\)\.$#'

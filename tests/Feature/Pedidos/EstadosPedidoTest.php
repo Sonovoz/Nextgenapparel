@@ -34,8 +34,9 @@ class EstadosPedidoTest extends TestCase
         }
 
         $this->assertSame($hasta, $this->cambiar($pedido, $hasta, ['transportista' => 'SEUR', 'numero_seguimiento' => 'X1'])->estado);
-        $this->assertSame([$hasta, 'Nota'], [$pedido->historial()->sole()->estado, $pedido->historial()->sole()->nota]);
-        $this->assertNotNull($pedido->historial()->sole()->user_id);
+        $cambio = $pedido->historial()->first(); // al pagar se anota también la factura (6.5a)
+        $this->assertSame([$hasta, 'Nota'], [$cambio->estado, $cambio->nota]);
+        $this->assertNotNull($cambio->user_id);
     }
 
     public static function cambios(): array

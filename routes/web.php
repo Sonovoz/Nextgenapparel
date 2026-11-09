@@ -44,6 +44,7 @@ Route::prefix('admin/archivos-disenos/{diseno}')->group(function () {
 Route::prefix('admin/archivos-pedidos/{pedido}')->group(function () {
     Route::get('/maquetas/{maqueta}', [ArchivoPedidoController::class, 'maqueta'])->name('backend.pedidos.maqueta')->whereNumber('maqueta');
     Route::get('/impresiones/{impresion}/original', [ArchivoPedidoController::class, 'original'])->name('backend.pedidos.original')->whereNumber('impresion');
+    Route::get('/facturas/{factura:uuid}', [ArchivoPedidoController::class, 'factura'])->name('backend.pedidos.factura')->whereUuid('factura');
 });
 
 // Cuenta del cliente (paso 5.2), con la URL traducida en cada idioma:
@@ -122,6 +123,7 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
             Route::get('/{pedido}/'.$tramo('confirmar_correo_pedido'), [PedidoController::class, 'confirmarCorreo'])->name('confirmar-correo')->whereUuid('pedido')->middleware('throttle:cuenta-verificar');
             Route::post('/{pedido}/'.$tramo('reenviar_enlace'), [PedidoController::class, 'reenviar'])->name('reenviar')->whereUuid('pedido')->middleware('throttle:cuenta-reenviar');
             Route::get('/{pedido}/'.$tramo('acceso'), [PedidoController::class, 'acceso'])->name('acceso')->whereUuid('pedido')->middleware('throttle:cuenta-verificar');
+            Route::get('/{pedido}/'.$tramo('facturas').'/{factura:uuid}', [PedidoController::class, 'factura'])->name('factura')->whereUuid('pedido')->whereUuid('factura');
             Route::get('/{pedido}/'.$tramo('maquetas').'/{maqueta}', [PedidoController::class, 'maqueta'])->name('maqueta')->whereUuid('pedido')->whereNumber('maqueta');
         });
 

@@ -4,15 +4,48 @@ namespace App\Models;
 
 use App\Dominio\Clientes\TipoCliente;
 use App\Dominio\Pedidos\EstadoPedido;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-/** Pedido (paso 6.1, D169): copia congelada de lo que el cliente confirmó. */
+/** Pedido (paso 6.1, D169): copia congelada de lo que el cliente confirmó.
+ *
+ * @property int $id
+ * @property string $uuid
+ * @property ?string $numero
+ * @property ?int $cliente_id
+ * @property EstadoPedido $estado
+ * @property string $idioma
+ * @property string $correo
+ * @property ?Carbon $correo_confirmado_en
+ * @property TipoCliente $tipo_cliente
+ * @property string $nombre_fiscal
+ * @property ?string $nif
+ * @property bool $recargo_equivalencia
+ * @property array<string, ?string> $direccion_envio
+ * @property array<string, ?string> $direccion_facturacion
+ * @property ?string $cupon
+ * @property int $bruto
+ * @property int $descuentos
+ * @property int $subtotal
+ * @property int $envio
+ * @property int $base_imponible
+ * @property int $impuestos
+ * @property int $total
+ * @property array<string, mixed> $desglose
+ * @property ?Carbon $fecha_estimada_entrega
+ * @property ?string $transportista
+ * @property ?string $numero_seguimiento
+ * @property-read ?Cliente $cliente
+ * @property-read Collection<int, LineaPedido> $lineas
+ * @property-read Collection<int, Factura> $facturas
+ */
 class Pedido extends Model
 {
     use HasFactory, HasUuids;
@@ -49,6 +82,11 @@ class Pedido extends Model
     public function lineas(): HasMany
     {
         return $this->hasMany(LineaPedido::class)->orderBy('orden');
+    }
+
+    public function facturas(): HasMany
+    {
+        return $this->hasMany(Factura::class)->orderBy('id');
     }
 
     public function notas(): HasMany

@@ -148,6 +148,8 @@ class PedidoResource extends Resource
                 TextEntry::make('fecha_estimada_entrega')->label('Entrega estimada')->date('d/m/Y')->placeholder('—'),
                 TextEntry::make('seguimiento')->label('Envío')->visible(fn (Pedido $r) => $r->numero_seguimiento !== null)
                     ->state(fn (Pedido $r) => $r->transportista.' · '.$r->numero_seguimiento),
+                TextEntry::make('facturas')->label('Facturas')->html()->placeholder('Sin factura')
+                    ->state(fn (Pedido $r) => $r->facturas->map(fn ($f) => '<a href="'.e(route('backend.pedidos.factura', ['pedido' => $r->uuid, 'factura' => $f->uuid])).'" target="_blank" style="text-decoration: underline;">'.e($f->codigo).'</a> · '.e($f->tipo->etiqueta('es')).' · '.e(Formato::euros($f->total, 'es')))->join('<br>') ?: null),
                 TextEntry::make('cupon')->label('Cupón')->placeholder('—'),
                 TextEntry::make('total')->label('Total')->formatStateUsing($euros)->weight('bold')
                     ->helperText(fn (Pedido $r) => 'Base '.$euros($r->base_imponible).' · impuestos '.$euros($r->impuestos).' · envío '.$euros($r->envio)
