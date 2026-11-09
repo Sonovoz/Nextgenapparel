@@ -750,14 +750,18 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .aviso-ia { margin: 0; font-size: 12px !important; }
 .boton-ia:focus-visible, .texto-ia:focus-visible, .subir-ia:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
-/* Pie: luz azul que recorre la línea, como el escáner de un juego */
+/* Pie y separador de la portada: luz azul que recorre la línea, como el escáner de un juego */
 .pie { position: relative; border-top-color: rgba(142, 160, 255, .14); }
+.separador-escaner { position: relative; height: 1px; background: rgba(142, 160, 255, .14); }
+.separador-escaner::before, .separador-escaner::after,
 .pie::before, .pie::after { content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 1px; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(45, 75, 255, .2) 20%, #2D4BFF 45%, #DDE3FF 50%, #2D4BFF 55%, rgba(45, 75, 255, .2) 80%, transparent) no-repeat; background-size: 34% 100%; background-position: -40% 0; animation: barrido-pie 5.5s cubic-bezier(.45, .05, .55, .95) infinite; }
-.pie::after { top: -4px; height: 7px; filter: blur(6px); opacity: .9; }
+.pie::after, .separador-escaner::after { top: -4px; height: 7px; filter: blur(6px); opacity: .9; }
+.separador-escaner::before, .separador-escaner::after { top: 0; animation-delay: -2.75s; } /* desfasada de la del pie */
+.separador-escaner::after { top: -3px; }
 @keyframes barrido-pie { 0% { background-position: -40% 0; } 100% { background-position: 140% 0; } }
 @media (prefers-reduced-motion: reduce) {
-    .pie::before, .pie::after { animation: none; background-size: 100% 100%; background-position: 0 0; }
-    .pie::after { opacity: .5; }
+    .pie::before, .pie::after, .separador-escaner::before, .separador-escaner::after { animation: none; background-size: 100% 100%; background-position: 0 0; }
+    .pie::after, .separador-escaner::after { opacity: .5; }
 }
 
 /* Página 404 en el estilo de consola */

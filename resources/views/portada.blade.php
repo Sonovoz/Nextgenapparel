@@ -230,6 +230,9 @@
         </div>
     </section>
 
+    {{-- Separador: la misma línea con luz que recorre el pie. --}}
+    <div class="separador-escaner" aria-hidden="true"></div>
+
     {{-- 2. Tu marca en 3 pasos, con prueba del logo --}}
     <section class="seccion" id="pasos" aria-labelledby="titulo-pasos">
         <div class="contenedor">
