@@ -67,6 +67,7 @@ Route::prefix('admin/produccion')->group(function () {
     Route::get('/pedidos/{pedido}/orden-de-trabajo', [ProduccionController::class, 'orden'])->name('backend.produccion.orden');
     Route::get('/pedidos/{pedido}/paquete', [ProduccionController::class, 'paquete'])->name('backend.produccion.paquete');
     Route::get('/hoja-de-compra.csv', [ProduccionController::class, 'hojaCompra'])->name('backend.produccion.hoja');
+    Route::get('/pliegos-dti.pdf', [ProduccionController::class, 'pliegos'])->name('backend.produccion.pliegos');
 });
 
 // Cuenta del cliente (paso 5.2), con la URL traducida en cada idioma:

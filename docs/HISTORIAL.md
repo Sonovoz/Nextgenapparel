@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **V2 · Pliegos DTI**: *Producción → Pliegos DTI* coloca los diseños de los pedidos en producción (uno por prenda) en pliegos del ancho del film y da el PDF a tamaño real; textos aparte; medidas del film configurables. | `v2-pliegos` | D193 |
 | 09/11 | **V2 · Carritos abandonados**: avisos a 1 h, 24 h y 72 h (cupón opcional en cada uno) a clientes con cuenta, correo verificado y consentimiento comercial; enlace de baja; *Marketing → Carritos abandonados* con la secuencia y lo recuperado. Desactivado hasta que el equipo lo active. | `v2-carritos-abandonados` | D189 |
 | 09/11 | **V1 · Textos legales en inglés**: los cinco textos también en inglés, con sus versiones y revisión por idioma; cada pedido guarda la versión de las condiciones en su idioma. | `fase-v1-legal-en` | D188 |
 | 09/11 | **V1 · Presupuestos en PDF**: «Descargar presupuesto» en el carrito (PRE-0001, importes del motor, validez en *Ajustes → General*), página con su enlace y «Pasar al carrito» con el precio de hoy, y *Pedidos → Presupuestos*. Ya no queda ninguna sección pendiente en el menú. | `fase-v1-presupuestos` | D187 |
