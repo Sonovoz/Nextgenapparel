@@ -40,5 +40,5 @@ Comparación con **Clave de Alma** (`Sonovoz/Clavedealma`), del mismo equipo y c
 
 ## 5. Pendiente para que la CI sea la puerta de verdad
 
-- Ejecutar la CI nueva en GitHub y generar la línea base de Larastan (`phpstan-baseline.neon`); después, quitar `continue-on-error` del paso de Larastan. **No se ha podido ejecutar aquí**: Composer no descarga desde GitHub en este entorno.
+- ~~Ejecutar la CI nueva y generar la línea base de Larastan~~ Hecho el 9/11: la CI pasa en SQLite (PHP 8.3 y 8.5) y en MariaDB estricta; la línea base (`phpstan-baseline.neon`, 302 reglas, 365 avisos ya existentes) se generó en la CI y Larastan es obligatorio desde la PR #11.
 - Fusionar la PR de la fase 5 y abrir la de la fase 6 para dejar de acumular cambios fuera de `main`.
