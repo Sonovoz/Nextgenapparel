@@ -47,6 +47,9 @@ class Ajuste extends Model
         'correo.estados_activos' => ['pagado', 'requiere_cambios', 'enviado', 'cancelado'],
         'correo.plantillas' => [],
         'pedidos.estados_visibles' => [],
+        // Facturación (D175): datos fiscales de la tienda y series (no se cambian tras la primera factura).
+        'facturacion.emisor' => [],
+        'facturacion.series' => ['completa' => 'F', 'simplificada' => 'T', 'rectificativa' => 'R'],
         // Recargo de equivalencia (paso 5.4): «equipo» (lo activa el equipo en la ficha) o «cliente» (lo marca él).
         'clientes.recargo_lo_indica' => 'equipo',
         // Mejora con IA para el cliente (D143): activa, desde qué nivel y texto propio por idioma (vacío = el de lang/disenos.php).

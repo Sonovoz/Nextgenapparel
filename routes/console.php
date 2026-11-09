@@ -63,6 +63,11 @@ Schedule::command('pedidos:caducar')
     ->dailyAt('03:25')
     ->withoutOverlapping();
 
+Schedule::command('facturas:emitir-pendientes')
+    ->description('Emitir las facturas de los pedidos pagados que aún no la tienen')
+    ->dailyAt('06:15')
+    ->withoutOverlapping();
+
 Schedule::command('disenos:limpiar')
     ->description('Borrar diseños sin pedido de visitantes sin cuenta y archivos huérfanos')
     ->dailyAt('03:40')

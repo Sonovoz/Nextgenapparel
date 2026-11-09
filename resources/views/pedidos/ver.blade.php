@@ -25,6 +25,17 @@
                 </div>
             @endunless
             <p class="aviso-cuenta verificar">{{ __('pedidos.pago_pronto') }}</p>
+            @if ($pedido->facturas->isNotEmpty())
+                <section class="pedido-novedades" aria-labelledby="titulo-facturas">
+                    <h2 id="titulo-facturas">{{ __('facturas.facturas') }}</h2>
+                    <ul>
+                        @foreach ($pedido->facturas as $factura)
+                            <li><a href="{{ route('pedidos.'.app()->getLocale().'.factura', ['pedido' => $pedido->uuid, 'factura' => $factura->uuid]) }}">{{ __('facturas.descargar', ['codigo' => $factura->codigo]) }}</a>
+                                <time>{{ $factura->tipo->etiqueta() }} · {{ $factura->emitida_en->locale(app()->getLocale())->isoFormat('LL') }}</time></li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
             @php $novedades = $pedido->notas()->where('tipo', 'cliente')->get(); @endphp
             @if ($novedades->isNotEmpty())
                 <section class="pedido-novedades" aria-labelledby="titulo-novedades">
