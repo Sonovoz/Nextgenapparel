@@ -67,6 +67,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Pasarela::class, function (): Pasarela {
             if (config('pagos.pasarela') === 'redsys') {
                 $c = (array) config('pagos.redsys');
+                if ($this->app->isProduction() && $c['entorno'] !== 'live') {
+                    throw new LogicException('En producción Redsys tiene que ser el real (REDSYS_ENVIRONMENT=live).');
+                }
 
                 return new PasarelaRedsys((string) $c['comercio'], (string) $c['terminal'], (string) $c['clave'], (string) $c['entorno'], (bool) $c['tarjeta'], (bool) $c['bizum'], (string) $c['nombre']);
             }

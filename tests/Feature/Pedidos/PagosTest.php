@@ -9,7 +9,10 @@ use App\Filament\Pages\AjustesPagos;
 use App\Http\Controllers\PedidoController;
 use App\Models\Pago;
 use App\Models\Pedido;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -146,12 +149,53 @@ class PagosTest extends TestCase
         app()->forgetInstance(Pasarela::class);
 
         $html = $this->withSession([PedidoController::SESION => [$this->pedido->uuid]])->post(route('pedidos.es.pagar', ['pedido' => $this->pedido->uuid]))->assertOk()->getContent();
-        preg_match('/action="([^"]+)"/', $html, $m);
+        preg_match('/<a href="([^"]+)"/', $html, $m);
         $pagina = $this->get(html_entity_decode($m[1]))->assertOk()->assertSee('Pago correcto')->getContent();
         preg_match('/class="ok" href="([^"]+)"/', $pagina, $ok);
         $this->get(html_entity_decode($ok[1]))->assertSessionHas('estado_pedido', __('pagos.cobrado'));
 
         $this->assertSame(E::Pagado, $this->pedido->fresh()->estado);
+    }
+
+    /**
+     * Auditoría final, C1: el aviso de Redsys llega sin sesión ni token. El middleware de CSRF no actúa en
+     * los tests, así que se prueba con él «como en producción».
+     */
+    public function test_el_aviso_de_redsys_no_pide_token_csrf_y_el_resto_si(): void
+    {
+        $csrf = new class(app(), app('encrypter')) extends PreventRequestForgery
+        {
+            protected function runningUnitTests()
+            {
+                return false;
+            }
+        };
+        $siguiente = fn () => response('OK');
+
+        $aviso = Request::create('/pagos/aviso', 'POST');
+        $aviso->setLaravelSession(app('session.store'));
+        $this->assertSame('OK', $csrf->handle($aviso, $siguiente)->getContent());
+        $this->expectException(TokenMismatchException::class);
+        $peticion = Request::create('/es/pedidos/'.$this->pedido->uuid.'/pagar', 'POST');
+        $peticion->setLaravelSession(app('session.store'));
+        $csrf->handle($peticion, $siguiente);
+    }
+
+    /** Auditoría final, A1: en producción, Redsys real o nada (nunca el TPV de pruebas ni el pago simulado). */
+    public function test_en_produccion_solo_vale_redsys_real(): void
+    {
+        $this->app->detectEnvironment(fn () => 'production');
+        app()->forgetInstance(Pasarela::class);
+
+        try {
+            app(Pasarela::class);
+            $this->fail('Con REDSYS_ENVIRONMENT=test no se cobra en producción.');
+        } catch (\LogicException $e) {
+            $this->assertStringContainsString('REDSYS_ENVIRONMENT=live', $e->getMessage());
+        }
+        config()->set('pagos.redsys.entorno', 'live');
+        app()->forgetInstance(Pasarela::class);
+        $this->assertFalse(app(Pasarela::class)->pruebas());
     }
 
     public function test_ajustes_pagos_muestra_la_pasarela_sin_la_clave(): void

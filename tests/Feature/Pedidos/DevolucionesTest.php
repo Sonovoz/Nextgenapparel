@@ -19,6 +19,7 @@ use App\Models\Incidencia;
 use App\Models\Pago;
 use App\Models\Pedido;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request as PeticionHttp;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
@@ -140,6 +141,25 @@ class DevolucionesTest extends TestCase
 
         $this->assertSame(E::Cancelado, $this->pedido->fresh()->estado);
         $this->assertSame(13298, Devolucion::sole()->importe);
+    }
+
+    /** Auditoría final, M1: si Redsys no contesta, la devolución queda dudosa: ni se repite ni se pide hacerla a mano sin mirar el TPV. */
+    public function test_si_redsys_no_contesta_la_devolucion_queda_dudosa_y_no_se_repite(): void
+    {
+        $llamadas = 0;
+        Http::fake(['sis-t.redsys.es*' => function () use (&$llamadas) {
+            $llamadas++;
+
+            throw new ConnectionException('Tiempo agotado');
+        }]);
+
+        (new DevolverPedido($this->pedido->id))->handle(app(DevolverDinero::class));
+        (new DevolverPedido($this->pedido->id))->handle(app(DevolverDinero::class));
+
+        $this->assertSame('dudosa', Devolucion::sole()->estado);
+        $this->assertSame(0, DevolverDinero::pendiente($this->pedido)); // cuenta como devuelta: nunca de más
+        $this->assertStringContainsString('compruébala en el TPV', $this->pedido->notas()->sole()->texto);
+        $this->assertSame(1, $llamadas); // la segunda vez ni se llama a Redsys
     }
 
     public function test_un_pedido_cobrado_fuera_de_la_pasarela_no_intenta_devolver(): void

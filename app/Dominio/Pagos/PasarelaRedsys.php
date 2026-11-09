@@ -98,8 +98,11 @@ class PasarelaRedsys implements Pasarela
                 'DS_MERCHANT_TRANSACTIONTYPE' => '3',
                 'DS_MERCHANT_TERMINAL' => $this->terminal,
             ]));
-        } catch (ConnectionException|PagoNoDisponible $e) {
-            return new ResultadoDevolucion(false, null, 'Redsys no ha respondido: '.$e->getMessage());
+        } catch (PagoNoDisponible $e) {
+            return new ResultadoDevolucion(false, null, $e->getMessage());
+        } catch (ConnectionException $e) {
+            // Pudo hacerla sin que llegara la respuesta: repetirla podría devolver dos veces (auditoría final, M1).
+            return new ResultadoDevolucion(false, null, 'Redsys no ha respondido: '.$e->getMessage(), dudosa: true);
         }
         $cuerpo = (array) $respuesta->json();
         if (isset($cuerpo['errorCode'])) {

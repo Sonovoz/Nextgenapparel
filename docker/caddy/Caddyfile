@@ -4,6 +4,8 @@
 
 {$DOMINIO_PRODUCCION} {
 	encode gzip
+	# Solo HTTPS durante un año (auditoría final, M4).
+	header Strict-Transport-Security "max-age=31536000"
 	reverse_proxy nga-produccion-web:80
 }
 

@@ -34,6 +34,11 @@ class DevolverPedido implements ShouldQueue
             return; // nunca se cobró por la pasarela o ya está devuelto
         }
         $resultado = $devolver($pedido, $importe, "cancelacion-{$pedido->id}", 'Cancelación del pedido '.$pedido->numero);
+        if ($resultado->dudosa) {
+            $pedido->notas()->create(['tipo' => 'privada', 'texto' => 'Redsys no ha contestado a la devolución: compruébala en el TPV antes de repetirla.']);
+
+            return;
+        }
         if (! $resultado->hecha) {
             throw new RuntimeException("No se ha podido devolver el pedido {$pedido->numero}: {$resultado->error}");
         }
@@ -42,7 +47,7 @@ class DevolverPedido implements ShouldQueue
 
     public function failed(Throwable $error): void
     {
-        Pedido::find($this->pedidoId)?->notas()->create(['tipo' => 'privada', 'texto' => mb_substr('La devolución automática ha fallado: devuelve el dinero a mano en el TPV. '.$error->getMessage(), 0, 500)]);
+        Pedido::find($this->pedidoId)?->notas()->create(['tipo' => 'privada', 'texto' => mb_substr('La devolución automática ha fallado: comprueba en el TPV si se hizo y, si no, devuelve el dinero a mano. '.$error->getMessage(), 0, 500)]);
         report($error);
     }
 }

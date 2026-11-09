@@ -8,7 +8,12 @@
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#07070C;color:#F3F2F8;font:16px system-ui,sans-serif;text-align:center}button{margin-top:16px;padding:12px 28px;border-radius:999px;border:1px solid #F3F2F8;background:none;color:inherit;font:inherit;cursor:pointer}</style>
 </head>
 <body>
-    <form id="pago" method="{{ $iniciado->campos === [] ? 'GET' : 'POST' }}" action="{{ $iniciado->url }}">
+    @if ($iniciado->campos === [])
+        <p>{{ __('pagos.redirigiendo') }}</p>
+        <a href="{{ $iniciado->url }}">{{ __('pagos.continuar') }}</a>
+        <script>window.location.replace(@js($iniciado->url));</script>
+    @else
+    <form id="pago" method="POST" action="{{ $iniciado->url }}">
         @foreach ($iniciado->campos as $nombre => $valor)
             <input type="hidden" name="{{ $nombre }}" value="{{ $valor }}">
         @endforeach
@@ -16,5 +21,6 @@
         <button type="submit">{{ __('pagos.continuar') }}</button>
     </form>
     <script>document.getElementById('pago').submit();</script>
+    @endif
 </body>
 </html>

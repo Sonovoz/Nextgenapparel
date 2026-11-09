@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $importe
  * @property string $clave
  * @property ?string $referencia
- * @property string $estado hecha | fallida
+ * @property string $estado hecha | fallida | dudosa
  * @property string $motivo
  * @property ?string $error
  * @property int $intentos

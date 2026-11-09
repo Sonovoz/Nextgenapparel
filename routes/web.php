@@ -24,7 +24,6 @@ use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TiendaController;
 use App\Http\Middleware\EstablecerIdioma;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -54,8 +53,8 @@ Route::prefix('admin/archivos-pedidos/{pedido}')->group(function () {
 });
 
 // Pagos (fase 7): el aviso firmado de la pasarela (sin CSRF ni sesión) y la página del pago simulado.
-Route::post('/pagos/aviso', [PagoController::class, 'aviso'])->name('pagos.aviso')
-    ->withoutMiddleware([ValidateCsrfToken::class]);
+// Sin CSRF por `preventRequestForgery(except:)` en bootstrap/app.php (auditoría final, C1).
+Route::post('/pagos/aviso', [PagoController::class, 'aviso'])->name('pagos.aviso');
 Route::get('/pagos/simulada', [PagoController::class, 'simulada'])->name('pagos.simulada');
 
 // Backend: documentos de producción (paso 6.5b), con la sección Producción.
