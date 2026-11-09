@@ -23,19 +23,15 @@ Portal de pedidos de prendas personalizadas con impresión DTI (camisetas, polos
 11. **Una sola sesión trabaja en una rama a la vez.** Antes de empezar: `git fetch origin '+refs/heads/*:refs/remotes/origin/*'` y partir de la rama más reciente (nunca de una copia local vieja). Al cerrar una fase, actualiza el estado en `docs/FICHA.md` (sección «Estado»).
 12. **Reutiliza Clave de Alma** (`Sonovoz/Clavedealma`, misma pila: Laravel 13, Filament 5) antes de escribir desde cero: Redsys y Ajustes → Pagos, facturas y rectificativas con Veri*Factu, PDF, devoluciones, SMTP desde el panel, textos legales, registro de seguridad, 2FA del equipo e instalación en OVH. Se porta y se adapta a un solo vendedor (sin artistas ni comisiones), con sus tests (D171).
 
-## Cómo se entrega y se verifica (D171, sustituye a D74)
+## Cómo se entrega (método de Clave de Alma, D180)
 
-Se sigue el método de Clave de Alma: **la CI es la puerta**, no las revisiones a mano.
+**La CI en verde es la única puerta.** Sin revisiones a mano.
 
-1. **Cada entrega = una rama y una PR** contra `main`, pequeña y con un resultado visible o comprobable. Entra en `main` solo con la **CI en verde** (`.github/workflows/tests.yml`: Pint, Larastan, tests en SQLite con PHP 8.3 y 8.5, y migraciones y tests en MariaDB estricta como XAMPP).
-2. **Tests útiles**: cada regla de negocio y cada fallo real tiene su test; los casos parecidos van juntos (proveedores de datos). No se prueba lo que ya garantiza el framework.
-3. **Antes de abrir la PR**: tests afectados + Pint en local. La suite completa y MariaDB las pasa la CI (no se repiten a mano).
-4. **Navegador** (una pasada, dominio `.test`) solo cuando la entrega trae una pantalla nueva o cambia un recorrido de compra.
-5. **Instructor** (`.claude/agents/instructor.md`): **una revisión por fase**, antes de cerrarla, y solo de lo que toca dinero, facturas, permisos o datos personales. Sin segundas rondas salvo defectos altos. Sin Gauntlet de dos rondas: `docs/GAUNTLET.md` queda como lista de comprobación para la auditoría final (fase 9).
-6. **Revisión del cliente en Herd** solo cuando hay algo visible, agrupando entregas, con un máximo de 3 puntos que comprobar.
-7. **Documentación corta**: `docs/HISTORIAL.md` lleva **una línea por entrega** (fecha, qué, PR, decisión). `docs/DECISIONES.md` solo para decisiones de negocio o de arquitectura, en 2-3 líneas; las correcciones y sus porqués van en el mensaje del commit o de la PR, no en DECISIONES.
-8. **Informe por entrega** (unas 5 líneas): qué incluye, qué no se ha podido probar y cómo verlo.
-9. **Comprobaciones al mínimo (orden del cliente, 09/11):** en local solo Pint y, si acaso, el test nuevo; nada de pasadas de navegador ni segundas rondas del instructor salvo que el cliente lo pida. La CI decide.
+1. **Cada entrega = una rama y una PR** contra `main`, pequeña. Entra con la CI en verde (`.github/workflows/tests.yml`: Pint, Larastan, tests en SQLite y en MariaDB estricta).
+2. **Tests**: uno por regla de negocio o fallo real. En local, solo Pint y el test nuevo; el resto lo pasa la CI.
+3. **Sin pasadas de navegador, sin instructor y sin segundas revisiones**, salvo que el cliente lo pida. `docs/GAUNTLET.md` solo para la auditoría final (fase 9).
+4. **Documentación**: una línea por entrega en `docs/HISTORIAL.md`; `docs/DECISIONES.md` solo para decisiones de negocio, en 2-3 líneas. Las correcciones van en el commit.
+5. **Informe al cliente**: 3-5 líneas (qué incluye, qué no se ha probado, la PR).
 
 ## Pila técnica
 
