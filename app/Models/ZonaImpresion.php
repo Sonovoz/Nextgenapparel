@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 /**
  * Frontal, pecho, espalda grande… con su medida máxima de impresión.
  *
+ * @property ?Cara $cara
  * @property-read PrendaZona $pivot al cargarla desde una prenda (precio y coste de la zona en esa prenda)
  */
 class ZonaImpresion extends Model

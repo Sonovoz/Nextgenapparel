@@ -22,6 +22,7 @@ class ImpresionCarrito extends Model
         return $this->belongsTo(LineaCarrito::class, 'linea_carrito_id');
     }
 
+    /** @return BelongsTo<ZonaImpresion, $this> */
     public function zona(): BelongsTo
     {
         return $this->belongsTo(ZonaImpresion::class, 'zona_impresion_id');

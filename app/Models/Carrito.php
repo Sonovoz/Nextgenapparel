@@ -31,6 +31,7 @@ class Carrito extends Model
         return $this->belongsTo(Cliente::class);
     }
 
+    /** @return HasMany<LineaCarrito, $this> */
     public function lineas(): HasMany
     {
         return $this->hasMany(LineaCarrito::class)->orderBy('orden')->orderBy('id');

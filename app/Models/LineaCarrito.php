@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Una línea del carrito: una prenda en un color con sus tallas, o un pack con sus elecciones.
  *
  * @property TipoLinea $tipo
+ * @property ?int $prenda_id
+ * @property ?int $color_id
+ * @property ?int $pack_id
  * @property ?array<int, array{color?: int, tallas?: array<int, int>}> $elecciones linea_pack_id => elección
  */
 class LineaCarrito extends Model
@@ -42,21 +45,25 @@ class LineaCarrito extends Model
         return $this->belongsTo(Carrito::class);
     }
 
+    /** @return BelongsTo<Prenda, $this> */
     public function prenda(): BelongsTo
     {
         return $this->belongsTo(Prenda::class)->withTrashed();
     }
 
+    /** @return BelongsTo<Color, $this> */
     public function color(): BelongsTo
     {
         return $this->belongsTo(Color::class);
     }
 
+    /** @return BelongsTo<Pack, $this> */
     public function pack(): BelongsTo
     {
         return $this->belongsTo(Pack::class)->withTrashed();
     }
 
+    /** @return HasMany<ImpresionCarrito, $this> */
     public function impresiones(): HasMany
     {
         return $this->hasMany(ImpresionCarrito::class)->orderBy('zona_impresion_id');
