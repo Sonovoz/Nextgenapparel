@@ -38,6 +38,10 @@ final class ResolverIncidencia
             throw new IncidenciaNoValida('Indica el importe del reembolso.');
         }
 
+        if ($resolucion === ResolucionIncidencia::Reembolso) {
+            $this->devolverAntes($incidencia, (int) $importe);
+        }
+
         $incidencia = DB::transaction(function () use ($incidencia, $resolucion, $respuesta, $importe, $quien): Incidencia {
             // Primero el pedido (como los demás cambios de dinero) y luego la incidencia, antes de cualquier otra
             // lectura: así lo ya rectificado se lee con los datos confirmados (B2).
@@ -58,13 +62,6 @@ final class ResolverIncidencia
                     throw new IncidenciaNoValida($e->getMessage());
                 }
             }
-            if ($factura !== null && DevolverDinero::pendiente($incidencia->pedido) > 0) {
-                // El dinero, por la pasarela (D182). Si falla, no se resuelve y tampoco queda la rectificativa.
-                $devuelto = ($this->devolver)($incidencia->pedido, (int) $importe, "incidencia-{$incidencia->id}", "Incidencia {$incidencia->codigo}");
-                if (! $devuelto->hecha) {
-                    throw new IncidenciaNoValida('No se ha podido devolver el dinero: '.$devuelto->error);
-                }
-            }
             $incidencia->update([
                 'estado' => 'resuelta', 'resolucion' => $resolucion, 'importe_reembolso' => $factura === null ? null : (int) $importe,
                 'factura_id' => $factura?->id, 'respuesta' => mb_substr($respuesta, 0, 2000), 'user_id' => $quien->id, 'resuelta_en' => now(),
@@ -82,5 +79,28 @@ final class ResolverIncidencia
         }
 
         return $incidencia;
+    }
+
+    /**
+     * El dinero por la pasarela (D182), **antes y fuera** de la transacción que emite la rectificativa
+     * (auditoría final, M2): la llamada a Redsys no bloquea las facturas y, si algo falla después, el
+     * reintento no devuelve otra vez (la clave `incidencia-{id}` ya está hecha). Si no se devuelve, no se resuelve.
+     */
+    private function devolverAntes(Incidencia $incidencia, int $importe): void
+    {
+        $pedido = $incidencia->pedido;
+        if (! $incidencia->abierta()) {
+            throw new IncidenciaNoValida("La incidencia {$incidencia->codigo} ya está resuelta.");
+        }
+        if ($importe > $this->facturas->pendienteDeRectificar($pedido)) {
+            throw new IncidenciaNoValida('El reembolso no puede pasar de lo que queda por devolver del pedido ('.Formato::euros($this->facturas->pendienteDeRectificar($pedido), 'es').').');
+        }
+        if (DevolverDinero::pendiente($pedido) === 0) {
+            return; // no se cobró por la pasarela (o ya se devolvió): solo la rectificativa
+        }
+        $devuelto = ($this->devolver)($pedido, $importe, "incidencia-{$incidencia->id}", "Incidencia {$incidencia->codigo}");
+        if (! $devuelto->hecha) {
+            throw new IncidenciaNoValida('No se ha podido devolver el dinero: '.$devuelto->error);
+        }
     }
 }

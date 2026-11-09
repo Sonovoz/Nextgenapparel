@@ -52,6 +52,12 @@ En `docker/caddy/.env`: los dos dominios y el correo para Let's Encrypt.
 
 Estos archivos no se suben nunca al repositorio.
 
+### Pagos con Redsys
+
+- En `produccion.env`: `PAGOS_PASARELA=redsys`, `REDSYS_MERCHANT_CODE`, `REDSYS_TERMINAL`, `REDSYS_SECRET_KEY` y `REDSYS_ENVIRONMENT=live` (con otro valor, producción no arranca los pagos). Bizum con `REDSYS_BIZUM=true` si el banco lo activa.
+- En el portal de Redsys: la URL de notificación que muestra *Ajustes → Pagos* (`https://<dominio>/pagos/aviso`) y «parámetros en las URLs».
+- Antes de abrir: en pruebas (`REDSYS_ENVIRONMENT=test`), pagar con tarjeta y con Bizum, cerrar la página del banco sin volver (el pedido tiene que quedar pagado por el aviso) y hacer una devolución.
+
 ## 3. Arrancar
 
 ```bash

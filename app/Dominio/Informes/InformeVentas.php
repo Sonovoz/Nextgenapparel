@@ -49,10 +49,12 @@ final class InformeVentas
     {
         $salida = fopen('php://temp', 'r+');
         $euros = fn (int $c) => number_format($c / 100, 2, ',', '');
+        // Un texto que empieza por = + - @ sería una fórmula en Excel (auditoría final, M3).
+        $texto = fn (?string $t) => preg_match('/^[=+\-@\t\r]/', (string) $t) === 1 ? "'".$t : (string) $t;
         fputcsv($salida, ['Factura', 'Tipo', 'Fecha', 'Pedido', 'Cliente', 'NIF', 'Base', 'IVA', 'Recargo', 'Total', 'Cupón'], ';');
-        Factura::with('pedido')->whereBetween('emitida_en', [$desde->startOfDay(), $hasta->endOfDay()])->orderBy('id')->each(function (Factura $f) use ($salida, $euros) {
+        Factura::with('pedido')->whereBetween('emitida_en', [$desde->startOfDay(), $hasta->endOfDay()])->orderBy('id')->each(function (Factura $f) use ($salida, $euros, $texto) {
             fputcsv($salida, [$f->codigo, $f->tipo->etiqueta('es'), $f->emitida_en->timezone('Europe/Madrid')->format('d/m/Y'), $f->pedido->numero,
-                $f->destinatario['nombre'] ?? '', $f->destinatario['nif'] ?? '', $euros($f->base_imponible), $euros($f->iva), $euros($f->recargo), $euros($f->total), $f->pedido->cupon ?? ''], ';');
+                $texto($f->destinatario['nombre'] ?? ''), $texto($f->destinatario['nif'] ?? ''), $euros($f->base_imponible), $euros($f->iva), $euros($f->recargo), $euros($f->total), $texto($f->pedido->cupon)], ';');
         });
         rewind($salida);
 

@@ -8,6 +8,7 @@ use App\Dominio\Pedidos\EstadoPedido as E;
 use App\Dominio\Sistema\Acceso\Rol;
 use App\Filament\Pages\Informes;
 use App\Models\Ajuste;
+use App\Models\Factura;
 use App\Models\Pedido;
 use Carbon\CarbonImmutable;
 use Filament\Facades\Filament;
@@ -46,6 +47,10 @@ class InformesTest extends TestCase
         $this->assertSame([['cupon' => 'BIENVENIDA', 'pedidos' => 1]], $d['cupones']);
         $csv = InformeVentas::csv($hoy->startOfMonth(), $hoy);
         $this->assertSame(4, substr_count($csv, "\n")); // cabecera + 3 facturas
+        // Auditoría final, M3: un nombre que empieza por «=» no es una fórmula en Excel.
+        $raro = $this->pedidoFacturado('PED-0003', 1000);
+        Factura::where('pedido_id', $raro->id)->update(['destinatario' => json_encode(['nombre' => '=HYPERLINK("http://x")', 'nif' => null])]);
+        $this->assertStringContainsString(";\"'=HYPERLINK(\"\"http://x\"\")\";", InformeVentas::csv($hoy->startOfMonth(), $hoy));
         $this->assertSame(0, InformeVentas::datos($hoy->subYear()->startOfMonth(), $hoy->subYear())['pedidos']);
     }
 

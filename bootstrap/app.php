@@ -24,6 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // (canonical, sitemap, recursos) salgan en https (D108). El contenedor
         // de la aplicación no se publica fuera de esa red.
         $middleware->trustProxies(at: '*');
+        // El aviso firmado de Redsys llega de su servidor, sin sesión ni token (auditoría final, C1).
+        $middleware->preventRequestForgery(except: ['pagos/aviso']);
         // …pero solo para el dominio de APP_URL (y sus subdominios): nadie puede
         // colar otro host, p. ej. en los enlaces de los correos. Se admite además
         // 127.0.0.1 para la comprobación de salud del contenedor (compose.yaml).

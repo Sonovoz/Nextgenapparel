@@ -21,6 +21,9 @@ final class DevolverDinero
         if ($hecha !== null) {
             return new ResultadoDevolucion(true, $hecha->referencia);
         }
+        if (Devolucion::where('clave', $clave)->where('estado', 'dudosa')->exists()) {
+            return new ResultadoDevolucion(false, null, 'Hay una devolución sin confirmar: compruébala en el TPV antes de repetirla.', dudosa: true);
+        }
         if ($importe < 1) {
             return new ResultadoDevolucion(false, null, 'No hay importe que devolver.');
         }
@@ -44,7 +47,7 @@ final class DevolverDinero
             $resultado = $this->pasarela->devolver($pago->referencia, $importe, $intentos === 0 ? $clave : $clave.':'.$intentos);
             Devolucion::updateOrCreate(['clave' => $clave], [
                 'pago_id' => $pago->id, 'pedido_id' => $pedido->id, 'importe' => $importe, 'referencia' => $resultado->referencia,
-                'estado' => $resultado->hecha ? 'hecha' : 'fallida', 'motivo' => mb_substr($motivo, 0, 255),
+                'estado' => $resultado->hecha ? 'hecha' : ($resultado->dudosa ? 'dudosa' : 'fallida'), 'motivo' => mb_substr($motivo, 0, 255),
                 'error' => $resultado->error === null ? null : mb_substr($resultado->error, 0, 500), 'intentos' => $resultado->hecha ? $intentos : $intentos + 1,
             ]);
 
@@ -62,6 +65,7 @@ final class DevolverDinero
 
     private static function devuelto(Pago $pago): int
     {
-        return (int) Devolucion::where('pago_id', $pago->id)->where('estado', 'hecha')->sum('importe');
+        // Las dudosas cuentan como hechas: nunca se devuelve de más por no saberlo.
+        return (int) Devolucion::where('pago_id', $pago->id)->whereIn('estado', ['hecha', 'dudosa'])->sum('importe');
     }
 }
