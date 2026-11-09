@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **Portada**: las burbujas que subían en la cabecera pasan a ondas de luz que se mecen y polvo de luz que flota, al estilo del menú de una consola. | `portada-ambiente` | — |
 | 09/11 | **Guía de Herd**: cómo instalar Imagick en Windows (necesario para subir diseños) y qué hacer si pide la verificación en dos pasos en local. | `docs-imagick-herd` | — |
 | 09/11 | **Configurador en 3 pasos**: sube tu diseño y lo colocamos, con «¿Dónde lo ponemos?» (Frontal, Pecho, Espalda) en el mismo paso y un botón por zona libre para otro diseño, tallas y colores, resumen y pago; declaración de derechos junto al botón de subir; «Escribir mi marca» oculto por ahora (D199); «Siguiente» dice qué falta; errores de subida que explican qué pasa (en local, con la causa). | `configurador-guiado` | D198 |
 | 09/11 | **Verificación en dos pasos desactivada por ahora**: el equipo entra al panel solo con contraseña; se reactiva con `DOS_PASOS_OBLIGATORIOS=true`. | `dos-pasos-desactivada` | D197 |
