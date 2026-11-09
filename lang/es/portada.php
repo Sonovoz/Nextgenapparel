@@ -25,7 +25,7 @@ return [
     'confianza_calidad' => 'Calidad DTI Textil',
     'confianza_pago' => 'Pago seguro',
     'confianza_plazo' => 'Producción en :dias días',
-    'pasos_etiqueta' => 'Cómo se juega',
+    'pasos_etiqueta' => 'Cómo configurar tu marca en 3 pasos',
     'pasos_titulo' => 'Tu marca en 3 niveles',
     'paso_1' => 'Sube tu logo',
     'paso_1_texto' => 'Lo ves al momento sobre la prenda y te decimos si tiene calidad para imprimir.',

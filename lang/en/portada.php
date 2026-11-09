@@ -25,7 +25,7 @@ return [
     'confianza_calidad' => 'DTI Textile quality',
     'confianza_pago' => 'Secure payment',
     'confianza_plazo' => 'Made in :dias days',
-    'pasos_etiqueta' => 'How to play',
+    'pasos_etiqueta' => 'How to set up your brand in 3 steps',
     'pasos_titulo' => 'Your brand in 3 levels',
     'paso_1' => 'Upload your logo',
     'paso_1_texto' => 'See it on the garment instantly and we tell you whether it is good enough to print.',
