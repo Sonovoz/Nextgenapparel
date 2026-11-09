@@ -71,9 +71,11 @@ jobs:
       - name: Instalar dependencias
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      # En la 10.4 «explicit_defaults_for_timestamp» ya está apagado (como en XAMPP) y no se puede cambiar.
       - name: MariaDB como XAMPP
         run: |
-          mysql -h127.0.0.1 -uroot -proot -e "SET GLOBAL explicit_defaults_for_timestamp=0; SET GLOBAL sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';"
+          mysql -h127.0.0.1 -uroot -proot -e "SET GLOBAL sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';"
+          mysql -h127.0.0.1 -uroot -proot -e "SELECT @@sql_mode, @@explicit_defaults_for_timestamp;"
 
       - name: Preparar entorno
         run: |
