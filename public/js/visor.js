@@ -564,7 +564,11 @@
             if (b.disabled) return;
             apagarMarcas();
             var ocupada = disenoValido(estado.disenos[z.id]);
-            if (!estado.anadiendo && !ocupada && hayDiseno() && estado.zonaId !== null) {
+            var deAhora = zonas.filter(function (o) { return o.id === estado.zonaId; })[0];
+            // Solo se mueve a una zona que se pisa con la del diseño activo (pecho ↔ frontal: «más grande o más
+            // pequeño»). Una zona independiente (la espalda) es un diseño nuevo ahí: nunca se lleva el de delante.
+            var mover = !estado.anadiendo && !ocupada && hayDiseno() && !!deAhora && solapan(z, deAhora);
+            if (mover) {
                 // Mover el diseño actual a esta zona.
                 estado.disenos[z.id] = estado.disenos[estado.zonaId];
                 delete estado.disenos[estado.zonaId];
@@ -579,8 +583,9 @@
             sincronizar();
             if (z.cara !== estado.cara) { estado.cara = z.cara; estampar = true; pintar('giro'); }
             else { estampar = true; pintar(); }
-            if (!hayDiseno()) elegirHerramienta('diseno');
             refrescarColeccion();
+            // Zona vacía: en el mismo clic, el selector de archivos (el cliente elige dónde y sube).
+            if (!hayDiseno()) { elegirHerramienta('diseno'); entrada.click(); }
         });
         grupoZonas.appendChild(b);
     });
@@ -686,9 +691,7 @@
                 mas.setAttribute('aria-label', texto('anadir_en', { zona: z.nombre }));
                 mas.addEventListener('click', function () {
                     var boton = grupoZonas.querySelector('[data-zona="' + z.id + '"]');
-                    estado.anadiendo = true;
-                    if (boton) boton.click();
-                    entrada.click();
+                    if (boton) boton.click(); // elige la zona y abre el selector de archivos
                 });
                 otras.appendChild(mas);
             });
