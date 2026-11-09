@@ -76,6 +76,8 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq mariadb-client
+          # El cliente nuevo exige SSL y la MariaDB 10.4 del servicio no lo tiene (solo en esta máquina de la CI).
+          printf '[client]\nskip-ssl\n' > ~/.my.cnf
 
       # En la 10.4 «explicit_defaults_for_timestamp» ya está apagado (como en XAMPP) y no se puede cambiar.
       - name: MariaDB como XAMPP
