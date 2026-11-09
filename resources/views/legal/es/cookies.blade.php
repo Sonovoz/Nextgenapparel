@@ -1,6 +1,6 @@
 # Política de cookies
 
-@include('legal._titular')
+@include('legal.es._titular')
 
 **Solo usamos cookies técnicas**, imprescindibles para que la web funcione. No usamos cookies de analítica, publicidad ni redes sociales, y por eso no te pedimos consentimiento.
 

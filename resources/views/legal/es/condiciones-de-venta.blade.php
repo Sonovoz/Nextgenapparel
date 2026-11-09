@@ -1,6 +1,6 @@
 # Condiciones de venta
 
-@include('legal._titular')
+@include('legal.es._titular')
 
 ## 1. Vendedor
 

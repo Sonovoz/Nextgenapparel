@@ -14,10 +14,10 @@ class LegalController
     public function ver(string $idioma, string $pagina, GenerarTextosLegales $generar): View
     {
         $pagina = PaginaLegal::from($pagina);
-        $texto = TextoLegal::actual($pagina);
+        $texto = TextoLegal::actual($pagina, $idioma);
         if ($texto === null) {
             $generar();
-            $texto = TextoLegal::actual($pagina);
+            $texto = TextoLegal::actual($pagina, $idioma);
         }
         abort_if($texto === null, 404);
 

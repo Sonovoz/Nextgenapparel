@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **V1 · Textos legales en inglés**: los cinco textos también en inglés, con sus versiones y revisión por idioma; cada pedido guarda la versión de las condiciones en su idioma. | `fase-v1-legal-en` | D188 |
 | 09/11 | **V1 · Presupuestos en PDF**: «Descargar presupuesto» en el carrito (PRE-0001, importes del motor, validez en *Ajustes → General*), página con su enlace y «Pasar al carrito» con el precio de hoy, y *Pedidos → Presupuestos*. Ya no queda ninguna sección pendiente en el menú. | `fase-v1-presupuestos` | D187 |
 | 09/11 | **10.1 Dos pasos del equipo y lista de puesta en marcha**: verificación en dos pasos obligatoria en el panel (app autenticadora y códigos de recuperación), «Mi perfil» y orden de emergencia para quitarla; lista de puesta en marcha en `DESPLIEGUE_OVH.md`. | `fase-10-dos-pasos` | D186 |
 | 09/11 | **9 Auditoría final**: corregidos el aviso de Redsys (CSRF), Redsys de pruebas en producción, devoluciones dudosas, devolución de incidencias fuera de la factura, CSV sin fórmulas y HSTS; lo que falta para salir en `docs/AUDITORIA_FINAL.md`. | `fase-9-auditoria` | D185 |

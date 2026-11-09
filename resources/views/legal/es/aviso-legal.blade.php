@@ -1,6 +1,6 @@
 # Aviso legal
 
-@include('legal._titular')
+@include('legal.es._titular')
 
 ## Titular de la web
 

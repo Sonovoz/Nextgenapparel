@@ -1,6 +1,6 @@
 # Política de privacidad
 
-@include('legal._titular')
+@include('legal.es._titular')
 
 ## 1. Responsable del tratamiento
 

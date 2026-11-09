@@ -61,12 +61,13 @@ class AjustesLegales extends Page implements HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn (): Builder => TextoLegal::query()->whereIn('id', TextoLegal::query()->selectRaw('max(id)')->groupBy('pagina')))
+            ->query(fn (): Builder => TextoLegal::query()->whereIn('id', TextoLegal::query()->selectRaw('max(id)')->groupBy('pagina', 'idioma'))->orderBy('pagina')->orderBy('idioma'))
             ->emptyStateHeading('Aún no hay textos')->emptyStateDescription('Pulsa «Regenerar textos».')
             ->paginated(false)
             ->columns([
                 TextColumn::make('pagina')->label('Texto')->formatStateUsing(fn (PaginaLegal $state) => $state->titulo('es'))
-                    ->url(fn (TextoLegal $r) => route('legal', ['idioma' => 'es', 'pagina' => $r->pagina->value]), shouldOpenInNewTab: true),
+                    ->description(fn (TextoLegal $r) => $r->idioma === 'es' ? 'Castellano' : 'Inglés')
+                    ->url(fn (TextoLegal $r) => route('legal', ['idioma' => $r->idioma, 'pagina' => $r->pagina->value]), shouldOpenInNewTab: true),
                 TextColumn::make('version')->label('Versión')->formatStateUsing(fn (int $state, TextoLegal $r) => 'v'.$state.' · '.$r->generado_en->timezone('Europe/Madrid')->format('d/m/Y')),
                 TextColumn::make('pendientes')->label('Falta')->badge()->color('warning')->placeholder('Nada')
                     ->state(fn (TextoLegal $r) => $r->pendientes ?? []),

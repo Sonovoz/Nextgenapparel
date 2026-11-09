@@ -124,7 +124,7 @@ final class CrearPedido
             'total' => $resultado->total(),
             'desglose' => $resultado->aArray(),
             'condiciones_aceptadas_en' => now(),
-            'condiciones_texto' => __('pedidos.condiciones_acepto', [], $idioma).(($condiciones = TextoLegal::actual(PaginaLegal::Condiciones)) ? ' · '.$condiciones->etiqueta() : ''),
+            'condiciones_texto' => __('pedidos.condiciones_acepto', [], $idioma).(($condiciones = TextoLegal::actual(PaginaLegal::Condiciones, $idioma)) ? ' · '.$condiciones->etiqueta() : ''),
             'ip' => $ip,
         ]);
 
