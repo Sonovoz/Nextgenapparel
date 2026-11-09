@@ -27,7 +27,6 @@ return [
     'reenviar_enlace' => 'Send me another link',
     'correo_confirmado' => 'Thank you: your email is confirmed.',
     'enlace_enviado' => 'If the order is awaiting confirmation, we have just sent a new link to its email.',
-    'pago_pronto' => 'Card and Bizum payment will be available very soon. We will let you know by email.',
     'prendas' => 'Garments',
     'impresion' => 'Printing',
     'unidades' => '{1} :n garment|[2,*] :n garments',

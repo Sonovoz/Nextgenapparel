@@ -28,7 +28,6 @@ return [
     'reenviar_enlace' => 'Enviarme otro enlace',
     'correo_confirmado' => 'Gracias: tu correo está confirmado.',
     'enlace_enviado' => 'Si el pedido está pendiente de confirmar, acabamos de enviar un enlace nuevo a su correo.',
-    'pago_pronto' => 'El pago con tarjeta o Bizum estará disponible muy pronto. Te avisaremos por correo.',
     'prendas' => 'Prendas',
     'impresion' => 'Impresión',
     'unidades' => '{1} :n prenda|[2,*] :n prendas',

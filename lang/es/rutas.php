@@ -34,4 +34,6 @@ return [
     'repetir' => 'repetir',
     'incidencias' => 'incidencias',
     'fotos' => 'fotos',
+    'pagar' => 'pagar',
+    'pago' => 'pago',
 ];

@@ -17,10 +17,12 @@ use App\Http\Controllers\Cuenta\RegistroController;
 use App\Http\Controllers\Cuenta\VerificacionController;
 use App\Http\Controllers\DisenoController;
 use App\Http\Controllers\PackController;
+use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TiendaController;
 use App\Http\Middleware\EstablecerIdioma;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,6 +50,11 @@ Route::prefix('admin/archivos-pedidos/{pedido}')->group(function () {
     Route::get('/facturas/{factura:uuid}', [ArchivoPedidoController::class, 'factura'])->name('backend.pedidos.factura')->whereUuid('factura');
     Route::get('/incidencias/fotos/{foto}', [ArchivoPedidoController::class, 'fotoIncidencia'])->name('backend.pedidos.foto-incidencia')->whereNumber('foto');
 });
+
+// Pagos (fase 7): el aviso firmado de la pasarela (sin CSRF ni sesión) y la página del pago simulado.
+Route::post('/pagos/aviso', [PagoController::class, 'aviso'])->name('pagos.aviso')
+    ->withoutMiddleware([ValidateCsrfToken::class]);
+Route::get('/pagos/simulada', [PagoController::class, 'simulada'])->name('pagos.simulada');
 
 // Backend: documentos de producción (paso 6.5b), con la sección Producción.
 Route::prefix('admin/produccion')->group(function () {
@@ -137,6 +144,9 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
             // Visor del cliente (paso 6.6): cancelar (o pedir que se cancele) y repetir.
             Route::post('/{pedido}/'.$tramo('cancelar'), [PedidoController::class, 'cancelar'])->name('cancelar')->whereUuid('pedido')->middleware('throttle:carrito');
             Route::post('/{pedido}/'.$tramo('repetir'), [PedidoController::class, 'repetir'])->name('repetir')->whereUuid('pedido')->middleware('throttle:carrito');
+            // Pagar el pedido (fase 7): a la pasarela y vuelta.
+            Route::post('/{pedido}/'.$tramo('pagar'), [PagoController::class, 'pagar'])->name('pagar')->whereUuid('pedido')->middleware('throttle:carrito');
+            Route::get('/{pedido}/'.$tramo('pago'), [PagoController::class, 'vuelta'])->name('pago-vuelta')->whereUuid('pedido');
             // Incidencias con fotos (paso 6.6b).
             Route::post('/{pedido}/'.$tramo('incidencias'), [PedidoController::class, 'abrirIncidencia'])->name('incidencia')->whereUuid('pedido')->middleware('throttle:carrito');
             Route::get('/{pedido}/'.$tramo('incidencias').'/'.$tramo('fotos').'/{foto}', [PedidoController::class, 'fotoIncidencia'])->name('foto-incidencia')->whereUuid('pedido')->whereNumber('foto');

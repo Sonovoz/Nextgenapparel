@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **7.1 Pagos con Redsys**: «Pagar ahora» en el pedido (tarjeta o Bizum en la página del banco), aviso y vuelta firmados, cobros que no cuadran anotados, pago simulado para pruebas y *Ajustes → Pagos*. | `fase-7-pagos` | D181 |
 | 09/11 | **6.7 Cierre de la fase 6**: revisión del instructor y sus correcciones: nunca dos facturas por pedido ni factura de un pedido cancelado (también garantizado en la base de datos), cadena de huellas sin bifurcaciones, motivo de la rectificativa sin notas internas, caducidad segura frente a pagos, Producción solo con pedidos en producción y fichas desactivadas sin acceso. | `fase-6-cierre` | D179 |
 | 09/11 | **6.6b Incidencias con fotos**: el cliente la abre desde su pedido entregado (fotos sin metadatos) y el equipo la resuelve en *Pedidos → Incidencias* con reimpresión, reembolso parcial (rectificativa parcial al momento) o rechazo, con respuesta por correo. Plazo en *Ajustes → General*. | `fase-6-incidencias` | D178 |
 | 09/11 | **6.6a Visor del cliente**: línea de progreso con fechas, «Mis pedidos» en la cuenta, repetir pedido (al carrito con el precio de hoy) y cancelar (al momento sin pagar; si está pagado, petición al equipo con aviso y filtro en *Pedidos*). | `fase-6-visor-cliente` | D177 |
