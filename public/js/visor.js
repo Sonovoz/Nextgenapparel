@@ -584,6 +584,7 @@
         });
         grupoZonas.appendChild(b);
     });
+    marcarZona(); // las tarjetas con su dibujo y precio desde el principio, antes de subir nada
 
     /** Con un diseño puesto, las marcas de zona estorban: se apagan solas. */
     function apagarMarcas() { estado.zonas = false; }
@@ -675,17 +676,23 @@
         var botones = el('div', 'decision-botones');
         if (libres.length) {
             caja.appendChild(el('p', 'decision-pregunta', textos.decision_pregunta));
-            var mas = el('button', 'boton-pildora borde anadir', textos.anadir_diseno);
-            mas.type = 'button';
-            mas.dataset.foco = 'anadir';
-            mas.addEventListener('click', function () {
-                // La siguiente zona libre (la gira si está detrás) y, en el mismo clic, el selector de archivos.
-                var boton = grupoZonas.querySelector('[data-zona="' + libres[0].id + '"]');
-                estado.anadiendo = true;
-                if (boton) boton.click();
-                entrada.click();
+            // Un botón por zona libre: «+ Espalda · +4,24 €». En el mismo clic, la zona (girando la prenda si va
+            // detrás) y el selector de archivos: el cliente elige dónde va sin buscarlo.
+            var otras = el('div', 'decision-zonas');
+            libres.forEach(function (z) {
+                var mas = el('button', 'boton-pildora borde anadir', '+ ' + z.nombre + (z.precio ? ' · +' + z.precio : ''));
+                mas.type = 'button';
+                mas.dataset.foco = 'anadir-' + z.id;
+                mas.setAttribute('aria-label', texto('anadir_en', { zona: z.nombre }));
+                mas.addEventListener('click', function () {
+                    var boton = grupoZonas.querySelector('[data-zona="' + z.id + '"]');
+                    estado.anadiendo = true;
+                    if (boton) boton.click();
+                    entrada.click();
+                });
+                otras.appendChild(mas);
             });
-            botones.appendChild(mas);
+            caja.appendChild(otras);
         }
         if (estado.errorSubida) {
             var error = el('p', 'error-subida', estado.errorSubida);
@@ -896,7 +903,7 @@
         if (estado.zonaId !== null) delete estado.ajustes[estado.zonaId];
         estado.version++;
         if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
-        elegirHerramienta('ajustar'); // el logo ya está colocado: se puede retocar
+        elegirHerramienta('diseno'); // colocado: en el mismo paso se ve dónde va y se puede cambiar
         sincronizar();
     }
 

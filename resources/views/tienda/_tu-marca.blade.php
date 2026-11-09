@@ -15,10 +15,9 @@
 
     <div class="nivel" id="nivel-diseno">
     <p class="claro nivel-ayuda">{{ __('tienda.ayuda_diseno') }}</p>
-    {{-- Herramientas del paso 1: el diseño se coloca solo; Zona y Ajustar son retoques opcionales. --}}
+    {{-- Herramientas del paso 1: Diseño (subir y dónde va) y Ajustar (tamaño y posición, opcional). --}}
     <div class="herramientas" role="tablist" aria-label="{{ __('tienda.estudio') }}">
         <button type="button" role="tab" class="herramienta" id="h-diseno" aria-selected="true" aria-controls="hp-diseno" data-herramienta="diseno">{{ __('tienda.herramienta_diseno') }}</button>
-        <button type="button" role="tab" class="herramienta" id="h-zona" aria-selected="false" aria-controls="hp-zona" data-herramienta="zona" tabindex="-1">{{ __('tienda.herramienta_zona') }}</button>
         <button type="button" role="tab" class="herramienta" id="h-ajustar" aria-selected="false" aria-controls="hp-ajustar" data-herramienta="ajustar" tabindex="-1">{{ __('tienda.herramienta_ajustar') }}</button>
         <button type="button" role="tab" class="herramienta" id="h-prenda" aria-selected="false" aria-controls="hp-prenda" data-herramienta="prenda" tabindex="-1">{{ __('tienda.herramienta_prenda') }}</button>
     </div>
@@ -82,14 +81,12 @@
         </div>
     </div>
 
-    </div>
-
-    <div id="hp-zona" role="tabpanel" aria-labelledby="h-zona" class="herramienta-panel" hidden>
+    {{-- ¿Dónde lo ponemos? (Frontal, Pecho, Espalda…) en el mismo paso, con su dibujo y su precio (D198). --}}
+    <div class="grupo donde">
+        <span class="donde-titulo">{{ __('tienda.donde') }}</span>
         <p class="aviso-zona" id="aviso-zona" aria-live="polite"></p>
-        <div class="grupo">
-            <span>{{ __('tienda.donde') }}</span>
-            <div class="opciones" id="zonas-diseno" role="radiogroup" aria-label="{{ __('tienda.donde') }}"></div>
-        </div>
+        <div class="opciones" id="zonas-diseno" role="radiogroup" aria-label="{{ __('tienda.donde') }}"></div>
+    </div>
     </div>
 
     <div id="hp-ajustar" role="tabpanel" aria-labelledby="h-ajustar" class="herramienta-panel" hidden>

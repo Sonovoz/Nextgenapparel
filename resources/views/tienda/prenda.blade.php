@@ -21,7 +21,7 @@
         'medida_impresion' => __('tienda.medida_impresion'),
         'calidad_sin_diseno' => __('tienda.calidad_sin_diseno'),
         'tus_disenos' => __('tienda.tus_disenos'),
-        'anadir_diseno' => __('tienda.anadir_diseno'),
+        'anadir_en' => __('tienda.anadir_en'),
         'elige_zona_nuevo' => __('tienda.elige_zona_nuevo'),
         'solapa' => __('tienda.solapa'),
         'listo_varios' => __('tienda.listo_varios'),
