@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Pedidos;
 use App\Dominio\Clientes\Paises;
 use App\Dominio\Pedidos\CambiarEstado;
 use App\Dominio\Pedidos\CambioNoValido;
+use App\Dominio\Pedidos\CancelarPorCliente;
 use App\Dominio\Pedidos\EstadoPedido;
 use App\Dominio\Precios\Formato;
 use App\Filament\Navegacion\GrupoNavegacion;
@@ -26,6 +27,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -61,14 +63,22 @@ class PedidoResource extends Resource
     /** Pedidos que esperan al equipo: pagados o con el diseño por revisar. */
     public static function getNavigationBadge(): ?string
     {
-        $n = rescue(fn () => Pedido::whereIn('estado', [EstadoPedido::Pagado->value, EstadoPedido::DisenoEnRevision->value])->count(), 0, report: false);
+        $n = rescue(fn () => Pedido::whereIn('estado', [EstadoPedido::Pagado->value, EstadoPedido::DisenoEnRevision->value])
+            ->orWhere(fn (Builder $q) => self::conCancelacionPendiente($q))->count(), 0, report: false);
 
         return $n > 0 ? (string) $n : null;
     }
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Pagados o con el diseño por revisar';
+        return 'Pagados, con el diseño por revisar o con una petición de cancelación';
+    }
+
+    /** Peticiones de cancelación del cliente que el equipo aún no ha resuelto (D177). */
+    public static function conCancelacionPendiente(Builder $query): Builder
+    {
+        return $query->whereNotNull('cancelacion_solicitada_en')
+            ->whereIn('estado', array_map(fn (EstadoPedido $e) => $e->value, CancelarPorCliente::CON_PETICION));
     }
 
     public static function table(Table $table): Table
@@ -92,7 +102,8 @@ class PedidoResource extends Resource
                     ->state(fn (Pedido $r) => trim(($r->direccion_envio['localidad'] ?? '').' · '.($r->direccion_envio['pais'] ?? ''), ' ·')),
                 TextColumn::make('total')->label('Total')->alignEnd()->sortable()->formatStateUsing(fn (int $state) => Formato::euros($state, 'es')),
                 TextColumn::make('estado')->label('Estado')->badge()
-                    ->formatStateUsing(fn (EstadoPedido $state) => $state->etiqueta())->color(fn (EstadoPedido $state) => $state->color()),
+                    ->formatStateUsing(fn (EstadoPedido $state) => $state->etiqueta())->color(fn (EstadoPedido $state) => $state->color())
+                    ->description(fn (Pedido $r) => $r->cancelacion_solicitada_en !== null && in_array($r->estado, CancelarPorCliente::CON_PETICION, true) ? 'Pide cancelar' : null),
                 TextColumn::make('fecha_estimada_entrega')->label('Entrega estimada')->date('d/m/Y')->sortable()->placeholder('—'),
                 IconColumn::make('maquetas')->label('Maquetas')->boolean()->toggleable(isToggledHiddenByDefault: true)
                     ->state(fn (Pedido $r) => $r->lineas()->whereHas('maquetas')->exists()),
@@ -101,6 +112,7 @@ class PedidoResource extends Resource
                 SelectFilter::make('estado')->label('Estado')->multiple()
                     ->options(collect(EstadoPedido::cases())->mapWithKeys(fn (EstadoPedido $e) => [$e->value => $e->etiqueta()])->all()),
                 TernaryFilter::make('correo_confirmado_en')->label('Correo confirmado')->nullable(),
+                Filter::make('cancelacion')->label('Piden cancelar')->query(fn (Builder $query) => self::conCancelacionPendiente($query)),
             ])
             ->recordActions([ViewAction::make()->label('Ver')])
             ->toolbarActions([
@@ -143,6 +155,9 @@ class PedidoResource extends Resource
                 TextEntry::make('estado')->label('Estado')->badge()
                     ->formatStateUsing(fn (EstadoPedido $state) => $state->etiqueta())->color(fn (EstadoPedido $state) => $state->color())
                     ->helperText(fn (Pedido $r) => 'El cliente ve: «'.$r->estado->visible($r->idioma).'»'),
+                TextEntry::make('cancelacion_solicitada_en')->label('El cliente pide cancelar')->dateTime('d/m/Y H:i')->color('danger')->weight('bold')
+                    ->visible(fn (Pedido $r) => $r->cancelacion_solicitada_en !== null && in_array($r->estado, CancelarPorCliente::CON_PETICION, true))
+                    ->helperText(fn (Pedido $r) => ($r->motivo_cancelacion ? 'Motivo: '.$r->motivo_cancelacion.'. ' : '').'Cancélalo con «Cambiar estado» (se emite la rectificativa) y devuelve el dinero en el TPV hasta que llegue Redsys.'),
                 TextEntry::make('created_at')->label('Creado')->dateTime('d/m/Y H:i'),
                 TextEntry::make('correo_confirmado_en')->label('Correo confirmado')->dateTime('d/m/Y H:i')->placeholder('Pendiente: el pedido no se puede dar por pagado'),
                 TextEntry::make('fecha_estimada_entrega')->label('Entrega estimada')->date('d/m/Y')->placeholder('—'),

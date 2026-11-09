@@ -9,7 +9,20 @@
     @endunless
 
     <h2 class="subtitulo-cuenta">{{ __('cuenta.mis_pedidos') }}</h2>
-    <p class="claro">{{ __('cuenta.sin_pedidos') }}</p>
+    @if ($pedidos->isEmpty())
+        <p class="claro">{{ __('cuenta.sin_pedidos') }}</p>
+    @else
+        <ul class="mis-pedidos">
+            @foreach ($pedidos as $pedido)
+                <li><a href="{{ \App\Http\Controllers\PedidoController::url('ver', $pedido) }}">
+                    <strong>{{ $pedido->numero }}</strong>
+                    <span class="importe">{{ \App\Dominio\Precios\Formato::euros($pedido->total) }}</span>
+                    <small>{{ $pedido->created_at->locale(app()->getLocale())->isoFormat('LL') }}</small>
+                    <small class="importe">{{ $pedido->estado->visible() }}</small>
+                </a></li>
+            @endforeach
+        </ul>
+    @endif
 
     <h2 class="subtitulo-cuenta">{{ __('cuenta.mis_disenos') }}</h2>
     @if ($disenos->isEmpty())

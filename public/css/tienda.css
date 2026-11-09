@@ -1010,3 +1010,36 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .pedido-novedades h2 { margin: 0 0 10px; font-size: 16px; font-family: var(--sans); text-transform: none; letter-spacing: 0; }
 .pedido-novedades ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
 .pedido-novedades time { display: block; font-size: 12px; color: var(--tinta-suave); }
+
+/* Visor del cliente (paso 6.6): línea de progreso, repetir y cancelar */
+.pedido-progreso ol { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0; margin: 20px 0 0; padding: 0; counter-reset: hito; }
+.pedido-progreso li { position: relative; padding: 26px 8px 0 0; font-size: 14px; color: var(--tinta-suave); }
+.pedido-progreso li::before { content: ""; position: absolute; top: 6px; left: 0; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--linea-fuerte); background: var(--fondo); z-index: 1; }
+.pedido-progreso li::after { content: ""; position: absolute; top: 12px; left: 12px; right: 0; height: 2px; background: var(--linea-fuerte); }
+.pedido-progreso li:last-child::after { display: none; }
+.pedido-progreso li.hecho { color: var(--tinta); }
+.pedido-progreso li.hecho::before { border-color: var(--azul); background: var(--azul); }
+.pedido-progreso li.hecho::after { background: var(--azul); }
+.pedido-progreso li.cancelado::before { border-color: #F0624D; background: #F0624D; }
+.pedido-progreso li[aria-current="step"] span { font-weight: 600; }
+.pedido-progreso time { display: block; font-size: 12px; color: var(--tinta-suave); }
+@media (max-width: 599px) {
+    .pedido-progreso ol { grid-template-columns: 1fr; }
+    .pedido-progreso li { padding: 0 0 16px 26px; }
+    .pedido-progreso li::before { top: 4px; }
+    .pedido-progreso li::after { top: 16px; bottom: 0; left: 5px; right: auto; width: 2px; height: auto; }
+}
+.pedido-acciones { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--linea); display: grid; gap: 14px; }
+.pedido-acciones h2 { margin: 0; font-size: 16px; font-family: var(--sans); text-transform: none; letter-spacing: 0; }
+.pedido-acciones .boton { width: 100%; min-height: 46px; font-size: 12px; }
+.pedido-acciones p { margin: 6px 0 0; font-size: 13px; }
+.pedido-cancelar summary { cursor: pointer; color: var(--tinta-suave); font-size: 14px; text-decoration: underline; min-height: 44px; display: flex; align-items: center; }
+.pedido-cancelar form { display: grid; gap: 8px; }
+.pedido-cancelar label { font-size: 13px; color: var(--tinta-suave); }
+.pedido-cancelar textarea { padding: 10px 12px; border-radius: 12px; border: 1px solid var(--linea-fuerte); background: var(--fondo); color: var(--tinta); font: inherit; font-size: 16px; resize: vertical; }
+.pedido-cancelar textarea:focus { border-color: var(--neon); outline: 2px solid var(--azul); outline-offset: 1px; }
+.mis-pedidos { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; }
+.mis-pedidos a { display: grid; grid-template-columns: 1fr auto; gap: 2px 16px; padding: 14px 16px; border: 1px solid var(--linea); border-radius: 14px; background: var(--papel); color: var(--tinta); text-decoration: none; }
+.mis-pedidos a:hover, .mis-pedidos a:focus-visible { border-color: var(--neon); }
+.mis-pedidos small { color: var(--tinta-suave); font-size: 13px; }
+.mis-pedidos .importe { text-align: right; font-weight: 600; }

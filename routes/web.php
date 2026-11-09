@@ -133,6 +133,9 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
             Route::get('/{pedido}/'.$tramo('acceso'), [PedidoController::class, 'acceso'])->name('acceso')->whereUuid('pedido')->middleware('throttle:cuenta-verificar');
             Route::get('/{pedido}/'.$tramo('facturas').'/{factura:uuid}', [PedidoController::class, 'factura'])->name('factura')->whereUuid('pedido')->whereUuid('factura');
             Route::get('/{pedido}/'.$tramo('maquetas').'/{maqueta}', [PedidoController::class, 'maqueta'])->name('maqueta')->whereUuid('pedido')->whereNumber('maqueta');
+            // Visor del cliente (paso 6.6): cancelar (o pedir que se cancele) y repetir.
+            Route::post('/{pedido}/'.$tramo('cancelar'), [PedidoController::class, 'cancelar'])->name('cancelar')->whereUuid('pedido')->middleware('throttle:carrito');
+            Route::post('/{pedido}/'.$tramo('repetir'), [PedidoController::class, 'repetir'])->name('repetir')->whereUuid('pedido')->middleware('throttle:carrito');
         });
 
     // El idioma va en la ruta (para EstablecerIdioma y las URL), no en un parámetro de la URL.

@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Dominio\Carrito\CarritoActual;
+use App\Dominio\Disenos\Dueno;
 use App\Dominio\Facturacion\PdfFactura;
+use App\Dominio\Pedidos\CambioNoValido;
+use App\Dominio\Pedidos\CancelarPorCliente;
 use App\Dominio\Pedidos\ConfirmarCorreoPedido;
 use App\Dominio\Pedidos\CorreoPedido;
 use App\Dominio\Pedidos\CrearPedido;
 use App\Dominio\Pedidos\PedidoNoCreado;
+use App\Dominio\Pedidos\RepetirPedido;
 use App\Models\Ajuste;
 use App\Models\Factura;
 use App\Models\MaquetaPedido;
@@ -72,9 +76,40 @@ class PedidoController
     public function ver(Request $request, Pedido $pedido): View
     {
         abort_unless($this->puedeVer($request, $pedido), 404);
-        $pedido->load('lineas.impresiones', 'lineas.maquetas', 'facturas');
+        $pedido->load('lineas.impresiones', 'lineas.maquetas', 'facturas', 'historial');
 
-        return view('pedidos.ver', ['pedido' => $pedido, 'alternos' => $this->alternos('ver', $pedido)]);
+        return view('pedidos.ver', ['pedido' => $pedido, 'alternos' => $this->alternos('ver', $pedido), 'puedeCancelar' => CancelarPorCliente::puede($pedido)]);
+    }
+
+    /** Cancelar desde el visor (paso 6.6, D177): al momento si no está pagado; si lo está, la petición al equipo. */
+    public function cancelar(Request $request, Pedido $pedido, CancelarPorCliente $cancelar): RedirectResponse
+    {
+        abort_unless($this->puedeVer($request, $pedido), 404);
+        $datos = $request->validate(['motivo' => ['nullable', 'string', 'max:500']]);
+        try {
+            $resultado = $cancelar($pedido, $datos['motivo'] ?? null);
+        } catch (CambioNoValido) {
+            return redirect(self::url('ver', $pedido))->with('estado_pedido', __('pedidos.cancelar_no_puede'));
+        }
+
+        return redirect(self::url('ver', $pedido))->with('estado_pedido', __('pedidos.cancelar_'.$resultado));
+    }
+
+    /** «Repetir pedido» (paso 6.6): las mismas líneas al carrito de quien lo pide, con el precio de hoy. */
+    public function repetir(Request $request, Pedido $pedido, RepetirPedido $repetir): RedirectResponse
+    {
+        abort_unless($this->puedeVer($request, $pedido), 404);
+        $carrito = CarritoActual::de($request, crear: true);
+        $dueno = Dueno::de($request);
+        abort_if($carrito === null || $dueno === null, 404);
+        $resultado = $repetir($pedido, $carrito, $dueno);
+
+        $mensaje = $resultado['anadidas'] > 0 ? trans_choice('pedidos.repetir_anadidas', $resultado['anadidas'], ['n' => $resultado['anadidas']]) : __('pedidos.repetir_ninguna');
+        if ($resultado['omitidas'] !== []) {
+            $mensaje .= ' '.__('pedidos.repetir_omitidas', ['lineas' => implode(', ', $resultado['omitidas'])]);
+        }
+
+        return redirect(CarritoController::url('ver'))->with('estado', $mensaje);
     }
 
     /** La maqueta de una cara (paso 6.2): del disco privado, solo para quien puede ver el pedido. */

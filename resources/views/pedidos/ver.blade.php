@@ -5,6 +5,15 @@
     $cm = fn (int $mm) => rtrim(rtrim(number_format($mm / 10, 1, app()->getLocale() === 'en' ? '.' : ',', ''), '0'), ',.');
     $envio = $pedido->direccion_envio;
     $recargo = array_sum(array_column($pedido->desglose['pasos'][5]['detalle'] ?? [], 'cuota_recargo'));
+    use App\Dominio\Pedidos\EstadoPedido as E;
+    // Línea de progreso (6.6): cada hito con la fecha en que se alcanzó, según el historial.
+    $alcanzado = fn (E $e) => $pedido->historial->first(fn ($h) => $h->estado === $e)?->created_at;
+    $cancelado = in_array($pedido->estado, [E::Cancelado, E::Reembolsado], true);
+    $hitos = [['pedido', $pedido->created_at], ['pagado', $alcanzado(E::Pagado)]];
+    $hitos = $cancelado
+        ? [...$hitos, ['cancelado', $alcanzado($pedido->estado) ?? $pedido->updated_at]]
+        : [...$hitos, ['produccion', $alcanzado(E::EnProduccion)], ['enviado', $alcanzado(E::Enviado)], ['entregado', $alcanzado(E::Entregado)]];
+    $fecha = fn ($f) => $f?->locale(app()->getLocale())->isoFormat('D MMM');
 @endphp
 <x-tienda :titulo="__('pedidos.titulo', ['numero' => $pedido->numero]).' · Nextgenapparel'" :descripcion="__('pedidos.recibido')" :alternos="$alternos" :seo="['noindex' => true]">
     <section class="carrito-pagina" aria-labelledby="titulo-pedido">
@@ -24,7 +33,24 @@
                     <form method="POST" action="{{ PedidoController::url('reenviar', $pedido) }}">@csrf <button type="submit" class="boton-texto">{{ __('pedidos.reenviar_enlace') }}</button></form>
                 </div>
             @endunless
-            <p class="aviso-cuenta verificar">{{ __('pedidos.pago_pronto') }}</p>
+            @if ($pedido->estado === E::PendientePago)
+                <p class="aviso-cuenta verificar">{{ __('pedidos.pago_pronto') }}</p>
+            @endif
+            @if ($pedido->cancelacion_solicitada_en && ! $cancelado)
+                <p class="aviso-cuenta verificar" role="status">{{ __('pedidos.cancelacion_pedida', ['fecha' => $pedido->cancelacion_solicitada_en->locale(app()->getLocale())->isoFormat('LL')]) }}</p>
+            @endif
+
+            <section class="pedido-progreso" aria-labelledby="titulo-progreso">
+                <h2 id="titulo-progreso" class="oculto">{{ __('pedidos.progreso') }}</h2>
+                <ol>
+                    @foreach ($hitos as [$clave, $cuando])
+                        <li @class(['hecho' => $cuando !== null, 'cancelado' => $clave === 'cancelado']) @if ($cuando !== null && $loop->last || ($cuando !== null && ($hitos[$loop->index + 1][1] ?? null) === null)) aria-current="step" @endif>
+                            <span>{{ __('pedidos.paso_'.$clave) }}</span>
+                            @if ($cuando)<time datetime="{{ $cuando->toIso8601String() }}">{{ $fecha($cuando) }}</time>@endif
+                        </li>
+                    @endforeach
+                </ol>
+            </section>
             @if ($pedido->facturas->isNotEmpty())
                 <section class="pedido-novedades" aria-labelledby="titulo-facturas">
                     <h2 id="titulo-facturas">{{ __('facturas.facturas') }}</h2>
@@ -107,6 +133,26 @@
                         @if ($recargo > 0)<div><dt>{{ __('carrito.recargo') }}</dt><dd>{{ Formato::euros($recargo) }}</dd></div>@endif
                     </dl>
                     <p class="cuenta-total"><span>{{ __('carrito.total') }}</span><strong>{{ Formato::euros($pedido->total) }}</strong></p>
+
+                    <div class="pedido-acciones">
+                        <h2>{{ __('pedidos.acciones') }}</h2>
+                        <form method="POST" action="{{ PedidoController::url('repetir', $pedido) }}">@csrf
+                            <button type="submit" class="boton">{{ __('pedidos.repetir') }}</button>
+                            <p class="claro">{{ __('pedidos.repetir_nota') }}</p>
+                        </form>
+                        @if ($puedeCancelar)
+                            @php $sinPagar = $pedido->estado === E::PendientePago; @endphp
+                            <details class="pedido-cancelar">
+                                <summary>{{ __($sinPagar ? 'pedidos.cancelar' : 'pedidos.cancelar_pedir') }}</summary>
+                                <form method="POST" action="{{ PedidoController::url('cancelar', $pedido) }}" onsubmit="return confirm(@js(__('pedidos.cancelar_confirmar')))">@csrf
+                                    <p class="claro">{{ __($sinPagar ? 'pedidos.cancelar_nota_sin_pagar' : 'pedidos.cancelar_nota_pagado') }}</p>
+                                    <label for="motivo-cancelar">{{ __('pedidos.cancelar_motivo') }}</label>
+                                    <textarea id="motivo-cancelar" name="motivo" rows="3" maxlength="500"></textarea>
+                                    <button type="submit" class="boton-texto">{{ __($sinPagar ? 'pedidos.cancelar' : 'pedidos.cancelar_pedir') }}</button>
+                                </form>
+                            </details>
+                        @endif
+                    </div>
                 </aside>
             </div>
         </div>

@@ -30,4 +30,6 @@ return [
     'maquetas' => 'maquetas',
     'acceso' => 'acceso',
     'facturas' => 'facturas',
+    'cancelar' => 'cancelar',
+    'repetir' => 'repetir',
 ];
