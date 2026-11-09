@@ -31,4 +31,5 @@ return [
     'sin_envio' => 'We do not ship to that destination yet.',
     'envio_gratis' => 'Your shipping is free.',
     'envio_gratis_cerca' => 'Add :faltan (excl. VAT) for free shipping.',
+    'tarifa_grupo_aplicada' => 'We applied your «:grupo» rate: you save :ahorro.',
 ];

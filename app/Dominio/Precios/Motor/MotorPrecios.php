@@ -14,6 +14,7 @@ use App\Dominio\Precios\TipoRegla;
 use App\Models\Ajuste;
 use App\Models\Caja;
 use App\Models\Cupon;
+use App\Models\GrupoCliente;
 use App\Models\Pack;
 use App\Models\Prenda;
 use App\Models\ReglaMinimo;
@@ -253,6 +254,21 @@ final class MotorPrecios
             $importe = array_sum($reparto);
             if ($importe > 0 && ($mejor === null || $importe > $mejor['importe'])) {
                 $mejor = ['regla' => $regla, 'importe' => $importe, 'reparto' => $reparto];
+            }
+        }
+
+        // Tarifa de su grupo (D192): compite con las ofertas y se aplica la que más ahorra (no se suman).
+        $grupo = $cesta->grupoId === null ? null : GrupoCliente::where('activo', true)->find($cesta->grupoId);
+        if ($grupo !== null && $grupo->descuento > 0) {
+            $reparto = self::descontar(Efecto::Porcentaje, $grupo->descuento, array_map(fn (LineaCalculada $l) => $l->bruto(), $sueltas));
+            $importe = array_sum($reparto);
+            if ($importe > 0 && ($mejor === null || $importe > $mejor['importe'])) {
+                foreach ($reparto as $indice => $descuento) {
+                    $sueltas[$indice]->descuento = $descuento;
+                }
+                $this->avisos[] = new Mensaje('tarifa_grupo_aplicada', ['grupo' => ['modelo' => 'grupo', 'id' => $grupo->id], 'ahorro' => ['euros' => $importe]]);
+
+                return ['id' => null, 'grupo' => $grupo->id, 'nombre' => $grupo->nombre, 'importe' => $importe];
             }
         }
 

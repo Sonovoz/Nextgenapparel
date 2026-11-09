@@ -9,6 +9,7 @@ use App\Filament\Navegacion\GrupoNavegacion;
 use App\Filament\Resources\Clientes\Pages\EditCliente;
 use App\Filament\Resources\Clientes\Pages\ListClientes;
 use App\Models\Cliente;
+use App\Models\GrupoCliente;
 use BackedEnum;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Placeholder;
@@ -84,6 +85,9 @@ class ClienteResource extends Resource
                     ->rule(fn () => fn ($a, $v, $fallo) => blank($v) || Nif::valido($v) ? null : $fallo('El NIF, NIE o CIF no es válido.')),
                 TextInput::make('telefono')->label('Teléfono')->tel()->maxLength(30)->regex(ReglasDireccion::TELEFONO),
                 Select::make('idioma')->label('Idioma')->options(config('idiomas.disponibles'))->required()->native(false),
+                Select::make('grupo_cliente_id')->label('Grupo (tarifa)')->native(false)->placeholder('Sin grupo')
+                    ->options(fn () => GrupoCliente::where('activo', true)->get()->mapWithKeys(fn (GrupoCliente $g) => [$g->id => $g->getTranslation('nombre', 'es').' · −'.rtrim(rtrim(number_format($g->descuento / 100, 2, ',', ''), '0'), ',').' %'])->all())
+                    ->helperText('Su descuento compite con las ofertas: se aplica el que más ahorra.'),
                 Toggle::make('recargo_equivalencia')->label('Recargo de equivalencia')->columnSpanFull()
                     ->helperText('Solo autónomos y empresas del comercio minorista. Cambia los impuestos de sus facturas.')
                     ->visible(fn (Get $get) => TipoCliente::tryFrom((string) ($get('tipo') instanceof TipoCliente ? $get('tipo')->value : $get('tipo')))?->admiteRecargo() ?? false),

@@ -4,6 +4,7 @@ namespace App\Dominio\Precios\Motor;
 
 use App\Dominio\Precios\Formato;
 use App\Models\Familia;
+use App\Models\GrupoCliente;
 use App\Models\Pack;
 use App\Models\Prenda;
 use App\Models\ReglaPrecio;
@@ -23,7 +24,7 @@ use App\Models\ReglaPrecio;
  */
 final class Mensaje
 {
-    private const MODELOS = ['familia' => Familia::class, 'prenda' => Prenda::class, 'pack' => Pack::class, 'regla' => ReglaPrecio::class];
+    private const MODELOS = ['familia' => Familia::class, 'prenda' => Prenda::class, 'pack' => Pack::class, 'regla' => ReglaPrecio::class, 'grupo' => GrupoCliente::class];
 
     /** @param  array<string, mixed>  $datos */
     public function __construct(

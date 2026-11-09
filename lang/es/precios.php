@@ -32,4 +32,5 @@ return [
     'sin_envio' => 'Todavía no enviamos a ese destino.',
     'envio_gratis' => 'Tu envío es gratis.',
     'envio_gratis_cerca' => 'Te faltan :faltan (sin IVA) para el envío gratis.',
+    'tarifa_grupo_aplicada' => 'Aplicamos tu tarifa «:grupo»: ahorras :ahorro.',
 ];
