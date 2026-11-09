@@ -653,6 +653,8 @@
      * - abajo, fija y fina: qué diseños llevas, el error si lo hay y «Siguiente».
      * La lista de diseños no se repite: las tarjetas de zona ya dicen cuál tiene diseño.
      */
+    var disenosVistos = 0;
+    var invitaHasta = 0;
     function pintarCapas() {
         var caja = document.getElementById('capas');
         var pie = document.getElementById('capas-pie');
@@ -687,9 +689,8 @@
             caja.appendChild(otras);
         }
 
-        pie.appendChild(el('p', 'capas-titulo', usadas.length === 1
-            ? texto('decision_uno', { zona: conDisenos[0].nombre })
-            : texto('decision_varios', { n: usadas.length }) + ': ' + conDisenos.map(function (z) { return z.nombre; }).join(' · ')));
+        // Abajo solo el botón; la caja aparece solo si hay algo que resolver (un error).
+        pie.classList.toggle('con-aviso', !!estado.errorSubida);
         if (estado.errorSubida) {
             var error = el('p', 'error-subida', estado.errorSubida);
             error.setAttribute('role', 'alert');
@@ -704,6 +705,14 @@
         seguir.setAttribute('aria-disabled', String(estado.subiendo));
         pie.setAttribute('aria-busy', String(estado.subiendo));
         seguir.addEventListener('click', function () { if (falta) irADerechos(); else irANivel('cantidades'); });
+        seguir.setAttribute('aria-label', (falta ? textos.falta_derechos : textos.siguiente_cantidades) + '. ' + (usadas.length === 1
+            ? texto('decision_uno', { zona: conDisenos[0].nombre })
+            : texto('decision_varios', { n: usadas.length }) + ': ' + conDisenos.map(function (z) { return z.nombre; }).join(', ')));
+        // Un diseño nuevo colocado: el botón se ilumina para invitar a seguir con tallas y colores.
+        // (dura unos segundos aunque el panel se repinte entretanto).
+        if (usadas.length > disenosVistos) invitaHasta = Date.now() + 3300;
+        disenosVistos = usadas.length;
+        if (!falta && Date.now() < invitaHasta) seguir.classList.add('invita');
         pie.appendChild(seguir);
         var volver = foco && (caja.querySelector('[data-foco="' + foco + '"]') || pie.querySelector('[data-foco="' + foco + '"]'));
         if (volver) volver.focus();
