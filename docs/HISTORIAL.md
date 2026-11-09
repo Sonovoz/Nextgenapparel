@@ -6,6 +6,9 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **Puesta en marcha**: *Herramientas → Puesta en marcha* con los 14 pasos para abrir la tienda (y la IA, opcional), que se marcan solos al hacerlos, con enlace a cada ajuste y el número de pendientes en el menú. | `v2-puesta-en-marcha` | D196 |
+| 09/11 | **V2 · Asistente SEO con IA y blog**: «Proponer SEO con IA» en prendas y entradas (título, metadescripción y traducción al inglés; solo propone, se guarda al revisar); *Marketing → Blog* con entradas es/en en Markdown, `/es/blog` y sitemap. | `v2-seo-blog` | D195 |
+| 09/11 | **V2 · Asistente IA de venta (OpenAI)**: chat para clientes con cuenta que consulta catálogo, motor de precios y packs con herramientas (nunca inventa precios); límites por día y de gasto al mes; se oculta si OpenAI falla; *Ajustes → IA*. | `v2-asistente-ia` | D194 |
 | 09/11 | **V2 · Carritos abandonados**: avisos a 1 h, 24 h y 72 h (cupón opcional en cada uno) a clientes con cuenta, correo verificado y consentimiento comercial; enlace de baja; *Marketing → Carritos abandonados* con la secuencia y lo recuperado. Desactivado hasta que el equipo lo active. | `v2-carritos-abandonados` | D189 |
 | 09/11 | **V1 · Textos legales en inglés**: los cinco textos también en inglés, con sus versiones y revisión por idioma; cada pedido guarda la versión de las condiciones en su idioma. | `fase-v1-legal-en` | D188 |
 | 09/11 | **V1 · Presupuestos en PDF**: «Descargar presupuesto» en el carrito (PRE-0001, importes del motor, validez en *Ajustes → General*), página con su enlace y «Pasar al carrito» con el precio de hoy, y *Pedidos → Presupuestos*. Ya no queda ninguna sección pendiente en el menú. | `fase-v1-presupuestos` | D187 |

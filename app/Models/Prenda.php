@@ -35,6 +35,7 @@ class Prenda extends Model
         return ['activa' => 'boolean'];
     }
 
+    /** @return BelongsTo<Familia, $this> */
     public function familia(): BelongsTo
     {
         return $this->belongsTo(Familia::class);

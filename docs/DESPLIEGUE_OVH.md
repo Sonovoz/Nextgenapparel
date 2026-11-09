@@ -102,7 +102,7 @@ En el backend: **Herramientas → Estado del sistema**.
 
 ## Lista de puesta en marcha (fase 10)
 
-Antes de abrir la tienda, en este orden:
+Antes de abrir la tienda, en este orden. *Herramientas → Puesta en marcha* muestra esta lista comprobada con los datos reales y enlaza a cada ajuste (D196).
 
 1. **Correo**: SMTP real en *Ajustes → Correos* (o `MAIL_*` en `produccion.env`), con «Enviar correo de prueba». También `ALERTAS_EMAIL`, para recibir los errores y los avisos de salud.
 2. **Equipo**: cada persona entra al panel y configura la **verificación en dos pasos** con una app autenticadora. Guarda sus códigos de recuperación. Si alguien pierde el móvil: `php artisan usuarios:quitar-dos-pasos <correo>`.
