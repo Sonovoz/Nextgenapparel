@@ -14,6 +14,7 @@ use App\Models\ClaseImpuesto;
 use App\Models\Color;
 use App\Models\Cupon;
 use App\Models\Familia;
+use App\Models\GrupoCliente;
 use App\Models\Pack;
 use App\Models\Prenda;
 use App\Models\ReglaMinimo;
@@ -110,6 +111,31 @@ class MotorPreciosTest extends TestCase
         $this->assertSame(2205, $r->totalImpuestos());
         $this->assertSame(12705, $r->total());
         $this->assertTrue($r->confirmable());
+    }
+
+    /**
+     * Tarifa de grupo (v2, D192): descuento % sobre prendas e impresión que compite con las ofertas
+     * (se aplica la que más ahorra). 50 camisetas: prendas 200,00 + impresión 150,00; «Tramo 50» = 10 % de las prendas (20,00).
+     */
+    #[DataProvider('grupos')]
+    public function test_la_tarifa_del_grupo_compite_con_las_ofertas(int $descuento, bool $activo, int $unidades, int $esperado, ?string $gana): void
+    {
+        $grupo = GrupoCliente::create(['nombre' => ['es' => 'Revendedor'], 'descuento' => $descuento, 'activo' => $activo]);
+
+        $r = $this->calcular([$this->linea('camiseta', $unidades, ['frontal'])], grupoId: $grupo->id);
+
+        $this->assertSame($esperado, $r->descuentos());
+        $this->assertSame($gana, $r->oferta === null ? null : ($r->oferta['grupo'] ?? null ? 'grupo' : 'oferta'));
+    }
+
+    public static function grupos(): array
+    {
+        return [
+            'P1 con un 15 %: 105,00 → 15,75' => [1500, true, 15, 1575, 'grupo'],
+            '50 uds., grupo 5 % (17,50) < tramo (20,00): gana la oferta' => [500, true, 50, 2000, 'oferta'],
+            '50 uds., grupo 10 % (35,00) > tramo (20,00): gana el grupo' => [1000, true, 50, 3500, 'grupo'],
+            'grupo desactivado: nada' => [1500, false, 15, 0, null],
+        ];
     }
 
     public function test_p2_catorce_camisetas_no_llegan_al_minimo(): void

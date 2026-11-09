@@ -25,6 +25,8 @@ final class Cesta
         public readonly ?Destino $destino = null,
         public readonly array $cuponesUsados = [],
         public readonly ?DateTimeInterface $ahora = null,
+        /** Grupo de cliente con tarifa (v2, D192), si el cliente es de uno activo. */
+        public readonly ?int $grupoId = null,
     ) {}
 
     public function ahora(): DateTimeInterface

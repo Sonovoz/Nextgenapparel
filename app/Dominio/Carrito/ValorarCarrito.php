@@ -8,6 +8,7 @@ use App\Dominio\Precios\Motor\LineaCesta;
 use App\Dominio\Precios\Motor\MotorPrecios;
 use App\Dominio\Precios\Motor\PackCesta;
 use App\Models\Carrito;
+use App\Models\Cliente;
 use App\Models\LineaCarrito;
 
 /**
@@ -48,7 +49,9 @@ final class ValorarCarrito
             }
         }
 
-        $resultado = $this->motor->calcular(new Cesta($lineas, $packs, $carrito->cupon, $recargo, $destino, $cuponesUsados, $ahora));
+        // La tarifa de su grupo (D192), si el carrito es de un cliente de un grupo.
+        $grupoId = $carrito->cliente_id === null ? null : Cliente::whereKey($carrito->cliente_id)->value('grupo_cliente_id');
+        $resultado = $this->motor->calcular(new Cesta($lineas, $packs, $carrito->cupon, $recargo, $destino, $cuponesUsados, $ahora, $grupoId === null ? null : (int) $grupoId));
 
         return new Valoracion($valoradas, $resultado);
     }
