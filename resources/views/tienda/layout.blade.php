@@ -178,6 +178,11 @@
                     </ul>
                 </div>
             </div>
+            <nav class="pie-legal" aria-label="{{ __('legal.legal') }}">
+                @foreach (\App\Dominio\Legal\PaginaLegal::cases() as $paginaLegal)
+                    <a href="{{ route('legal', ['idioma' => $idiomaActual, 'pagina' => $paginaLegal->value]) }}">{{ $paginaLegal->titulo() }}</a>
+                @endforeach
+            </nav>
             <div class="pie-firma">
                 <span>© {{ now()->year }} {{ $nombreTienda }}</span>
                 <span>{{ __('portada.firma') }}</span>

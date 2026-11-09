@@ -6,6 +6,7 @@ use App\Dominio\Carrito\TipoLinea;
 use App\Dominio\Carrito\ValorarCarrito;
 use App\Dominio\Clientes\TipoCliente;
 use App\Dominio\Disenos\GuardarDiseno;
+use App\Dominio\Legal\PaginaLegal;
 use App\Dominio\Precios\Motor\Destino;
 use App\Dominio\Precios\Motor\LineaCalculada;
 use App\Dominio\Precios\RepartoPack;
@@ -20,6 +21,7 @@ use App\Models\LineaPedido;
 use App\Models\Pack;
 use App\Models\Pedido;
 use App\Models\Talla;
+use App\Models\TextoLegal;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -122,7 +124,7 @@ final class CrearPedido
             'total' => $resultado->total(),
             'desglose' => $resultado->aArray(),
             'condiciones_aceptadas_en' => now(),
-            'condiciones_texto' => __('pedidos.condiciones_acepto', [], $idioma),
+            'condiciones_texto' => __('pedidos.condiciones_acepto', [], $idioma).(($condiciones = TextoLegal::actual(PaginaLegal::Condiciones)) ? ' · '.$condiciones->etiqueta() : ''),
             'ip' => $ip,
         ]);
 

@@ -1060,3 +1060,14 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .pedido-pagar label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
 .pedido-pagar input[type="radio"] { width: 18px; height: 18px; accent-color: var(--azul); }
 .pedido-pagar .boton { justify-self: start; min-height: 46px; background: var(--azul); border-color: var(--azul); }
+
+/* Textos legales (paso 8.1) */
+.pie-legal { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 18px 0 0; font-size: 13px; }
+.pie-legal a { color: var(--tinta-suave); text-decoration: none; }
+.pie-legal a:hover, .pie-legal a:focus-visible { color: var(--tinta); text-decoration: underline; }
+.texto-legal { max-width: 760px; font-size: 16px; line-height: 1.65; }
+.texto-legal h1 { font-size: clamp(30px, 5vw, 44px); }
+.texto-legal h2 { margin-top: 32px; font-size: 20px; font-family: var(--sans); text-transform: none; letter-spacing: 0; }
+.texto-legal table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; display: block; overflow-x: auto; }
+.texto-legal th, .texto-legal td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--linea); vertical-align: top; }
+.texto-legal a { color: var(--neon); }
