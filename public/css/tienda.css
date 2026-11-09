@@ -366,10 +366,9 @@ body.estudio-abierto { overflow: hidden; }
     .piel { width: 92px; }
     .piel .marco { width: 92px; height: 104px; }
     .estudio.activo .tu-marca { padding: 24px 28px 0; }
-    /* La decisión («Siguiente: tallas y colores») siempre a la vista, fija abajo del panel. */
-    .estudio.activo .capas.decision { position: sticky; bottom: 0; z-index: 3; margin: 0 -28px; padding: 18px 28px 22px; border-radius: 18px 18px 0 0; border-width: 1px 0 0; background: linear-gradient(180deg, rgba(45, 75, 255, .2), rgba(45, 75, 255, .08)), #121218; box-shadow: 0 -18px 32px -12px rgba(0, 0, 0, .7); }
-    .estudio.activo #nivel-diseno { padding-bottom: 24px; }
-    .estudio.activo #nivel-diseno:has(.capas.decision) { padding-bottom: 0; }
+    /* Abajo, fija y fina: qué llevas, el error si lo hay y «Siguiente» (D198). */
+    .estudio.activo .capas-pie { position: sticky; bottom: 0; z-index: 3; margin: 0 -28px; padding: 12px 28px 16px; background: #121218; border-top: 1px solid rgba(142, 160, 255, .3); box-shadow: 0 -14px 24px -14px rgba(0, 0, 0, .8); }
+    .estudio.activo #nivel-diseno:has(.capas-pie:not([hidden])) { padding-bottom: 0; }
 }
 /* «Foto próximamente» dentro de la miniatura de color, sin salirse. */
 .piel .sin-foto { margin: 0; padding: 0 4px; font-size: 8px; letter-spacing: 0; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
@@ -382,13 +381,18 @@ body.estudio-abierto { overflow: hidden; }
     .piel { width: 58px; font-size: 9px; }
     .piel .marco { width: 58px; height: 62px; border-radius: 10px; }
     .estudio.activo .visor-controles .boton-pildora { min-height: 30px; padding: 0 10px; }
-    .estudio.activo #ver-zonas { display: none; }  /* en el móvil, «¿Dónde lo ponemos?» en el paso Diseño */
+    .estudio.activo #ver-zonas { display: none; }
+    .estudio.activo .capas-pie .boton-siguiente { display: none; } /* en el móvil, «Siguiente» ya está en la barra de abajo */  /* en el móvil, «¿Dónde lo ponemos?» en el paso Diseño */
 }
 @media (prefers-reduced-motion: reduce) { .estudio.activo { animation: none; } .estudio.activo .pista.visible { animation: none; opacity: 1; } }
 
 /* Varios diseños: capas y zonas */
 .capas { display: flex; flex-direction: column; gap: 8px; }
 .capas:empty { display: none; }
+.capas-pie { display: flex; flex-direction: column; gap: 8px; }
+.capas-pie .capas-titulo { color: #fff; font-size: 11px; letter-spacing: .14em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.capas-pie .capas-titulo::before { content: "✓"; display: inline-flex; width: 16px; height: 16px; margin-right: 8px; border-radius: 99px; align-items: center; justify-content: center; background: #3DBE7A; color: #0B0B10; font-size: 10px; letter-spacing: 0; }
+.capas-pie .boton-siguiente { width: 100%; min-height: 48px; }
 .capas-titulo { margin: 0; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #A7A2B5; }
 .capa-diseno { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .04); color: #fff; font: 14px var(--sans); text-align: left; cursor: pointer; transition: border-color .2s ease, background .2s ease; }
 .capa-diseno strong { font-weight: 500; letter-spacing: .12em; text-transform: uppercase; font-size: 12px; }

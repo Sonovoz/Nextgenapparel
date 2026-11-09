@@ -647,42 +647,31 @@
         if (aviso) aviso.textContent = estado.anadiendo ? textos.elige_zona_nuevo : '';
     }
 
-    /** Tarjeta de decisión (D142): tus diseños con lo que suma cada uno, y «¿otro o seguimos?». */
+    /**
+     * Decisión del paso 1 (D142, D198), en dos partes para que no estorbe:
+     * - en el panel, «¿Quieres otro diseño?» con un botón por zona libre;
+     * - abajo, fija y fina: qué diseños llevas, el error si lo hay y «Siguiente».
+     * La lista de diseños no se repite: las tarjetas de zona ya dicen cuál tiene diseño.
+     */
     function pintarCapas() {
         var caja = document.getElementById('capas');
-        if (!caja) return;
+        var pie = document.getElementById('capas-pie');
+        if (!caja || !pie) return;
         var usadas = zonasConDiseno();
-        // Se repinta entera: se recuerda qué control tenía el foco para devolvérselo (WCAG 2.4.3).
-        var foco = document.activeElement && caja.contains(document.activeElement) ? document.activeElement.dataset.foco : null;
+        // Se repinta entero: se recuerda qué control tenía el foco para devolvérselo (WCAG 2.4.3).
+        var activo = document.activeElement;
+        var foco = activo && (caja.contains(activo) || pie.contains(activo)) ? activo.dataset.foco : null;
         caja.replaceChildren();
+        pie.replaceChildren();
         caja.classList.toggle('decision', usadas.length > 0);
+        pie.hidden = usadas.length === 0;
         if (usadas.length === 0) return;
         var conDisenos = zonas.filter(function (z) { return usadas.indexOf(z.id) !== -1; });
-        caja.appendChild(el('p', 'capas-titulo', usadas.length === 1
-            ? texto('decision_uno', { zona: conDisenos[0].nombre }) : texto('decision_varios', { n: usadas.length })));
-        conDisenos.forEach(function (z) {
-            var d = estado.disenos[z.id];
-            var b = el('button', 'capa-diseno');
-            b.type = 'button';
-            b.setAttribute('aria-pressed', String(z.id === estado.zonaId));
-            b.dataset.foco = 'zona-' + z.id;
-            b.appendChild(el('strong', '', z.nombre));
-            b.appendChild(el('span', '', d.modo === 'logo' ? (d.nombre || textos.pestana_logo) : '«' + d.texto.trim() + '»'));
-            if (z.precio) b.appendChild(el('small', '', '+' + z.precio + textos.por_unidad));
-            b.addEventListener('click', function () {
-                fijarZona(z.id);
-                estado.anadiendo = false;
-                sincronizar();
-                if (z.cara !== estado.cara) { estado.cara = z.cara; pintar('giro'); } else { pintar(); }
-            });
-            caja.appendChild(b);
-        });
+
         var libres = zonas.filter(function (z) { return usadas.indexOf(z.id) === -1 && !zonas.some(function (o) { return usadas.indexOf(o.id) !== -1 && solapan(z, o); }); });
-        var botones = el('div', 'decision-botones');
         if (libres.length) {
             caja.appendChild(el('p', 'decision-pregunta', textos.decision_pregunta));
-            // Un botón por zona libre: «+ Espalda · +4,24 €». En el mismo clic, la zona (girando la prenda si va
-            // detrás) y el selector de archivos: el cliente elige dónde va sin buscarlo.
+            // Un botón por zona libre: «+ Espalda · +4,24 €». Elige la zona y abre el selector de archivos.
             var otras = el('div', 'decision-zonas');
             libres.forEach(function (z) {
                 var mas = el('button', 'boton-pildora borde anadir', '+ ' + z.nombre + (z.precio ? ' · +' + z.precio : ''));
@@ -691,16 +680,20 @@
                 mas.setAttribute('aria-label', texto('anadir_en', { zona: z.nombre }));
                 mas.addEventListener('click', function () {
                     var boton = grupoZonas.querySelector('[data-zona="' + z.id + '"]');
-                    if (boton) boton.click(); // elige la zona y abre el selector de archivos
+                    if (boton) boton.click();
                 });
                 otras.appendChild(mas);
             });
             caja.appendChild(otras);
         }
+
+        pie.appendChild(el('p', 'capas-titulo', usadas.length === 1
+            ? texto('decision_uno', { zona: conDisenos[0].nombre })
+            : texto('decision_varios', { n: usadas.length }) + ': ' + conDisenos.map(function (z) { return z.nombre; }).join(' · ')));
         if (estado.errorSubida) {
             var error = el('p', 'error-subida', estado.errorSubida);
             error.setAttribute('role', 'alert');
-            caja.appendChild(error);
+            pie.appendChild(error);
         }
         // «Siguiente» dice qué falta en vez de fallar al pulsarlo; pulsado, lleva a donde se resuelve.
         var falta = sinDeclarar().length > 0;
@@ -709,11 +702,10 @@
         seguir.dataset.foco = 'seguir';
         // aria-disabled y no disabled: un botón desactivado pierde el foco del teclado.
         seguir.setAttribute('aria-disabled', String(estado.subiendo));
-        caja.setAttribute('aria-busy', String(estado.subiendo));
+        pie.setAttribute('aria-busy', String(estado.subiendo));
         seguir.addEventListener('click', function () { if (falta) irADerechos(); else irANivel('cantidades'); });
-        botones.appendChild(seguir);
-        caja.appendChild(botones);
-        var volver = foco && caja.querySelector('[data-foco="' + foco + '"]');
+        pie.appendChild(seguir);
+        var volver = foco && (caja.querySelector('[data-foco="' + foco + '"]') || pie.querySelector('[data-foco="' + foco + '"]'));
         if (volver) volver.focus();
     }
 
@@ -1561,7 +1553,7 @@
         estado.subiendo = false;
         estado.errorSubida = mensaje;
         pintarCapas();
-        var aviso = document.querySelector('#capas .error-subida');
+        var aviso = document.querySelector('#capas-pie .error-subida');
         if (aviso && aviso.scrollIntoView) aviso.scrollIntoView({ block: 'nearest', behavior: sinMovimiento ? 'auto' : 'smooth' });
         return false;
     }
@@ -1572,7 +1564,7 @@
         for (var j = 0; j < pendientes.length; j++) {
             if (!pendientes[j].archivo) return Promise.resolve(fallarSubida(texto('error_original', { nombre: pendientes[j].nombre })));
         }
-        if (sinDeclarar().length) { irADerechos(); return Promise.resolve(fallarSubida(textos.error_derechos)); }
+        if (sinDeclarar().length) { fallarSubida(textos.error_derechos); irADerechos(); return Promise.resolve(false); } // primero el aviso, luego a la casilla
         for (var i = 0; i < pendientes.length; i++) {
             var d = pendientes[i];
             // Sin tipo (algunos selectores de Android) decide el servidor por la firma del archivo.

@@ -150,6 +150,8 @@
     <p class="claro" style="font-size: 13px;">{{ trans_choice('tienda.privacidad', $diasDisenos = (int) \App\Models\Ajuste::obtener('disenos.dias_sin_pedido'), ['dias' => $diasDisenos]) }}</p>
     {{-- Tarjeta de decisión: tus diseños con lo que suman y «¿otro diseño o seguimos?»; en el escritorio, fija abajo. --}}
     <div class="capas" id="capas" aria-live="polite"></div>
+    {{-- Abajo, fija y fina: qué llevas, el error si lo hay y «Siguiente: tallas y colores». --}}
+    <div class="capas-pie" id="capas-pie" aria-live="polite" hidden></div>
 
     </div>
 
