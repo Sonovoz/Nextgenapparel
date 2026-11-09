@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **Configurador en 3 pasos**: sube tu diseño y lo colocamos («Sí, subir otro» lo pone en la siguiente zona libre), tallas y colores, resumen y pago; declaración de derechos junto al botón de subir; «Siguiente» dice qué falta; errores de subida que explican qué pasa (en local, con la causa). | `configurador-guiado` | D198 |
 | 09/11 | **Estudio**: panel de control más ancho (440-620 px) con el orden de los pasos (pasos, herramienta, calidad) y «Siguiente: tallas y colores» siempre visible abajo; «Foto próximamente» ya no se sale de la miniatura. | `estudio-panel` | — |
 | 09/11 | **Portada**: «Cómo se juega» pasa a «Cómo configurar tu marca en 3 pasos» (en inglés, «How to set up your brand in 3 steps»). | `frontend-ajustes` | — |
 | 09/11 | **Puesta en marcha**: *Herramientas → Puesta en marcha* con los 14 pasos para abrir la tienda (y la IA, opcional), que se marcan solos al hacerlos, con enlace a cada ajuste y el número de pendientes en el menú. | `v2-puesta-en-marcha` | D196 |

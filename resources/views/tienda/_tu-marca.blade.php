@@ -14,6 +14,8 @@
     </ol>
 
     <div class="nivel" id="nivel-diseno">
+    <p class="claro nivel-ayuda">{{ __('tienda.ayuda_diseno') }}</p>
+    {{-- Herramientas del paso 1: el diseño se coloca solo; Zona y Ajustar son retoques opcionales. --}}
     <div class="herramientas" role="tablist" aria-label="{{ __('tienda.estudio') }}">
         <button type="button" role="tab" class="herramienta" id="h-diseno" aria-selected="true" aria-controls="hp-diseno" data-herramienta="diseno">{{ __('tienda.herramienta_diseno') }}</button>
         <button type="button" role="tab" class="herramienta" id="h-zona" aria-selected="false" aria-controls="hp-zona" data-herramienta="zona" tabindex="-1">{{ __('tienda.herramienta_zona') }}</button>
@@ -31,6 +33,12 @@
         <button type="button" role="tab" id="pestana-logo" aria-selected="true" aria-controls="panel-logo" data-modo="logo">{{ __('tienda.pestana_logo') }}</button>
         <button type="button" role="tab" id="pestana-texto" aria-selected="false" aria-controls="panel-texto" data-modo="texto" tabindex="-1">{{ __('tienda.pestana_texto') }}</button>
     </div>
+
+    {{-- Declaración de derechos al subir el logo, antes de elegirlo (fase 4): vale para los logos que se suben con ella marcada. --}}
+    <label class="casilla-derechos" for="derechos-diseno">
+        <input type="checkbox" id="derechos-diseno">
+        <span>{{ __('disenos.derechos_casilla') }}</span>
+    </label>
 
     <div id="panel-logo" role="tabpanel" aria-labelledby="pestana-logo">
         <label class="soltar" id="soltar" for="archivo-diseno">

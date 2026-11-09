@@ -57,14 +57,14 @@
 
     // estado.modo, estado.logo, estado.texto… son los del diseño de la zona activa
     // (o un borrador mientras aún no hay zona). Así cada zona lleva su propio diseño.
-    function nuevoDiseno() { return { modo: 'logo', logo: null, texto: '', fuente: 0, tinta: 'auto', logoPx: null, logoTipo: null, nombre: '', archivo: null, uuid: null, avisos: null }; }
+    function nuevoDiseno() { return { modo: 'logo', logo: null, texto: '', fuente: 0, tinta: 'auto', logoPx: null, logoTipo: null, nombre: '', archivo: null, uuid: null, avisos: null, declarado: false }; }
     var borrador = nuevoDiseno();
     function actual() {
         if (estado.zonaId === null) return borrador;
         if (!estado.disenos[estado.zonaId]) estado.disenos[estado.zonaId] = nuevoDiseno();
         return estado.disenos[estado.zonaId];
     }
-    ['modo', 'logo', 'texto', 'fuente', 'tinta', 'logoPx', 'logoTipo', 'nombre', 'archivo', 'uuid', 'avisos'].forEach(function (campo) {
+    ['modo', 'logo', 'texto', 'fuente', 'tinta', 'logoPx', 'logoTipo', 'nombre', 'archivo', 'uuid', 'avisos', 'declarado'].forEach(function (campo) {
         Object.defineProperty(estado, campo, { get: function () { return actual()[campo]; }, set: function (v) { actual()[campo] = v; } });
     });
     function disenoValido(d) { return !!d && (d.modo === 'logo' ? !!d.logo : d.texto.trim() !== ''); }
@@ -675,45 +675,48 @@
         var botones = el('div', 'decision-botones');
         if (libres.length) {
             caja.appendChild(el('p', 'decision-pregunta', textos.decision_pregunta));
-            var mas = el('button', 'boton-pildora borde anadir', '+ ' + textos.anadir_diseno);
+            var mas = el('button', 'boton-pildora borde anadir', textos.anadir_diseno);
             mas.type = 'button';
             mas.dataset.foco = 'anadir';
             mas.addEventListener('click', function () {
+                // La siguiente zona libre (la gira si está detrás) y, en el mismo clic, el selector de archivos.
+                var boton = grupoZonas.querySelector('[data-zona="' + libres[0].id + '"]');
                 estado.anadiendo = true;
-                marcarZona();
-                elegirHerramienta('zona');
+                if (boton) boton.click();
+                entrada.click();
             });
             botones.appendChild(mas);
-        }
-        if (pendientesDeSubir().length) {
-            // Al pasar al pedido se suben los logos: antes, la declaración de derechos (fase 4).
-            var casilla = el('label', 'casilla-derechos');
-            var marca = el('input');
-            marca.type = 'checkbox';
-            marca.id = 'derechos-diseno';
-            marca.dataset.foco = 'derechos';
-            marca.checked = estado.derechos;
-            marca.addEventListener('change', function () { estado.derechos = marca.checked; estado.errorSubida = ''; pintarCapas(); });
-            casilla.appendChild(marca);
-            casilla.appendChild(el('span', '', textos.derechos_casilla));
-            caja.appendChild(casilla);
         }
         if (estado.errorSubida) {
             var error = el('p', 'error-subida', estado.errorSubida);
             error.setAttribute('role', 'alert');
             caja.appendChild(error);
         }
-        var seguir = el('button', 'boton-siguiente', estado.subiendo ? textos.comprobando : textos.siguiente_cantidades + ' →');
+        // «Siguiente» dice qué falta en vez de fallar al pulsarlo; pulsado, lleva a donde se resuelve.
+        var falta = sinDeclarar().length > 0;
+        var seguir = el('button', 'boton-siguiente' + (falta ? ' falta' : ''), estado.subiendo ? textos.comprobando : (falta ? textos.falta_derechos : textos.siguiente_cantidades + ' →'));
         seguir.type = 'button';
         seguir.dataset.foco = 'seguir';
         // aria-disabled y no disabled: un botón desactivado pierde el foco del teclado.
         seguir.setAttribute('aria-disabled', String(estado.subiendo));
         caja.setAttribute('aria-busy', String(estado.subiendo));
-        seguir.addEventListener('click', function () { irANivel('cantidades'); });
+        seguir.addEventListener('click', function () { if (falta) irADerechos(); else irANivel('cantidades'); });
         botones.appendChild(seguir);
         caja.appendChild(botones);
         var volver = foco && caja.querySelector('[data-foco="' + foco + '"]');
         if (volver) volver.focus();
+    }
+
+    /** Logos aún sin subir que nadie ha declarado como propios. */
+    function sinDeclarar() { return pendientesDeSubir().filter(function (d) { return !d.declarado; }); }
+
+    /** Lleva a la casilla de derechos (en «Diseño», junto al botón de subir). */
+    function irADerechos() {
+        elegirHerramienta('diseno');
+        if (!casillaDerechos) return;
+        casillaDerechos.closest('.casilla-derechos').classList.add('resaltada');
+        if (casillaDerechos.scrollIntoView) casillaDerechos.scrollIntoView({ block: 'center', behavior: sinMovimiento ? 'auto' : 'smooth' });
+        casillaDerechos.focus();
     }
 
     /** Lleva los controles del panel al diseño de la zona activa. */
@@ -888,16 +891,27 @@
         estado.uuid = logo.uuid;
         estado.avisos = logo.avisos || null;
         estado.errorSubida = '';
-        // Un logo nuevo pide su propia declaración de derechos (Gauntlet M1).
-        if (!logo.uuid) estado.derechos = false;
+        // Cada logo nuevo lleva su propia declaración (Gauntlet M1): vale la casilla marcada junto al botón de subir.
+        estado.declarado = !!logo.uuid || estado.derechos;
         if (estado.zonaId !== null) delete estado.ajustes[estado.zonaId];
         estado.version++;
         if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
-        elegirHerramienta('ajustar'); // el logo ya está: toca colocarlo
+        elegirHerramienta('ajustar'); // el logo ya está colocado: se puede retocar
         sincronizar();
     }
 
     entrada.addEventListener('change', function () { leerLogo(entrada.files[0]); entrada.value = ''; });
+
+    var casillaDerechos = document.getElementById('derechos-diseno');
+    if (casillaDerechos) {
+        casillaDerechos.addEventListener('change', function () {
+            estado.derechos = casillaDerechos.checked;
+            pendientesDeSubir().forEach(function (d) { d.declarado = casillaDerechos.checked; });
+            casillaDerechos.closest('.casilla-derechos').classList.remove('resaltada');
+            estado.errorSubida = '';
+            pintarCapas();
+        });
+    }
 
     /* ---------- Tus diseños subidos (fase 4) ----------
        Los que este visitante ya subió: se colocan sin volver a subirlos (miniatura
@@ -1548,7 +1562,7 @@
         for (var j = 0; j < pendientes.length; j++) {
             if (!pendientes[j].archivo) return Promise.resolve(fallarSubida(texto('error_original', { nombre: pendientes[j].nombre })));
         }
-        if (!estado.derechos) return Promise.resolve(fallarSubida(textos.error_derechos));
+        if (sinDeclarar().length) { irADerechos(); return Promise.resolve(fallarSubida(textos.error_derechos)); }
         for (var i = 0; i < pendientes.length; i++) {
             var d = pendientes[i];
             // Sin tipo (algunos selectores de Android) decide el servidor por la firma del archivo.
@@ -1584,11 +1598,17 @@
                             return true;
                         }
                         if (r.status === 419) return fallarSubida(textos.error_caducada);
+                        if (r.status === 429) return fallarSubida(textos.error_muchas);
+                        if (r.status === 413) return fallarSubida(d.nombre + ': ' + textos.error_pesado);
                         var mensaje = json.message;
                         if (json.errors) mensaje = json.errors[Object.keys(json.errors)[0]][0];
-                        return fallarSubida(r.status === 429 || r.status >= 500 || !mensaje ? textos.error_red : d.nombre + ': ' + mensaje);
+                        if (r.status >= 500 || !mensaje) {
+                            // Fallo nuestro, no del archivo. En local (APP_DEBUG) se enseña la causa para arreglarla.
+                            return fallarSubida(textos.error_servidor + (textos.depurar && json.message ? ' [' + r.status + ': ' + json.message + ']' : ''));
+                        }
+                        return fallarSubida(d.nombre + ': ' + mensaje);
                     });
-                }, function () { return fallarSubida(textos.error_red); });
+                }, function () { return fallarSubida(textos.error_conexion); });
             });
         }, Promise.resolve(true)).then(function (ok) {
             if (ok) {
