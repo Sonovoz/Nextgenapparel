@@ -1,110 +1,8 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$alto_mm\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ComprobarLinea.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ancho_mm\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ComprobarLinea.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$desde_centro_mm\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ComprobarLinea.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$desde_cuello_mm\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ComprobarLinea.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$diseno_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ComprobarLinea.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fuente\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ComprobarLinea.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$texto\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ComprobarLinea.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tinta\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ComprobarLinea.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$zona_impresion_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ComprobarLinea.php
-
-		-
-			message: '#^Anonymous function should return App\\Models\\LineaCarrito but returns Illuminate\\Database\\Eloquent\\Model\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Dominio/Carrito/EditarCarrito.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:impresiones\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Dominio/Carrito/EditarCarrito.php
-
-		-
-			message: '#^Method App\\Dominio\\Carrito\\EditarCarrito\:\:linea\(\) should return App\\Models\\LineaCarrito but returns Illuminate\\Database\\Eloquent\\Model\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Dominio/Carrito/EditarCarrito.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$zona\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Dominio/Carrito/Maqueta.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$zona_impresion_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/Maqueta.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:lineas\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Dominio/Carrito/Maqueta.php
-
-		-
 			message: '#^Cannot access property \$value on string\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: app/Dominio/Carrito/Maqueta.php
-
-		-
-			message: '#^Parameter \#1 \$i of static method App\\Dominio\\Carrito\\Maqueta\:\:posicion\(\) expects App\\Models\\ImpresionCarrito, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Dominio/Carrito/Maqueta.php
-
-		-
-			message: '#^Parameter \#1 \$zona of static method App\\Dominio\\Carrito\\Maqueta\:\:rectangulo\(\) expects App\\Models\\ZonaImpresion, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Dominio/Carrito/Maqueta.php
 
@@ -115,86 +13,8 @@ parameters:
 			path: app/Dominio/Carrito/Maqueta.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$alto_mm\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ancho_mm\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$color_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$diseno\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$impresiones\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pack\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pack_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tipo\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$zona_impresion_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:unidadesPorTalla\(\)\.$#'
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:calidad\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Parameter \#1 \$linea of method App\\Dominio\\Carrito\\ComprobarLinea\:\:linea\(\) expects App\\Models\\LineaCarrito, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Parameter \#1 \$linea of method App\\Dominio\\Carrito\\ValorarCarrito\:\:calidades\(\) expects App\\Models\\LineaCarrito, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
-			message: '#^Parameter \#1 \$lineas of class App\\Dominio\\Carrito\\Valoracion constructor expects list\<array\{linea\: App\\Models\\LineaCarrito, problemas\: list\<string\>, calidades\: array\<int, array\{ppp\: int, nivel\: App\\Dominio\\Disenos\\NivelCalidad\}\>\}\>, list\<array\{linea\: Illuminate\\Database\\Eloquent\\Model, problemas\: list\<string\>, calidades\: array\}\> given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Dominio/Carrito/ValorarCarrito.php
 
@@ -463,18 +283,6 @@ parameters:
 			path: app/Dominio/Pedidos/CrearPedido.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cara\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$codigo_hex\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1
@@ -495,17 +303,11 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pack_id\.$#'
 			identifier: property.notFound
-			count: 2
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda\.$#'
-			identifier: property.notFound
 			count: 1
 			path: app/Dominio/Pedidos/CrearPedido.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda_id\.$#'
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Dominio/Pedidos/CrearPedido.php
@@ -520,12 +322,6 @@ parameters:
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sha256\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tipo\.$#'
-			identifier: property.notFound
-			count: 2
 			path: app/Dominio/Pedidos/CrearPedido.php
 
 		-
@@ -559,25 +355,7 @@ parameters:
 			path: app/Dominio/Pedidos/CrearPedido.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getTranslations\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
 			message: '#^Parameter \#2 \$linea of method App\\Dominio\\Pedidos\\CrearPedido\:\:copiarImpresion\(\) expects App\\Models\\LineaPedido, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Parameter \#2 \$linea of method App\\Dominio\\Pedidos\\CrearPedido\:\:copiarLinea\(\) expects App\\Models\\LineaCarrito, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Parameter \#3 \$impresion of method App\\Dominio\\Pedidos\\CrearPedido\:\:copiarImpresion\(\) expects App\\Models\\ImpresionCarrito, Illuminate\\Database\\Eloquent\\Model given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Dominio/Pedidos/CrearPedido.php
@@ -713,6 +491,18 @@ parameters:
 			identifier: deadCode.unreachable
 			count: 1
 			path: app/Dominio/Precios/Motor/MotorPrecios.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$uuid\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Dominio/Presupuestos/CrearPresupuesto.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\ImpresionCarrito\>\:\:mapWithKeys\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Dominio/Presupuestos/CrearPresupuesto.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tipo\.$#'
@@ -1031,12 +821,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/Filament/Resources/Users/Tables/UsersTable.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:variantes\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/CarritoController.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>lineas" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
