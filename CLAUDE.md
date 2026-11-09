@@ -35,6 +35,7 @@ Se sigue el método de Clave de Alma: **la CI es la puerta**, no las revisiones 
 6. **Revisión del cliente en Herd** solo cuando hay algo visible, agrupando entregas, con un máximo de 3 puntos que comprobar.
 7. **Documentación corta**: `docs/HISTORIAL.md` lleva **una línea por entrega** (fecha, qué, PR, decisión). `docs/DECISIONES.md` solo para decisiones de negocio o de arquitectura, en 2-3 líneas; las correcciones y sus porqués van en el mensaje del commit o de la PR, no en DECISIONES.
 8. **Informe por entrega** (unas 5 líneas): qué incluye, qué no se ha podido probar y cómo verlo.
+9. **Comprobaciones al mínimo (orden del cliente, 09/11):** en local solo Pint y, si acaso, el test nuevo; nada de pasadas de navegador ni segundas rondas del instructor salvo que el cliente lo pida. La CI decide.
 
 ## Pila técnica
 
