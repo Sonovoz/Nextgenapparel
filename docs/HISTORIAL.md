@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **Guía de Herd**: cómo instalar Imagick en Windows (necesario para subir diseños) y qué hacer si pide la verificación en dos pasos en local. | `docs-imagick-herd` | — |
 | 09/11 | **Estudio**: panel de control más ancho (440-620 px) con el orden de los pasos (pasos, herramienta, calidad) y «Siguiente: tallas y colores» siempre visible abajo; «Foto próximamente» ya no se sale de la miniatura. | `estudio-panel` | — |
 | 09/11 | **Portada**: «Cómo se juega» pasa a «Cómo configurar tu marca en 3 pasos» (en inglés, «How to set up your brand in 3 steps»). | `frontend-ajustes` | — |
 | 09/11 | **Puesta en marcha**: *Herramientas → Puesta en marcha* con los 14 pasos para abrir la tienda (y la IA, opcional), que se marcan solos al hacerlos, con enlace a cada ajuste y el número de pendientes en el menú. | `v2-puesta-en-marcha` | D196 |

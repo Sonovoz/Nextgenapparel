@@ -111,6 +111,28 @@ Reglas de precio, envíos y un pack de ejemplo (fase 3), para probarlos en Marke
 php artisan db:seed --class=EjemplosPreciosSeeder
 ```
 
+## 9. Imagick (para subir diseños)
+
+Sin la extensión **Imagick** no se pueden subir logos en la tienda: sale «Algo ha fallado en nuestro servidor… [500: Class "Imagick" not found]» y *Herramientas → Estado del sistema* marca «Procesado de imágenes» en rojo. Herd para Windows no la trae, así que se instala a mano (una sola vez). Con **PHP 8.3**:
+
+1. Usa PHP 8.3 y comprueba que dice **NTS**: `herd use 8.3` y luego `php -v`.
+2. Descarga **`php_imagick-3.7.0-8.3-nts-vs16-x64.zip`** de <https://windows.php.net/downloads/pecl/releases/imagick/3.7.0/>. Ojo: tiene que poner **8.3**, `nts`, `vs16` y `x64`; la de otra versión de PHP (por ejemplo `7.2-nts-vc15`) no carga y da «No se puede encontrar el módulo especificado».
+3. Descomprímelo en Descargas y, con Herd cerrado, copia:
+
+```bat
+copy /Y %USERPROFILE%\Downloads\php_imagick-3.7.0-8.3-nts-vs16-x64\php_imagick.dll %USERPROFILE%\.config\herd\bin\php83\ext\
+copy /Y %USERPROFILE%\Downloads\php_imagick-3.7.0-8.3-nts-vs16-x64\CORE_RL_*.dll %USERPROFILE%\.config\herd\bin\php83\
+copy /Y %USERPROFILE%\Downloads\php_imagick-3.7.0-8.3-nts-vs16-x64\IM_MOD_RL_*.dll %USERPROFILE%\.config\herd\bin\php83\
+```
+
+4. Añade al final de `%USERPROFILE%\.config\herd\bin\php83\php.ini` la línea con la **ruta completa** (con `extension=imagick` a secas, PHP la busca en la carpeta desde la que lanzas el comando y falla):
+
+```
+extension=C:\Users\<tu usuario>\.config\herd\bin\php83\ext\php_imagick.dll
+```
+
+5. Reinicia Herd del todo (también el icono junto al reloj) y comprueba con `php -m | findstr imagick`. En *Estado del sistema*, «Procesado de imágenes» sale en verde.
+
 ## Cada vez que haya un paso nuevo
 
 ```bat
@@ -133,5 +155,7 @@ php artisan migrate
 | Página en blanco o error 500 | Revisa `storage\logs\laravel.log` |
 | `composer install` pide la extensión `bcmath` | En Herd → *PHP* → *Extensions*, activa `bcmath` |
 | El backend se ve sin estilos | Ejecuta `php artisan filament:upgrade` y recarga con Ctrl + F5 |
-| Tests de diseños saltados o «Procesado de imágenes» en rojo en Estado del sistema | En Herd → *PHP* → *Extensions*, activa `imagick` |
+| «Procesado de imágenes» en rojo, tests de diseños saltados o «Class "Imagick" not found» al subir un logo | Falta Imagick: sigue el apartado 9 |
+| `Unable to load dynamic library 'imagick'` | El zip no es el de tu versión de PHP (tiene que ser `8.3-nts-vs16-x64`) o falta la ruta completa en el `php.ini` (apartado 9) |
+| Te pide la verificación en dos pasos al entrar al backend | Añade `DOS_PASOS_OBLIGATORIOS=false` al final del `.env` y ejecuta `php artisan config:clear` |
 | Al subir un diseño: «No hemos recibido el archivo completo» | PHP de Herd limita las subidas a 2 MB. En Herd → *PHP* → la versión activa → *Open php.ini*, pon `upload_max_filesize = 50M` y `post_max_size = 55M`, guarda y reinicia Herd |
