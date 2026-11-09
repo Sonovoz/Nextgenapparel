@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **10.1 Dos pasos del equipo y lista de puesta en marcha**: verificación en dos pasos obligatoria en el panel (app autenticadora y códigos de recuperación), «Mi perfil» y orden de emergencia para quitarla; lista de puesta en marcha en `DESPLIEGUE_OVH.md`. | `fase-10-dos-pasos` | D186 |
 | 09/11 | **9 Auditoría final**: corregidos el aviso de Redsys (CSRF), Redsys de pruebas en producción, devoluciones dudosas, devolución de incidencias fuera de la factura, CSV sin fórmulas y HSTS; lo que falta para salir en `docs/AUDITORIA_FINAL.md`. | `fase-9-auditoria` | D185 |
 | 09/11 | **8.2 Informes de ventas**: *Analíticas → Informes de ventas* con facturado, rectificado, neto, impuestos, pedidos, ticket medio, ventas por día, lo más vendido y cupones, por periodo, y CSV de facturas para la gestoría. | `fase-8-informes` | D184 |
 | 09/11 | **8.1 Textos legales**: aviso legal, privacidad, cookies, condiciones de venta y envíos e incidencias generados con los datos del sistema, por versiones, con revisión de la asesoría en *Ajustes → Textos legales*; enlaces en el pie; el pedido guarda la versión de las condiciones aceptadas. | `fase-8-legal` | D183 |

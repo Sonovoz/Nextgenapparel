@@ -6,6 +6,10 @@ use App\Dominio\Sistema\Acceso\Rol;
 use App\Notifications\Cuenta\RestablecerContrasena;
 use App\Notifications\Cuenta\VerificarCorreo;
 use Database\Factories\UserFactory;
+use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthentication;
+use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthenticationRecovery;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -21,11 +25,12 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'password', 'activo'])]
-#[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements FilamentUser, MustVerifyEmail
+#[Hidden(['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes'])]
+class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, LogsActivity, Notifiable {
+    // Dos pasos del equipo (D186): la clave y los códigos se guardan cifrados con la APP_KEY.
+    use HasFactory, HasRoles, InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery, LogsActivity, Notifiable {
         LogsActivity::shouldLogEvent as private registraEvento;
     }
 

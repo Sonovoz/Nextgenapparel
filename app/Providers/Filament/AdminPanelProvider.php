@@ -4,8 +4,10 @@ namespace App\Providers\Filament;
 
 use App\Filament\AvatarIniciales;
 use App\Filament\Pages\Escritorio;
+use App\Http\Middleware\DosPasosEquipo;
 use App\Http\Middleware\IdiomaBackend;
 use App\Http\Middleware\NoIndexar;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -30,6 +32,11 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // «Mi perfil»: nombre, contraseña y verificación en dos pasos (D186).
+            ->profile(isSimple: false)
+            // Dos pasos con app autenticadora y códigos de recuperación, obligatoria para el equipo (portada de Clave de Alma).
+            ->multiFactorAuthentication([AppAuthentication::make()->recoverable()->brandName('Nextgenapparel')], isRequired: true)
+            ->multiFactorAuthenticationRequiredMiddlewareName(DosPasosEquipo::class)
             ->brandName('Nextgenapparel')
             ->defaultAvatarProvider(AvatarIniciales::class)
             ->colors([

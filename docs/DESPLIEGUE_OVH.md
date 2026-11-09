@@ -98,3 +98,16 @@ En el backend: **Herramientas → Estado del sistema**.
 - Volúmenes por entorno: `storage` (archivos y copias), `mariadb` y `redis`.
 - Copias: cada noche en el volumen `storage` y, cuando se active, en OVH Object Storage. Restaurar: `docs/RESTAURACION.md`.
 - Logs: `storage/logs` (14 días) y `docker compose logs` (limitados a 30 MB por contenedor).
+
+
+## Lista de puesta en marcha (fase 10)
+
+Antes de abrir la tienda, en este orden:
+
+1. **Correo**: SMTP real en *Ajustes → Correos* (o `MAIL_*` en `produccion.env`), con «Enviar correo de prueba». También `ALERTAS_EMAIL`, para recibir los errores y los avisos de salud.
+2. **Equipo**: cada persona entra al panel y configura la **verificación en dos pasos** con una app autenticadora. Guarda sus códigos de recuperación. Si alguien pierde el móvil: `php artisan usuarios:quitar-dos-pasos <correo>`.
+3. **Datos fiscales** en *Ajustes → Facturación*, y **textos legales** revisados por la asesoría en *Ajustes → Textos legales*.
+4. **Redsys**: el TPV real y su prueba (ver «Pagos con Redsys»).
+5. **Copias fuera del servidor**: contrata OVH Object Storage y rellena `COPIAS_EXTERNAS_*` con `COPIAS_EXTERNAS_ACTIVAS=true`. Comprueba en *Herramientas → Copias de seguridad* que se suben, y haz una prueba de restauración.
+6. **Veri*Factu**: decide con la asesoría cuándo activarlo (`VERIFACTU_ACTIVO=true` y `VERIFACTU_PRODUCCION=true`). Mientras tanto, las facturas guardan su huella encadenada, pero no se envían a la AEAT.
+7. **Comprobación final**: *Herramientas → Estado del sistema* en verde, un pedido real de 1 € pagado y devuelto, y el correo de cada estado recibido.
