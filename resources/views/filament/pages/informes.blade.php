@@ -15,6 +15,16 @@
         @endforeach
     </div>
 
+    <x-filament::section>
+        <x-slot name="heading">Márgenes</x-slot>
+        <x-slot name="description">Pedidos facturados en el periodo y no cancelados: lo vendido sin IVA ni envío menos el coste de las prendas lisas y de la impresión (Productos).@if ($datos['margen']['estimadas'] > 0) {{ $datos['margen']['estimadas'] }} líneas de antes de guardar el coste se estiman con el coste actual.@endif</x-slot>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem;">
+            @foreach ([['Vendido sin IVA', $e($datos['margen']['ingresos'])], ['Coste', $e($datos['margen']['coste'])], ['Margen', $e($datos['margen']['margen'])], ['Margen %', number_format($datos['margen']['porcentaje'] / 100, 1, ',', '.').' %']] as [$etiqueta, $valor])
+                <div><div style="font-size: .8rem; opacity: .7;">{{ $etiqueta }}</div><div style="font-size: 1.4rem; font-weight: 700;">{{ $valor }}</div></div>
+            @endforeach
+        </div>
+    </x-filament::section>
+
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem;">
         <x-filament::section>
             <x-slot name="heading">Ventas por día</x-slot>
@@ -30,7 +40,7 @@
             <x-slot name="heading">Lo más vendido</x-slot>
             @forelse ($datos['prendas'] as $p)
                 <div style="display: flex; justify-content: space-between; font-size: .875rem; padding: .3rem 0; border-bottom: 1px solid rgba(127,127,127,.15);">
-                    <span>{{ $p['prenda'] }} · {{ $p['unidades'] }} uds.</span><span>{{ $e($p['base']) }} sin IVA</span>
+                    <span>{{ $p['prenda'] }} · {{ $p['unidades'] }} uds.</span><span>{{ $e($p['base']) }} · margen {{ $e($p['margen']) }}</span>
                 </div>
             @empty
                 <p style="opacity: .7; font-size: .875rem;">—</p>
