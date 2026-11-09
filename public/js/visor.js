@@ -118,7 +118,8 @@
                 var img = new Image();
                 img.crossOrigin = 'anonymous'; // preparado para servir las fotos desde un almacenamiento externo
                 img.onload = function () { resolver(img); };
-                img.onerror = rechazar;
+                // Si falla (red, CORS), se olvida para poder reintentar en el siguiente pintado.
+                img.onerror = function (e) { delete cacheFotos[url]; rechazar(e); };
                 img.src = url;
             });
         }
@@ -204,15 +205,34 @@
     }
 
     /**
+     * El diseño en mm reales (revisión N3 del 5.8, A1): se encaja con la proporción de la
+     * zona en mm, no con la del rectángulo dibujado en la foto, que puede ser distinta.
+     * Así el tamaño, la calidad y lo que se guarda en el carrito no deforman el diseño.
+     */
+    function geometriaMm(diseno, zona) {
+        var aj = ajusteDe(zona.id);
+        var proporcion = diseno.width / diseno.height;
+        var w, h;
+        if (proporcion > zona.ancho_mm / zona.alto_mm) { w = zona.ancho_mm * aj.escala; h = w / proporcion; }
+        else { h = zona.alto_mm * aj.escala; w = h * proporcion; }
+        return { x: (zona.ancho_mm - w) * aj.cx, y: (zona.alto_mm - h) * aj.cy, w: w, h: h };
+    }
+
+    /**
      * Capa del diseño «impreso» sobre la zona de una foto: un canvas del tamaño
      * de la zona (en píxeles de la foto) que toma las luces, sombras y pliegues
      * de la tela. Si el navegador no deja leer la foto, se devuelve sin fundir.
      */
+    function claveCapa(color, cara, zona) {
+        var aj = ajusteDe(zona.id);
+        return [estado.version, estado.modo, estado.fuente, tintaPara(color), estado.texto, color.caras[cara].url, zona.id, aj.escala, aj.cx, aj.cy].join('|');
+    }
+
     function capaImpresa(color, cara, zona) {
         var datos = color.caras[cara];
         var diseno = disenoPara(color);
         var aj = ajusteDe(zona.id);
-        var clave = [estado.version, estado.modo, estado.fuente, tintaPara(color), estado.texto, datos.url, zona.id, aj.escala, aj.cx, aj.cy].join('|');
+        var clave = claveCapa(color, cara, zona);
         if (cacheCapas[clave]) return cacheCapas[clave];
 
         cacheCapas[clave] = cargarFoto(datos.url).then(function (foto) {
@@ -405,6 +425,10 @@
                 c.setAttribute('aria-hidden', 'true');
                 c.style.cssText = 'left:' + zona.x + '%;top:' + zona.y + '%;width:' + zona.ancho + '%;height:' + zona.alto + '%';
                 escena.appendChild(c);
+                if (activa && opciones.movible) ocultarCarga();
+            }, function () {
+                // La foto no cargó: sin capa (y sin promesa sin capturar); se reintenta al volver a pintar.
+                delete cacheCapas[conDiseno(zona.id, function () { return claveCapa(color, cara, zona); })];
                 if (activa && opciones.movible) ocultarCarga();
             });
         });
@@ -1090,8 +1114,8 @@
         if (!zona) return;
 
         var color = colores[estado.color];
-        var g = geometria(disenoPara(color), zona);
-        var anchoMm = zona.ancho_mm * g.w, altoMm = zona.alto_mm * g.h;
+        var g = geometriaMm(disenoPara(color), zona);
+        var anchoMm = g.w, altoMm = g.h;
         tamano.value = Math.round(ajusteDe(zona.id).escala * 100);
         document.getElementById('medida-diseno').textContent = texto('medida_impresion', { medida: cm(anchoMm) + ' × ' + cm(altoMm) + ' cm' });
 
@@ -1473,6 +1497,7 @@
     }
 
     function pintarPrecio() {
+        if (typeof pintarAnadir === 'function') pintarAnadir();
         var r = resumenPrecio();
         if (precioBarra.importe) {
             var v = r || precioInicial;
@@ -1826,6 +1851,73 @@
         }
     }
     if (pieSiguiente) pieSiguiente.addEventListener('click', function () { irANivel(pieSiguiente.dataset.ir); });
+
+    /* ---------- Añadir a mi pedido (paso 5.6) ---------- */
+
+    /**
+     * El diseño de una zona en mm (D99), con la misma geometría que se ve en el visor:
+     * tamaño, borde de arriba bajo el cuello y centro desde el centro de la prenda
+     * (negativo = a la izquierda de quien la lleva, que de frente es la derecha de la foto).
+     * El servidor comprueba que queda dentro de la zona.
+     */
+    function impresionEnMm(id) {
+        return conDiseno(id, function () {
+            var color = colores[estado.color];
+            var zona = zonaActual();
+            var info = zonas.filter(function (z) { return z.id === id; })[0];
+            if (!zona || !info) return null;
+            var g = geometriaMm(disenoPara(color), zona);
+            var desplazamiento = g.x + g.w / 2 - zona.ancho_mm / 2;
+            var d = estado.disenos[id];
+            var datos = {
+                ancho_mm: Math.round(g.w),
+                alto_mm: Math.round(g.h),
+                desde_cuello_mm: Math.round((zona.cuello_mm || 0) + g.y),
+                desde_centro_mm: Math.round((zona.centro_mm || 0) + (info.cara === 'delantera' ? -desplazamiento : desplazamiento))
+            };
+            if (d.modo === 'logo') { datos.diseno = d.uuid; } else { datos.texto = d.texto.trim(); datos.fuente = d.fuente; datos.tinta = d.tinta; }
+            return datos;
+        });
+    }
+
+    var botonAnadir = document.getElementById('anadir-pedido');
+    var errorAnadir = document.getElementById('anadir-error');
+    function pintarAnadir() {
+        if (!botonAnadir) return;
+        botonAnadir.disabled = !(precio && precio.confirmable) || estado.anadiendoPedido;
+    }
+    if (botonAnadir) botonAnadir.addEventListener('click', function () {
+        var impresiones = {};
+        zonasConDiseno().forEach(function (id) { var i = impresionEnMm(id); if (i) impresiones[id] = i; });
+        var lineas = estado.lineas.map(function (i) {
+            var id = colores[i].id, c = estado.cantidades[id] || {}, tallas = {};
+            Object.keys(c).forEach(function (t) { if (c[t] > 0) tallas[t] = c[t]; });
+            return { color: id, tallas: tallas };
+        }).filter(function (l) { return Object.keys(l.tallas).length; });
+        var token = document.querySelector('meta[name="csrf-token"]');
+        estado.anadiendoPedido = true;
+        errorAnadir.textContent = '';
+        botonAnadir.textContent = textos.anadiendo;
+        pintarAnadir();
+        fetch(visor.dataset.anadir, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token ? token.content : '' },
+            body: JSON.stringify({ prenda: Number(visor.dataset.prenda), lineas: lineas, impresiones: impresiones })
+        }).then(function (r) {
+            return r.json().catch(function () { return {}; }).then(function (json) {
+                if (r.ok && json.url) { window.location.href = json.url; return; }
+                var mensaje = json.message;
+                if (json.errors) mensaje = json.errors[Object.keys(json.errors)[0]][0];
+                throw new Error(r.status === 419 ? textos.error_caducada : (r.status === 422 && mensaje ? mensaje : textos.error_anadir));
+            });
+        }).catch(function (e) {
+            estado.anadiendoPedido = false;
+            errorAnadir.textContent = e && e.message && e.message !== 'Failed to fetch' ? e.message : textos.error_anadir;
+            botonAnadir.textContent = textos.anadir_pedido;
+            pintarAnadir();
+        });
+    });
 
     if (esPagina) {
         document.body.classList.add('estudio-abierto');

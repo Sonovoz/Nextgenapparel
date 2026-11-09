@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Precios;
 use App\Dominio\Precios\Impuestos;
 use App\Dominio\Precios\Iva;
 use App\Dominio\Precios\RepartoPack;
+use App\Filament\Concerns\BusquedaTraducible;
 use App\Filament\Concerns\CampoDinero;
 use App\Filament\Concerns\CamposTraducibles;
 use App\Filament\Navegacion\GrupoNavegacion;
@@ -163,7 +164,7 @@ class PackResource extends RecursoPrecios
             ->description('Precio cerrado: no se combina con cupones ni ofertas y cumple por sí solo el pedido mínimo.')
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['lineas', 'zonas']))
             ->columns([
-                TextColumn::make('nombre')->label('Pack')->searchable(),
+                TextColumn::make('nombre')->label('Pack')->searchable(query: BusquedaTraducible::en('nombre')),
                 TextColumn::make('unidades')->label('Prendas')->state(fn (Pack $record) => $record->unidades()),
                 TextColumn::make('precio')->label('Precio con IVA')->formatStateUsing(fn ($state, Pack $record) => CampoDinero::formatear(Iva::conIva((int) $state, Impuestos::tipoIva($record->clase_impuesto_id)))),
                 TextColumn::make('reparto')->label('Tallas')->badge(),

@@ -145,7 +145,8 @@ return [
     'resumen_total' => 'Total con IVA',
     'envio_al_cerrar' => 'El envío se calcula al cerrar el pedido, cuando sepamos a dónde lo enviamos.',
     'anadir_pedido' => 'Añadir a mi pedido',
-    'anadir_pronto' => 'Muy pronto podrás guardarlo en tu carrito y pagar. De momento, revisa aquí tu pedido.',
+    'anadiendo' => 'Añadiendo…',
+    'error_anadir' => 'No hemos podido añadirlo a tu pedido. Revisa la conexión y vuelve a intentarlo.',
     'cambiar_cantidades' => 'Cambiar tallas y colores',
     'calculando' => 'Calculando…',
     // Mejorar el diseño con IA (D143)

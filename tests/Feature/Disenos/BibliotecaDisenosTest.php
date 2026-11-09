@@ -92,7 +92,9 @@ class BibliotecaDisenosTest extends TestCase
         $diseno = $this->disenoSubido();
         $this->actingAs($this->usuarioConRol(Rol::Superadministrador, ['activo' => false]));
 
-        $this->get(route('backend.disenos.miniatura', $diseno))->assertNotFound();
+        // La cuenta desactivada sale en la primera petición (CuentaActiva) y ya no descarga nada.
+        $this->get(route('backend.disenos.miniatura', $diseno))->assertRedirect();
+        $this->assertGuest();
         $this->get(route('backend.disenos.original', $diseno))->assertNotFound();
         $this->assertDatabaseMissing('activity_log', ['description' => 'Original de un diseño descargado']);
     }

@@ -137,6 +137,8 @@ class Escaparate
                         'precio' => $precioZona[$z->zona_impresion_id] ?? null,
                         'id' => $z->zona_impresion_id, 'nombre' => $z->zona?->nombre,
                         'ancho_mm' => $z->zona?->ancho_max_mm, 'alto_mm' => $z->zona?->alto_max_mm,
+                        // Dónde está la zona en la prenda (D99): el carrito guarda la posición en mm.
+                        'cuello_mm' => $z->zona?->desde_cuello_mm, 'centro_mm' => $z->zona?->desde_centro_mm,
                         'x' => $z->x / 100, 'y' => $z->y / 100, 'ancho' => $z->ancho / 100, 'alto' => $z->alto / 100,
                     ])->values()->all(),
                 ];

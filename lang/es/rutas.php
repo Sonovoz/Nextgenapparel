@@ -1,0 +1,31 @@
+<?php
+
+// Tramos de URL traducidos de la cuenta del cliente (fase 5).
+return [
+    'cuenta' => 'cuenta',
+    'entrar' => 'entrar',
+    'registro' => 'registro',
+    'salir' => 'salir',
+    'recuperar' => 'recuperar-contrasena',
+    'restablecer' => 'nueva-contrasena',
+    'verificar' => 'verificar-correo',
+    'reenviar' => 'reenviar-verificacion',
+    'datos' => 'mis-datos',
+    'direcciones' => 'direcciones',
+    'nueva' => 'nueva',
+    'editar' => 'editar',
+    'predeterminada' => 'predeterminada',
+    'disenos' => 'mis-disenos',
+    'contrasena' => 'contrasena',
+    'borrado' => 'borrar-cuenta',
+    'confirmar_correo' => 'confirmar-nuevo-correo',
+    'carrito' => 'carrito',
+    'lineas' => 'lineas',
+    'cupon' => 'cupon',
+    'cerrar' => 'cerrar-pedido',
+    'confirmar' => 'confirmar',
+    'pedidos' => 'pedidos',
+    'confirmar_correo_pedido' => 'confirmar-correo',
+    'reenviar_enlace' => 'reenviar-enlace',
+    'maquetas' => 'maquetas',
+];

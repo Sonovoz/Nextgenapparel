@@ -145,7 +145,8 @@ return [
     'resumen_total' => 'Total incl. VAT',
     'envio_al_cerrar' => 'Shipping is calculated when you check out, once we know where to send it.',
     'anadir_pedido' => 'Add to my order',
-    'anadir_pronto' => 'Soon you will be able to save it to your cart and pay. For now, review your order here.',
+    'anadiendo' => 'Adding…',
+    'error_anadir' => 'We could not add it to your order. Check your connection and try again.',
     'cambiar_cantidades' => 'Change sizes & colours',
     'calculando' => 'Calculating…',
     // Improve the design with AI (D143)

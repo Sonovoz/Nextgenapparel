@@ -4,8 +4,9 @@ Portal de pedidos de prendas personalizadas con impresión DTI (camisetas, polos
 
 **Lee siempre antes de trabajar:**
 - `docs/FICHA.md`: alcance, modelo de datos, reglas de negocio y fases. Es la fuente de verdad.
-- `docs/DECISIONES.md`: decisiones ya tomadas y su motivo. No las reabras sin que lo pida el usuario.
-- `docs/GAUNTLET.md`: protocolo de calidad obligatorio para todo el desarrollo.
+- `docs/DECISIONES.md`: decisiones ya tomadas y su motivo (lee las últimas; las antiguas, cuando toques su parte). No las reabras sin que lo pida el usuario.
+- `docs/HISTORIAL.md`: una línea por entrega, de la más reciente a la más antigua. Dice dónde está el proyecto.
+- `docs/GAUNTLET.md`: solo como lista de comprobación de la auditoría final (D171).
 
 ## Reglas permanentes
 
@@ -19,24 +20,21 @@ Portal de pedidos de prendas personalizadas con impresión DTI (camisetas, polos
 8. **Alcance por versiones:** construir la versión 1 completa antes de cualquier función de la versión 2. La base de datos se diseña pensando en ambas.
 9. **No inventes resultados:** pruebas, métricas o auditorías no ejecutadas se declaran como no ejecutadas.
 10. **Secretos fuera del código:** claves de Redsys, SMTP e IA solo en variables de entorno.
-11. **Una sesión de trabajo por fase.** Al cerrar una fase, actualiza el estado en `docs/FICHA.md` (sección «Estado») y registra en `docs/DECISIONES.md` cualquier decisión nueva.
+11. **Una sola sesión trabaja en una rama a la vez.** Antes de empezar: `git fetch origin '+refs/heads/*:refs/remotes/origin/*'` y partir de la rama más reciente (nunca de una copia local vieja). Al cerrar una fase, actualiza el estado en `docs/FICHA.md` (sección «Estado»).
+12. **Reutiliza Clave de Alma** (`Sonovoz/Clavedealma`, misma pila: Laravel 13, Filament 5) antes de escribir desde cero: Redsys y Ajustes → Pagos, facturas y rectificativas con Veri*Factu, PDF, devoluciones, SMTP desde el panel, textos legales, registro de seguridad, 2FA del equipo e instalación en OVH. Se porta y se adapta a un solo vendedor (sin artistas ni comisiones), con sus tests (D171).
 
-## Protocolo del instructor (cómo se verifica, D74)
+## Cómo se entrega y se verifica (D171, sustituye a D74)
 
-El **instructor** (`.claude/agents/instructor.md`) planifica cada fase, asigna a cada paso un nivel de verificación y hace la revisión adversarial al cerrarla. La verificación es **proporcional al riesgo**:
+Se sigue el método de Clave de Alma: **la CI es la puerta**, no las revisiones a mano.
 
-| Nivel | Cuándo | Qué se hace al terminar el paso |
-|---|---|---|
-| **N1 Ligero** | Textos, estilos, documentación, ajustes sin lógica | Tests afectados + Pint. Sin navegador |
-| **N2 Normal** | Pantallas y funciones nuevas sin dinero ni permisos | Suite completa + **una** pasada de navegador del flujo principal (dominio `.test`) |
-| **N3 Riguroso** | Dinero, impuestos, facturas, permisos, datos personales, migraciones, copias, despliegue | N2 + migraciones en MariaDB estricta (configuración de XAMPP) + revisión del instructor |
-
-Reglas:
-1. **Una sola verificación, al final del paso.** Nada de capturas ni comprobaciones intermedias. Si algo falla, se corrige y se repite solo lo afectado.
-2. **Tests útiles:** cada regla de negocio y cada fallo real encontrado tiene su test. No se prueba lo que ya garantiza el framework; los casos parecidos van juntos (proveedores de datos).
-3. **Revisión del cliente en Herd** solo cuando hay algo visible, agrupando 2 o 3 pasos, con un máximo de 3 puntos que comprobar.
-4. **Gauntlet completo** (dos rondas adversariales e informe de la sección 14) solo al cerrar la fase. Por paso basta el informe breve.
-5. **Informe breve por paso** (unas 10 líneas): qué incluye, nivel aplicado, qué no se ha podido probar y los comandos para verlo.
+1. **Cada entrega = una rama y una PR** contra `main`, pequeña y con un resultado visible o comprobable. Entra en `main` solo con la **CI en verde** (`.github/workflows/tests.yml`: Pint, Larastan, tests en SQLite con PHP 8.3 y 8.5, y migraciones y tests en MariaDB estricta como XAMPP).
+2. **Tests útiles**: cada regla de negocio y cada fallo real tiene su test; los casos parecidos van juntos (proveedores de datos). No se prueba lo que ya garantiza el framework.
+3. **Antes de abrir la PR**: tests afectados + Pint en local. La suite completa y MariaDB las pasa la CI (no se repiten a mano).
+4. **Navegador** (una pasada, dominio `.test`) solo cuando la entrega trae una pantalla nueva o cambia un recorrido de compra.
+5. **Instructor** (`.claude/agents/instructor.md`): **una revisión por fase**, antes de cerrarla, y solo de lo que toca dinero, facturas, permisos o datos personales. Sin segundas rondas salvo defectos altos. Sin Gauntlet de dos rondas: `docs/GAUNTLET.md` queda como lista de comprobación para la auditoría final (fase 9).
+6. **Revisión del cliente en Herd** solo cuando hay algo visible, agrupando entregas, con un máximo de 3 puntos que comprobar.
+7. **Documentación corta**: `docs/HISTORIAL.md` lleva **una línea por entrega** (fecha, qué, PR, decisión). `docs/DECISIONES.md` solo para decisiones de negocio o de arquitectura, en 2-3 líneas; las correcciones y sus porqués van en el mensaje del commit o de la PR, no en DECISIONES.
+8. **Informe por entrega** (unas 5 líneas): qué incluye, qué no se ha podido probar y cómo verlo.
 
 ## Pila técnica
 

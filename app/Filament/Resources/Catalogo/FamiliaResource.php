@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Catalogo;
 
+use App\Filament\Concerns\BusquedaTraducible;
 use App\Filament\Concerns\CamposTraducibles;
 use App\Models\Familia;
 use BackedEnum;
@@ -51,7 +52,7 @@ class FamiliaResource extends RecursoCatalogo
             ->defaultSort('orden')
             ->reorderable('orden')
             ->columns([
-                TextColumn::make('nombre')->label('Nombre')->searchable(),
+                TextColumn::make('nombre')->label('Nombre')->searchable(query: BusquedaTraducible::en('nombre')),
                 TextColumn::make('prendas_count')->label('Prendas')->counts('prendas'),
                 TextColumn::make('plazo_base_dias')->label('Plazo')->suffix(' días'),
                 IconColumn::make('activa')->label('Activa')->boolean(),

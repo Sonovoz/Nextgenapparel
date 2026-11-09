@@ -44,7 +44,7 @@ return [
     'pack_prendas' => ':n garments',
     'pack_iva' => 'VAT included',
     'pack_impresion' => 'Printing included: :zonas',
-    'pack_proximamente' => 'Coming soon',
+    'pack_elegir' => 'Choose this pack',
     'sin_packs' => 'Packs ready for your brand are coming very soon.',
     'prendas_etiqueta' => 'Select',
     'prendas_titulo' => 'Choose your base',

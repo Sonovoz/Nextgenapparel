@@ -295,8 +295,7 @@
                                     @if ($pack['zonas'])<li>{{ __('portada.pack_impresion', ['zonas' => $pack['zonas']]) }}</li>@endif
                                     @if ($pack['descripcion'])<li>{{ $pack['descripcion'] }}</li>@endif
                                 </ul>
-                                {{-- La página de cada pack llega con el configurador (fase 5). --}}
-                                <span class="boton inactivo" aria-disabled="true">{{ __('portada.pack_proximamente') }}</span>
+                                <a class="boton" href="{{ $pack['url'] }}">{{ __('portada.pack_elegir') }}<span class="oculto"> · {{ $pack['nombre'] }}</span></a>
                             </div>
                         </article>
                     @endforeach

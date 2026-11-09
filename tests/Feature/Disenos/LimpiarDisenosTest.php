@@ -5,6 +5,7 @@ namespace Tests\Feature\Disenos;
 use App\Dominio\Disenos\GuardarDiseno;
 use App\Dominio\Disenos\LimpiarDisenos;
 use App\Models\Ajuste;
+use App\Models\Cliente;
 use App\Models\Diseno;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -28,7 +29,7 @@ class LimpiarDisenosTest extends TestCase
         Ajuste::guardar('disenos.dias_sin_pedido', 30);
         $caducado = $this->diseno(hace: 31);
         $reciente = $this->diseno(hace: 29);
-        $deCliente = $this->diseno(hace: 400, cliente: 7);
+        $deCliente = $this->diseno(hace: 400, cliente: Cliente::factory()->create()->id);
 
         $this->artisan('disenos:limpiar')->expectsOutputToContain('Diseños borrados: 1.')->assertSuccessful();
 

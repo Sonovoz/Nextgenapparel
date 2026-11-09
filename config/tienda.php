@@ -11,6 +11,8 @@ return [
         'checkout', 'pago', 'payment', 'packs', 'pack', 'personalizar', 'customise', 'customize', 'configurador',
         'buscar', 'search', 'legal', 'privacidad', 'privacy', 'cookies', 'aviso-legal', 'terminos', 'terms',
         'contacto', 'contact', 'ayuda', 'help', 'blog', 'login', 'registro', 'register', 'acceso', 'presupuesto', 'quote',
+        // Rutas fijas que ya existen antes de las familias (fases 4 y 5).
+        'disenos', 'sobre-nosotros', 'about-us',
     ],
 
 ];

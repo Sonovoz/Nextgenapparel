@@ -470,14 +470,7 @@ final class MotorPrecios
     /** @param  list<LineaCalculada>  $lineas */
     private function calcularEnvio(Destino $destino, array $lineas): ?array
     {
-        $pais = strtoupper($destino->pais);
-        $cp = preg_replace('/\s+/', '', $destino->codigoPostal);
-        $zona = ZonaEnvio::where('activa', true)->with('tarifas')->get()
-            ->filter(fn (ZonaEnvio $z) => in_array($pais, array_map('strtoupper', $z->paises ?? []), true)
-                && ($z->prefijos_cp === null || $z->prefijos_cp === [] || collect($z->prefijos_cp)->contains(fn ($p) => str_starts_with($cp, (string) $p))))
-            // La más concreta primero (con prefijos), luego la de más prioridad.
-            ->sortBy([fn ($a, $b) => empty($a->prefijos_cp) <=> empty($b->prefijos_cp), fn ($a, $b) => $b->prioridad <=> $a->prioridad])
-            ->first();
+        $zona = ZonaEnvio::paraDestino($destino->pais, $destino->codigoPostal)?->load('tarifas');
 
         if ($zona === null) {
             $this->impedimentos[] = new Mensaje('sin_envio');

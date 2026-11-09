@@ -346,12 +346,32 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 | 2. Catálogo | Familias, prendas, variantes, zonas, fotos de maqueta, proveedores (manual), stock, SEO técnico | Se crea una prenda variable completa desde el backend y se ve en el frontend en es/en con su sitemap y datos estructurados |
 | 3. Motor de precios | Tramos, ofertas, mínimos, cupones, envíos, impuestos, recargo de equivalencia, desglose, **packs (modelo, backend y precio)** | Los casos P1–P7, K1–K4 y los de envío pasan como tests automáticos |
 | 4. Diseños | Subida PNG, cálculo de ppp efectivo, avisos, declaración de derechos, biblioteca de diseños | Tests con PNG reales de distintas resoluciones dan el aviso correcto según el tamaño de impresión |
-| 5. Configurador y área de cliente | Flujo de 3 pasos, configurador, **selector de Packs**, maqueta 2D, carrito persistente, registro, área de cliente, visor de pedido, repetir pedido | Un cliente configura un pedido con dos zonas y ve la maqueta y el precio correctos en móvil y escritorio |
-| 6. Pedidos y documentos | Estados, notas, acciones en bloque, plazos, cancelación, incidencias, presupuesto, factura, rectificativa, orden de trabajo, maquetas del pedido por cara, ZIP, hoja de compra, correos SMTP | El ciclo completo de un pedido genera todos los documentos y correos en el idioma del cliente; el PDF del cliente y la orden de trabajo llevan la maqueta de cada cara |
+| 5. Configurador y área de cliente | Flujo de 3 pasos, configurador, **selector de Packs**, maqueta 2D, carrito persistente (también para invitados), registro, área de cliente (el visor de pedido y repetir pedido pasan a la fase 6, D153) | Un cliente configura un pedido con dos zonas y ve la maqueta y el precio correctos en móvil y escritorio |
+| 6. Pedidos y documentos | Visor de pedido del cliente y repetir pedido (D153); no se compra con una ficha de cliente desactivada ni se borra un cliente con pedidos (se anonimiza, D158); estados, notas, acciones en bloque, plazos, cancelación, incidencias, presupuesto, factura, rectificativa, orden de trabajo, maquetas del pedido por cara, ZIP, hoja de compra, correos SMTP | El ciclo completo de un pedido genera todos los documentos y correos en el idioma del cliente; el PDF del cliente y la orden de trabajo llevan la maqueta de cada cara |
 | 7. Pagos | Redsys (y Bizum) en pruebas, verificación de firma, cuadre de pagos, reembolsos | Pagos, fallos y reembolsos en el entorno de pruebas de Redsys funcionan y quedan registrados |
 | 8. Panel de ventas y legal | Panel de ventas, exportación, páginas legales, banner de cookies | Los datos del panel cuadran con los pedidos de prueba |
 | 9. Auditoría Gauntlet | Revisión adversarial según `docs/GAUNTLET.md` | Sin defectos críticos ni altos abiertos |
 | 10. Puesta en marcha | Producción, dominio, Redsys real, SMTP real | Primer pedido real completado |
+
+---
+
+## 15 bis. Plan hasta la meta (D171)
+
+Lo que falta, en entregas pequeñas (una PR cada una, con la CI en verde). La columna «Se porta de Clave de Alma» indica el módulo de `Sonovoz/Clavedealma` que se adapta a Nextgenapparel (un solo vendedor, sin artistas ni comisiones) en lugar de escribirlo desde cero.
+
+| Entrega | Contenido | Se porta de Clave de Alma | Navegador |
+| --- | --- | --- | --- |
+| 6.2 | Maquetas del pedido en el servidor, una por cara (D98) | — (propio, Imagick) | No |
+| 6.3 | Backend de Pedidos como WooCommerce: listado, ficha, estados (también en bloque), notas privadas y para el cliente, acciones del pedido, plazos y transportista | Panel del pedido (ADR 0025), estados y cancelación (ADR 0015) | Sí |
+| 6.4 | Correos: SMTP en *Ajustes → Correo* y plantillas es/en por estado | `Platform/Mail/SmtpSettings` (ADR 0029) y avisos de pedido | No |
+| 6.5 | Documentos: factura y rectificativa con numeración correlativa y Veri*Factu preparado, orden de trabajo con maquetas, ZIP de producción y hoja de compra | `Modules/Invoicing` (ADR 0018), `Platform/Pdf` y vistas PDF (ADR 0017) | No |
+| 6.6 | Visor del cliente: progreso, documentos, cancelar, repetir e incidencias con fotos | «Mi cuenta → Ver pedido» (ADR 0021) y devoluciones (ADR 0016) | Sí |
+| 7 | Pagos: Redsys (tarjeta y Bizum), aviso y vuelta firmados, devoluciones y *Ajustes → Pagos* | `Modules/Payments` con Redsys (ADR 0026, 0027) | Sí |
+| 8 | Panel de ventas, exportación, textos legales generados y banner de cookies | Informes (ADR 0017), `Platform/Legal` (ADR 0020) | Sí |
+| 9 | Auditoría final: una revisión adversarial del instructor con `GAUNTLET.md` como lista | — | — |
+| 10 | Puesta en marcha en OVH: dominio, HTTPS, copias fuera del servidor, 2FA del equipo, avisos de errores, Redsys y SMTP reales | Guía OVH y seguridad (ADR 0028) | Sí |
+
+La revisión del instructor de cada fase se hace al terminar sus entregas y solo sobre dinero, facturas, permisos y datos personales.
 
 ---
 
@@ -364,5 +384,6 @@ Aviso legal, privacidad, cookies y condiciones de venta (es/en); banner de cooki
 | 2. Catálogo | **Completada con limitaciones** (informe: `docs/INFORME_FASE_2.md`). Criterio de aceptación cumplido con un test de principio a fin, en SQLite y en MariaDB estricta; pendiente la revisión del cliente en Herd de los últimos pasos y el despliegue en OVH | 2026-11-07 |
 | 3. Motor de precios | **Completada con limitaciones** (informe: `docs/INFORME_FASE_3.md`). Casos P1–P7, K1–K4 y E1–E5 como tests en SQLite y MariaDB estricta; pendiente el asesor (IVA del envío y recargo). D127 confirmada y revisión en Herd hecha | 2026-11-08 |
 | Visual V1 | Completado: sistema de diseño, cabecera, pie y portada premium (`docs/PLAN_VISUAL.md`); pendiente la revisión en Herd | 2026-11-08 |
-| Configurador (adelanto de la fase 5) | **En curso** (D141, D142): el configurador es la página de producto, con 3 niveles (diseño, tallas y colores, resumen) y el precio en directo del motor; pendiente la subida real del PNG (fase 4), el carrito y el pago | 2026-11-08 |
+| Configurador (adelanto de la fase 5) | Integrado en la fase 5 | 2026-11-08 |
 | 4. Diseños | **Completada con limitaciones** (informe: `docs/INFORME_FASE_4.md`). Análisis y subida de PNG, declaración de derechos, biblioteca en la tienda y en el backend y retención, con tres revisiones del instructor (D147–D152); criterio de aceptación cumplido con PNG sintéticos. Pendiente: PNG reales del cliente, la suite dentro de la imagen de Docker y la revisión en Herd | 2026-11-08 |
+| 5. Configurador y área de cliente | **Completada con limitaciones** (informe: `docs/INFORME_FASE_5.md`). Cuenta y área de cliente, backend de Clientes, carrito persistente (también de invitados), «Añadir a mi pedido» con maqueta, selector de Packs sencillo y cierre del pedido hasta el total; revisiones N3 por paso y Gauntlet de 2 rondas (D153–D167). Simplificada a petición del director de proyecto; confirmar y pagar, en las fases 6 y 7. Pendientes la revisión en Herd (con una foto trasera real) y el asesor (IVA y recargo del envío) | 2026-11-08 |

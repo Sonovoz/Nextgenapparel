@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class UserResource extends Resource
@@ -35,6 +36,15 @@ class UserResource extends Resource
     protected static ?string $slug = 'usuarios';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    /**
+     * Solo el equipo (usuarios con rol). Los clientes de la tienda no tienen rol y se
+     * gestionan en Clientes (paso 5.4); aquí no se ven ni se editan (revisión N3, M3).
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->whereHas('roles');
+    }
 
     public static function form(Schema $schema): Schema
     {

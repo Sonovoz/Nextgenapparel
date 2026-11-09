@@ -62,6 +62,8 @@
         'resumen_prendas' => __('tienda.resumen_prendas'),
         'resumen_total' => __('tienda.resumen_total'),
         'anadir_pedido' => __('tienda.anadir_pedido'),
+        'anadiendo' => __('tienda.anadiendo'),
+        'error_anadir' => __('tienda.error_anadir'),
         'calculando' => __('tienda.calculando'),
         'ia_copiar' => __('tienda.ia_copiar'),
         'ia_copiado' => __('tienda.ia_copiado'),
@@ -260,7 +262,7 @@
                 <div class="estudio-escena">
                 <button type="button" class="girar anterior" data-girar aria-label="{{ __('tienda.atajo_girar') }}">‹</button>
                 <div class="marco-visor">
-                <div class="visor" id="visor" data-subida="{{ route('disenos.subir') }}" data-biblioteca="{{ route('disenos.lista') }}" data-borrar="{{ route('disenos.borrar', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
+                <div class="visor" id="visor" data-subida="{{ route('disenos.subir') }}" data-biblioteca="{{ route('disenos.lista') }}" data-borrar="{{ route('disenos.borrar', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-prenda="{{ $prenda->id }}" data-anadir="{{ \App\Http\Controllers\CarritoController::url('anadir') }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
                     <div class="visor-controles">
                         <div class="segmento" role="group" aria-label="{{ __('tienda.delantera') }} / {{ __('tienda.trasera') }}">
                             <button type="button" class="boton-pildora" data-cara="delantera" aria-pressed="true">{{ __('tienda.delantera') }}</button>

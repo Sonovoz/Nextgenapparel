@@ -6,6 +6,7 @@ use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Ajuste;
 use App\Models\Diseno;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -17,8 +18,8 @@ use Illuminate\Support\Facades\Storage;
  * - Los archivos sin fila de más de un día también: quedan si un proceso muere a mitad
  *   de una subida (revisión N3, D148).
  *
- * IMPORTANTE para la fase 6: cuando existan los pedidos, un diseño usado en un pedido
- * no se borra aquí (se conserva con el pedido); hay que excluirlo en disenosCaducados().
+ * - Un diseño usado en un pedido no se borra aquí: el pedido tiene su copia, pero el
+ *   cliente lo conserva en su biblioteca (revisión N3 del 6.1, B1).
  */
 final class LimpiarDisenos
 {
@@ -69,6 +70,9 @@ final class LimpiarDisenos
     {
         $dias = max(1, (int) Ajuste::obtener('disenos.dias_sin_pedido'));
 
-        return Diseno::whereNull('cliente_id')->where('created_at', '<', now()->subDays($dias));
+        // Los que están en un carrito se quedan mientras el carrito exista (su plazo es aparte).
+        return Diseno::whereNull('cliente_id')->where('created_at', '<', now()->subDays($dias))
+            ->whereNotExists(fn ($q) => $q->select(DB::raw(1))->from('impresiones_carrito')->whereColumn('impresiones_carrito.diseno_id', 'disenos.id'))
+            ->whereNotExists(fn ($q) => $q->select(DB::raw(1))->from('impresiones_pedido')->whereColumn('impresiones_pedido.diseno_id', 'disenos.id'));
     }
 }
