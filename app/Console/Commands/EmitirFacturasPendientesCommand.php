@@ -25,9 +25,10 @@ class EmitirFacturasPendientesCommand extends Command
         $pagados = array_map(fn (EstadoPedido $e) => $e->value, [EstadoPedido::Pagado, EstadoPedido::DisenoEnRevision, EstadoPedido::RequiereCambios,
             EstadoPedido::EnProduccion, EstadoPedido::Enviado, EstadoPedido::Entregado]);
         $n = 0;
-        Pedido::whereIn('estado', $pagados)->whereDoesntHave('facturas')->orderBy('id')->each(function (Pedido $pedido) use (&$n) {
+        // Por id: los ya facturados salen de la consulta y paginar por posición se saltaría pedidos.
+        Pedido::whereIn('estado', $pagados)->whereDoesntHave('facturas')->lazyById()->each(function (Pedido $pedido) use (&$n) {
             EmitirFacturaPedido::dispatchSync($pedido->id);
-            $n++;
+            $n += $pedido->facturas()->exists() ? 1 : 0;
         });
         $this->info("Facturas emitidas: {$n}");
 

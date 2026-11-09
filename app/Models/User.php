@@ -96,7 +96,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->registraEvento($eventName);
     }
 
-    /** Ficha de cliente de la tienda, si el usuario compra (fase 5). Los clientes no tienen rol. */
+    /**
+     * Ficha de cliente de la tienda, si el usuario compra (fase 5). Los clientes no tienen rol.
+     *
+     * @return HasOne<Cliente, $this>
+     */
     public function cliente(): HasOne
     {
         return $this->hasOne(Cliente::class);

@@ -409,12 +409,6 @@ parameters:
 			path: app/Dominio/Clientes/Direcciones.php
 
 		-
-			message: '#^Method App\\Dominio\\Clientes\\VincularCliente\:\:__invoke\(\) should return App\\Models\\Cliente\|null but returns Illuminate\\Database\\Eloquent\\Model\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Dominio/Clientes/VincularCliente.php
-
-		-
 			message: '#^Offset ''marketing_consentido_en'' does not exist on array\{\}\|string\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
@@ -443,12 +437,6 @@ parameters:
 			identifier: booleanAnd.alwaysFalse
 			count: 1
 			path: app/Dominio/Clientes/VincularCliente.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Disenos/Dueno.php
 
 		-
 			message: '#^Template type T of method App\\Dominio\\Disenos\\Dueno\:\:filtrar\(\) is not referenced in a parameter\.$#'
@@ -1123,12 +1111,6 @@ parameters:
 			path: app/Http/Controllers/CierreController.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\CierreController\:\:cliente\(\) should return App\\Models\\Cliente\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/CierreController.php
-
-		-
 			message: '#^Strict comparison using \!\=\= between string and App\\Dominio\\Clientes\\TipoCliente\:\:Particular will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
 			count: 1
@@ -1207,24 +1189,6 @@ parameters:
 			path: app/Http/Controllers/Cuenta/MisDisenosController.php
 
 		-
-			message: '#^Parameter \#2 \$cliente of callable App\\Dominio\\Carrito\\FusionarCarrito expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Cuenta/RegistroController.php
-
-		-
-			message: '#^Parameter \#2 \$cliente of callable App\\Dominio\\Disenos\\TraspasarDisenos expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Cuenta/RegistroController.php
-
-		-
-			message: '#^Parameter \#3 \$cliente of static method App\\Http\\Controllers\\Cuenta\\DatosController\:\:correoOcupado\(\) expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Cuenta/VerificacionController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\DisenoController\:\:delVisitante\(\) should return App\\Models\\Diseno but returns Illuminate\\Database\\Eloquent\\Model\.$#'
 			identifier: return.type
 			count: 1
@@ -1253,24 +1217,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Http/Controllers/PackController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Controllers/PedidoController.php
-
-		-
-			message: '#^Parameter \#2 \$cliente of static method App\\Http\\Controllers\\CierreController\:\:bloqueoDe\(\) expects App\\Models\\Cliente\|null, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/PedidoController.php
-
-		-
-			message: '#^Parameter \#3 \$cliente of callable App\\Dominio\\Pedidos\\CrearPedido expects App\\Models\\Cliente\|null, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/PedidoController.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$talla\.$#'
@@ -1315,12 +1261,6 @@ parameters:
 			path: app/Models/FotoZona.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$idioma\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/User.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>idioma" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -1355,18 +1295,6 @@ parameters:
 			identifier: method.notFound
 			count: 2
 			path: app/Policies/CatalogoPolicy.php
-
-		-
-			message: '#^Parameter \#2 \$cliente of callable App\\Dominio\\Carrito\\FusionarCarrito expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Providers/AppServiceProvider.php
-
-		-
-			message: '#^Parameter \#2 \$cliente of callable App\\Dominio\\Disenos\\TraspasarDisenos expects App\\Models\\Cliente, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Providers/AppServiceProvider.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'

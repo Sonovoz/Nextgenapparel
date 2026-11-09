@@ -18,6 +18,7 @@ use LogicException;
  * @property string $codigo
  * @property TipoFactura $tipo
  * @property int $pedido_id
+ * @property ?int $pedido_original_id solo en F1/F2: una por pedido
  * @property ?int $rectifica_id
  * @property bool $parcial
  * @property ?string $motivo

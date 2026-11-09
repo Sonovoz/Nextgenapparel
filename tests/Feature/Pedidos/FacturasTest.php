@@ -14,14 +14,17 @@ use App\Dominio\Sistema\Acceso\Rol;
 use App\Filament\Pages\AjustesFacturacion;
 use App\Filament\Resources\Facturas\FacturaResource;
 use App\Http\Controllers\PedidoController;
+use App\Jobs\EmitirFacturaPedido;
 use App\Models\Ajuste;
 use App\Models\Factura;
 use App\Models\Pedido;
 use App\Notifications\Pedidos\CorreoDelPedido;
 use Filament\Facades\Filament;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use LogicException;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -240,8 +243,53 @@ class FacturasTest extends TestCase
             return $adjunto['name'] === 'factura-'.$factura->codigo.'.pdf' && str_starts_with($adjunto['data'], '%PDF');
         });
 
-        app(CambiarEstado::class)($pedido, E::Cancelado);
+        app(CambiarEstado::class)($pedido, E::Cancelado, nota: 'Cliente pesado, no volver a venderle');
         $this->assertSame([TipoFactura::Simplificada, TipoFactura::RectificativaSimplificada], $pedido->facturas()->pluck('tipo')->all());
+        // M2: el motivo de la rectificativa (impreso en el PDF del cliente) es fijo y en su idioma; la nota se queda en el historial.
+        $this->assertSame('Cancelación del pedido '.$pedido->numero, $pedido->facturas()->get()->last()->motivo);
+        $this->assertSame('Cliente pesado, no volver a venderle', $pedido->historial()->get()->first(fn ($h) => $h->estado === E::Cancelado)->nota);
+    }
+
+    /**
+     * A1: la factura se decide bajo el bloqueo del pedido. Un reintento tras cancelar no deja una factura sin
+     * rectificar, y otra emisión (la orden de las 06:15 o la cola) no la duplica.
+     */
+    public function test_un_pedido_cancelado_no_se_factura_y_nunca_hay_dos_facturas(): void
+    {
+        $emitir = app(EmitirFactura::class);
+        $cancelado = $this->pedido(['estado' => E::Cancelado]);
+        $this->assertNull($emitir->delPedido($cancelado));
+        $this->assertSame(0, $cancelado->facturas()->count());
+        $this->assertStringContainsString('Factura no emitida', (string) $cancelado->historial()->latest('id')->value('nota'));
+
+        $pagado = $this->pedido();
+        (new EmitirFacturaPedido($pagado->id))->handle($emitir);
+        $this->artisan('facturas:emitir-pendientes')->assertSuccessful();
+        (new EmitirFacturaPedido($pagado->id))->handle($emitir);
+        $this->assertSame(1, $pagado->facturas()->count());
+
+        // Y la base de datos lo impide aunque algo se saltara el bloqueo.
+        $this->expectException(UniqueConstraintViolationException::class);
+        Factura::query()->whereKey($pagado->facturas()->value('id'))->first()->replicate(['uuid', 'codigo', 'huella_anterior'])
+            ->fill(['uuid' => (string) Str::uuid(), 'codigo' => 'X-1', 'numero' => 999])->saveQuietly();
+    }
+
+    /** M1: factura, rectificativa parcial y rectificativa del resto, cada una encadenada con la anterior. */
+    public function test_la_cadena_de_huellas_no_se_parte_con_varios_tipos(): void
+    {
+        $emitir = app(EmitirFactura::class);
+        $pedido = $this->pedido(['nif' => 'B87654321']);
+        $otro = $this->pedido();
+        $emitir->delPedido($pedido);
+        $emitir->rectificativaParcial($pedido, 500, 'Reembolso', 'Incidencia INC-0001');
+        $emitir->delPedido($otro);
+        $emitir->rectificativa($pedido, 'Cancelación');
+
+        $facturas = Factura::orderBy('id')->get();
+        $this->assertCount(4, $facturas);
+        foreach ($facturas as $i => $factura) {
+            $this->assertSame($i === 0 ? null : $facturas[$i - 1]->huella, $factura->huella_anterior, "Factura {$factura->codigo}");
+        }
     }
 
     public function test_el_pdf_solo_lo_descarga_quien_puede_ver_el_pedido(): void

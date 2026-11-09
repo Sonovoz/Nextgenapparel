@@ -2,6 +2,7 @@
 
 namespace App\Dominio\Facturacion;
 
+use App\Dominio\Pedidos\EstadoPedido;
 use App\Dominio\Pedidos\Numeracion;
 use App\Dominio\Precios\Formato;
 use App\Models\Factura;
@@ -24,12 +25,30 @@ use LogicException;
  */
 final class EmitirFactura
 {
-    public function delPedido(Pedido $pedido): Factura
+    /**
+     * La factura del pedido, una sola vez (revisión de cierre, A1): bajo el bloqueo del pedido, antes de
+     * cualquier otra lectura, y nunca para un pedido sin pagar o ya cancelado (su rectificativa no la vería).
+     */
+    public function delPedido(Pedido $pedido): ?Factura
     {
-        $existente = Factura::where('pedido_id', $pedido->id)->whereIn('tipo', [TipoFactura::Completa->value, TipoFactura::Simplificada->value])->first();
-        if ($existente !== null) {
-            return $existente;
-        }
+        return DB::transaction(function () use ($pedido): ?Factura {
+            $pedido = Pedido::whereKey($pedido->id)->lockForUpdate()->firstOrFail();
+            $existente = $this->original($pedido);
+            if ($existente !== null) {
+                return $existente;
+            }
+            if (in_array($pedido->estado, [EstadoPedido::PendientePago, EstadoPedido::Cancelado, EstadoPedido::Reembolsado], true)) {
+                $pedido->historial()->create(['estado' => $pedido->estado, 'nota' => 'Factura no emitida: el pedido está «'.$pedido->estado->etiqueta().'».']);
+
+                return null;
+            }
+
+            return $this->facturar($pedido);
+        });
+    }
+
+    private function facturar(Pedido $pedido): Factura
+    {
         $pedido->loadMissing('lineas.impresiones');
         $tipo = filled($pedido->nif) ? TipoFactura::Completa : TipoFactura::Simplificada;
 
@@ -151,7 +170,8 @@ final class EmitirFactura
         return DB::transaction(function () use ($pedido, $tipo, $lineas, $desglose, $rectifica, $motivo, $base, $iva, $recargo, $parcial) {
             // Primero el contador de la cadena: así las facturas se encadenan de una en una (sin huecos ni dos con la misma huella anterior).
             Numeracion::siguiente('facturas');
-            $anterior = Factura::latest('id')->first();
+            // Lectura con bloqueo: ve la última factura confirmada aunque la transacción ya hubiera leído antes (M1).
+            $anterior = Factura::latest('id')->lockForUpdate()->first();
             $ahora = now()->timezone('Europe/Madrid');
             $serie = Emisor::serie($tipo);
             $anio = (int) $ahora->format('Y');
@@ -167,7 +187,7 @@ final class EmitirFactura
             $factura = Factura::create([
                 'uuid' => (string) Str::uuid(),
                 'serie' => $serie, 'anio' => $anio, 'numero' => $numero, 'codigo' => $codigo, 'tipo' => $tipo,
-                'pedido_id' => $pedido->id, 'rectifica_id' => $rectifica?->id, 'parcial' => $parcial, 'motivo' => $motivo === null ? null : mb_substr($motivo, 0, 255),
+                'pedido_id' => $pedido->id, 'pedido_original_id' => $rectifica === null ? $pedido->id : null, 'rectifica_id' => $rectifica?->id, 'parcial' => $parcial, 'motivo' => $motivo === null ? null : mb_substr($motivo, 0, 255),
                 'emitida_en' => $ahora, 'idioma' => $pedido->idioma, 'emisor' => $emisor,
                 'destinatario' => ['nombre' => $pedido->nombre_fiscal, 'nif' => $pedido->nif, 'direccion' => $pedido->direccion_facturacion, 'correo' => $pedido->correo],
                 'base_imponible' => $base, 'iva' => $iva, 'recargo' => $recargo, 'total' => $total, 'desglose' => $desglose,

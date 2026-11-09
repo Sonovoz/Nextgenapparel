@@ -90,6 +90,19 @@ class EstadosPedidoTest extends TestCase
         $this->cambiar($pedido, E::Cancelado);
     }
 
+    /** B1: quien decidió con una lectura anterior (la caducidad) no pisa un pago hecho mientras tanto. */
+    public function test_con_desde_solo_cambia_si_sigue_en_ese_estado(): void
+    {
+        $pedido = Pedido::factory()->create(['estado' => E::Pagado]);
+
+        $this->expectException(CambioNoValido::class);
+        try {
+            app(CambiarEstado::class)($pedido, E::Cancelado, desde: E::PendientePago);
+        } finally {
+            $this->assertSame(E::Pagado, $pedido->fresh()->estado);
+        }
+    }
+
     public function test_los_pedidos_sin_pagar_caducan_a_los_dias_de_ajustes(): void
     {
         Ajuste::guardar('pedidos.dias_sin_pago', 5);

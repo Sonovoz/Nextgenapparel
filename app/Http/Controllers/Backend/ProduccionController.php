@@ -7,6 +7,7 @@ use App\Dominio\Produccion\OrdenTrabajo;
 use App\Dominio\Produccion\PaqueteProduccion;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Filament\Navegacion\GrupoNavegacion;
+use App\Filament\Pages\Produccion\OrdenesTrabajo;
 use App\Models\Pedido;
 use Filament\Facades\Filament;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +21,7 @@ class ProduccionController
 {
     public function orden(Pedido $pedido): Response
     {
-        $this->comprobarAcceso();
+        $this->comprobarAcceso($pedido);
 
         return response(OrdenTrabajo::pdf($pedido), 200, [
             'Content-Type' => 'application/pdf',
@@ -31,7 +32,7 @@ class ProduccionController
 
     public function paquete(Pedido $pedido): Response
     {
-        $this->comprobarAcceso();
+        $this->comprobarAcceso($pedido);
         Actividad::apuntar('produccion', 'Paquete de producción descargado', $pedido);
 
         return response()->download(PaqueteProduccion::crear($pedido), $pedido->numero.'_produccion.zip', ['Content-Type' => 'application/zip'])->deleteFileAfterSend();
@@ -47,9 +48,11 @@ class ProduccionController
         ]);
     }
 
-    private function comprobarAcceso(): void
+    /** Con la sección Producción y, si es de un pedido, solo de los que están en producción (B3). */
+    private function comprobarAcceso(?Pedido $pedido = null): void
     {
         $usuario = auth()->user();
         abort_unless($usuario !== null && $usuario->canAccessPanel(Filament::getPanel('admin')) && $usuario->can(GrupoNavegacion::Produccion->permiso()), 404);
+        abort_if($pedido !== null && ! in_array($pedido->estado, OrdenesTrabajo::ESTADOS, true), 404);
     }
 }
