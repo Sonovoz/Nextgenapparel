@@ -46,7 +46,9 @@ jobs:
       # Mientras no haya línea base: se genera aquí y se deja para descargar (no se puede generar en local).
       - name: Línea base de Larastan
         if: matrix.php == '8.3' && steps.larastan.outcome == 'failure'
-        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G --generate-baseline=phpstan-baseline.neon --allow-empty-baseline || true
+        run: |
+          vendor/bin/phpstan analyse --no-progress --memory-limit=1G --generate-baseline=phpstan-baseline.neon --allow-empty-baseline || true
+          echo '-----LINEA-BASE-----'; cat phpstan-baseline.neon; echo '-----FIN-LINEA-BASE-----'
 
       - uses: actions/upload-artifact@v4
         if: matrix.php == '8.3' && steps.larastan.outcome == 'failure'
