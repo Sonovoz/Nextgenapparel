@@ -30,6 +30,8 @@ return [
     'cantidades' => 'Cantidades por talla',
     'guardar_cantidades' => 'Guardar cantidades',
     'cantidades_guardadas' => 'Cantidades guardadas.',
+    'actualizando' => 'Actualizando el precio…',
+    'guardando' => 'Guardando cantidades…',
     'quitar' => 'Quitar del pedido',
     'linea_quitada' => 'Prenda quitada de tu pedido.',
     'resumen' => 'Resumen',

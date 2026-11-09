@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **Carrito**: las cantidades por talla se guardan solas y el precio se actualiza; «Cerrar el pedido» guarda antes los cambios pendientes. | `carrito-cantidades-auto` | D201 |
 | 09/11 | **Ajustes → Correos**: «Enviar correo de prueba» ya no dice «enviado» si el `.env` tiene `MAIL_MAILER=log`; avisa de que se ha escrito en el log y de cómo enviarlo de verdad. | `correo-prueba-honesto` | — |
 | 09/11 | **PDF del presupuesto con la foto de lo creado**: cada línea lleva la maqueta de cada cara con los diseños del cliente. | `pdf-maquetas` | D200 |
 | 09/11 | **Portada**: las burbujas que subían en la cabecera pasan a ondas de luz que se mecen y polvo de luz que flota, al estilo del menú de una consola. | `portada-ambiente` | — |

@@ -113,6 +113,9 @@ class PaginaCarritoTest extends TestCase
 
         $this->patch('/es/carrito/lineas/'.$linea->uuid, ['tallas' => [$this->m->id => 15]])->assertRedirect('/es/carrito#linea-'.$linea->uuid);
         $this->assertSame([$this->m->id => 15], $linea->fresh()->tallas);
+        // D201: guardadas al pulsar «Cerrar el pedido», sigue al cierre con las cantidades nuevas.
+        $this->patch('/es/carrito/lineas/'.$linea->uuid, ['tallas' => [$this->m->id => 15], 'seguir' => 'cerrar'])->assertRedirect('/es/carrito/cerrar-pedido');
+        $this->assertSame([$this->m->id => 15], $linea->fresh()->tallas);
         $this->from('/es/carrito')->patch('/es/carrito/lineas/'.$linea->uuid, ['tallas' => [$this->m->id => 0]])->assertSessionHasErrors('linea_'.$linea->uuid);
 
         $this->post('/es/carrito/cupon', ['cupon' => 'verano10'])->assertRedirect('/es/carrito#cupon');

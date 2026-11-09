@@ -30,6 +30,8 @@ return [
     'cantidades' => 'Quantities per size',
     'guardar_cantidades' => 'Save quantities',
     'cantidades_guardadas' => 'Quantities saved.',
+    'actualizando' => 'Updating the price…',
+    'guardando' => 'Saving quantities…',
     'quitar' => 'Remove from order',
     'linea_quitada' => 'Garment removed from your order.',
     'resumen' => 'Summary',
