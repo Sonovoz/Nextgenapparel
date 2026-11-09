@@ -8,6 +8,7 @@ use App\Dominio\Pedidos\Numeracion;
 use App\Models\Ajuste;
 use App\Models\Carrito;
 use App\Models\Cliente;
+use App\Models\ImpresionCarrito;
 use App\Models\Presupuesto;
 use App\Models\Talla;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +47,7 @@ final class CrearPresupuesto
             $origen[] = [
                 'tipo' => $linea->tipo->value, 'prenda_id' => $linea->prenda_id, 'color_id' => $linea->color_id, 'pack_id' => $linea->pack_id,
                 'tallas' => $esPack ? null : $linea->unidadesPorTalla(), 'elecciones' => $linea->elecciones,
-                'impresiones' => $linea->impresiones->mapWithKeys(fn ($i) => [$i->zona_impresion_id => array_filter([
+                'impresiones' => $linea->impresiones->mapWithKeys(fn (ImpresionCarrito $i) => [$i->zona_impresion_id => array_filter([
                     'diseno' => $i->diseno?->uuid, 'texto' => $i->texto, 'fuente' => $i->fuente, 'tinta' => $i->tinta,
                     'ancho_mm' => $i->ancho_mm, 'alto_mm' => $i->alto_mm, 'desde_cuello_mm' => $i->desde_cuello_mm, 'desde_centro_mm' => $i->desde_centro_mm,
                 ], fn ($v) => $v !== null)])->all(),

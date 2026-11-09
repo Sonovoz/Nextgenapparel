@@ -13,12 +13,6 @@ parameters:
 			path: app/Dominio/Carrito/Maqueta.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:calidad\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Dominio/Carrito/ValorarCarrito.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$texto_alternativo\.$#'
 			identifier: property.notFound
 			count: 1
@@ -283,24 +277,6 @@ parameters:
 			path: app/Dominio/Pedidos/CrearPedido.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$miniatura\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$nombre_original\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pack_id\.$#'
 			identifier: property.notFound
 			count: 1
@@ -309,48 +285,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$prenda\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ruta\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sha256\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$util_alto_px\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$util_ancho_px\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$util_x\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$util_y\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Pedidos/CrearPedido.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:calidad\(\)\.$#'
-			identifier: method.notFound
 			count: 1
 			path: app/Dominio/Pedidos/CrearPedido.php
 
@@ -491,18 +425,6 @@ parameters:
 			identifier: deadCode.unreachable
 			count: 1
 			path: app/Dominio/Precios/Motor/MotorPrecios.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$uuid\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Dominio/Presupuestos/CrearPresupuesto.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\ImpresionCarrito\>\:\:mapWithKeys\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Dominio/Presupuestos/CrearPresupuesto.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tipo\.$#'
