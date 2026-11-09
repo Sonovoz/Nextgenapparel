@@ -121,9 +121,9 @@ class ProduccionTest extends TestCase
     public static function roles(): array
     {
         return [
-            'producción' => [Rol::Produccion, true],
-            'gestor de la tienda' => [Rol::GestorTienda, true],
-            'administrador' => [Rol::Administrador, true],
+            'producción' => [Rol::Produccion],
+            'gestor de la tienda' => [Rol::GestorTienda],
+            'administrador' => [Rol::Administrador],
         ];
     }
 
