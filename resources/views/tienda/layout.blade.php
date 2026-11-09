@@ -142,6 +142,9 @@
         {{ $slot }}
     </main>
 
+    @if (\App\Dominio\Asistente\AsistenteVenta::disponible(auth()->user()?->cliente))
+        @include('tienda.asistente')
+    @endif
     <footer class="pie">
         <div class="contenedor">
             <div class="pie-rejilla">

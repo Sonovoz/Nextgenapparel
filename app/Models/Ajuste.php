@@ -47,6 +47,14 @@ class Ajuste extends Model
         'pagos.cancelacion_automatica' => false,
         // D187: días que vale un presupuesto.
         'presupuestos.dias_validez' => 15,
+        // v2 (D194): asistente IA (OpenAI). Desactivado hasta que el equipo lo active; límite del mes en €;
+        // precios por millón de tokens en céntimos (los de la tarifa de OpenAI del modelo elegido).
+        'ia.activa' => false,
+        'ia.modelo' => 'gpt-4o-mini',
+        'ia.mensajes_dia' => 30,
+        'ia.limite_mensual' => 20,
+        'ia.precio_entrada' => 15,
+        'ia.precio_salida' => 60,
         // v2 (D189): carritos abandonados. Desactivado hasta que el equipo lo active; horas desde el último cambio y cupón opcional.
         'carritos.avisos_activos' => false,
         'carritos.secuencia' => [['horas' => 1, 'cupon' => null], ['horas' => 24, 'cupon' => null], ['horas' => 72, 'cupon' => null]],

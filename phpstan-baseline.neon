@@ -109,18 +109,6 @@ parameters:
 			path: app/Dominio/Catalogo/Portada.php
 
 		-
-			message: '#^Parameter \#1 \$modelo of static method App\\Dominio\\Catalogo\\Escaparate\:\:slug\(\) expects App\\Models\\Familia\|App\\Models\\Prenda, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Dominio/Catalogo/Portada.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getTranslation\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Dominio/Catalogo/Sku.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$clave\.$#'
 			identifier: property.notFound
 			count: 1
