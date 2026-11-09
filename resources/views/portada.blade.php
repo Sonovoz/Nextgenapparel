@@ -175,8 +175,15 @@
         <div class="arena-fondo" aria-hidden="true">
             <span class="arena-halo uno"></span><span class="arena-halo dos"></span>
             <span class="arena-suelo"></span>
-            @foreach ([[8, 0], [17, 3.2], [26, 1.4], [35, 5.1], [44, 2.3], [53, 6.4], [62, .8], [71, 4.2], [80, 2.9], [89, 5.7], [22, 7.1], [66, 6.9], [48, 8.2], [93, 1.9]] as [$x, $retraso])
-                <span class="chispa" style="--x: {{ $x }}%; --retraso: {{ $retraso }}s;"></span>
+            {{-- Ondas de luz que se mecen despacio, como el fondo de un menú de consola (sin símbolos de ninguna marca). --}}
+            <div class="arena-ondas">
+                <svg class="onda onda-a" viewBox="0 0 2880 400" preserveAspectRatio="none" focusable="false"><path d="M0 200 C240 120 480 120 720 200 S1200 280 1440 200 S1920 120 2160 200 S2640 280 2880 200"/><path d="M0 206 C240 121 480 121 720 206 S1200 291 1440 206 S1920 121 2160 206 S2640 291 2880 206"/><path d="M0 212 C240 122 480 122 720 212 S1200 302 1440 212 S1920 122 2160 212 S2640 302 2880 212"/><path d="M0 220 C240 124 480 124 720 220 S1200 316 1440 220 S1920 124 2160 220 S2640 316 2880 220"/></svg>
+                <svg class="onda onda-b" viewBox="0 0 2880 400" preserveAspectRatio="none" focusable="false"><path d="M0 230 C240 177 480 177 720 230 S1200 283 1440 230 S1920 177 2160 230 S2640 283 2880 230"/><path d="M0 236 C240 175 480 175 720 236 S1200 297 1440 236 S1920 175 2160 236 S2640 297 2880 236"/><path d="M0 244 C240 178 480 178 720 244 S1200 310 1440 244 S1920 178 2160 244 S2640 310 2880 244"/></svg>
+                <svg class="onda onda-c" viewBox="0 0 2880 400" preserveAspectRatio="none" focusable="false"><path d="M0 180 C240 74 480 74 720 180 S1200 286 1440 180 S1920 74 2160 180 S2640 286 2880 180"/><path d="M0 190 C240 76 480 76 720 190 S1200 304 1440 190 S1920 76 2160 190 S2640 304 2880 190"/></svg>
+            </div>
+            {{-- Polvo de luz: puntos a distintas profundidades que flotan y titilan (x, y, tamaño, duración, retraso). --}}
+            @foreach ([[44, 27, 3, 24, 0.6], [71, 20, 3, 23, 0.7], [67, 35, 2, 15, 5.2], [11, 38, 2, 22, 5.1], [75, 23, 2, 24, 7.5], [10, 81, 4, 20, 0.6], [31, 13, 4, 16, 3.5], [21, 77, 2, 23, 3.7], [90, 31, 2, 23, 6.9], [27, 55, 2, 22, 8.5], [75, 15, 4, 17, 6.0], [71, 62, 8, 19, 5.6], [61, 54, 3, 17, 9.5], [92, 39, 2, 23, 3.6], [66, 51, 6, 21, 3.5], [12, 23, 4, 20, 2.0], [46, 27, 3, 20, 0.5], [88, 17, 8, 22, 6.9]] as [$x, $y, $t, $d, $r])
+                <span class="polvo{{ $t >= 6 ? ' lejos' : '' }}" style="--x: {{ $x }}%; --y: {{ $y }}%; --t: {{ $t }}px; --d: {{ $d }}s; --r: -{{ $r }}s;"></span>
             @endforeach
         </div>
 
