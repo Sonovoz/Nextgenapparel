@@ -365,7 +365,7 @@ Lo que falta, en entregas pequeñas (una PR cada una, con la CI en verde). La co
 | 6.3 | Backend de Pedidos como WooCommerce: listado, ficha, estados (también en bloque), notas privadas y para el cliente, acciones del pedido, plazos y transportista | Panel del pedido (ADR 0025), estados y cancelación (ADR 0015) | Sí |
 | 6.4 | Correos: SMTP en *Ajustes → Correo* y plantillas es/en por estado | `Platform/Mail/SmtpSettings` (ADR 0029) y avisos de pedido | No |
 | 6.5 | Documentos: factura y rectificativa con numeración correlativa y Veri*Factu preparado, orden de trabajo con maquetas, ZIP de producción y hoja de compra | `Modules/Invoicing` (ADR 0018), `Platform/Pdf` y vistas PDF (ADR 0017) | No |
-| 6.6 | Visor del cliente: progreso, documentos, cancelar, repetir e incidencias con fotos | «Mi cuenta → Ver pedido» (ADR 0021) y devoluciones (ADR 0016) | Sí |
+| 6.6 | Visor del cliente: progreso, documentos, cancelar, repetir (6.6a) e incidencias con fotos (6.6b) | «Mi cuenta → Ver pedido» (ADR 0021) y devoluciones (ADR 0016) | Sí |
 | 7 | Pagos: Redsys (tarjeta y Bizum), aviso y vuelta firmados, devoluciones y *Ajustes → Pagos* | `Modules/Payments` con Redsys (ADR 0026, 0027) | Sí |
 | 8 | Panel de ventas, exportación, textos legales generados y banner de cookies | Informes (ADR 0017), `Platform/Legal` (ADR 0020) | Sí |
 | 9 | Auditoría final: una revisión adversarial del instructor con `GAUNTLET.md` como lista | — | — |

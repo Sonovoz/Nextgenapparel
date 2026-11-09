@@ -42,6 +42,8 @@ use Illuminate\Support\Facades\Storage;
  * @property ?Carbon $fecha_estimada_entrega
  * @property ?string $transportista
  * @property ?string $numero_seguimiento
+ * @property ?Carbon $cancelacion_solicitada_en
+ * @property ?string $motivo_cancelacion
  * @property-read ?Cliente $cliente
  * @property-read Collection<int, LineaPedido> $lineas
  * @property-read Collection<int, Factura> $facturas
@@ -116,6 +118,7 @@ class Pedido extends Model
             'correo_confirmado_en' => 'datetime',
             'condiciones_aceptadas_en' => 'datetime',
             'fecha_estimada_entrega' => 'date',
+            'cancelacion_solicitada_en' => 'datetime',
         ];
     }
 }
