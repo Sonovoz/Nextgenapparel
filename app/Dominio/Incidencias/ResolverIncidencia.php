@@ -7,6 +7,7 @@ use App\Dominio\Facturacion\EmitirFactura;
 use App\Dominio\Precios\Formato;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Incidencia;
+use App\Models\Pedido;
 use App\Models\User;
 use App\Notifications\Pedidos\IncidenciaResuelta;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,9 @@ final class ResolverIncidencia
         }
 
         $incidencia = DB::transaction(function () use ($incidencia, $resolucion, $respuesta, $importe, $quien): Incidencia {
+            // Primero el pedido (como los demás cambios de dinero) y luego la incidencia, antes de cualquier otra
+            // lectura: así lo ya rectificado se lee con los datos confirmados (B2).
+            Pedido::whereKey($incidencia->pedido_id)->lockForUpdate()->firstOrFail();
             $incidencia = Incidencia::whereKey($incidencia->id)->lockForUpdate()->firstOrFail();
             if (! $incidencia->abierta()) {
                 throw new IncidenciaNoValida("La incidencia {$incidencia->codigo} ya está resuelta.");

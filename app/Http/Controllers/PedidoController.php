@@ -217,6 +217,9 @@ class PedidoController
     private function puedeVer(Request $request, Pedido $pedido): bool
     {
         $cliente = $request->user()?->cliente;
+        if ($cliente !== null && ! $cliente->activo) {
+            return false; // ficha desactivada: como en Mi cuenta, sin acceso a sus pedidos (B5)
+        }
 
         return in_array($pedido->uuid, $request->session()->get(self::SESION, []), true)
             || ($cliente !== null && $pedido->cliente_id !== null && $pedido->cliente_id === $cliente->id);

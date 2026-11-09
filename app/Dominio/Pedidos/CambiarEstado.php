@@ -21,12 +21,19 @@ use Illuminate\Support\Facades\DB;
  */
 final class CambiarEstado
 {
-    /** @param  array{transportista?: ?string, numero_seguimiento?: ?string}  $envio */
-    public function __invoke(Pedido $pedido, EstadoPedido $nuevo, ?User $quien = null, ?string $nota = null, array $envio = []): Pedido
+    /**
+     * @param  array{transportista?: ?string, numero_seguimiento?: ?string}  $envio
+     * @param  ?EstadoPedido  $desde  si se indica, solo cambia si bajo el bloqueo sigue en ese estado (B1: un proceso
+     *                                que decidió con una lectura anterior no pisa un cambio hecho mientras tanto)
+     */
+    public function __invoke(Pedido $pedido, EstadoPedido $nuevo, ?User $quien = null, ?string $nota = null, array $envio = [], ?EstadoPedido $desde = null): Pedido
     {
-        return DB::transaction(function () use ($pedido, $nuevo, $quien, $nota, $envio) {
+        return DB::transaction(function () use ($pedido, $nuevo, $quien, $nota, $envio, $desde) {
             $pedido = Pedido::whereKey($pedido->getKey())->lockForUpdate()->firstOrFail();
             $actual = $pedido->estado;
+            if ($desde !== null && $actual !== $desde) {
+                throw new CambioNoValido("El pedido {$pedido->numero} ya no está «{$desde->etiqueta()}».");
+            }
             if (! in_array($nuevo, $actual->siguientes(), true)) {
                 throw new CambioNoValido("El pedido {$pedido->numero} está «{$actual->etiqueta()}» y no puede pasar a «{$nuevo->etiqueta()}».");
             }
@@ -51,7 +58,8 @@ final class CambiarEstado
             if ($nuevo === EstadoPedido::Pagado) {
                 EmitirFacturaPedido::dispatch($pedido->id)->afterCommit();
             } elseif ($nuevo === EstadoPedido::Cancelado && in_array($actual, [EstadoPedido::Pagado, EstadoPedido::DisenoEnRevision, EstadoPedido::RequiereCambios], true)) {
-                EmitirFacturaPedido::dispatch($pedido->id, 'rectificativa', trim('Cancelación del pedido '.$pedido->numero.(blank($nota) ? '' : ': '.trim($nota))))->afterCommit();
+                // Motivo fijo y en el idioma del cliente: la nota interna se queda en el historial (M2).
+                EmitirFacturaPedido::dispatch($pedido->id, 'rectificativa', __('facturas.motivo_cancelacion', ['numero' => $pedido->numero], $pedido->idioma))->afterCommit();
             }
             // El correo del estado, si está activo en Ajustes → Correos (sale al confirmar la transacción).
             $avisado = CorreosPedido::activo($nuevo) && CorreoPedido::enviar($pedido, new CorreoDelPedido($pedido, 'estado', $nuevo));

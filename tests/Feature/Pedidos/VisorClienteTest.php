@@ -207,6 +207,17 @@ class VisorClienteTest extends TestCase
         $this->actingAs($usuario)->get(PedidoController::url('ver', $this->pedido))->assertOk()->assertSee(__('pedidos.repetir'));
     }
 
+    /** B5: con la ficha desactivada no ve sus pedidos ni actúa sobre ellos, como en Mi cuenta. */
+    public function test_con_la_ficha_desactivada_no_ve_sus_pedidos(): void
+    {
+        $usuario = User::factory()->create(['email' => 'ana@ejemplo.com']);
+        $this->pedido->update(['cliente_id' => Cliente::factory()->create(['user_id' => $usuario->id, 'correo' => 'ana@ejemplo.com', 'activo' => false])->id]);
+
+        $this->actingAs($usuario)->get(PedidoController::url('ver', $this->pedido))->assertNotFound();
+        $this->actingAs($usuario)->post(PedidoController::url('cancelar', $this->pedido))->assertNotFound();
+        $this->assertSame(E::PendientePago, $this->pedido->fresh()->estado);
+    }
+
     public function test_el_backend_ve_y_filtra_las_peticiones_de_cancelacion(): void
     {
         Filament::setCurrentPanel('admin');

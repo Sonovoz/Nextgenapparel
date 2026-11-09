@@ -149,6 +149,22 @@ class ProduccionTest extends TestCase
             ->assertDontSee('Estudio Luna')->assertDontSee('luna@estudio.es')->assertDontSee('PED-0050');
     }
 
+    public static function fueraDeProduccion(): array
+    {
+        return ['sin pagar' => [E::PendientePago], 'cancelado' => [E::Cancelado], 'entregado' => [E::Entregado]];
+    }
+
+    /** B3: los documentos de producción, solo de los pedidos que se están produciendo. */
+    #[DataProvider('fueraDeProduccion')]
+    public function test_no_se_descargan_documentos_de_pedidos_fuera_de_produccion(E $estado): void
+    {
+        $this->pedido->update(['estado' => $estado]);
+        $this->actingAs($this->usuarioConRol(Rol::Produccion));
+
+        $this->get(route('backend.produccion.orden', $this->pedido))->assertNotFound();
+        $this->get(route('backend.produccion.paquete', $this->pedido))->assertNotFound();
+    }
+
     public function test_sin_la_seccion_produccion_o_sin_entrar_al_panel_no_hay_documentos(): void
     {
         $sin = $this->usuarioConRol(Rol::Produccion);

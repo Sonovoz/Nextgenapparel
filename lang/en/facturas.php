@@ -25,6 +25,7 @@ return [
     'total' => 'Total',
     'envio' => 'Shipping',
     'anulacion_resto' => 'Order cancellation (less refunds already credited)',
+    'motivo_cancelacion' => 'Cancellation of order :numero',
     'reembolso_incidencia' => 'Partial refund for issue :codigo',
     'segun_desglose' => 'per breakdown',
     'impresion' => 'printed on :zonas',

@@ -62,6 +62,8 @@ class IncidenciasTest extends TestCase
         $imagen = new Imagick;
         $imagen->newImage($ancho, 1200, new ImagickPixel('#c33'));
         $imagen->setImageProperty('comment', 'Calle Secreta 1, 40.4168 -3.7038');
+        // La ubicación también puede ir en un perfil XMP (como la guardan muchos móviles).
+        $imagen->setImageProfile('xmp', '<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description xmlns:exif="http://ns.adobe.com/exif/1.0/" exif:GPSLatitude="40,25.0N" exif:GPSLongitude="3,42.2W"/></rdf:RDF></x:xmpmeta>');
         $imagen->setImageFormat('png');
 
         return UploadedFile::fake()->createWithContent($nombre, $imagen->getImageBlob());
@@ -88,6 +90,8 @@ class IncidenciasTest extends TestCase
         $guardada->readImageBlob(Storage::disk(Pedido::DISCO)->get($incidencia->fotos[0]->ruta));
         $this->assertSame('WEBP', $guardada->getImageFormat());
         $this->assertArrayNotHasKey('comment', $guardada->getImageProperties());
+        $this->assertSame([], $guardada->getImageProfiles());
+        $this->assertSame([], array_filter(array_keys($guardada->getImageProperties()), fn ($k) => str_starts_with($k, 'exif:') || str_starts_with($k, 'xmp')));
         Notification::assertSentOnDemand(IncidenciaAbierta::class, fn ($n, $c, $destino) => $destino->routes['mail'] === 'taller@nextgenapparel.test');
         $this->assertStringContainsString('INC-0001', $this->pedido->notas()->sole()->texto);
 
@@ -98,6 +102,11 @@ class IncidenciasTest extends TestCase
         $this->withSession([PedidoController::SESION => [$this->pedido->uuid]])->get($foto)->assertOk()->assertHeader('Content-Type', 'image/webp');
         $this->flushSession();
         $this->get($foto)->assertNotFound();
+
+        // Con acceso a otro pedido, la foto de este por la URL de aquel tampoco.
+        $propio = Pedido::factory()->create();
+        $this->withSession([PedidoController::SESION => [$propio->uuid]])
+            ->get(route('pedidos.es.foto-incidencia', ['pedido' => $propio->uuid, 'foto' => $incidencia->fotos[0]->id]))->assertNotFound();
     }
 
     public static function datosNoValidos(): array

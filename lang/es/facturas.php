@@ -26,6 +26,7 @@ return [
     'total' => 'Total',
     'envio' => 'Envío',
     'anulacion_resto' => 'Anulación del pedido (descontados los reembolsos ya rectificados)',
+    'motivo_cancelacion' => 'Cancelación del pedido :numero',
     'reembolso_incidencia' => 'Reembolso parcial por la incidencia :codigo',
     'segun_desglose' => 'según desglose',
     'impresion' => 'impresión en :zonas',
