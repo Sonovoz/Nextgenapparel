@@ -157,7 +157,7 @@ class PedidoResource extends Resource
                     ->helperText(fn (Pedido $r) => 'El cliente ve: «'.$r->estado->visible($r->idioma).'»'),
                 TextEntry::make('cancelacion_solicitada_en')->label('El cliente pide cancelar')->dateTime('d/m/Y H:i')->color('danger')->weight('bold')
                     ->visible(fn (Pedido $r) => $r->cancelacion_solicitada_en !== null && in_array($r->estado, CancelarPorCliente::CON_PETICION, true))
-                    ->helperText(fn (Pedido $r) => ($r->motivo_cancelacion ? 'Motivo: '.$r->motivo_cancelacion.'. ' : '').'Cancélalo con «Cambiar estado» (se emite la rectificativa) y devuelve el dinero en el TPV hasta que llegue Redsys.'),
+                    ->helperText(fn (Pedido $r) => ($r->motivo_cancelacion ? 'Motivo: '.$r->motivo_cancelacion.'. ' : '').'Cancélalo con «Cambiar estado»: se emite la rectificativa y el dinero se devuelve solo por la pasarela.'),
                 TextEntry::make('created_at')->label('Creado')->dateTime('d/m/Y H:i'),
                 TextEntry::make('correo_confirmado_en')->label('Correo confirmado')->dateTime('d/m/Y H:i')->placeholder('Pendiente: el pedido no se puede dar por pagado'),
                 TextEntry::make('fecha_estimada_entrega')->label('Entrega estimada')->date('d/m/Y')->placeholder('—'),

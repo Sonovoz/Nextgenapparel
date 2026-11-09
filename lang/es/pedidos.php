@@ -72,4 +72,5 @@ return [
     'cancelar_solicitado' => 'Hemos recibido tu petición. Te escribiremos en cuanto la revisemos.',
     'cancelar_no_puede' => 'Este pedido ya no se puede cancelar desde aquí. Escríbenos y lo vemos.',
     'cancelacion_pedida' => 'Pediste cancelar este pedido el :fecha. Lo estamos revisando.',
+    'cancelar_cancelado_devolucion' => 'Tu pedido está cancelado. Te devolvemos el dinero en la misma tarjeta o Bizum; puede tardar unos días en verse.',
 ];

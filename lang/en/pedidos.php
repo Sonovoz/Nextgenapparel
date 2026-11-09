@@ -71,4 +71,5 @@ return [
     'cancelar_solicitado' => 'We have received your request. We will write to you as soon as we have reviewed it.',
     'cancelar_no_puede' => 'This order can no longer be cancelled here. Write to us and we will look into it.',
     'cancelacion_pedida' => 'You asked to cancel this order on :fecha. We are reviewing it.',
+    'cancelar_cancelado_devolucion' => 'Your order has been cancelled. We are refunding you to the same card or Bizum; it may take a few days to show.',
 ];

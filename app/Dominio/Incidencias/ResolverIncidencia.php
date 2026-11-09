@@ -4,6 +4,7 @@ namespace App\Dominio\Incidencias;
 
 use App\Dominio\Facturacion\EmisorIncompleto;
 use App\Dominio\Facturacion\EmitirFactura;
+use App\Dominio\Pagos\DevolverDinero;
 use App\Dominio\Precios\Formato;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Incidencia;
@@ -20,12 +21,12 @@ use LogicException;
  *
  * - **Reimpresión**: se vuelven a imprimir las prendas (el equipo lo organiza con la nota del pedido).
  * - **Reembolso parcial**: importe con impuestos, como mucho lo que queda por devolver del pedido; se
- *   emite su **rectificativa parcial** al momento. El dinero se devuelve en el TPV hasta Redsys (fase 7).
+ *   emite su **rectificativa parcial** y el dinero se devuelve por la pasarela (D182).
  * - **Rechazo**: con el motivo en la respuesta.
  */
 final class ResolverIncidencia
 {
-    public function __construct(private readonly EmitirFactura $facturas) {}
+    public function __construct(private readonly EmitirFactura $facturas, private readonly DevolverDinero $devolver) {}
 
     public function __invoke(Incidencia $incidencia, ResolucionIncidencia $resolucion, string $respuesta, ?int $importe, User $quien): Incidencia
     {
@@ -57,12 +58,19 @@ final class ResolverIncidencia
                     throw new IncidenciaNoValida($e->getMessage());
                 }
             }
+            if ($factura !== null && DevolverDinero::pendiente($incidencia->pedido) > 0) {
+                // El dinero, por la pasarela (D182). Si falla, no se resuelve y tampoco queda la rectificativa.
+                $devuelto = ($this->devolver)($incidencia->pedido, (int) $importe, "incidencia-{$incidencia->id}", "Incidencia {$incidencia->codigo}");
+                if (! $devuelto->hecha) {
+                    throw new IncidenciaNoValida('No se ha podido devolver el dinero: '.$devuelto->error);
+                }
+            }
             $incidencia->update([
                 'estado' => 'resuelta', 'resolucion' => $resolucion, 'importe_reembolso' => $factura === null ? null : (int) $importe,
                 'factura_id' => $factura?->id, 'respuesta' => mb_substr($respuesta, 0, 2000), 'user_id' => $quien->id, 'resuelta_en' => now(),
             ]);
             $incidencia->pedido->notas()->create(['tipo' => 'privada', 'user_id' => $quien->id, 'texto' => mb_substr("Incidencia {$incidencia->codigo} resuelta: {$resolucion->etiqueta('es')}"
-                .($factura !== null ? ' de '.Formato::euros((int) $importe, 'es')." (rectificativa {$factura->codigo}; devuelve el dinero en el TPV hasta que llegue Redsys)" : '').'.', 0, 500)]);
+                .($factura !== null ? ' de '.Formato::euros((int) $importe, 'es')." (rectificativa {$factura->codigo})" : '').'.', 0, 500)]);
 
             return $incidencia;
         });
