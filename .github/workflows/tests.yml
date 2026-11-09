@@ -71,6 +71,12 @@ jobs:
       - name: Instalar dependencias
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      # Las copias de seguridad usan mariadb-dump (el mysqldump 8 del runner no sirve con MariaDB).
+      - name: Cliente de MariaDB
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq mariadb-client
+
       # En la 10.4 «explicit_defaults_for_timestamp» ya está apagado (como en XAMPP) y no se puede cambiar.
       - name: MariaDB como XAMPP
         run: |
