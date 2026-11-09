@@ -27,4 +27,5 @@ return [
     'pedidos' => 'pedidos',
     'confirmar_correo_pedido' => 'confirmar-correo',
     'reenviar_enlace' => 'reenviar-enlace',
+    'maquetas' => 'maquetas',
 ];

@@ -45,4 +45,6 @@ return [
     'correo_confirmar_plazo' => '{1} El enlace vale 1 día.|[2,*] El enlace vale :n días.',
     'correo_confirmar_no_fuiste' => 'Si no has hecho este pedido, no hagas nada: sin confirmar no seguiremos adelante.',
     'sin_iva' => 'sin IVA',
+    'maqueta_delantera' => 'Maqueta delantera de :prenda',
+    'maqueta_trasera' => 'Maqueta trasera de :prenda',
 ];

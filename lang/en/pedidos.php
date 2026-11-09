@@ -44,4 +44,6 @@ return [
     'correo_confirmar_plazo' => '{1} The link is valid for 1 day.|[2,*] The link is valid for :n days.',
     'correo_confirmar_no_fuiste' => 'If you did not place this order, do nothing: we will not go ahead without confirmation.',
     'sin_iva' => 'excl. VAT',
+    'maqueta_delantera' => 'Front mock-up of :prenda',
+    'maqueta_trasera' => 'Back mock-up of :prenda',
 ];

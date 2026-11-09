@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 09/11 | **6.2 Maquetas del pedido**: una imagen por cara generada en el servidor (Imagick) con los diseños en su sitio y el fundido con la tela, en la cola con reintentos, y visibles en la página del pedido. | `fase-6-maquetas` | D172 |
 | 09/11 | **Auditoría del proyecto y nuevo método**: la CI es la puerta (Pint, Larastan, SQLite con PHP 8.3 y 8.5, MariaDB estricta), una revisión del instructor por fase, historial de una línea por entrega y reutilización de Clave de Alma para lo que falta (`docs/AUDITORIA_2026-11-09.md`). | `fase-6-pedidos` | D171 |
 | 08/11 | **6.1 Pedido desde el carrito**: «Confirmar pedido» con las condiciones, número correlativo `PED-0001`, copia congelada (datos, líneas, importes del motor, archivos de los diseños), cupón y carrito bajo bloqueo, enlace para que el invitado confirme su correo y página del pedido. | `fase-6-pedidos` | D169, D170 |
 | 08/11 | Plan de la fase 6 (presupuesto en PDF aplazado). | `fase-6-pedidos` | D168 |

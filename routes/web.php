@@ -114,6 +114,7 @@ foreach (array_keys(config('idiomas.disponibles')) as $idioma) {
             Route::get('/{pedido}', [PedidoController::class, 'ver'])->name('ver')->whereUuid('pedido');
             Route::get('/{pedido}/'.$tramo('confirmar_correo_pedido'), [PedidoController::class, 'confirmarCorreo'])->name('confirmar-correo')->whereUuid('pedido')->middleware('throttle:cuenta-verificar');
             Route::post('/{pedido}/'.$tramo('reenviar_enlace'), [PedidoController::class, 'reenviar'])->name('reenviar')->whereUuid('pedido')->middleware('throttle:cuenta-reenviar');
+            Route::get('/{pedido}/'.$tramo('maquetas').'/{maqueta}', [PedidoController::class, 'maqueta'])->name('maqueta')->whereUuid('pedido')->whereNumber('maqueta');
         });
 
     // El idioma va en la ruta (para EstablecerIdioma y las URL), no en un parámetro de la URL.

@@ -8,6 +8,7 @@ use App\Dominio\Clientes\TipoCliente;
 use App\Dominio\Disenos\GuardarDiseno;
 use App\Dominio\Precios\Motor\Destino;
 use App\Dominio\Precios\Motor\LineaCalculada;
+use App\Jobs\GenerarMaquetasPedido;
 use App\Models\Carrito;
 use App\Models\Cliente;
 use App\Models\Cupon;
@@ -47,11 +48,15 @@ final class CrearPedido
 
         try {
             // Hasta 3 intentos si MariaDB detecta un interbloqueo entre dos pedidos (M1).
-            return DB::transaction(fn () => $this->crear($carrito, $datos, $cliente, $totalVisto, $idioma, $ip, $uuid), 3);
+            $pedido = DB::transaction(fn () => $this->crear($carrito, $datos, $cliente, $totalVisto, $idioma, $ip, $uuid), 3);
         } catch (Throwable $e) {
             Storage::disk(Pedido::DISCO)->deleteDirectory($uuid); // nada a medias
             throw $e;
         }
+        // Las maquetas, en la cola con reintentos (paso 6.2): si fallan, el pedido sigue adelante.
+        GenerarMaquetasPedido::dispatch($pedido->id);
+
+        return $pedido;
     }
 
     private function crear(Carrito $carrito, array $datos, ?Cliente $cliente, int $totalVisto, string $idioma, ?string $ip, string $uuid): Pedido
@@ -207,6 +212,8 @@ final class CrearPedido
             'miniatura' => $miniatura,
             'nombre_original' => $diseno?->nombre_original,
             'sha256' => $diseno?->sha256,
+            'util_x' => $diseno?->util_x,
+            'util_y' => $diseno?->util_y,
             'util_ancho_px' => $diseno?->util_ancho_px,
             'util_alto_px' => $diseno?->util_alto_px,
             'ppp' => $calidad['ppp'] ?? null,

@@ -28,6 +28,13 @@
                 <div class="pedido-lineas">
                     @foreach ($pedido->lineas as $linea)
                         <article class="pedido-tarjeta pedido-linea">
+                            @if ($linea->maquetas->isNotEmpty())
+                                <div class="pedido-maquetas">
+                                    @foreach ($linea->maquetas as $maqueta)
+                                        <img src="{{ route('pedidos.'.app()->getLocale().'.maqueta', ['pedido' => $pedido->uuid, 'maqueta' => $maqueta->id]) }}" alt="{{ __('pedidos.maqueta_'.$maqueta->cara, ['prenda' => $linea->nombreEn()]) }}" width="{{ $maqueta->ancho_px }}" height="{{ $maqueta->alto_px }}" loading="lazy">
+                                    @endforeach
+                                </div>
+                            @endif
                             <h2>{{ $linea->nombreEn() }}@if ($linea->colorEn()) · {{ $linea->colorEn() }}@endif</h2>
                             <p class="claro">
                                 @if ($linea->tallas)

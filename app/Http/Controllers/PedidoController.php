@@ -7,13 +7,16 @@ use App\Dominio\Pedidos\ConfirmarCorreoPedido;
 use App\Dominio\Pedidos\CrearPedido;
 use App\Dominio\Pedidos\PedidoNoCreado;
 use App\Models\Ajuste;
+use App\Models\MaquetaPedido;
 use App\Models\Pedido;
 use App\Notifications\Pedidos\ConfirmaTuCorreo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Confirmar el pedido desde el cierre y verlo (paso 6.1, D169). Un pedido lo ve quien
@@ -65,9 +68,17 @@ class PedidoController
     public function ver(Request $request, Pedido $pedido): View
     {
         abort_unless($this->puedeVer($request, $pedido), 404);
-        $pedido->load('lineas.impresiones');
+        $pedido->load('lineas.impresiones', 'lineas.maquetas');
 
         return view('pedidos.ver', ['pedido' => $pedido, 'alternos' => $this->alternos('ver', $pedido)]);
+    }
+
+    /** La maqueta de una cara (paso 6.2): del disco privado, solo para quien puede ver el pedido. */
+    public function maqueta(Request $request, Pedido $pedido, MaquetaPedido $maqueta): Response
+    {
+        abort_unless($this->puedeVer($request, $pedido) && $maqueta->linea?->pedido_id === $pedido->id, 404);
+
+        return Storage::disk(Pedido::DISCO)->response($maqueta->ruta, null, ['Cache-Control' => 'private, max-age=86400']);
     }
 
     /** El enlace del correo: confirma el correo del invitado y le enseña su pedido. */

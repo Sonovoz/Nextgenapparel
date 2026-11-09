@@ -8,6 +8,7 @@ use App\Models\Foto;
 use App\Models\FotoZona;
 use App\Models\ImpresionCarrito;
 use App\Models\LineaCarrito;
+use App\Models\ZonaImpresion;
 
 /**
  * Maqueta 2D de una línea del carrito (paso 5.6): la foto de maqueta de cada cara con
@@ -54,13 +55,22 @@ final class Maqueta
      */
     public static function posicion(ImpresionCarrito $i, FotoZona $rect, Cara $cara): array
     {
-        $zona = $i->zona;
-        $desplazamiento = $i->desde_centro_mm - $zona->desde_centro_mm; // negativo: hacia su izquierda
+        return self::rectangulo($i->zona, $rect, $cara, $i->ancho_mm, $i->alto_mm, $i->desde_cuello_mm, $i->desde_centro_mm);
+    }
+
+    /**
+     * Lo mismo a partir de las medidas en mm: lo usan el carrito y las maquetas del pedido (paso 6.2).
+     *
+     * @return array{left: float, top: float, width: float, height: float}
+     */
+    public static function rectangulo(ZonaImpresion $zona, FotoZona $rect, Cara $cara, int $anchoMm, int $altoMm, int $desdeCuelloMm, int $desdeCentroMm): array
+    {
+        $desplazamiento = $desdeCentroMm - $zona->desde_centro_mm; // negativo: hacia su izquierda
         $enFoto = $cara === Cara::Delantera ? -$desplazamiento : $desplazamiento;
-        $fx = ($zona->ancho_max_mm / 2 + $enFoto - $i->ancho_mm / 2) / max(1, $zona->ancho_max_mm);
-        $fy = ($i->desde_cuello_mm - $zona->desde_cuello_mm) / max(1, $zona->alto_max_mm);
-        $fw = $i->ancho_mm / max(1, $zona->ancho_max_mm);
-        $fh = $i->alto_mm / max(1, $zona->alto_max_mm);
+        $fx = ($zona->ancho_max_mm / 2 + $enFoto - $anchoMm / 2) / max(1, $zona->ancho_max_mm);
+        $fy = ($desdeCuelloMm - $zona->desde_cuello_mm) / max(1, $zona->alto_max_mm);
+        $fw = $anchoMm / max(1, $zona->ancho_max_mm);
+        $fh = $altoMm / max(1, $zona->alto_max_mm);
         // FotoZona en centésimas de porcentaje de la foto.
         $redondeo = fn (float $v) => round($v, 2);
 

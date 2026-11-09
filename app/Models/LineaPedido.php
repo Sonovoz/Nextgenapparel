@@ -30,6 +30,11 @@ class LineaPedido extends Model
         return $this->hasMany(ImpresionPedido::class)->orderBy('id');
     }
 
+    public function maquetas(): HasMany
+    {
+        return $this->hasMany(MaquetaPedido::class)->orderByRaw("cara = 'delantera' desc");
+    }
+
     /** El nombre copiado al confirmar, en ese idioma (o en español). */
     public function nombreEn(?string $idioma = null): string
     {
