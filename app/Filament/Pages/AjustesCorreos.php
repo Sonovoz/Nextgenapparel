@@ -160,6 +160,14 @@ class AjustesCorreos extends Page implements HasSchemas
                 ->fillForm(fn () => ['para' => auth()->user()?->email])
                 ->schema([TextInput::make('para')->label('Enviar a')->email()->required()])
                 ->action(function (array $data): void {
+                    // Con MAIL_MAILER=log el correo no sale: se escribe en el log. Se dice claro.
+                    if (config('mail.default') === 'log') {
+                        Notification::make()->title('El correo no se ha enviado')
+                            ->body('El .env tiene MAIL_MAILER='.config('mail.default').': los correos se escriben en '.storage_path('logs'.DIRECTORY_SEPARATOR.'laravel.log').'. Pon MAIL_MAILER=smtp en el .env y ejecuta «php artisan config:clear».')
+                            ->warning()->persistent()->send();
+
+                        return;
+                    }
                     try {
                         Notificaciones::route('mail', $data['para'])->notifyNow(new CorreoDePrueba);
                         Notification::make()->title('Correo de prueba enviado a '.$data['para'])->body('Mira la bandeja de entrada y la de spam.')->success()->send();
