@@ -19,6 +19,7 @@
     td { border-bottom: 1px solid #e5e5e5; padding: 1.8mm 1.5mm; vertical-align: top; }
     .num { text-align: right; white-space: nowrap; }
     .totales td { border: 0; padding: 1mm 1.5mm; }
+    .maquetas img { width: 42mm; margin: 2.5mm 2mm 0 0; border: 1px solid #e5e5e5; }
 </style>
 </head>
 <body>
@@ -29,7 +30,9 @@
         <thead><tr><th>{{ __('presupuestos.concepto', [], $i) }}</th><th class="num">{{ __('presupuestos.unidades', [], $i) }}</th><th class="num">{{ __('presupuestos.importe', [], $i) }}</th></tr></thead>
         <tbody>
             @foreach ($c['lineas'] as $l)
-                <tr><td><strong>{{ $l['descripcion'] }}</strong><br><span class="tenue">{{ $l['detalle'] }}</span></td><td class="num">{{ $l['unidades'] }}</td><td class="num">{{ $e($l['neto']) }}</td></tr>
+                <tr><td><strong>{{ $l['descripcion'] }}</strong><br><span class="tenue">{{ $l['detalle'] }}</span>
+                    {{-- Lo que ha creado: la maqueta de cada cara con sus diseños (D200). --}}
+                    @if (! empty($maquetas[$loop->index]))<div class="maquetas">@foreach ($maquetas[$loop->index] as $img)<img src="{{ $img }}" alt="">@endforeach</div>@endif</td><td class="num">{{ $l['unidades'] }}</td><td class="num">{{ $e($l['neto']) }}</td></tr>
             @endforeach
         </tbody>
     </table>
