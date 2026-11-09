@@ -47,6 +47,10 @@ class Ajuste extends Model
         'pagos.cancelacion_automatica' => false,
         // D187: días que vale un presupuesto.
         'presupuestos.dias_validez' => 15,
+        // v2 (D193): pliegos DTI. Ancho del film, largo máximo de cada pliego y separación entre diseños, en mm.
+        'produccion.pliego_ancho_mm' => 580,
+        'produccion.pliego_largo_mm' => 1000,
+        'produccion.pliego_separacion_mm' => 5,
         // v2 (D189): carritos abandonados. Desactivado hasta que el equipo lo active; horas desde el último cambio y cupón opcional.
         'carritos.avisos_activos' => false,
         'carritos.secuencia' => [['horas' => 1, 'cupon' => null], ['horas' => 24, 'cupon' => null], ['horas' => 72, 'cupon' => null]],

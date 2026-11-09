@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Dominio\Produccion\HojaCompra;
 use App\Dominio\Produccion\OrdenTrabajo;
 use App\Dominio\Produccion\PaqueteProduccion;
+use App\Dominio\Produccion\PliegosDti;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Filament\Navegacion\GrupoNavegacion;
 use App\Filament\Pages\Produccion\OrdenesTrabajo;
@@ -36,6 +37,18 @@ class ProduccionController
         Actividad::apuntar('produccion', 'Paquete de producción descargado', $pedido);
 
         return response()->download(PaqueteProduccion::crear($pedido), $pedido->numero.'_produccion.zip', ['Content-Type' => 'application/zip'])->deleteFileAfterSend();
+    }
+
+    /** Pliegos DTI (v2, D193): los diseños de los pedidos en producción, colocados en el film. */
+    public function pliegos(): Response
+    {
+        $this->comprobarAcceso();
+        Actividad::apuntar('produccion', 'Pliegos DTI descargados');
+
+        return response(PliegosDti::pdf(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="pliegos-dti-'.now()->format('Y-m-d-Hi').'.pdf"',
+        ]);
     }
 
     public function hojaCompra(): Response
