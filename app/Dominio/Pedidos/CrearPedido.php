@@ -6,6 +6,7 @@ use App\Dominio\Carrito\TipoLinea;
 use App\Dominio\Carrito\ValorarCarrito;
 use App\Dominio\Clientes\TipoCliente;
 use App\Dominio\Disenos\GuardarDiseno;
+use App\Dominio\Informes\CosteLinea;
 use App\Dominio\Legal\PaginaLegal;
 use App\Dominio\Precios\Motor\Destino;
 use App\Dominio\Precios\Motor\LineaCalculada;
@@ -185,6 +186,10 @@ final class CrearPedido
             'descuento' => $calculada->descuento,
             'cupon' => $calculada->cupon,
             'neto' => $calculada->neto(),
+            // El coste al venderla, para los márgenes (D191).
+            'coste' => $esPack
+                ? CosteLinea::pack(self::repartoPack($linea), $linea->impresiones->pluck('zona_impresion_id')->all())
+                : CosteLinea::prenda((int) $linea->prenda_id, (int) $linea->color_id, $linea->unidadesPorTalla(), $linea->impresiones->pluck('zona_impresion_id')->all()),
             'tipo_iva' => $calculada->tipoIva,
             'recargo' => $calculada->recargo,
         ]);

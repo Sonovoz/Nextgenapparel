@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $cupon
  * @property int $neto
  * @property int $tipo_iva
+ * @property ?int $coste céntimos sin IVA al venderla (D191)
  * @property int $recargo
  * @property-read Collection<int, ImpresionPedido> $impresiones
  * @property-read Collection<int, MaquetaPedido> $maquetas

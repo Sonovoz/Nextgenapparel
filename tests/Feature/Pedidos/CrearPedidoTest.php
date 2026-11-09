@@ -111,6 +111,7 @@ class CrearPedidoTest extends TestCase
         $linea = $pedido->lineas->sole();
         $this->assertSame(['Essential T-shirt', 'Black', [['talla_id' => $linea->tallas[0]['talla_id'], 'nombre' => 'M', 'unidades' => 15]]], [$linea->nombreEn('en'), $linea->colorEn('en'), $linea->tallas]);
         $this->assertSame([15, 6000, 4500, 10500], [$linea->unidades, $linea->prendas, $linea->impresion, $linea->neto]);
+        $this->assertSame((250 + 100) * 15, $linea->coste); // coste de la variante (fábrica) + de la zona, por unidad (D191)
         $impresion = $linea->impresiones->sole();
         $this->assertSame(['Frontal', 100, 75, 305, 'correcta'], [$impresion->zonaEn('es'), $impresion->ancho_mm, $impresion->desde_cuello_mm, $impresion->ppp, $impresion->nivel_calidad]);
 
