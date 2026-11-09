@@ -2,9 +2,10 @@
 
 namespace App\Dominio\Pedidos;
 
+use App\Models\Ajuste;
+
 /**
- * Estados del pedido (ficha § 8). El nombre que ve el cliente sale de lang/{es,en}/pedidos.php
- * hasta que el paso 6.4 lo haga editable en el backend.
+ * Estados del pedido (ficha § 8). El nombre que ve el cliente se edita en Ajustes → Correos (paso 6.4).
  */
 enum EstadoPedido: string
 {
@@ -34,10 +35,13 @@ enum EstadoPedido: string
         };
     }
 
-    /** Lo que ve el cliente, en su idioma. */
+    /** Lo que ve el cliente, en su idioma: el nombre de Ajustes → Correos o, si está vacío, el de lang/. */
     public function visible(?string $idioma = null): string
     {
-        return __('pedidos.estado_'.$this->value, [], $idioma);
+        $idioma ??= app()->getLocale();
+        $propio = trim((string) (((array) Ajuste::obtener('pedidos.estados_visibles'))[$this->value][$idioma] ?? ''));
+
+        return $propio !== '' ? $propio : __('pedidos.estado_'.$this->value, [], $idioma);
     }
 
     /**

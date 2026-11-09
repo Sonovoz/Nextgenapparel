@@ -41,6 +41,12 @@ class Ajuste extends Model
         // y días extra de producción según las unidades: [{desde: 100, dias: 2}, …] (vacío: ninguno).
         'pedidos.dias_sin_pago' => 7,
         'pedidos.plazo_tramos' => [],
+        // Paso 6.4: SMTP del panel (contraseña cifrada), estados que avisan al cliente, plantillas
+        // propias por estado e idioma y nombres visibles de los estados (vacíos: los de lang/).
+        'correo.smtp' => [],
+        'correo.estados_activos' => ['pagado', 'requiere_cambios', 'enviado', 'cancelado'],
+        'correo.plantillas' => [],
+        'pedidos.estados_visibles' => [],
         // Recargo de equivalencia (paso 5.4): «equipo» (lo activa el equipo en la ficha) o «cliente» (lo marca él).
         'clientes.recargo_lo_indica' => 'equipo',
         // Mejora con IA para el cliente (D143): activa, desde qué nivel y texto propio por idioma (vacío = el de lang/disenos.php).

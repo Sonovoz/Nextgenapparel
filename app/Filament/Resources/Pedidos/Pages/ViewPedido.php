@@ -4,9 +4,11 @@ namespace App\Filament\Resources\Pedidos\Pages;
 
 use App\Dominio\Pedidos\CambiarEstado;
 use App\Dominio\Pedidos\CambioNoValido;
+use App\Dominio\Pedidos\CorreoPedido;
 use App\Dominio\Pedidos\EstadoPedido;
 use App\Filament\Resources\Pedidos\PedidoResource;
 use App\Models\Pedido;
+use App\Notifications\Pedidos\CorreoDelPedido;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
@@ -64,7 +66,9 @@ class ViewPedido extends ViewRecord
                 ])
                 ->action(function (array $data) use ($pedido): void {
                     $pedido->notas()->create(['tipo' => $data['tipo'], 'texto' => trim($data['texto']), 'user_id' => auth()->id()]);
-                    Notification::make()->title('Nota añadida')->success()->send();
+                    // La nota para el cliente le llega también por correo (paso 6.4).
+                    $avisado = $data['tipo'] === 'cliente' && CorreoPedido::enviar($pedido, new CorreoDelPedido($pedido, 'nota', nota: $data['texto']));
+                    Notification::make()->title('Nota añadida')->body($avisado ? 'Se le ha enviado por correo.' : null)->success()->send();
                 }),
             Action::make('fecha')->label('Fecha estimada')->icon(Heroicon::OutlinedCalendarDays)->color('gray')
                 ->fillForm(['fecha_estimada_entrega' => $pedido->fecha_estimada_entrega])

@@ -6,6 +6,7 @@ use App\Dominio\Carrito\FusionarCarrito;
 use App\Dominio\Disenos\Propietario;
 use App\Dominio\Disenos\TraspasarDisenos;
 use App\Dominio\Sistema\Actividad\Actividad;
+use App\Dominio\Sistema\Correo\Smtp;
 use App\Dominio\Sistema\Errores\ErrorDeCopia;
 use App\Models\Ajuste;
 use App\Models\Caja;
@@ -64,6 +65,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // SMTP escrito en Ajustes → Correos (paso 6.4): manda sobre el .env, al crear el correo.
+        $smtpAplicado = false;
+        $this->app->beforeResolving('mail.manager', function () use (&$smtpAplicado): void {
+            if (! $smtpAplicado) {
+                $smtpAplicado = true;
+                rescue(fn () => Smtp::aplicar(), report: false);
+            }
+        });
+
         // Subidas de diseños: un límite por IP frena el abuso sin molestar a quien prueba varias versiones.
         RateLimiter::for('disenos', fn (Request $request) => Limit::perHour(max(1, (int) Ajuste::obtener('disenos.subidas_hora')))->by($request->ip()));
 

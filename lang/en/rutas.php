@@ -28,4 +28,5 @@ return [
     'confirmar_correo_pedido' => 'confirm-email',
     'reenviar_enlace' => 'resend-link',
     'maquetas' => 'mockups',
+    'acceso' => 'access',
 ];

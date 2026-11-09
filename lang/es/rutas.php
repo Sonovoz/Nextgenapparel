@@ -28,4 +28,5 @@ return [
     'confirmar_correo_pedido' => 'confirmar-correo',
     'reenviar_enlace' => 'reenviar-enlace',
     'maquetas' => 'maquetas',
+    'acceso' => 'acceso',
 ];

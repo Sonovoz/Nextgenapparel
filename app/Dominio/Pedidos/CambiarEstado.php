@@ -5,6 +5,7 @@ namespace App\Dominio\Pedidos;
 use App\Models\Cupon;
 use App\Models\Pedido;
 use App\Models\User;
+use App\Notifications\Pedidos\CorreoDelPedido;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -14,8 +15,8 @@ use Illuminate\Support\Facades\DB;
  *   transportista y el número de seguimiento; no se da por pagado un pedido de invitado
  *   con el correo sin confirmar.
  * - Al cancelar se devuelve el uso del cupón (decisión del cliente, D173).
- * - Cada cambio queda en el historial con quién lo hizo y su nota. Los correos al cliente,
- *   en el paso 6.4.
+ * - Cada cambio queda en el historial con quién lo hizo, su nota y si se avisó al cliente
+ *   (el correo del estado, si está activo en Ajustes → Correos, paso 6.4).
  */
 final class CambiarEstado
 {
@@ -45,7 +46,9 @@ final class CambiarEstado
                 Cupon::where('codigo', $pedido->cupon)->where('usos', '>', 0)->decrement('usos');
             }
             $pedido->update($cambios);
-            $pedido->historial()->create(['estado' => $nuevo, 'user_id' => $quien?->id, 'nota' => blank($nota) ? null : trim($nota)]);
+            // El correo del estado, si está activo en Ajustes → Correos (sale al confirmar la transacción).
+            $avisado = CorreosPedido::activo($nuevo) && CorreoPedido::enviar($pedido, new CorreoDelPedido($pedido, 'estado', $nuevo));
+            $pedido->historial()->create(['estado' => $nuevo, 'user_id' => $quien?->id, 'nota' => blank($nota) ? null : trim($nota), 'notificado_cliente' => $avisado]);
 
             return $pedido;
         });
