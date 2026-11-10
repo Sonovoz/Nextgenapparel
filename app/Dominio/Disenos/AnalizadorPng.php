@@ -40,7 +40,7 @@ class AnalizadorPng
     ];
 
     /**
-     * @param  array{max_mb: int, max_px: int, min_px: int}|null  $limites  los de Ajustes si no se indican
+     * @param  array{max_mb: int, max_px: int, min_px: int, exigir_ppp?: int}|null  $limites  los de Ajustes si no se indican
      * @param  (callable(Imagick, AnalisisPng): void)|null  $conImagen  trabajo extra con la imagen ya leída
      *                                                                  (la miniatura), sin leerla otra vez
      */
@@ -80,6 +80,10 @@ class AnalizadorPng
         } catch (ImagickException) {
             throw new DisenoNoValido('ilegible');
         }
+        // D206 (ya se sabe que es un PNG legible): si se exige (Ajustes → General), el PNG tiene que declarar su resolución en ppp.
+        if (($limites['exigir_ppp'] ?? 0) && self::pppDeclarados($ruta) === null) {
+            throw new DisenoNoValido('sin_ppp');
+        }
 
         try {
             [$util, $fondo] = $imagen->getImageAlphaChannel()
@@ -102,6 +106,7 @@ class AnalizadorPng
                 fondo: $fondo,
                 perfilColor: $this->perfilColor($ruta),
                 profundidadBits: (int) $imagen->getImageDepth(),
+                pppArchivo: self::pppDeclarados($ruta),
             );
 
             if ($conImagen !== null) {
@@ -152,13 +157,14 @@ class AnalizadorPng
         }
     }
 
-    /** @return array{max_mb: int, max_px: int, min_px: int} */
+    /** @return array{max_mb: int, max_px: int, min_px: int, exigir_ppp: int} */
     public static function limites(): array
     {
         return [
             'max_mb' => (int) Ajuste::obtener('disenos.max_mb'),
             'max_px' => (int) Ajuste::obtener('disenos.max_px'),
             'min_px' => (int) Ajuste::obtener('disenos.min_px'),
+            'exigir_ppp' => (int) (bool) Ajuste::obtener('disenos.exigir_ppp'),
         ];
     }
 
@@ -226,6 +232,42 @@ class AnalizadorPng
     }
 
     /** Nombre del perfil ICC incrustado (fragmento iCCP), «sRGB», «Gris» o null (RGB sin perfil). */
+    /**
+     * La resolución que declara el PNG en su fragmento pHYs (píxeles por metro), en ppp; null si no la
+     * declara o no está en metros (D206). Es un dato del archivo: la calidad real se mide con los píxeles
+     * y el tamaño al que se imprime.
+     */
+    public static function pppDeclarados(string $ruta): ?int
+    {
+        $archivo = @fopen($ruta, 'rb');
+        if ($archivo === false) {
+            return null;
+        }
+        try {
+            fseek($archivo, 8);
+            while (($cabecera = fread($archivo, 8)) !== false && strlen($cabecera) === 8) {
+                ['largo' => $largo, 'tipo' => $tipo] = unpack('Nlargo/a4tipo', $cabecera);
+                if ($tipo === 'IDAT' || $tipo === 'IEND') {
+                    return null;
+                }
+                if ($tipo === 'pHYs' && $largo === 9) {
+                    $datos = (string) fread($archivo, 9);
+                    if (strlen($datos) !== 9) {
+                        return null;
+                    }
+                    ['x' => $x, 'unidad' => $unidad] = unpack('Nx/Ny/Cunidad', $datos);
+
+                    return $unidad === 1 && $x > 0 ? min(65535, (int) round($x * 0.0254)) : null;
+                }
+                fseek($archivo, $largo + 4, SEEK_CUR); // datos + CRC
+            }
+
+            return null;
+        } finally {
+            fclose($archivo);
+        }
+    }
+
     private function perfilColor(string $ruta): ?string
     {
         $archivo = @fopen($ruta, 'rb');

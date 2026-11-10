@@ -17,6 +17,8 @@ final readonly class AnalisisPng
         public string $fondo,
         public ?string $perfilColor,
         public int $profundidadBits,
+        /** La resolución que declara el archivo (pHYs), en ppp; null si no la declara (D206). */
+        public ?int $pppArchivo = null,
     ) {}
 
     /** @return array<string, int|string|null> columnas de la tabla disenos */
@@ -32,6 +34,7 @@ final readonly class AnalisisPng
             'fondo' => $this->fondo,
             'perfil_color' => $this->perfilColor,
             'profundidad_bits' => $this->profundidadBits,
+            'ppp_archivo' => $this->pppArchivo,
         ];
     }
 }

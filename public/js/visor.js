@@ -50,7 +50,6 @@
         nivel: 'diseno',       // diseno · cantidades · resumen (D142)
         lineas: [],            // índices de los colores del pedido, en orden
         cantidades: {},        // por color: { colorId: { tallaId: unidades } }
-        derechos: false,       // el cliente declara que tiene los derechos de sus diseños (fase 4)
         errorSubida: '',       // mensaje si un diseño no se acepta al pasar al nivel 2
         subiendo: false
     };
@@ -564,7 +563,11 @@
             if (b.disabled) return;
             apagarMarcas();
             var ocupada = disenoValido(estado.disenos[z.id]);
-            if (!estado.anadiendo && !ocupada && hayDiseno() && estado.zonaId !== null) {
+            var deAhora = zonas.filter(function (o) { return o.id === estado.zonaId; })[0];
+            // Solo se mueve a una zona que se pisa con la del diseño activo (pecho ↔ frontal: «más grande o más
+            // pequeño»). Una zona independiente (la espalda) es un diseño nuevo ahí: nunca se lleva el de delante.
+            var mover = !estado.anadiendo && !ocupada && hayDiseno() && !!deAhora && solapan(z, deAhora);
+            if (mover) {
                 // Mover el diseño actual a esta zona.
                 estado.disenos[z.id] = estado.disenos[estado.zonaId];
                 delete estado.disenos[estado.zonaId];
@@ -579,11 +582,13 @@
             sincronizar();
             if (z.cara !== estado.cara) { estado.cara = z.cara; estampar = true; pintar('giro'); }
             else { estampar = true; pintar(); }
-            if (!hayDiseno()) elegirHerramienta('diseno');
             refrescarColeccion();
+            // Zona vacía: en el mismo clic, el selector de archivos (el cliente elige dónde y sube).
+            if (!hayDiseno()) { elegirHerramienta('diseno'); entrada.click(); }
         });
         grupoZonas.appendChild(b);
     });
+    marcarZona(); // las tarjetas con su dibujo y precio desde el principio, antes de subir nada
 
     /** Con un diseño puesto, las marcas de zona estorban: se apagan solas. */
     function apagarMarcas() { estado.zonas = false; }
@@ -641,78 +646,72 @@
         if (aviso) aviso.textContent = estado.anadiendo ? textos.elige_zona_nuevo : '';
     }
 
-    /** Tarjeta de decisión (D142): tus diseños con lo que suma cada uno, y «¿otro o seguimos?». */
+    /**
+     * Decisión del paso 1 (D142, D198), en dos partes para que no estorbe:
+     * - en el panel, «¿Quieres otro diseño?» con un botón por zona libre;
+     * - abajo, fija y fina: qué diseños llevas, el error si lo hay y «Siguiente».
+     * La lista de diseños no se repite: las tarjetas de zona ya dicen cuál tiene diseño.
+     */
+    var disenosVistos = 0;
+    var invitaHasta = 0;
     function pintarCapas() {
         var caja = document.getElementById('capas');
-        if (!caja) return;
+        var pie = document.getElementById('capas-pie');
+        if (!caja || !pie) return;
         var usadas = zonasConDiseno();
-        // Se repinta entera: se recuerda qué control tenía el foco para devolvérselo (WCAG 2.4.3).
-        var foco = document.activeElement && caja.contains(document.activeElement) ? document.activeElement.dataset.foco : null;
+        // Se repinta entero: se recuerda qué control tenía el foco para devolvérselo (WCAG 2.4.3).
+        var activo = document.activeElement;
+        var foco = activo && (caja.contains(activo) || pie.contains(activo)) ? activo.dataset.foco : null;
         caja.replaceChildren();
+        pie.replaceChildren();
         caja.classList.toggle('decision', usadas.length > 0);
+        pie.hidden = usadas.length === 0;
         if (usadas.length === 0) return;
         var conDisenos = zonas.filter(function (z) { return usadas.indexOf(z.id) !== -1; });
-        caja.appendChild(el('p', 'capas-titulo', usadas.length === 1
-            ? texto('decision_uno', { zona: conDisenos[0].nombre }) : texto('decision_varios', { n: usadas.length })));
-        conDisenos.forEach(function (z) {
-            var d = estado.disenos[z.id];
-            var b = el('button', 'capa-diseno');
-            b.type = 'button';
-            b.setAttribute('aria-pressed', String(z.id === estado.zonaId));
-            b.dataset.foco = 'zona-' + z.id;
-            b.appendChild(el('strong', '', z.nombre));
-            b.appendChild(el('span', '', d.modo === 'logo' ? (d.nombre || textos.pestana_logo) : '«' + d.texto.trim() + '»'));
-            if (z.precio) b.appendChild(el('small', '', '+' + z.precio + textos.por_unidad));
-            b.addEventListener('click', function () {
-                fijarZona(z.id);
-                estado.anadiendo = false;
-                sincronizar();
-                if (z.cara !== estado.cara) { estado.cara = z.cara; pintar('giro'); } else { pintar(); }
-            });
-            caja.appendChild(b);
-        });
+
         var libres = zonas.filter(function (z) { return usadas.indexOf(z.id) === -1 && !zonas.some(function (o) { return usadas.indexOf(o.id) !== -1 && solapan(z, o); }); });
-        var botones = el('div', 'decision-botones');
         if (libres.length) {
             caja.appendChild(el('p', 'decision-pregunta', textos.decision_pregunta));
-            var mas = el('button', 'boton-pildora borde anadir', '+ ' + textos.anadir_diseno);
-            mas.type = 'button';
-            mas.dataset.foco = 'anadir';
-            mas.addEventListener('click', function () {
-                estado.anadiendo = true;
-                marcarZona();
-                elegirHerramienta('zona');
+            // Un botón por zona libre: «+ Espalda · +4,24 €». Elige la zona y abre el selector de archivos.
+            var otras = el('div', 'decision-zonas');
+            libres.forEach(function (z) {
+                var mas = el('button', 'boton-pildora borde anadir', '+ ' + z.nombre + (z.precio ? ' · +' + z.precio : ''));
+                mas.type = 'button';
+                mas.dataset.foco = 'anadir-' + z.id;
+                mas.setAttribute('aria-label', texto('anadir_en', { zona: z.nombre }));
+                mas.addEventListener('click', function () {
+                    var boton = grupoZonas.querySelector('[data-zona="' + z.id + '"]');
+                    if (boton) boton.click();
+                });
+                otras.appendChild(mas);
             });
-            botones.appendChild(mas);
+            caja.appendChild(otras);
         }
-        if (pendientesDeSubir().length) {
-            // Al pasar al pedido se suben los logos: antes, la declaración de derechos (fase 4).
-            var casilla = el('label', 'casilla-derechos');
-            var marca = el('input');
-            marca.type = 'checkbox';
-            marca.id = 'derechos-diseno';
-            marca.dataset.foco = 'derechos';
-            marca.checked = estado.derechos;
-            marca.addEventListener('change', function () { estado.derechos = marca.checked; estado.errorSubida = ''; pintarCapas(); });
-            casilla.appendChild(marca);
-            casilla.appendChild(el('span', '', textos.derechos_casilla));
-            caja.appendChild(casilla);
-        }
+
+        // Abajo solo el botón; la caja aparece solo si hay algo que resolver (un error).
+        pie.classList.toggle('con-aviso', !!estado.errorSubida);
         if (estado.errorSubida) {
             var error = el('p', 'error-subida', estado.errorSubida);
             error.setAttribute('role', 'alert');
-            caja.appendChild(error);
+            pie.appendChild(error);
         }
         var seguir = el('button', 'boton-siguiente', estado.subiendo ? textos.comprobando : textos.siguiente_cantidades + ' →');
         seguir.type = 'button';
         seguir.dataset.foco = 'seguir';
         // aria-disabled y no disabled: un botón desactivado pierde el foco del teclado.
         seguir.setAttribute('aria-disabled', String(estado.subiendo));
-        caja.setAttribute('aria-busy', String(estado.subiendo));
+        pie.setAttribute('aria-busy', String(estado.subiendo));
         seguir.addEventListener('click', function () { irANivel('cantidades'); });
-        botones.appendChild(seguir);
-        caja.appendChild(botones);
-        var volver = foco && caja.querySelector('[data-foco="' + foco + '"]');
+        seguir.setAttribute('aria-label', textos.siguiente_cantidades + '. ' + (usadas.length === 1
+            ? texto('decision_uno', { zona: conDisenos[0].nombre })
+            : texto('decision_varios', { n: usadas.length }) + ': ' + conDisenos.map(function (z) { return z.nombre; }).join(', ')));
+        // Un diseño nuevo colocado: el botón se ilumina para invitar a seguir con tallas y colores.
+        // (dura unos segundos aunque el panel se repinte entretanto).
+        if (usadas.length > disenosVistos) invitaHasta = Date.now() + 3300;
+        disenosVistos = usadas.length;
+        if (Date.now() < invitaHasta) seguir.classList.add('invita');
+        pie.appendChild(seguir);
+        var volver = foco && (caja.querySelector('[data-foco="' + foco + '"]') || pie.querySelector('[data-foco="' + foco + '"]'));
         if (volver) volver.focus();
     }
 
@@ -834,12 +833,51 @@
         }, falta);
     }
 
+    /**
+     * ¿Declara el PNG su resolución? Lee el fragmento pHYs (D206), igual que el servidor: true si la declara
+     * en ppp, false si no, null si no se sabe (el navegador no puede leerlo): entonces decide el servidor.
+     */
+    function pppDeclarados(archivo) {
+        if (!archivo || !archivo.slice || !window.DataView) return Promise.resolve(null);
+        var trozo = archivo.slice(0, 1024 * 1024);
+        var leer = trozo.arrayBuffer ? trozo.arrayBuffer() : new Promise(function (ok, mal) {
+            var lector = new FileReader();
+            lector.onload = function () { ok(lector.result); };
+            lector.onerror = mal;
+            lector.readAsArrayBuffer(trozo);
+        });
+        return leer.then(function (buffer) {
+            var v = new DataView(buffer), p = 8;
+            while (p + 8 <= v.byteLength) {
+                var largo = v.getUint32(p), tipo = String.fromCharCode(v.getUint8(p + 4), v.getUint8(p + 5), v.getUint8(p + 6), v.getUint8(p + 7));
+                if (tipo === 'IDAT' || tipo === 'IEND') return false;
+                if (tipo === 'pHYs') return largo === 9 && p + 17 <= v.byteLength ? v.getUint8(p + 16) === 1 && v.getUint32(p + 8) > 0 : null;
+                p += 12 + largo;
+            }
+            return null;
+        }, function () { return null; });
+    }
+
     /** @param original  datos del archivo original si llega reducido desde la portada */
     function leerLogo(archivo, original) {
         mostrarError('');
         if (!archivo || estado.subiendo) return; // mientras se sube, el logo no cambia (Gauntlet A1)
-        if (!/^image\/(png|jpeg|webp|svg\+xml|gif)$/.test(archivo.type)) { mostrarError(textos.error_archivo); return; }
+        // Solo PNG (D206): el servidor tampoco acepta otro formato. Sin tipo (algunos Android), por la extensión.
+        if (!(archivo.type === 'image/png' || (!archivo.type && /\.png$/i.test(archivo.name)))) { mostrarError(textos.error_archivo); return; }
         if (archivo.size > PESO_MAXIMO) { mostrarError(textos.error_grande); return; }
+        // D206: sin resolución declarada no se admite; se dice al elegirlo, no al pasar al pedido.
+        var aRevisar = original ? (original.archivo || null) : archivo; // desde la portada, el original
+        if (textos.exigir_ppp && aRevisar) {
+            pppDeclarados(aRevisar).then(function (declara) {
+                if (declara === false) { mostrarError(textos.error_sin_ppp); return; }
+                cargarLogo(archivo, original);
+            });
+            return;
+        }
+        cargarLogo(archivo, original);
+    }
+
+    function cargarLogo(archivo, original) {
         abrirEstudio();
         mostrarCarga();
 
@@ -888,16 +926,15 @@
         estado.uuid = logo.uuid;
         estado.avisos = logo.avisos || null;
         estado.errorSubida = '';
-        // Un logo nuevo pide su propia declaración de derechos (Gauntlet M1).
-        if (!logo.uuid) estado.derechos = false;
         if (estado.zonaId !== null) delete estado.ajustes[estado.zonaId];
         estado.version++;
         if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
-        elegirHerramienta('ajustar'); // el logo ya está: toca colocarlo
+        elegirHerramienta('diseno'); // colocado: en el mismo paso se ve dónde va y se puede cambiar
         sincronizar();
     }
 
     entrada.addEventListener('change', function () { leerLogo(entrada.files[0]); entrada.value = ''; });
+
 
     /* ---------- Tus diseños subidos (fase 4) ----------
        Los que este visitante ya subió: se colocan sin volver a subirlos (miniatura
@@ -1537,7 +1574,7 @@
         estado.subiendo = false;
         estado.errorSubida = mensaje;
         pintarCapas();
-        var aviso = document.querySelector('#capas .error-subida');
+        var aviso = document.querySelector('#capas-pie .error-subida');
         if (aviso && aviso.scrollIntoView) aviso.scrollIntoView({ block: 'nearest', behavior: sinMovimiento ? 'auto' : 'smooth' });
         return false;
     }
@@ -1548,7 +1585,6 @@
         for (var j = 0; j < pendientes.length; j++) {
             if (!pendientes[j].archivo) return Promise.resolve(fallarSubida(texto('error_original', { nombre: pendientes[j].nombre })));
         }
-        if (!estado.derechos) return Promise.resolve(fallarSubida(textos.error_derechos));
         for (var i = 0; i < pendientes.length; i++) {
             var d = pendientes[i];
             // Sin tipo (algunos selectores de Android) decide el servidor por la firma del archivo.
@@ -1566,7 +1602,6 @@
                 var enviado = d.archivo;
                 var datos = new FormData();
                 datos.append('archivo', d.archivo, d.archivo.name);
-                datos.append('derechos', '1');
                 return fetch(visor.dataset.subida, {
                     method: 'POST',
                     body: datos,
@@ -1584,11 +1619,17 @@
                             return true;
                         }
                         if (r.status === 419) return fallarSubida(textos.error_caducada);
+                        if (r.status === 429) return fallarSubida(textos.error_muchas);
+                        if (r.status === 413) return fallarSubida(d.nombre + ': ' + textos.error_pesado);
                         var mensaje = json.message;
                         if (json.errors) mensaje = json.errors[Object.keys(json.errors)[0]][0];
-                        return fallarSubida(r.status === 429 || r.status >= 500 || !mensaje ? textos.error_red : d.nombre + ': ' + mensaje);
+                        if (r.status >= 500 || !mensaje) {
+                            // Fallo nuestro, no del archivo. En local (APP_DEBUG) se enseña la causa para arreglarla.
+                            return fallarSubida(textos.error_servidor + (textos.depurar && json.message ? ' [' + r.status + ': ' + json.message + ']' : ''));
+                        }
+                        return fallarSubida(d.nombre + ': ' + mensaje);
                     });
-                }, function () { return fallarSubida(textos.error_red); });
+                }, function () { return fallarSubida(textos.error_conexion); });
             });
         }, Promise.resolve(true)).then(function (ok) {
             if (ok) {

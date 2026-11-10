@@ -6,10 +6,13 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 10/11 | **Diseños solo en PNG y con ppp declarados**: se anota la resolución del archivo; sin ella no se admite (configurable en *Ajustes → General*). | `disenos-png-dpi` | D206 |
 | 10/11 | **PDF elegantes**: factura, presupuesto y orden de trabajo con logo, línea de marca, bloques, tablas limpias, total destacado y pie con página. | `pdf-diseno` | D205 |
 | 10/11 | **Packs por modo**: en el backend, cada pack dice para qué modos es (o genérico); las tarjetas de «Elige tu modo» llevan a una página con sus packs y los genéricos. | `packs-por-modo` | D203 |
 | 09/11 | **PDF del presupuesto con la foto de lo creado**: cada línea lleva la maqueta de cada cara con los diseños del cliente. | `pdf-maquetas` | D200 |
+| 10/11 | **Derechos de los diseños en las condiciones de venta**: fuera la casilla del estudio y de los packs; la declaración va en «Acepto las condiciones de venta» y en una cláusula nueva de las condiciones (es/en). | `configurador-guiado` | D202 |
 | 09/11 | **Portada**: entre la cabecera y «Cómo configurar tu marca en 3 pasos», la misma línea con luz que recorre el pie. | `portada-separador` | — |
+| 09/11 | **Configurador en 3 pasos**: sube tu diseño y lo colocamos, con «¿Dónde lo ponemos?» (Frontal, Pecho, Espalda) en el mismo paso y un botón por zona libre para otro diseño, tallas y colores, resumen y pago; declaración de derechos junto al botón de subir; «Escribir mi marca» oculto por ahora (D199); «Siguiente» dice qué falta; errores de subida que explican qué pasa (en local, con la causa). | `configurador-guiado` | D198 |
 | 09/11 | **Estudio**: panel de control más ancho (440-620 px) con el orden de los pasos (pasos, herramienta, calidad) y «Siguiente: tallas y colores» siempre visible abajo; «Foto próximamente» ya no se sale de la miniatura. | `estudio-panel` | — |
 | 09/11 | **Portada**: «Cómo se juega» pasa a «Cómo configurar tu marca en 3 pasos» (en inglés, «How to set up your brand in 3 steps»). | `frontend-ajustes` | — |
 | 09/11 | **Puesta en marcha**: *Herramientas → Puesta en marcha* con los 14 pasos para abrir la tienda (y la IA, opcional), que se marcan solos al hacerlos, con enlace a cada ajuste y el número de pendientes en el menú. | `v2-puesta-en-marcha` | D196 |
