@@ -38,4 +38,5 @@ return [
     'correo_asunto' => ':tipo :codigo · pedido :numero',
     'correo_texto' => 'Hola, :nombre. Te enviamos la :tipo :codigo de tu pedido :numero. La tienes adjunta y también en tu pedido.',
     'cancelacion' => 'Cancelación del pedido :numero',
+    'pagina' => 'Página',
 ];

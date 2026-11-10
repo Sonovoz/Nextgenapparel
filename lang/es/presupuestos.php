@@ -3,6 +3,7 @@
 return [
     'boton' => 'Descargar presupuesto',
     'titulo' => 'Presupuesto :numero',
+    'tipo_documento' => 'Presupuesto',
     'valido' => 'Válido hasta el :fecha',
     'caducado' => 'Este presupuesto ha caducado. Puedes pedir otro desde tu carrito.',
     'sin_envio' => 'Precios con IVA. El envío se calcula con la dirección de entrega al cerrar el pedido.',
