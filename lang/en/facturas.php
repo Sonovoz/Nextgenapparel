@@ -37,4 +37,5 @@ return [
     'correo_asunto' => ':tipo :codigo · order :numero',
     'correo_texto' => 'Hi :nombre. Here is the :tipo :codigo for your order :numero. It is attached and also available in your order.',
     'cancelacion' => 'Cancellation of order :numero',
+    'pagina' => 'Page',
 ];

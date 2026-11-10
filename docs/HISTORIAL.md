@@ -6,8 +6,10 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 10/11 | **PDF elegantes**: factura, presupuesto y orden de trabajo con logo, línea de marca, bloques, tablas limpias, total destacado y pie con página. | `pdf-diseno` | D205 |
 | 10/11 | **Correos con diseño de marca**: logo, línea azul, botón redondeado, pie con datos y textos legales; los de pedido con resumen y total. | `correos-diseno` | D204 |
 | 10/11 | **Packs por modo**: en el backend, cada pack dice para qué modos es (o genérico); las tarjetas de «Elige tu modo» llevan a una página con sus packs y los genéricos. | `packs-por-modo` | D203 |
+| 09/11 | **PDF del presupuesto con la foto de lo creado**: cada línea lleva la maqueta de cada cara con los diseños del cliente. | `pdf-maquetas` | D200 |
 | 09/11 | **Portada**: entre la cabecera y «Cómo configurar tu marca en 3 pasos», la misma línea con luz que recorre el pie. | `portada-separador` | — |
 | 09/11 | **Estudio**: panel de control más ancho (440-620 px) con el orden de los pasos (pasos, herramienta, calidad) y «Siguiente: tallas y colores» siempre visible abajo; «Foto próximamente» ya no se sale de la miniatura. | `estudio-panel` | — |
 | 09/11 | **Portada**: «Cómo se juega» pasa a «Cómo configurar tu marca en 3 pasos» (en inglés, «How to set up your brand in 3 steps»). | `frontend-ajustes` | — |
