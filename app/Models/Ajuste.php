@@ -28,6 +28,8 @@ class Ajuste extends Model
         'disenos.max_mb' => 30,
         'disenos.max_px' => 8000, // 67 cm a 300 ppp; más solo cuesta memoria y tiempo
         'disenos.min_px' => 300,
+        // D206: no se admite un PNG que no declare su resolución (ppp, fragmento pHYs).
+        'disenos.exigir_ppp' => 1,
         'disenos.dias_sin_pedido' => 30,
         // Frenos al abuso: subidas por hora e IP y diseños nuevos por visitante y día.
         'disenos.subidas_hora' => 60,
