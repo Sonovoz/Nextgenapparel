@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Precios;
 
+use App\Dominio\Catalogo\ModoCliente;
 use App\Dominio\Precios\Impuestos;
 use App\Dominio\Precios\Iva;
 use App\Dominio\Precios\RepartoPack;
@@ -19,6 +20,7 @@ use App\Models\ZonaImpresion;
 use BackedEnum;
 use Closure;
 use Filament\Actions\RestoreAction;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -154,6 +156,9 @@ class PackResource extends RecursoPrecios
                 DateTimePicker::make('desde')->label('Desde')->seconds(false),
                 DateTimePicker::make('hasta')->label('Hasta')->seconds(false)->after('desde'),
                 Toggle::make('activo')->label('Activo')->default(true)->inline(false),
+                // D203: en qué «Elige tu modo» de la portada sale. Sin marcar: genérico, sale en todos.
+                CheckboxList::make('modos')->label('Para qué modos')->options(ModoCliente::opciones())->columns(3)->columnSpanFull()
+                    ->helperText('Sale en la página de cada modo marcado. Si no marcas ninguno, es genérico y sale en todos.'),
             ]),
         ]);
     }
