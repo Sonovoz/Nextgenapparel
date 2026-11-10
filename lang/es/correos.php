@@ -25,4 +25,9 @@ return [
     'sin_fecha' => 'te la confirmaremos pronto',
     'prueba_asunto' => 'Correo de prueba de :tienda',
     'prueba_texto' => 'Si lees esto, el correo de la tienda sale bien por SMTP.',
+    'pie_lema' => 'Prendas personalizadas con impresión DTI Textil',
+    'resumen_prenda' => 'Tu pedido',
+    'resumen_unidades' => 'Uds.',
+    'resumen_envio' => 'Envío',
+    'resumen_total' => 'Total (IVA incluido)',
 ];
