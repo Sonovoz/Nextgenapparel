@@ -29,6 +29,8 @@ El pago se hace en la página segura de **Redsys**, la plataforma de pago de los
 
 Tras el pago revisamos los diseños. Si alguno no se puede imprimir bien, te escribimos para que lo cambies. Si un diseño infringe derechos de terceros o una marca, podemos rechazar el pedido y te devolvemos el dinero.
 
+**Tus diseños y sus derechos.** Al aportar imágenes, logotipos o textos para imprimir declaras que eres su titular o que tienes autorización para usarlos e imprimirlos, y que no infringen derechos de terceros (de autor, de marca, de imagen o de cualquier otro tipo). Esta declaración la haces al aceptar estas condiciones al confirmar el pedido. Eres el único responsable de ella: si un tercero reclama por un diseño que has aportado, respondes tú frente a esa reclamación y mantienes indemne a {!! $f($e['razon_social'], 'razón social') !!} de los daños, gastos y sanciones que se deriven.
+
 ## 6. Cancelación
 
 Puedes cancelar el pedido desde su página **mientras no esté en impresión**. Si ya lo has pagado, te devolvemos el dinero en el mismo medio de pago y emitimos la factura rectificativa. Una vez empieza la impresión ya no se puede cancelar.

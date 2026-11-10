@@ -29,6 +29,8 @@ Payment is made on the secure page of **Redsys**, the Spanish banks' payment pla
 
 After payment we review the designs. If one cannot be printed well, we write to you so you can change it. If a design infringes third-party rights or a trademark, we may reject the order and refund you.
 
+**Your designs and their rights.** By providing images, logos or text to be printed, you declare that you own them or are authorised to use and print them, and that they do not infringe third-party rights (copyright, trademark, image rights or any other). You make this declaration when you accept these terms on confirming the order. You are solely responsible for it: if a third party makes a claim over a design you have provided, you answer for that claim and hold {!! $f($e['razon_social'], 'razón social') !!} harmless from any resulting damages, costs and penalties.
+
 ## 6. Cancellation
 
 You can cancel the order from its page **until printing starts**. If you have already paid, we refund you to the same payment method and issue the credit note. Once printing starts it can no longer be cancelled.

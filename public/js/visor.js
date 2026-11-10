@@ -50,21 +50,20 @@
         nivel: 'diseno',       // diseno · cantidades · resumen (D142)
         lineas: [],            // índices de los colores del pedido, en orden
         cantidades: {},        // por color: { colorId: { tallaId: unidades } }
-        derechos: false,       // el cliente declara que tiene los derechos de sus diseños (fase 4)
         errorSubida: '',       // mensaje si un diseño no se acepta al pasar al nivel 2
         subiendo: false
     };
 
     // estado.modo, estado.logo, estado.texto… son los del diseño de la zona activa
     // (o un borrador mientras aún no hay zona). Así cada zona lleva su propio diseño.
-    function nuevoDiseno() { return { modo: 'logo', logo: null, texto: '', fuente: 0, tinta: 'auto', logoPx: null, logoTipo: null, nombre: '', archivo: null, uuid: null, avisos: null, declarado: false }; }
+    function nuevoDiseno() { return { modo: 'logo', logo: null, texto: '', fuente: 0, tinta: 'auto', logoPx: null, logoTipo: null, nombre: '', archivo: null, uuid: null, avisos: null }; }
     var borrador = nuevoDiseno();
     function actual() {
         if (estado.zonaId === null) return borrador;
         if (!estado.disenos[estado.zonaId]) estado.disenos[estado.zonaId] = nuevoDiseno();
         return estado.disenos[estado.zonaId];
     }
-    ['modo', 'logo', 'texto', 'fuente', 'tinta', 'logoPx', 'logoTipo', 'nombre', 'archivo', 'uuid', 'avisos', 'declarado'].forEach(function (campo) {
+    ['modo', 'logo', 'texto', 'fuente', 'tinta', 'logoPx', 'logoTipo', 'nombre', 'archivo', 'uuid', 'avisos'].forEach(function (campo) {
         Object.defineProperty(estado, campo, { get: function () { return actual()[campo]; }, set: function (v) { actual()[campo] = v; } });
     });
     function disenoValido(d) { return !!d && (d.modo === 'logo' ? !!d.logo : d.texto.trim() !== ''); }
@@ -696,38 +695,24 @@
             error.setAttribute('role', 'alert');
             pie.appendChild(error);
         }
-        // «Siguiente» dice qué falta en vez de fallar al pulsarlo; pulsado, lleva a donde se resuelve.
-        var falta = sinDeclarar().length > 0;
-        var seguir = el('button', 'boton-siguiente' + (falta ? ' falta' : ''), estado.subiendo ? textos.comprobando : (falta ? textos.falta_derechos : textos.siguiente_cantidades + ' →'));
+        var seguir = el('button', 'boton-siguiente', estado.subiendo ? textos.comprobando : textos.siguiente_cantidades + ' →');
         seguir.type = 'button';
         seguir.dataset.foco = 'seguir';
         // aria-disabled y no disabled: un botón desactivado pierde el foco del teclado.
         seguir.setAttribute('aria-disabled', String(estado.subiendo));
         pie.setAttribute('aria-busy', String(estado.subiendo));
-        seguir.addEventListener('click', function () { if (falta) irADerechos(); else irANivel('cantidades'); });
-        seguir.setAttribute('aria-label', (falta ? textos.falta_derechos : textos.siguiente_cantidades) + '. ' + (usadas.length === 1
+        seguir.addEventListener('click', function () { irANivel('cantidades'); });
+        seguir.setAttribute('aria-label', textos.siguiente_cantidades + '. ' + (usadas.length === 1
             ? texto('decision_uno', { zona: conDisenos[0].nombre })
             : texto('decision_varios', { n: usadas.length }) + ': ' + conDisenos.map(function (z) { return z.nombre; }).join(', ')));
         // Un diseño nuevo colocado: el botón se ilumina para invitar a seguir con tallas y colores.
         // (dura unos segundos aunque el panel se repinte entretanto).
         if (usadas.length > disenosVistos) invitaHasta = Date.now() + 3300;
         disenosVistos = usadas.length;
-        if (!falta && Date.now() < invitaHasta) seguir.classList.add('invita');
+        if (Date.now() < invitaHasta) seguir.classList.add('invita');
         pie.appendChild(seguir);
         var volver = foco && (caja.querySelector('[data-foco="' + foco + '"]') || pie.querySelector('[data-foco="' + foco + '"]'));
         if (volver) volver.focus();
-    }
-
-    /** Logos aún sin subir que nadie ha declarado como propios. */
-    function sinDeclarar() { return pendientesDeSubir().filter(function (d) { return !d.declarado; }); }
-
-    /** Lleva a la casilla de derechos (en «Diseño», junto al botón de subir). */
-    function irADerechos() {
-        elegirHerramienta('diseno');
-        if (!casillaDerechos) return;
-        casillaDerechos.closest('.casilla-derechos').classList.add('resaltada');
-        if (casillaDerechos.scrollIntoView) casillaDerechos.scrollIntoView({ block: 'center', behavior: sinMovimiento ? 'auto' : 'smooth' });
-        casillaDerechos.focus();
     }
 
     /** Lleva los controles del panel al diseño de la zona activa. */
@@ -902,8 +887,6 @@
         estado.uuid = logo.uuid;
         estado.avisos = logo.avisos || null;
         estado.errorSubida = '';
-        // Cada logo nuevo lleva su propia declaración (Gauntlet M1): vale la casilla marcada junto al botón de subir.
-        estado.declarado = !!logo.uuid || estado.derechos;
         if (estado.zonaId !== null) delete estado.ajustes[estado.zonaId];
         estado.version++;
         if (estado.modo !== 'logo') pestanas[0].click(); else colocarDiseno();
@@ -913,16 +896,6 @@
 
     entrada.addEventListener('change', function () { leerLogo(entrada.files[0]); entrada.value = ''; });
 
-    var casillaDerechos = document.getElementById('derechos-diseno');
-    if (casillaDerechos) {
-        casillaDerechos.addEventListener('change', function () {
-            estado.derechos = casillaDerechos.checked;
-            pendientesDeSubir().forEach(function (d) { d.declarado = casillaDerechos.checked; });
-            casillaDerechos.closest('.casilla-derechos').classList.remove('resaltada');
-            estado.errorSubida = '';
-            pintarCapas();
-        });
-    }
 
     /* ---------- Tus diseños subidos (fase 4) ----------
        Los que este visitante ya subió: se colocan sin volver a subirlos (miniatura
@@ -1573,7 +1546,6 @@
         for (var j = 0; j < pendientes.length; j++) {
             if (!pendientes[j].archivo) return Promise.resolve(fallarSubida(texto('error_original', { nombre: pendientes[j].nombre })));
         }
-        if (sinDeclarar().length) { fallarSubida(textos.error_derechos); irADerechos(); return Promise.resolve(false); } // primero el aviso, luego a la casilla
         for (var i = 0; i < pendientes.length; i++) {
             var d = pendientes[i];
             // Sin tipo (algunos selectores de Android) decide el servidor por la firma del archivo.
@@ -1591,7 +1563,6 @@
                 var enviado = d.archivo;
                 var datos = new FormData();
                 datos.append('archivo', d.archivo, d.archivo.name);
-                datos.append('derechos', '1');
                 return fetch(visor.dataset.subida, {
                     method: 'POST',
                     body: datos,

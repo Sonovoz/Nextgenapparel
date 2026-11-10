@@ -21,13 +21,11 @@ class DisenoController
 
         $request->validate([
             'archivo' => ['required', 'file', 'max:'.($maxMb * 1024)],
-            'derechos' => ['accepted'],
         ], [
             'archivo.required' => __('disenos.error_sin_archivo'),
             'archivo.file' => __('disenos.error_subida', ['mb' => $maxMb]),
             'archivo.uploaded' => __('disenos.error_subida', ['mb' => $maxMb]),
             'archivo.max' => __('disenos.error_pesado', ['mb' => $maxMb]),
-            'derechos.accepted' => __('disenos.error_derechos'),
         ]);
 
         try {
