@@ -6,6 +6,7 @@ use App\Dominio\Precios\Formato;
 use App\Dominio\Precios\Impuestos;
 use App\Dominio\Precios\Iva;
 use App\Models\Familia;
+use App\Models\Foto;
 use App\Models\Pack;
 use App\Models\Prenda;
 use App\Models\ReglaMinimo;
@@ -54,7 +55,7 @@ final class Portada
      * Los packs vigentes que se pueden comprar, listos para la tarjeta. Con modo, los de ese modo primero y
      * después los genéricos (D203).
      *
-     * @return Collection<int, array{nombre: string, url: string, descripcion: ?string, unidades: int, precio: string, zonas: string, foto: ?\App\Models\Foto}>
+     * @return Collection<int, array{nombre: string, url: string, descripcion: ?string, unidades: int, precio: string, zonas: string, foto: ?Foto}>
      */
     public static function packs(?ModoCliente $modo = null): Collection
     {
