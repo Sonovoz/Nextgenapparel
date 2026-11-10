@@ -1,5 +1,6 @@
 <?php
 
+use App\Dominio\Catalogo\ModoCliente;
 use App\Dominio\Legal\PaginaLegal;
 use App\Http\Controllers\AsistenteController;
 use App\Http\Controllers\Backend\ArchivoDisenoController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Cuenta\RegistroController;
 use App\Http\Controllers\Cuenta\VerificacionController;
 use App\Http\Controllers\DisenoController;
 use App\Http\Controllers\LegalController;
+use App\Http\Controllers\ModoController;
 use App\Http\Controllers\PackController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PedidoController;
@@ -202,6 +204,8 @@ Route::prefix('{idioma}')
 
         // Packs (paso 5.7): /es/packs/pack-joven, antes de las familias.
         Route::get('/packs/{pack}', [PackController::class, 'ver'])->name('packs.ver');
+        // Modos de la portada (D203): /es/modo/eventos, con sus packs y los genéricos; antes de las familias.
+        Route::get('/modo/{modo}', [ModoController::class, 'ver'])->name('modo')->whereIn('modo', array_column(ModoCliente::cases(), 'value'));
         Route::post('/packs/{pack}', [PackController::class, 'anadir'])->name('packs.anadir')->middleware('throttle:carrito');
         Route::post('/packs/{pack}/diseno', [PackController::class, 'subir'])->name('packs.subir')->middleware('throttle:disenos');
 
