@@ -44,7 +44,7 @@
             <span class="claro">{{ __('tienda.soltar_formatos') }}</span>
             <span class="nombre-logo" id="nombre-logo"></span>
         </label>
-        <input type="file" id="archivo-diseno" class="oculto" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+        <input type="file" id="archivo-diseno" class="oculto" accept="image/png,.png">
 
         {{-- Tus diseños subidos (fase 4): se rellena desde public/js/visor.js. --}}
         <div class="biblioteca" id="biblioteca" hidden>

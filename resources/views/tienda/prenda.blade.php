@@ -73,6 +73,8 @@
         'error_no_png' => __('disenos.error_no_png'),
         'error_red' => __('disenos.error_red'),
         'error_servidor' => __('disenos.error_servidor'),
+        'error_sin_ppp' => __('disenos.error_sin_ppp'),
+        'exigir_ppp' => (bool) \App\Models\Ajuste::obtener('disenos.exigir_ppp'),
         'error_muchas' => __('disenos.error_muchas'),
         'error_conexion' => __('disenos.error_conexion'),
         'depurar' => (bool) config('app.debug'),

@@ -249,6 +249,7 @@ final class CrearPedido
             'util_ancho_px' => $diseno?->util_ancho_px,
             'util_alto_px' => $diseno?->util_alto_px,
             'ppp' => $calidad['ppp'] ?? null,
+            'ppp_archivo' => $diseno?->ppp_archivo,
             'nivel_calidad' => isset($calidad['nivel']) ? $calidad['nivel']->value : null,
             'texto' => $impresion->texto,
             'fuente' => $impresion->fuente,

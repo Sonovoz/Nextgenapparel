@@ -833,12 +833,51 @@
         }, falta);
     }
 
+    /**
+     * ¿Declara el PNG su resolución? Lee el fragmento pHYs (D206), igual que el servidor: true si la declara
+     * en ppp, false si no, null si no se sabe (el navegador no puede leerlo): entonces decide el servidor.
+     */
+    function pppDeclarados(archivo) {
+        if (!archivo || !archivo.slice || !window.DataView) return Promise.resolve(null);
+        var trozo = archivo.slice(0, 1024 * 1024);
+        var leer = trozo.arrayBuffer ? trozo.arrayBuffer() : new Promise(function (ok, mal) {
+            var lector = new FileReader();
+            lector.onload = function () { ok(lector.result); };
+            lector.onerror = mal;
+            lector.readAsArrayBuffer(trozo);
+        });
+        return leer.then(function (buffer) {
+            var v = new DataView(buffer), p = 8;
+            while (p + 8 <= v.byteLength) {
+                var largo = v.getUint32(p), tipo = String.fromCharCode(v.getUint8(p + 4), v.getUint8(p + 5), v.getUint8(p + 6), v.getUint8(p + 7));
+                if (tipo === 'IDAT' || tipo === 'IEND') return false;
+                if (tipo === 'pHYs') return largo === 9 && p + 17 <= v.byteLength ? v.getUint8(p + 16) === 1 && v.getUint32(p + 8) > 0 : null;
+                p += 12 + largo;
+            }
+            return null;
+        }, function () { return null; });
+    }
+
     /** @param original  datos del archivo original si llega reducido desde la portada */
     function leerLogo(archivo, original) {
         mostrarError('');
         if (!archivo || estado.subiendo) return; // mientras se sube, el logo no cambia (Gauntlet A1)
-        if (!/^image\/(png|jpeg|webp|svg\+xml|gif)$/.test(archivo.type)) { mostrarError(textos.error_archivo); return; }
+        // Solo PNG (D206): el servidor tampoco acepta otro formato. Sin tipo (algunos Android), por la extensión.
+        if (!(archivo.type === 'image/png' || (!archivo.type && /\.png$/i.test(archivo.name)))) { mostrarError(textos.error_archivo); return; }
         if (archivo.size > PESO_MAXIMO) { mostrarError(textos.error_grande); return; }
+        // D206: sin resolución declarada no se admite; se dice al elegirlo, no al pasar al pedido.
+        var aRevisar = original ? (original.archivo || null) : archivo; // desde la portada, el original
+        if (textos.exigir_ppp && aRevisar) {
+            pppDeclarados(aRevisar).then(function (declara) {
+                if (declara === false) { mostrarError(textos.error_sin_ppp); return; }
+                cargarLogo(archivo, original);
+            });
+            return;
+        }
+        cargarLogo(archivo, original);
+    }
+
+    function cargarLogo(archivo, original) {
         abrirEstudio();
         mostrarCarga();
 

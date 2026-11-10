@@ -55,6 +55,23 @@ class SubidaDisenoTest extends TestCase
         $this->assertSame([600, 450], [$mini->getImageWidth(), $mini->getImageHeight()]);
     }
 
+    /** D206: se anota la resolución que declara el PNG (pHYs); si no la declara, queda vacía. */
+    public function test_anota_los_ppp_que_declara_el_png(): void
+    {
+        $this->subir(PngDePrueba::crear(600, 600, 'white'), 'con-ppp.png')->assertCreated()->assertJson(['ppp_archivo' => 300]);
+        $this->assertSame(300, Diseno::sole()->ppp_archivo);
+
+        // Sin resolución declarada no se admite (D206)…
+        $sin = PngDePrueba::sinPpp(500, 500);
+        $this->assertNull(AnalizadorPng::pppDeclarados($sin));
+        $this->subir($sin, 'sin-ppp.png')->assertUnprocessable()->assertJson(['motivo' => 'sin_ppp']);
+        $this->assertSame(1, Diseno::count());
+
+        // …salvo que en Ajustes → General se deje de exigir.
+        Ajuste::guardar('disenos.exigir_ppp', 0);
+        $this->subir($sin, 'sin-ppp.png')->assertCreated()->assertJson(['ppp_archivo' => null]);
+    }
+
     /** D202: la declaración de derechos no se pide al subir; va en las condiciones de venta del pedido. */
     public function test_se_sube_sin_casilla_de_derechos_y_la_declaracion_va_en_las_condiciones(): void
     {
