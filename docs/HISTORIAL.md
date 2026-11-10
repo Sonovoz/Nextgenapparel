@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 10/11 | **Packs por modo**: en el backend, cada pack dice para qué modos es (o genérico); las tarjetas de «Elige tu modo» llevan a una página con sus packs y los genéricos. | `packs-por-modo` | D203 |
 | 09/11 | **Portada**: entre la cabecera y «Cómo configurar tu marca en 3 pasos», la misma línea con luz que recorre el pie. | `portada-separador` | — |
 | 09/11 | **Estudio**: panel de control más ancho (440-620 px) con el orden de los pasos (pasos, herramienta, calidad) y «Siguiente: tallas y colores» siempre visible abajo; «Foto próximamente» ya no se sale de la miniatura. | `estudio-panel` | — |
 | 09/11 | **Verificación en dos pasos desactivada por ahora**: el equipo entra al panel solo con contraseña; se reactiva con `DOS_PASOS_OBLIGATORIOS=true`. | `dos-pasos-desactivada` | D197 |
