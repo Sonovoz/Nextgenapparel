@@ -6,6 +6,9 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 10/11 | **PDF elegantes**: factura, presupuesto y orden de trabajo con logo, línea de marca, bloques, tablas limpias, total destacado y pie con página. | `pdf-diseno` | D205 |
+| 10/11 | **Packs por modo**: en el backend, cada pack dice para qué modos es (o genérico); las tarjetas de «Elige tu modo» llevan a una página con sus packs y los genéricos. | `packs-por-modo` | D203 |
+| 09/11 | **PDF del presupuesto con la foto de lo creado**: cada línea lleva la maqueta de cada cara con los diseños del cliente. | `pdf-maquetas` | D200 |
 | 10/11 | **Correos con diseño de marca**: logo, línea azul, botón redondeado, pie con datos y textos legales; los de pedido con resumen y total. | `correos-diseno` | D204 |
 | 10/11 | **Portada**: la frase de la cabecera pasa a «En 3 pasos, tu colección de prendas en marcha» (en inglés, «In 3 steps, your clothing collection up and running»). | `portada-frase` | — |
 | 10/11 | **Packs por modo**: en el backend, cada pack dice para qué modos es (o genérico); las tarjetas de «Elige tu modo» llevan a una página con sus packs y los genéricos. | `packs-por-modo` | D203 |
