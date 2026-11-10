@@ -44,10 +44,8 @@ class SubidaDisenoTest extends TestCase
         $diseno = Diseno::sole();
         $this->assertSame($respuesta->json('uuid'), $diseno->uuid);
         $this->assertSame(hash('sha256', session('disenos.propietario')), $diseno->propietario);
-        $this->assertNotNull($diseno->derechos_declarados_en);
         $this->assertSame(file_get_contents($png), Storage::disk('disenos')->get($diseno->ruta));
         $this->assertSame('image/webp', Storage::disk('disenos')->mimeType($diseno->miniatura));
-        $this->assertSame(__('disenos.derechos_casilla'), $diseno->derechos_texto);
         // El JSON no lleva nada interno: ni rutas, ni el dueño, ni la huella del archivo.
         $this->assertEmpty(array_intersect(['ruta', 'miniatura_ruta', 'propietario', 'sha256', 'id'], array_keys($respuesta->json())));
 
@@ -57,12 +55,32 @@ class SubidaDisenoTest extends TestCase
         $this->assertSame([600, 450], [$mini->getImageWidth(), $mini->getImageHeight()]);
     }
 
-    public function test_sin_declarar_los_derechos_no_se_guarda_nada(): void
+    /** D206: se anota la resolución que declara el PNG (pHYs); si no la declara, queda vacía. */
+    public function test_anota_los_ppp_que_declara_el_png(): void
     {
-        $this->subir(PngDePrueba::crear(600, 600, 'white'), derechos: false)
-            ->assertUnprocessable()->assertJsonValidationErrors(['derechos' => 'confirma que tienes los derechos']);
+        $this->subir(PngDePrueba::crear(600, 600, 'white'), 'con-ppp.png')->assertCreated()->assertJson(['ppp_archivo' => 300]);
+        $this->assertSame(300, Diseno::sole()->ppp_archivo);
 
-        $this->assertNada();
+        // Sin resolución declarada no se admite (D206)…
+        $sin = PngDePrueba::sinPpp(500, 500);
+        $this->assertNull(AnalizadorPng::pppDeclarados($sin));
+        $this->subir($sin, 'sin-ppp.png')->assertUnprocessable()->assertJson(['motivo' => 'sin_ppp']);
+        $this->assertSame(1, Diseno::count());
+
+        // …salvo que en Ajustes → General se deje de exigir.
+        Ajuste::guardar('disenos.exigir_ppp', 0);
+        $this->subir($sin, 'sin-ppp.png')->assertCreated()->assertJson(['ppp_archivo' => null]);
+    }
+
+    /** D202: la declaración de derechos no se pide al subir; va en las condiciones de venta del pedido. */
+    public function test_se_sube_sin_casilla_de_derechos_y_la_declaracion_va_en_las_condiciones(): void
+    {
+        $this->subir(PngDePrueba::crear(600, 600, 'white'), derechos: false)->assertCreated();
+
+        $this->assertNull(Diseno::sole()->derechos_declarados_en);
+        $this->assertStringContainsString('declaro que tengo los derechos sobre las imágenes y diseños', __('pedidos.condiciones_acepto'));
+        $this->assertStringContainsString('Tus diseños y sus derechos', (string) file_get_contents(resource_path('views/legal/es/condiciones-de-venta.blade.php')));
+        $this->assertStringContainsString('Your designs and their rights', (string) file_get_contents(resource_path('views/legal/en/condiciones-de-venta.blade.php')));
     }
 
     public function test_un_archivo_que_no_es_png_se_rechaza_con_su_motivo_y_no_se_guarda(): void
