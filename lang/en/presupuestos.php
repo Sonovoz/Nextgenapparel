@@ -3,6 +3,7 @@
 return [
     'boton' => 'Download quote',
     'titulo' => 'Quote :numero',
+    'tipo_documento' => 'Quote',
     'valido' => 'Valid until :fecha',
     'caducado' => 'This quote has expired. You can request a new one from your cart.',
     'sin_envio' => 'Prices include VAT. Shipping is calculated with the delivery address at checkout.',

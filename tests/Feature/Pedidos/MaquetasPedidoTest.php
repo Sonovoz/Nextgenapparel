@@ -6,7 +6,9 @@ use App\Dominio\Catalogo\Cara;
 use App\Dominio\Catalogo\TipoFoto;
 use App\Dominio\Pedidos\EstadoPedido;
 use App\Dominio\Pedidos\GenerarMaquetas;
+use App\Dominio\Presupuestos\MaquetasPresupuesto;
 use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\PresupuestoController;
 use App\Models\Color;
 use App\Models\Familia;
 use App\Models\Foto;
@@ -15,9 +17,11 @@ use App\Models\LineaPedido;
 use App\Models\MaquetaPedido;
 use App\Models\Pedido;
 use App\Models\Prenda;
+use App\Models\Presupuesto;
 use App\Models\ZonaImpresion;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Imagick;
 use ImagickPixel;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -176,5 +180,26 @@ class MaquetasPedidoTest extends TestCase
         $otro->save();
         $this->withSession([PedidoController::SESION => [$otro->uuid]])->get('/es/pedidos/'.$otro->uuid.'/maquetas/'.MaquetaPedido::sole()->id)->assertNotFound();
         $this->withSession([PedidoController::SESION => [$this->pedido->uuid]])->get('/es/pedidos/'.$this->pedido->uuid)->assertSee($url, false);
+    }
+
+    /** D200: el PDF del presupuesto lleva la foto de lo que ha creado, compuesta igual que la del pedido. */
+    public function test_el_presupuesto_lleva_la_maqueta_de_lo_que_ha_creado(): void
+    {
+        $presupuesto = Presupuesto::create([
+            'uuid' => (string) Str::uuid(), 'numero' => 'PRE-0001', 'idioma' => 'es', 'total' => 0, 'valido_hasta' => now()->addDays(15)->toDateString(),
+            'contenido' => ['lineas' => [['descripcion' => 'Camiseta', 'detalle' => 'Frontal', 'unidades' => 15, 'neto' => 0]], 'bruto' => 0, 'descuentos' => 0, 'descuento_nombre' => null, 'base' => 0, 'impuestos' => 0, 'total' => 0],
+            'origen' => [['tipo' => 'prenda', 'prenda_id' => $this->linea->prenda_id, 'color_id' => $this->linea->color_id, 'pack_id' => null, 'tallas' => [], 'elecciones' => null,
+                'impresiones' => [$this->zona->id => ['texto' => 'NEXT', 'fuente' => 2, 'tinta' => 'negro', 'ancho_mm' => 140, 'alto_mm' => 100, 'desde_cuello_mm' => 75, 'desde_centro_mm' => 0]]]],
+        ]);
+
+        $maquetas = app(MaquetasPresupuesto::class)($presupuesto);
+
+        $this->assertCount(1, $maquetas[0]);
+        $imagen = new Imagick;
+        $imagen->readImageBlob((string) base64_decode(substr($maquetas[0][0], strlen('data:image/jpeg;base64,'))));
+        $imagen->transformImageColorspace(Imagick::COLORSPACE_GRAY);
+        $this->assertLessThan(0.2 * Imagick::getQuantum(), $imagen->getImageChannelRange(Imagick::CHANNEL_GRAY)['minima']); // la tinta negra está
+        $pdf = $this->get(PresupuestoController::url('pdf', $presupuesto))->assertOk()->getContent();
+        $this->assertStringContainsString('/Subtype /Image', $pdf);
     }
 }
