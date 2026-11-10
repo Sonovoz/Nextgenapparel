@@ -286,21 +286,7 @@
             @else
                 <div class="carrusel">
                     @foreach ($packs as $pack)
-                        <article class="pack aparece">
-                            <div class="pack-foto">
-                                @if ($pack['foto'])<img src="{{ $pack['foto']->url() }}" alt="" width="1000" height="1200" loading="lazy">@endif
-                            </div>
-                            <div class="pack-cuerpo">
-                                <h3>{{ $pack['nombre'] }}</h3>
-                                <p class="pack-precio">{{ $pack['precio'] }}<small>{{ __('portada.pack_iva') }}</small></p>
-                                <ul class="pack-datos">
-                                    <li>{{ __('portada.pack_prendas', ['n' => $pack['unidades']]) }}</li>
-                                    @if ($pack['zonas'])<li>{{ __('portada.pack_impresion', ['zonas' => $pack['zonas']]) }}</li>@endif
-                                    @if ($pack['descripcion'])<li>{{ $pack['descripcion'] }}</li>@endif
-                                </ul>
-                                <a class="boton" href="{{ $pack['url'] }}">{{ __('portada.pack_elegir') }}<span class="oculto"> · {{ $pack['nombre'] }}</span></a>
-                            </div>
-                        </article>
+                        @include('tienda._pack', ['pack' => $pack])
                     @endforeach
                 </div>
             @endif
@@ -360,12 +346,15 @@
             <p class="etiqueta aparece">{{ __('portada.quien_etiqueta') }}</p>
             <h2 class="titulo-seccion aparece" id="titulo-quien">{{ __('portada.quien_titulo') }}</h2>
             <div class="quien-rejilla">
-                @foreach ([1, 2, 3] as $i)
-                    <article class="aparece retraso-{{ $i }}">
+                {{-- Cada modo lleva a sus packs (D203). --}}
+                @foreach (\App\Dominio\Catalogo\ModoCliente::cases() as $modo)
+                    @php $i = $modo->numero(); @endphp
+                    <a class="quien-tarjeta aparece retraso-{{ $i }}" href="{{ route('modo', ['modo' => $modo->value]) }}">
                         <p class="modo">{{ __('portada.modo') }} 0{{ $i }}</p>
                         <h3>{{ __('portada.quien_'.$i) }}</h3>
                         <p>{{ __('portada.quien_'.$i.'_texto') }}</p>
-                    </article>
+                        <span class="quien-ver">{{ __('portada.modo_ver_packs') }} <span aria-hidden="true">→</span></span>
+                    </a>
                 @endforeach
             </div>
         </div>
