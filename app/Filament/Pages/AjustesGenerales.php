@@ -102,6 +102,8 @@ class AjustesGenerales extends Page implements HasSchemas
                     TextInput::make('max_px')->label('Lado mayor, como mucho')->integer()->minValue(1000)->maxValue(10000)->suffix('px')->required()
                         ->helperText('8000 px son 67 cm a 300 ppp. Más solo hace la subida más lenta.'),
                     TextInput::make('min_px')->label('Lado menor, al menos')->integer()->minValue(50)->maxValue(2000)->suffix('px')->required(),
+                    Toggle::make('exigir_ppp')->label('Exigir que el PNG indique su resolución (ppp)')->inline(false)
+                        ->helperText('Si el archivo no la declara, no se admite (D206).'),
                     TextInput::make('dias_sin_pedido')->label('Guardar sin pedido')->integer()->minValue(1)->maxValue(365)->suffix('días')->required(),
                     TextInput::make('subidas_hora')->label('Subidas por hora y conexión')->integer()->minValue(5)->maxValue(1000)->required()
                         ->helperText('Frena el abuso; quien prueba varias versiones de su logo no llega.'),
