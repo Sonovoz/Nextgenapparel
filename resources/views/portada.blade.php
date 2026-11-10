@@ -121,6 +121,31 @@
 
             // Animación de subida: dura al menos MINIMO ms para que se vea y se entienda.
             var MINIMO = 1100;
+            function esPng(f) { return f.type === 'image/png' || (!f.type && /\.png$/i.test(f.name)); }
+            /**
+             * ¿Declara el PNG su resolución? Lee el fragmento pHYs (D206), igual que el servidor: true si la declara
+             * en ppp, false si no, null si no se sabe (el navegador no puede leerlo): entonces decide el servidor.
+             */
+            function pppDeclarados(archivo) {
+                if (!archivo || !archivo.slice || !window.DataView) return Promise.resolve(null);
+                var trozo = archivo.slice(0, 1024 * 1024);
+                var leer = trozo.arrayBuffer ? trozo.arrayBuffer() : new Promise(function (ok, mal) {
+                    var lector = new FileReader();
+                    lector.onload = function () { ok(lector.result); };
+                    lector.onerror = mal;
+                    lector.readAsArrayBuffer(trozo);
+                });
+                return leer.then(function (buffer) {
+                    var v = new DataView(buffer), p = 8;
+                    while (p + 8 <= v.byteLength) {
+                        var largo = v.getUint32(p), tipo = String.fromCharCode(v.getUint8(p + 4), v.getUint8(p + 5), v.getUint8(p + 6), v.getUint8(p + 7));
+                        if (tipo === 'IDAT' || tipo === 'IEND') return false;
+                        if (tipo === 'pHYs') return largo === 9 && p + 17 <= v.byteLength ? v.getUint8(p + 16) === 1 && v.getUint32(p + 8) > 0 : null;
+                        p += 12 + largo;
+                    }
+                    return null;
+                }, function () { return null; });
+            }
             function fallo() { zona.classList.remove('subiendo'); error.textContent = caja.dataset.error; error.hidden = false; }
             // El original, sin reducir, también se queda en este navegador (IndexedDB) para el pedido.
             function guardarOriginal(archivo) {
@@ -135,7 +160,15 @@
             }
             function leer(archivo) {
                 error.hidden = true;
-                if (!archivo || !/^image\/(png|jpeg|webp|svg\+xml)$/.test(archivo.type)) { fallo(); return; }
+                if (!archivo || !esPng(archivo)) { fallo(); return; } // solo PNG (D206)
+                if (caja.dataset.exigirPpp === '1' && !archivo.revisado) {
+                    pppDeclarados(archivo).then(function (declara) {
+                        if (declara === false) { fallo(); error.textContent = caja.dataset.errorPpp; return; }
+                        archivo.revisado = true;
+                        leer(archivo);
+                    });
+                    return;
+                }
                 zona.classList.add('subiendo');
                 var inicio = Date.now();
                 var url = URL.createObjectURL(archivo);
@@ -249,7 +282,7 @@
             </div>
 
             @if ($urlPrueba)
-                <div class="prueba-logo aparece" id="prueba-logo" data-destino="{{ $urlPrueba }}#tu-marca" data-error="{{ __('portada.soltar_error') }}">
+                <div class="prueba-logo aparece" id="prueba-logo" data-destino="{{ $urlPrueba }}#tu-marca" data-error="{{ __('portada.soltar_error') }}" data-error-ppp="{{ __('disenos.error_sin_ppp') }}" data-exigir-ppp="{{ \App\Models\Ajuste::obtener('disenos.exigir_ppp') ? '1' : '0' }}">
                     <div>
                         <p class="etiqueta">{{ __('portada.paso_1') }}</p>
                         <h3 style="font-size: clamp(30px, 4vw, 44px); text-transform: uppercase;">{{ __('portada.soltar_titulo') }}</h3>
@@ -269,7 +302,7 @@
                         </span>
                         <small class="error-logo" role="alert" style="color: #C62828;" hidden></small>
                     </label>
-                    <input class="oculto" type="file" id="logo-portada" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+                    <input class="oculto" type="file" id="logo-portada" accept="image/png,.png">
                 </div>
             @endif
         </div>
@@ -286,21 +319,7 @@
             @else
                 <div class="carrusel">
                     @foreach ($packs as $pack)
-                        <article class="pack aparece">
-                            <div class="pack-foto">
-                                @if ($pack['foto'])<img src="{{ $pack['foto']->url() }}" alt="" width="1000" height="1200" loading="lazy">@endif
-                            </div>
-                            <div class="pack-cuerpo">
-                                <h3>{{ $pack['nombre'] }}</h3>
-                                <p class="pack-precio">{{ $pack['precio'] }}<small>{{ __('portada.pack_iva') }}</small></p>
-                                <ul class="pack-datos">
-                                    <li>{{ __('portada.pack_prendas', ['n' => $pack['unidades']]) }}</li>
-                                    @if ($pack['zonas'])<li>{{ __('portada.pack_impresion', ['zonas' => $pack['zonas']]) }}</li>@endif
-                                    @if ($pack['descripcion'])<li>{{ $pack['descripcion'] }}</li>@endif
-                                </ul>
-                                <a class="boton" href="{{ $pack['url'] }}">{{ __('portada.pack_elegir') }}<span class="oculto"> · {{ $pack['nombre'] }}</span></a>
-                            </div>
-                        </article>
+                        @include('tienda._pack', ['pack' => $pack])
                     @endforeach
                 </div>
             @endif
@@ -360,12 +379,15 @@
             <p class="etiqueta aparece">{{ __('portada.quien_etiqueta') }}</p>
             <h2 class="titulo-seccion aparece" id="titulo-quien">{{ __('portada.quien_titulo') }}</h2>
             <div class="quien-rejilla">
-                @foreach ([1, 2, 3] as $i)
-                    <article class="aparece retraso-{{ $i }}">
+                {{-- Cada modo lleva a sus packs (D203). --}}
+                @foreach (\App\Dominio\Catalogo\ModoCliente::cases() as $modo)
+                    @php $i = $modo->numero(); @endphp
+                    <a class="quien-tarjeta aparece retraso-{{ $i }}" href="{{ route('modo', ['modo' => $modo->value]) }}">
                         <p class="modo">{{ __('portada.modo') }} 0{{ $i }}</p>
                         <h3>{{ __('portada.quien_'.$i) }}</h3>
                         <p>{{ __('portada.quien_'.$i.'_texto') }}</p>
-                    </article>
+                        <span class="quien-ver">{{ __('portada.modo_ver_packs') }} <span aria-hidden="true">→</span></span>
+                    </a>
                 @endforeach
             </div>
         </div>

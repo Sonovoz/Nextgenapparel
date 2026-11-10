@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Dominio\Catalogo\Escaparate;
+use App\Dominio\Catalogo\ModoCliente;
 use App\Dominio\Seo\Indexacion;
 use App\Models\EntradaBlog;
 use Illuminate\Http\Response;
@@ -43,6 +44,11 @@ class SeoController
                 $entrada['imagen'] = Escaparate::fotoPrincipal($prenda)?->url();
                 $urls[] = $entrada;
             }
+        }
+
+        // Modos de la portada (D203).
+        foreach (ModoCliente::cases() as $modo) {
+            $urls[] = $this->entrada(fn ($i) => route('modo', ['idioma' => $i, 'modo' => $modo->value]), $idioma, $idiomas);
         }
 
         // Blog (D195): el índice y cada entrada publicada.

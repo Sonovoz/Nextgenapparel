@@ -27,7 +27,6 @@
                     <h2>{{ __('packs.subir_titulo') }}</h2>
                     <label for="campo-archivo">{{ __('packs.subir_png', ['mb' => $maxMb]) }}</label>
                     <input type="file" id="campo-archivo" name="archivo" accept="image/png" required>
-                    <label class="casilla"><input type="checkbox" name="derechos" value="1" required> {{ __('disenos.derechos_casilla') }}</label>
                     <button type="submit" class="boton">{{ __('packs.subir') }}</button>
                 </form>
             </div>

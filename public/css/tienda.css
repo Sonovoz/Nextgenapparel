@@ -264,10 +264,18 @@ body.menu-abierto { overflow: hidden; }
 
 /* Para quién */
 .quien-rejilla { display: grid; gap: 0; margin-top: 40px; border-top: 1px solid var(--linea); }
-.quien-rejilla article { padding: 26px 0; border-bottom: 1px solid var(--linea); }
+.quien-rejilla .quien-tarjeta { padding: 26px 0; border-bottom: 1px solid var(--linea); }
 .quien-rejilla h3 { font-size: 30px; }
+.quien-tarjeta { display: block; color: inherit; text-decoration: none; }
+.quien-tarjeta:hover h3, .quien-tarjeta:focus-visible h3 { color: #fff; }
+.quien-tarjeta:hover, .quien-tarjeta:focus-visible { border-color: rgba(142, 160, 255, .6) !important; transform: translateY(-2px); }
+.quien-ver { display: inline-block; margin-top: 16px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--neon); }
+/* Página de un modo (D203) */
+.modo-cabecera { padding-top: var(--hueco); }
+.modo-cabecera .entradilla { max-width: 60ch; }
+.modo-otros { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
 .quien-rejilla p { margin: 8px 0 0; color: var(--tinta-suave); }
-@media (min-width: 900px) { .quien-rejilla { grid-template-columns: repeat(3, 1fr); border-top: 0; } .quien-rejilla article { border-bottom: 0; border-left: 1px solid var(--linea); padding: 0 32px; } .quien-rejilla article:first-child { border-left: 0; padding-left: 0; } }
+@media (min-width: 900px) { .quien-rejilla { grid-template-columns: repeat(3, 1fr); border-top: 0; } .quien-rejilla .quien-tarjeta { border-bottom: 0; border-left: 1px solid var(--linea); padding: 0 32px; } .quien-rejilla .quien-tarjeta:first-child { border-left: 0; padding-left: 0; } }
 
 /* Preguntas */
 .preguntas { max-width: 860px; margin: 32px auto 0; }
@@ -336,6 +344,7 @@ body.estudio-abierto { overflow: hidden; }
 .piel[aria-pressed="true"] .marco { border-color: #8EA0FF; background: rgba(142, 160, 255, .16); box-shadow: 0 0 0 1px #8EA0FF, 0 8px 24px -8px rgba(142, 160, 255, .6); }
 
 /* Panel de herramientas */
+.estudio.activo .herramientas { background: #1C1C24; box-shadow: 0 8px 16px -8px #121218; } /* fija arriba: opaca para no transparentar lo de debajo */
 .estudio.activo .estudio-panel { display: block; overflow-y: auto; overscroll-behavior: contain; background: #121218; border-top: 1px solid rgba(255, 255, 255, .08); }
 .estudio.activo .tu-marca { margin: 0; border-radius: 0; background: transparent; padding: 20px 18px 28px; gap: 18px; }
 .estudio.activo .tu-marca > div:first-child { display: none; }
@@ -365,10 +374,10 @@ body.estudio-abierto { overflow: hidden; }
     .piel { width: 92px; }
     .piel .marco { width: 92px; height: 104px; }
     .estudio.activo .tu-marca { padding: 24px 28px 0; }
-    /* La decisión («Siguiente: tallas y colores») siempre a la vista, fija abajo del panel. */
-    .estudio.activo .capas.decision { position: sticky; bottom: 0; z-index: 3; margin: 0 -28px; padding: 18px 28px 22px; border-radius: 18px 18px 0 0; border-width: 1px 0 0; background: linear-gradient(180deg, rgba(45, 75, 255, .2), rgba(45, 75, 255, .08)), #121218; box-shadow: 0 -18px 32px -12px rgba(0, 0, 0, .7); }
-    .estudio.activo #nivel-diseno { padding-bottom: 24px; }
-    .estudio.activo #nivel-diseno:has(.capas.decision) { padding-bottom: 0; }
+    /* Abajo, fija y fina: qué llevas, el error si lo hay y «Siguiente» (D198). */
+    .estudio.activo .capas-pie { position: sticky; bottom: 0; z-index: 3; margin: 0 -28px; padding: 28px 28px 16px; background: linear-gradient(to top, #121218 72%, rgba(18, 18, 24, 0)); }
+    .estudio.activo .capas-pie.con-aviso { padding-top: 14px; background: #121218; border-top: 1px solid rgba(240, 98, 77, .45); box-shadow: 0 -14px 24px -14px rgba(0, 0, 0, .8); }
+    .estudio.activo #nivel-diseno:has(.capas-pie:not([hidden])) { padding-bottom: 0; }
 }
 /* «Foto próximamente» dentro de la miniatura de color, sin salirse. */
 .piel .sin-foto { margin: 0; padding: 0 4px; font-size: 8px; letter-spacing: 0; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
@@ -381,13 +390,20 @@ body.estudio-abierto { overflow: hidden; }
     .piel { width: 58px; font-size: 9px; }
     .piel .marco { width: 58px; height: 62px; border-radius: 10px; }
     .estudio.activo .visor-controles .boton-pildora { min-height: 30px; padding: 0 10px; }
-    .estudio.activo #ver-zonas { display: none; }  /* en el móvil, la pestaña «Zona» */
+    .estudio.activo #ver-zonas { display: none; }
+    .estudio.activo .capas-pie .boton-siguiente { display: none; } /* en el móvil, «Siguiente» ya está en la barra de abajo */  /* en el móvil, «¿Dónde lo ponemos?» en el paso Diseño */
 }
 @media (prefers-reduced-motion: reduce) { .estudio.activo { animation: none; } .estudio.activo .pista.visible { animation: none; opacity: 1; } }
 
 /* Varios diseños: capas y zonas */
 .capas { display: flex; flex-direction: column; gap: 8px; }
 .capas:empty { display: none; }
+.capas-pie { display: flex; flex-direction: column; gap: 8px; }
+.capas-pie .boton-siguiente { width: 100%; min-height: 48px; }
+.capas-pie .boton-siguiente.invita { animation: invita 1.1s ease-in-out 3; }
+@keyframes invita { 50% { box-shadow: 0 0 0 6px rgba(45, 75, 255, .35), 0 0 32px rgba(45, 75, 255, .7); transform: translateY(-1px); } }
+/* «¿Quieres otro diseño?» sin caja: texto y botones, sin cargar la vista */
+.estudio.activo .capas.decision { padding: 0; border: 0; background: none; box-shadow: none; animation: none; }
 .capas-titulo { margin: 0; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #A7A2B5; }
 .capa-diseno { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .04); color: #fff; font: 14px var(--sans); text-align: left; cursor: pointer; transition: border-color .2s ease, background .2s ease; }
 .capa-diseno strong { font-weight: 500; letter-spacing: .12em; text-transform: uppercase; font-size: 12px; }
@@ -605,7 +621,7 @@ body.estudio-abierto { overflow: hidden; }
     .pasos-rejilla::before { content: ""; position: absolute; left: 0; right: 0; top: 74px; height: 2px; background: linear-gradient(90deg, var(--azul), var(--neon) 50%, var(--linea-fuerte)); opacity: .7; }
     .paso { border-left: 0; padding-top: 0; }
 }
-.paso, .quien-rejilla article { transition: transform .3s ease; }
+.paso, .quien-rejilla .quien-tarjeta { transition: transform .3s ease; }
 .prueba-logo { background: var(--papel); border-color: var(--linea-fuerte); }
 .pack { background: var(--papel); border-color: var(--linea-fuerte); position: relative; }
 .pack::before { content: "BUNDLE"; position: absolute; top: 14px; left: 14px; z-index: 1; padding: 4px 10px; border-radius: 6px; font-size: 10px; letter-spacing: .24em; color: #0B0B10; background: linear-gradient(90deg, #8EA0FF, #C8D0FF); }
@@ -617,12 +633,12 @@ body.estudio-abierto { overflow: hidden; }
 .familia-tarjeta:hover .ir { background: var(--azul-oscuro); }
 .seccion-calidad { background: linear-gradient(180deg, var(--fondo), #0D0E18 30%, var(--fondo)); border-top: 1px solid var(--linea); border-bottom: 1px solid var(--linea); }
 .lupa-tejido { border: 1px solid var(--linea-fuerte); }
-.quien-rejilla article { padding: 26px 0; }
+.quien-rejilla .quien-tarjeta { padding: 26px 0; }
 .quien-rejilla .modo { margin: 0 0 8px; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--neon); }
 @media (min-width: 900px) {
     .quien-rejilla { gap: 16px; border: 0; }
-    .quien-rejilla article, .quien-rejilla article:first-child { border: 1px solid var(--linea-fuerte); border-radius: 16px; padding: 28px; background: var(--papel); }
-    .quien-rejilla article:hover { transform: translateY(-4px); border-color: var(--neon); }
+    .quien-rejilla .quien-tarjeta, .quien-rejilla .quien-tarjeta:first-child { border: 1px solid var(--linea-fuerte); border-radius: 16px; padding: 28px; background: var(--papel); }
+    .quien-rejilla .quien-tarjeta:hover { transform: translateY(-4px); border-color: var(--neon); }
 }
 .quien-rejilla h3 { font-size: 26px; text-transform: uppercase; }
 .preguntas details { border-color: var(--linea-fuerte); }
@@ -646,7 +662,7 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .info-prenda .chip { border-color: rgba(255, 255, 255, .2); color: #fff; }
 .info-prenda summary { color: #fff; }
 .info-prenda details { border-color: rgba(255, 255, 255, .12); }
-.herramientas { grid-template-columns: repeat(4, 1fr); }
+.herramientas { grid-template-columns: repeat(3, 1fr); }
 .herramienta { letter-spacing: .1em; font-size: 11px; }
 @media (min-width: 700px) { .estudio-precio { display: inline-flex; } }
 @media (max-width: 1023px) { .estudio-ruta { display: none; } .estudio.activo .estudio-barra { gap: 10px; } }
@@ -725,7 +741,7 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
     .estudio-pie .boton-siguiente { flex: none; min-height: 46px; padding: 0 16px; font-size: 11px; letter-spacing: .08em; }
     .estudio-pie .boton-siguiente[hidden] { display: none; }
 }
-@media (prefers-reduced-motion: reduce) { .capas.decision { animation: none; } .estudio-precio strong.latido { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .capas.decision, .capas-pie .boton-siguiente.invita { animation: none; } .estudio-precio strong.latido { animation: none; } }
 
 /* Mejorar el diseño con IA (D143) */
 .mejora-ia { display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 16px; border: 1px solid rgba(142, 160, 255, .45); background: linear-gradient(135deg, rgba(45, 75, 255, .18), rgba(142, 160, 255, .05)); }
@@ -822,8 +838,11 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 @media (min-width: 1024px) and (max-width: 1359px) { .navegacion { display: none; } .boton-menu { display: inline-flex; } }
 
 /* Declaración de derechos y errores al subir los diseños (fase 4). */
-.casilla-derechos { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.45; color: #DCD8E8; cursor: pointer; }
-.casilla-derechos input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--azul); cursor: pointer; }
+.nivel-ayuda { margin: 0; font-size: 13px; }
+.grupo.donde { gap: 10px; }
+.donde-titulo { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #A7A2B5; }
+.decision-zonas { display: flex; flex-wrap: wrap; gap: 8px; }
+.decision-zonas .anadir { flex: 1 1 140px; }
 .error-subida { margin: 0; padding: 10px 12px; border-radius: 10px; background: rgba(240, 98, 77, .14); border: 1px solid rgba(240, 98, 77, .5); color: #FFC9C0; font-size: 13px; line-height: 1.45; }
 
 /* Tus diseños subidos (fase 4). */
