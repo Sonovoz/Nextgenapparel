@@ -5,6 +5,7 @@ namespace App\Notifications\Pedidos;
 use App\Dominio\Facturacion\PdfFactura;
 use App\Dominio\Pedidos\CorreosPedido;
 use App\Dominio\Pedidos\EstadoPedido;
+use App\Dominio\Precios\Formato;
 use App\Http\Controllers\PedidoController;
 use App\Models\Ajuste;
 use App\Models\Factura;
@@ -50,7 +51,9 @@ class CorreoDelPedido extends Notification implements ShouldQueue
         $texto = CorreosPedido::rellenar(CorreosPedido::plantilla($clave, 'texto', $idioma), $pedido);
         $tienda = Ajuste::obtener('tienda.nombre');
 
-        $correo = (new MailMessage)->subject($asunto.' · '.$tienda);
+        $correo = (new MailMessage)->subject($asunto.' · '.$tienda)
+            ->greeting(trans('cuenta.correo_hola', ['nombre' => (string) ($pedido->direccion_envio['nombre'] ?? $pedido->nombre_fiscal)], $idioma))
+            ->markdown('correos.pedido', ['resumen' => self::resumen($pedido, $idioma)]);
         foreach (preg_split('/\n\s*\n/', $texto) as $parrafo) {
             $correo->line(trim($parrafo));
         }
@@ -60,6 +63,26 @@ class CorreoDelPedido extends Notification implements ShouldQueue
 
         return $correo->action(trans('correos.ver_pedido', [], $idioma), PedidoController::enlacePrivado($pedido))
             ->salutation(trans('cuenta.correo_despedida', ['tienda' => $tienda], $idioma));
+    }
+
+    /**
+     * Lo que lleva el pedido y su total, para el correo (D204). Los importes salen del pedido (ya calculados).
+     *
+     * @return array{lineas: list<array{nombre: string, detalle: string, unidades: int}>, envio: ?string, total: string}
+     */
+    public static function resumen(Pedido $pedido, string $idioma): array
+    {
+        $pedido->loadMissing('lineas');
+
+        return [
+            'lineas' => $pedido->lineas->map(fn ($l) => [
+                'nombre' => (string) ($l->nombre[$idioma] ?? $l->nombre['es'] ?? reset($l->nombre)),
+                'detalle' => (string) ($l->color_nombre[$idioma] ?? $l->color_nombre['es'] ?? ''),
+                'unidades' => (int) $l->unidades,
+            ])->values()->all(),
+            'envio' => $pedido->envio > 0 ? Formato::euros($pedido->envio, $idioma) : null,
+            'total' => Formato::euros($pedido->total, $idioma),
+        ];
     }
 
     /** La factura o la rectificativa, con su PDF adjunto (D175). */
