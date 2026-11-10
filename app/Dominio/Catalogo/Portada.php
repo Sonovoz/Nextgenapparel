@@ -6,10 +6,12 @@ use App\Dominio\Precios\Formato;
 use App\Dominio\Precios\Impuestos;
 use App\Dominio\Precios\Iva;
 use App\Models\Familia;
+use App\Models\Foto;
 use App\Models\Pack;
 use App\Models\Prenda;
 use App\Models\ReglaMinimo;
 use App\Models\ZonaImpresion;
+use Illuminate\Support\Collection;
 
 /**
  * Lo que muestra la portada, siempre con los datos reales del backend:
@@ -33,17 +35,7 @@ final class Portada
             ];
         });
 
-        $packs = Pack::vigentes($ahora)->with(['lineas.prenda.fotos', 'zonas'])->orderBy('orden')->get()
-            ->filter(fn (Pack $p) => $p->lineas->isNotEmpty() && $p->lineas->every(fn ($l) => $l->prenda?->activa))
-            ->map(fn (Pack $p) => [
-                'nombre' => $p->nombre,
-                'url' => route('packs.ver', ['pack' => $p->getTranslation('slug', app()->getLocale())]),
-                'descripcion' => $p->descripcion,
-                'unidades' => $p->unidades(),
-                'precio' => Formato::euros(Iva::conIva($p->precio, Impuestos::tipoIva($p->clase_impuesto_id))),
-                'zonas' => $p->zonas->map(fn (ZonaImpresion $z) => $z->nombre)->implode(', '),
-                'foto' => Escaparate::fotoPrincipal($p->lineas->first()->prenda),
-            ])->values();
+        $packs = self::packs();
 
         // La prenda donde se prueba el logo: la primera con maqueta y zonas.
         $prueba = Prenda::where('activa', true)->whereHas('variantes', fn ($q) => $q->aLaVenta())
@@ -57,6 +49,31 @@ final class Portada
             'plazo' => Familia::where('activa', true)->min('plazo_base_dias'),
             'urlPrueba' => $prueba ? route('tienda.prenda', ['familia' => Escaparate::slug($prueba->familia, app()->getLocale()), 'prenda' => Escaparate::slug($prueba, app()->getLocale())]) : null,
         ];
+    }
+
+    /**
+     * Los packs vigentes que se pueden comprar, listos para la tarjeta. Con modo, los de ese modo primero y
+     * después los genéricos (D203).
+     *
+     * @return Collection<int, array{nombre: string, url: string, descripcion: ?string, unidades: int, precio: string, zonas: string, foto: ?Foto}>
+     */
+    public static function packs(?ModoCliente $modo = null): Collection
+    {
+        $packs = Pack::vigentes(now())->with(['lineas.prenda.fotos', 'zonas'])->orderBy('orden')->get()
+            ->filter(fn (Pack $p) => $p->lineas->isNotEmpty() && $p->lineas->every(fn ($l) => $l->prenda?->activa));
+        if ($modo !== null) {
+            $packs = $packs->filter(fn (Pack $p) => $p->esPara($modo))->sortBy(fn (Pack $p) => $p->modos ? 0 : 1);
+        }
+
+        return $packs->map(fn (Pack $p) => [
+            'nombre' => $p->nombre,
+            'url' => route('packs.ver', ['pack' => $p->getTranslation('slug', app()->getLocale())]),
+            'descripcion' => $p->descripcion,
+            'unidades' => $p->unidades(),
+            'precio' => Formato::euros(Iva::conIva($p->precio, Impuestos::tipoIva($p->clase_impuesto_id))),
+            'zonas' => $p->zonas->map(fn (ZonaImpresion $z) => $z->nombre)->implode(', '),
+            'foto' => Escaparate::fotoPrincipal($p->lineas->first()->prenda),
+        ])->values();
     }
 
     /** @return array<string, mixed> */

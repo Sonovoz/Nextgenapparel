@@ -264,10 +264,18 @@ body.menu-abierto { overflow: hidden; }
 
 /* Para quién */
 .quien-rejilla { display: grid; gap: 0; margin-top: 40px; border-top: 1px solid var(--linea); }
-.quien-rejilla article { padding: 26px 0; border-bottom: 1px solid var(--linea); }
+.quien-rejilla .quien-tarjeta { padding: 26px 0; border-bottom: 1px solid var(--linea); }
 .quien-rejilla h3 { font-size: 30px; }
+.quien-tarjeta { display: block; color: inherit; text-decoration: none; }
+.quien-tarjeta:hover h3, .quien-tarjeta:focus-visible h3 { color: #fff; }
+.quien-tarjeta:hover, .quien-tarjeta:focus-visible { border-color: rgba(142, 160, 255, .6) !important; transform: translateY(-2px); }
+.quien-ver { display: inline-block; margin-top: 16px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--neon); }
+/* Página de un modo (D203) */
+.modo-cabecera { padding-top: var(--hueco); }
+.modo-cabecera .entradilla { max-width: 60ch; }
+.modo-otros { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
 .quien-rejilla p { margin: 8px 0 0; color: var(--tinta-suave); }
-@media (min-width: 900px) { .quien-rejilla { grid-template-columns: repeat(3, 1fr); border-top: 0; } .quien-rejilla article { border-bottom: 0; border-left: 1px solid var(--linea); padding: 0 32px; } .quien-rejilla article:first-child { border-left: 0; padding-left: 0; } }
+@media (min-width: 900px) { .quien-rejilla { grid-template-columns: repeat(3, 1fr); border-top: 0; } .quien-rejilla .quien-tarjeta { border-bottom: 0; border-left: 1px solid var(--linea); padding: 0 32px; } .quien-rejilla .quien-tarjeta:first-child { border-left: 0; padding-left: 0; } }
 
 /* Preguntas */
 .preguntas { max-width: 860px; margin: 32px auto 0; }
@@ -613,7 +621,7 @@ body.estudio-abierto { overflow: hidden; }
     .pasos-rejilla::before { content: ""; position: absolute; left: 0; right: 0; top: 74px; height: 2px; background: linear-gradient(90deg, var(--azul), var(--neon) 50%, var(--linea-fuerte)); opacity: .7; }
     .paso { border-left: 0; padding-top: 0; }
 }
-.paso, .quien-rejilla article { transition: transform .3s ease; }
+.paso, .quien-rejilla .quien-tarjeta { transition: transform .3s ease; }
 .prueba-logo { background: var(--papel); border-color: var(--linea-fuerte); }
 .pack { background: var(--papel); border-color: var(--linea-fuerte); position: relative; }
 .pack::before { content: "BUNDLE"; position: absolute; top: 14px; left: 14px; z-index: 1; padding: 4px 10px; border-radius: 6px; font-size: 10px; letter-spacing: .24em; color: #0B0B10; background: linear-gradient(90deg, #8EA0FF, #C8D0FF); }
@@ -625,12 +633,12 @@ body.estudio-abierto { overflow: hidden; }
 .familia-tarjeta:hover .ir { background: var(--azul-oscuro); }
 .seccion-calidad { background: linear-gradient(180deg, var(--fondo), #0D0E18 30%, var(--fondo)); border-top: 1px solid var(--linea); border-bottom: 1px solid var(--linea); }
 .lupa-tejido { border: 1px solid var(--linea-fuerte); }
-.quien-rejilla article { padding: 26px 0; }
+.quien-rejilla .quien-tarjeta { padding: 26px 0; }
 .quien-rejilla .modo { margin: 0 0 8px; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--neon); }
 @media (min-width: 900px) {
     .quien-rejilla { gap: 16px; border: 0; }
-    .quien-rejilla article, .quien-rejilla article:first-child { border: 1px solid var(--linea-fuerte); border-radius: 16px; padding: 28px; background: var(--papel); }
-    .quien-rejilla article:hover { transform: translateY(-4px); border-color: var(--neon); }
+    .quien-rejilla .quien-tarjeta, .quien-rejilla .quien-tarjeta:first-child { border: 1px solid var(--linea-fuerte); border-radius: 16px; padding: 28px; background: var(--papel); }
+    .quien-rejilla .quien-tarjeta:hover { transform: translateY(-4px); border-color: var(--neon); }
 }
 .quien-rejilla h3 { font-size: 26px; text-transform: uppercase; }
 .preguntas details { border-color: var(--linea-fuerte); }

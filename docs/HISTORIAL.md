@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 10/11 | **Packs por modo**: en el backend, cada pack dice para qué modos es (o genérico); las tarjetas de «Elige tu modo» llevan a una página con sus packs y los genéricos. | `packs-por-modo` | D203 |
 | 10/11 | **Derechos de los diseños en las condiciones de venta**: fuera la casilla del estudio y de los packs; la declaración va en «Acepto las condiciones de venta» y en una cláusula nueva de las condiciones (es/en). | `configurador-guiado` | D202 |
 | 09/11 | **Portada**: entre la cabecera y «Cómo configurar tu marca en 3 pasos», la misma línea con luz que recorre el pie. | `portada-separador` | — |
 | 09/11 | **Configurador en 3 pasos**: sube tu diseño y lo colocamos, con «¿Dónde lo ponemos?» (Frontal, Pecho, Espalda) en el mismo paso y un botón por zona libre para otro diseño, tallas y colores, resumen y pago; declaración de derechos junto al botón de subir; «Escribir mi marca» oculto por ahora (D199); «Siguiente» dice qué falta; errores de subida que explican qué pasa (en local, con la causa). | `configurador-guiado` | D198 |
