@@ -6,7 +6,9 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 10/11 | **PDF elegantes**: factura, presupuesto y orden de trabajo con logo, línea de marca, bloques, tablas limpias, total destacado y pie con página. | `pdf-diseno` | D205 |
 | 10/11 | **Packs por modo**: en el backend, cada pack dice para qué modos es (o genérico); las tarjetas de «Elige tu modo» llevan a una página con sus packs y los genéricos. | `packs-por-modo` | D203 |
+| 09/11 | **PDF del presupuesto con la foto de lo creado**: cada línea lleva la maqueta de cada cara con los diseños del cliente. | `pdf-maquetas` | D200 |
 | 09/11 | **Ajustes → Correos**: «Enviar correo de prueba» ya no dice «enviado» si el `.env` tiene `MAIL_MAILER=log`; avisa de que se ha escrito en el log y de cómo enviarlo de verdad. | `correo-prueba-honesto` | — |
 | 09/11 | **Portada**: entre la cabecera y «Cómo configurar tu marca en 3 pasos», la misma línea con luz que recorre el pie. | `portada-separador` | — |
 | 09/11 | **Estudio**: panel de control más ancho (440-620 px) con el orden de los pasos (pasos, herramienta, calidad) y «Siguiente: tallas y colores» siempre visible abajo; «Foto próximamente» ya no se sale de la miniatura. | `estudio-panel` | — |
