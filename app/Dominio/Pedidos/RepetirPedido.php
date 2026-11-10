@@ -81,7 +81,8 @@ final class RepetirPedido
         try {
             file_put_contents($temporal, $disco->get($impresion->archivo));
 
-            return ($this->guardarDiseno)(new UploadedFile($temporal, $impresion->nombre_original ?? 'diseno.png', 'image/png', null, true), $dueno)->uuid;
+            // Ya se aceptó e imprimió: no se le exige la resolución declarada (D206).
+            return ($this->guardarDiseno)(new UploadedFile($temporal, $impresion->nombre_original ?? 'diseno.png', 'image/png', null, true), $dueno, exigirPpp: false)->uuid;
         } finally {
             @unlink($temporal);
         }

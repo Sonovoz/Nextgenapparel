@@ -103,11 +103,9 @@ class PackController
         $maxMb = AnalizadorPng::maxMbEfectivo();
         $request->validate([
             'archivo' => ['required', 'file', 'max:'.($maxMb * 1024)],
-            'derechos' => ['accepted'],
         ], [
             'archivo.required' => __('disenos.error_sin_archivo'),
             'archivo.max' => __('disenos.error_pesado', ['mb' => $maxMb]),
-            'derechos.accepted' => __('disenos.error_derechos'),
         ]);
 
         try {
