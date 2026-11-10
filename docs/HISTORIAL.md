@@ -6,6 +6,9 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 10/11 | **Derechos de los diseños en las condiciones de venta**: fuera la casilla del estudio y de los packs; la declaración va en «Acepto las condiciones de venta» y en una cláusula nueva de las condiciones (es/en). | `configurador-guiado` | D202 |
+| 09/11 | **Portada**: entre la cabecera y «Cómo configurar tu marca en 3 pasos», la misma línea con luz que recorre el pie. | `portada-separador` | — |
+| 09/11 | **Configurador en 3 pasos**: sube tu diseño y lo colocamos, con «¿Dónde lo ponemos?» (Frontal, Pecho, Espalda) en el mismo paso y un botón por zona libre para otro diseño, tallas y colores, resumen y pago; declaración de derechos junto al botón de subir; «Escribir mi marca» oculto por ahora (D199); «Siguiente» dice qué falta; errores de subida que explican qué pasa (en local, con la causa). | `configurador-guiado` | D198 |
 | 09/11 | **Carrito**: las cantidades por talla se guardan solas y el precio se actualiza; «Cerrar el pedido» guarda antes los cambios pendientes. | `carrito-cantidades-auto` | D201 |
 | 09/11 | **Ajustes → Correos**: «Enviar correo de prueba» ya no dice «enviado» si el `.env` tiene `MAIL_MAILER=log`; avisa de que se ha escrito en el log y de cómo enviarlo de verdad. | `correo-prueba-honesto` | — |
 | 09/11 | **PDF del presupuesto con la foto de lo creado**: cada línea lleva la maqueta de cada cara con los diseños del cliente. | `pdf-maquetas` | D200 |

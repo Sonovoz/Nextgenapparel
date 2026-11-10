@@ -107,8 +107,9 @@ class DisenoResource extends Resource
                 TextEntry::make('dueno')->label('De')->state(fn (Diseno $record): string => $record->dueno()),
             ]),
             Section::make('Declaración de derechos')->columnSpanFull()->columns(3)->schema([
-                TextEntry::make('derechos_texto')->label('Texto aceptado')->columnSpan(2),
-                TextEntry::make('derechos_declarados_en')->label('Aceptado el')->dateTime('d/m/Y H:i:s'),
+                // Desde D202, la declaración va en las condiciones de venta que acepta al confirmar el pedido.
+                TextEntry::make('derechos_texto')->label('Texto aceptado')->columnSpan(2)->placeholder('En las condiciones de venta del pedido'),
+                TextEntry::make('derechos_declarados_en')->label('Aceptado el')->dateTime('d/m/Y H:i:s')->placeholder('Al confirmar el pedido'),
             ]),
         ]);
     }

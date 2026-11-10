@@ -843,18 +843,11 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 @media (min-width: 1024px) and (max-width: 1359px) { .navegacion { display: none; } .boton-menu { display: inline-flex; } }
 
 /* Declaración de derechos y errores al subir los diseños (fase 4). */
-.casilla-derechos { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.45; color: #DCD8E8; cursor: pointer; }
-.casilla-derechos input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--azul); cursor: pointer; }
-#hp-diseno .casilla-derechos { padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .03); transition: border-color .2s ease, background .2s ease; }
-#hp-diseno .casilla-derechos.resaltada { border-color: #F2B33D; background: rgba(242, 179, 61, .12); animation: latido-casilla 1s ease 2; }
-@keyframes latido-casilla { 50% { box-shadow: 0 0 0 4px rgba(242, 179, 61, .25); } }
 .nivel-ayuda { margin: 0; font-size: 13px; }
 .grupo.donde { gap: 10px; }
 .donde-titulo { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #A7A2B5; }
 .decision-zonas { display: flex; flex-wrap: wrap; gap: 8px; }
 .decision-zonas .anadir { flex: 1 1 140px; }
-/* «Siguiente» cuando falta algo: dice qué y no parece listo. */
-.boton-siguiente.falta { background: transparent; color: #F7D27E; box-shadow: inset 0 0 0 1px rgba(242, 179, 61, .6); }
 .error-subida { margin: 0; padding: 10px 12px; border-radius: 10px; background: rgba(240, 98, 77, .14); border: 1px solid rgba(240, 98, 77, .5); color: #FFC9C0; font-size: 13px; line-height: 1.45; }
 
 /* Tus diseños subidos (fase 4). */

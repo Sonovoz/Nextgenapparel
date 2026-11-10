@@ -78,8 +78,7 @@ final class GuardarDiseno
                 'bytes' => (int) $archivo->getSize(),
                 'sha256' => $sha256,
                 ...$analisis->aColumnas(),
-                'derechos_declarados_en' => now(),
-                'derechos_texto' => __('disenos.derechos_casilla'),
+                // La declaración de derechos va en las condiciones de venta del pedido (D202).
             ]);
         } catch (UniqueConstraintViolationException) {
             // Otra petición igual (doble clic, reintento) llegó antes: se usa la suya.
