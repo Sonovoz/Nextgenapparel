@@ -49,9 +49,6 @@ final class GenerarMaquetas
     /** @return int maquetas generadas */
     public function __invoke(Pedido $pedido): int
     {
-        foreach (self::RECURSOS as $tipo => $bytes) {
-            Imagick::setResourceLimit($tipo, $bytes);
-        }
         $pedido->load('lineas.impresiones');
         $hechas = 0;
         foreach ($pedido->lineas as $linea) {
@@ -69,39 +66,16 @@ final class GenerarMaquetas
     private function cara(Pedido $pedido, LineaPedido $linea, ?Cara $cara, array $impresiones): bool
     {
         [$prendaId, $colorId] = $this->prendaYColor($linea);
-        $foto = $cara === null || $prendaId === null ? null : Foto::with('zonas')->where('prenda_id', $prendaId)->where('color_id', $colorId)
-            ->where('tipo', TipoFoto::Maqueta)->where('cara', $cara->value)->first();
-        if ($foto === null || ! Storage::disk(Foto::DISCO)->exists($foto->ruta)) {
-            Log::warning("Pedido {$pedido->numero}: sin foto de maqueta para la línea {$linea->uuid}, cara {$cara?->value}.");
-
+        $disco = Storage::disk(Pedido::DISCO);
+        $capas = array_map(fn (ImpresionPedido $i) => new CapaMaqueta(
+            (int) $i->zona_impresion_id, $i->ancho_mm, $i->alto_mm, $i->desde_cuello_mm, $i->desde_centro_mm,
+            $i->archivo !== null && $disco->exists($i->archivo) ? $disco->get($i->archivo) : null,
+            $i->util_ancho_px && $i->util_alto_px ? [(int) $i->util_x, (int) $i->util_y, $i->util_ancho_px, $i->util_alto_px] : null,
+            $i->archivo === null ? $i->texto : null, $i->fuente, $i->tinta,
+        ), $impresiones);
+        $base = $this->componer($prendaId, $colorId, (string) $linea->color_hex, $cara, $capas, "Pedido {$pedido->numero}, línea {$linea->uuid}");
+        if ($base === null || $cara === null) {
             return false;
-        }
-
-        $base = new Imagick;
-        $base->readImageBlob(Storage::disk(Foto::DISCO)->get($foto->ruta));
-        $base->setImageColorspace(Imagick::COLORSPACE_SRGB);
-        $ancho = $base->getImageWidth();
-        $alto = $base->getImageHeight();
-        $oscura = $this->luminancia((string) $linea->color_hex) < 0.45;
-
-        foreach ($impresiones as $impresion) {
-            $zona = $impresion->zona_impresion_id === null ? null : ZonaImpresion::find($impresion->zona_impresion_id);
-            $rect = $foto->zonas->firstWhere('zona_impresion_id', $impresion->zona_impresion_id);
-            if ($zona === null || $rect === null) {
-                Log::warning("Pedido {$pedido->numero}: la zona {$impresion->zona_impresion_id} ya no está en la foto de maqueta.");
-
-                continue;
-            }
-            $r = Maqueta::rectangulo($zona, $rect, $cara, $impresion->ancho_mm, $impresion->alto_mm, $impresion->desde_cuello_mm, $impresion->desde_centro_mm);
-            $x = (int) round($r['left'] / 100 * $ancho);
-            $y = (int) round($r['top'] / 100 * $alto);
-            $w = max(1, (int) round($r['width'] / 100 * $ancho));
-            $h = max(1, (int) round($r['height'] / 100 * $alto));
-
-            $capa = $impresion->archivo !== null ? $this->logo($impresion, $w, $h) : $this->texto($impresion, $oscura, $w, $h);
-            if ($capa !== null) {
-                $base->compositeImage($this->fundir($capa, $base, $x, $y), Imagick::COMPOSITE_OVER, $x, $y);
-            }
         }
 
         $ruta = "{$pedido->uuid}/maquetas/{$linea->uuid}-{$cara->value}.webp";
@@ -110,23 +84,70 @@ final class GenerarMaquetas
         Storage::disk(Pedido::DISCO)->put($ruta, $base->getImageBlob());
         MaquetaPedido::updateOrCreate(
             ['linea_pedido_id' => $linea->id, 'cara' => $cara->value],
-            ['ruta' => $ruta, 'ancho_px' => $ancho, 'alto_px' => $alto, 'generada_en' => now()],
+            ['ruta' => $ruta, 'ancho_px' => $base->getImageWidth(), 'alto_px' => $base->getImageHeight(), 'generada_en' => now()],
         );
 
         return true;
     }
 
-    /** El logo del pedido (su copia), recortado a lo que se imprime (D114) y al tamaño de su caja. */
-    private function logo(ImpresionPedido $impresion, int $w, int $h): ?Imagick
+    /**
+     * Una cara compuesta: la foto de maqueta de la prenda en ese color con sus diseños fundidos con la
+     * tela. Null si no hay foto de maqueta (se avisa en el registro). La usan el pedido, que la guarda,
+     * y el presupuesto, que la pone en su PDF (D200).
+     *
+     * @param  list<CapaMaqueta>  $capas
+     */
+    public function componer(?int $prendaId, ?int $colorId, string $colorHex, ?Cara $cara, array $capas, string $contexto = ''): ?Imagick
     {
-        $disco = Storage::disk(Pedido::DISCO);
-        if (! $disco->exists($impresion->archivo)) {
+        foreach (self::RECURSOS as $tipo => $bytes) {
+            Imagick::setResourceLimit($tipo, $bytes);
+        }
+        $foto = $cara === null || $prendaId === null ? null : Foto::with('zonas')->where('prenda_id', $prendaId)->where('color_id', $colorId)
+            ->where('tipo', TipoFoto::Maqueta)->where('cara', $cara->value)->first();
+        if ($foto === null || ! Storage::disk(Foto::DISCO)->exists($foto->ruta)) {
+            Log::warning("{$contexto}: sin foto de maqueta, cara {$cara?->value}.");
+
             return null;
         }
+
+        $base = new Imagick;
+        $base->readImageBlob(Storage::disk(Foto::DISCO)->get($foto->ruta));
+        $base->setImageColorspace(Imagick::COLORSPACE_SRGB);
+        $ancho = $base->getImageWidth();
+        $alto = $base->getImageHeight();
+        $oscura = $this->luminancia($colorHex) < 0.45;
+
+        foreach ($capas as $capa) {
+            $zona = ZonaImpresion::find($capa->zonaId);
+            $rect = $foto->zonas->firstWhere('zona_impresion_id', $capa->zonaId);
+            if ($zona === null || $rect === null) {
+                Log::warning("{$contexto}: la zona {$capa->zonaId} ya no está en la foto de maqueta.");
+
+                continue;
+            }
+            $r = Maqueta::rectangulo($zona, $rect, $cara, $capa->anchoMm, $capa->altoMm, $capa->desdeCuelloMm, $capa->desdeCentroMm);
+            $x = (int) round($r['left'] / 100 * $ancho);
+            $y = (int) round($r['top'] / 100 * $alto);
+            $w = max(1, (int) round($r['width'] / 100 * $ancho));
+            $h = max(1, (int) round($r['height'] / 100 * $alto));
+
+            $imagen = $capa->logo !== null ? $this->logo($capa, $w, $h) : $this->texto($capa, $oscura, $w, $h);
+            if ($imagen !== null) {
+                $base->compositeImage($this->fundir($imagen, $base, $x, $y), Imagick::COMPOSITE_OVER, $x, $y);
+            }
+        }
+
+        return $base;
+    }
+
+    /** El logo (su original), recortado a lo que se imprime (D114) y al tamaño de su caja. */
+    private function logo(CapaMaqueta $capa, int $w, int $h): Imagick
+    {
         $logo = new Imagick;
-        $logo->readImageBlob($disco->get($impresion->archivo));
-        if ($impresion->util_ancho_px && $impresion->util_alto_px) {
-            $logo->cropImage($impresion->util_ancho_px, $impresion->util_alto_px, (int) $impresion->util_x, (int) $impresion->util_y);
+        $logo->readImageBlob((string) $capa->logo);
+        if ($capa->util !== null) {
+            [$ux, $uy, $uw, $uh] = $capa->util;
+            $logo->cropImage($uw, $uh, $ux, $uy);
             $logo->setImagePage(0, 0, 0, 0);
         }
         $logo->setImageColorspace(Imagick::COLORSPACE_SRGB);
@@ -136,7 +157,7 @@ final class GenerarMaquetas
     }
 
     /** El texto de «Escribir mi marca» con su letra y su tinta, encajado en su caja y centrado. */
-    private function texto(ImpresionPedido $impresion, bool $prendaOscura, int $w, int $h): ?Imagick
+    private function texto(CapaMaqueta $impresion, bool $prendaOscura, int $w, int $h): ?Imagick
     {
         [$archivo, $mayusculas, $espacio] = self::FUENTES[$impresion->fuente ?? 0] ?? self::FUENTES[0];
         $cadena = trim((string) $impresion->texto);
@@ -211,14 +232,25 @@ final class GenerarMaquetas
     /** @return array{0: ?int, 1: ?int} la prenda y el color que se ven (en un pack, su primera prenda) */
     private function prendaYColor(LineaPedido $linea): array
     {
-        if ($linea->tipo === 'prenda') {
-            return [$linea->prenda_id, $linea->color_id];
+        return self::prendaYColorDe((string) $linea->tipo, $linea->prenda_id, $linea->color_id, $linea->pack_id, $linea->elecciones);
+    }
+
+    /**
+     * Lo mismo para una línea del carrito o de un presupuesto.
+     *
+     * @param  array<int|string, mixed>|null  $elecciones
+     * @return array{0: ?int, 1: ?int}
+     */
+    public static function prendaYColorDe(string $tipo, ?int $prendaId, ?int $colorId, ?int $packId, ?array $elecciones): array
+    {
+        if ($tipo === 'prenda') {
+            return [$prendaId, $colorId];
         }
-        $primera = $linea->pack_id === null ? null : LineaPack::where('pack_id', $linea->pack_id)->orderBy('id')->first();
+        $primera = $packId === null ? null : LineaPack::where('pack_id', $packId)->orderBy('id')->first();
         if ($primera === null) {
             return [null, null];
         }
-        $color = $linea->elecciones[$primera->id]['color'] ?? ($primera->colores[0] ?? null);
+        $color = $elecciones[$primera->id]['color'] ?? ($primera->colores[0] ?? null);
 
         return [$primera->prenda_id, $color === null ? null : (int) $color];
     }
