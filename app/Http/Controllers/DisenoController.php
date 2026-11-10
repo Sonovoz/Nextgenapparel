@@ -91,6 +91,7 @@ class DisenoController
             'ancho_px' => $diseno->util_ancho_px,
             'alto_px' => $diseno->util_alto_px,
             'fondo' => $diseno->fondo,
+            'ppp_archivo' => $diseno->ppp_archivo,
             'miniatura' => route('disenos.miniatura', ['diseno' => $diseno->uuid]),
             'avisos' => $avisos,
         ];

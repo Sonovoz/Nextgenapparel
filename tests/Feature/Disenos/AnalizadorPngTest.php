@@ -91,6 +91,8 @@ class AnalizadorPngTest extends TestCase
         $gris->drawImage($dibujo);
         $gris->setOption('png:color-type', '4');
         $ruta = PngDePrueba::archivo('');
+        $gris->setImageUnits(Imagick::RESOLUTION_PIXELSPERINCH);
+        $gris->setImageResolution(300, 300); // como un PNG bien exportado (D206)
         $gris->writeImage('png:'.$ruta);
         $this->assertSame(4, ord(file_get_contents($ruta, false, null, 25, 1)));
         $this->assertSame([100, 50, 400, 300, 'transparente'], $this->util($ruta));
@@ -170,7 +172,7 @@ class AnalizadorPngTest extends TestCase
             ->callAction('guardar')
             ->assertNotified('Ajustes guardados');
 
-        $this->assertSame(['max_mb' => 20, 'max_px' => 8000, 'min_px' => 500], AnalizadorPng::limites());
+        $this->assertSame(['max_mb' => 20, 'max_px' => 8000, 'min_px' => 500, 'exigir_ppp' => 1], AnalizadorPng::limites());
         $this->assertDatabaseHas('activity_log', ['description' => 'Límites de los archivos de diseño cambiados']);
     }
 
@@ -210,6 +212,8 @@ class AnalizadorPngTest extends TestCase
         $gris->setImageType(Imagick::IMGTYPE_GRAYSCALE);
         $ruta = PngDePrueba::archivo('');
         $gris->setOption('png:color-type', '0');
+        $gris->setImageUnits(Imagick::RESOLUTION_PIXELSPERINCH);
+        $gris->setImageResolution(300, 300); // como un PNG bien exportado (D206)
         $gris->writeImage('png:'.$ruta);
         $this->assertSame('Gris', (new AnalizadorPng)->analizar($ruta)->perfilColor);
     }

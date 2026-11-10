@@ -121,6 +121,31 @@
 
             // Animación de subida: dura al menos MINIMO ms para que se vea y se entienda.
             var MINIMO = 1100;
+            function esPng(f) { return f.type === 'image/png' || (!f.type && /\.png$/i.test(f.name)); }
+            /**
+             * ¿Declara el PNG su resolución? Lee el fragmento pHYs (D206), igual que el servidor: true si la declara
+             * en ppp, false si no, null si no se sabe (el navegador no puede leerlo): entonces decide el servidor.
+             */
+            function pppDeclarados(archivo) {
+                if (!archivo || !archivo.slice || !window.DataView) return Promise.resolve(null);
+                var trozo = archivo.slice(0, 1024 * 1024);
+                var leer = trozo.arrayBuffer ? trozo.arrayBuffer() : new Promise(function (ok, mal) {
+                    var lector = new FileReader();
+                    lector.onload = function () { ok(lector.result); };
+                    lector.onerror = mal;
+                    lector.readAsArrayBuffer(trozo);
+                });
+                return leer.then(function (buffer) {
+                    var v = new DataView(buffer), p = 8;
+                    while (p + 8 <= v.byteLength) {
+                        var largo = v.getUint32(p), tipo = String.fromCharCode(v.getUint8(p + 4), v.getUint8(p + 5), v.getUint8(p + 6), v.getUint8(p + 7));
+                        if (tipo === 'IDAT' || tipo === 'IEND') return false;
+                        if (tipo === 'pHYs') return largo === 9 && p + 17 <= v.byteLength ? v.getUint8(p + 16) === 1 && v.getUint32(p + 8) > 0 : null;
+                        p += 12 + largo;
+                    }
+                    return null;
+                }, function () { return null; });
+            }
             function fallo() { zona.classList.remove('subiendo'); error.textContent = caja.dataset.error; error.hidden = false; }
             // El original, sin reducir, también se queda en este navegador (IndexedDB) para el pedido.
             function guardarOriginal(archivo) {
@@ -135,7 +160,15 @@
             }
             function leer(archivo) {
                 error.hidden = true;
-                if (!archivo || !/^image\/(png|jpeg|webp|svg\+xml)$/.test(archivo.type)) { fallo(); return; }
+                if (!archivo || !esPng(archivo)) { fallo(); return; } // solo PNG (D206)
+                if (caja.dataset.exigirPpp === '1' && !archivo.revisado) {
+                    pppDeclarados(archivo).then(function (declara) {
+                        if (declara === false) { fallo(); error.textContent = caja.dataset.errorPpp; return; }
+                        archivo.revisado = true;
+                        leer(archivo);
+                    });
+                    return;
+                }
                 zona.classList.add('subiendo');
                 var inicio = Date.now();
                 var url = URL.createObjectURL(archivo);
@@ -256,7 +289,7 @@
             </div>
 
             @if ($urlPrueba)
-                <div class="prueba-logo aparece" id="prueba-logo" data-destino="{{ $urlPrueba }}#tu-marca" data-error="{{ __('portada.soltar_error') }}">
+                <div class="prueba-logo aparece" id="prueba-logo" data-destino="{{ $urlPrueba }}#tu-marca" data-error="{{ __('portada.soltar_error') }}" data-error-ppp="{{ __('disenos.error_sin_ppp') }}" data-exigir-ppp="{{ \App\Models\Ajuste::obtener('disenos.exigir_ppp') ? '1' : '0' }}">
                     <div>
                         <p class="etiqueta">{{ __('portada.paso_1') }}</p>
                         <h3 style="font-size: clamp(30px, 4vw, 44px); text-transform: uppercase;">{{ __('portada.soltar_titulo') }}</h3>
@@ -276,7 +309,7 @@
                         </span>
                         <small class="error-logo" role="alert" style="color: #C62828;" hidden></small>
                     </label>
-                    <input class="oculto" type="file" id="logo-portada" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+                    <input class="oculto" type="file" id="logo-portada" accept="image/png,.png">
                 </div>
             @endif
         </div>

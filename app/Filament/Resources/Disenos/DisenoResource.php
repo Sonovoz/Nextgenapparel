@@ -103,6 +103,8 @@ class DisenoResource extends Resource
                     ->color(fn (string $state): string => $state === 'transparente' ? 'success' : 'warning'),
                 TextEntry::make('perfil_color')->label('Perfil de color')->placeholder('Sin perfil (se trata como sRGB)'),
                 TextEntry::make('profundidad_bits')->label('Profundidad')->suffix(' bits por canal'),
+                // D206: lo que declara el PNG; la calidad real es la de «Calidad excelente hasta».
+                TextEntry::make('ppp_archivo')->label('Resolución declarada en el archivo')->suffix(' ppp')->placeholder('No la declara'),
                 TextEntry::make('estado')->label('Estado')->badge()->formatStateUsing(fn (string $state): string => self::ESTADOS[$state] ?? $state),
                 TextEntry::make('dueno')->label('De')->state(fn (Diseno $record): string => $record->dueno()),
             ]),

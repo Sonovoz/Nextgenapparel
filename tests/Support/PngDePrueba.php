@@ -68,10 +68,25 @@ final class PngDePrueba
         return $ruta;
     }
 
-    private static function guardar(Imagick $imagen, string $formato): string
+    /** Un PNG que no declara su resolución (sin fragmento pHYs), para D206. */
+    public static function sinPpp(int $ancho, int $alto): string
+    {
+        $imagen = new Imagick;
+        $imagen->newImage($ancho, $alto, new ImagickPixel('white'), 'png');
+
+        return self::guardar($imagen, 'png32', conPpp: false);
+    }
+
+    private static function guardar(Imagick $imagen, string $formato, bool $conPpp = true): string
     {
         $ruta = tempnam(sys_get_temp_dir(), 'png').'.png';
         $imagen->stripImage();
+        if ($conPpp) {
+            // Como un PNG exportado bien: declara su resolución (D206).
+            $imagen->setImageUnits(Imagick::RESOLUTION_PIXELSPERINCH);
+            $imagen->setImageResolution(300, 300);
+            $imagen->setOption('png:include-chunk', 'pHYs'); // stripImage() lo quitaría
+        }
         $imagen->writeImage($formato.':'.$ruta);
 
         return $ruta;

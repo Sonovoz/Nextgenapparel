@@ -30,6 +30,7 @@ return [
     // Upload errors (phase 4).
     'error_ilegible' => 'We could not read the file. Check it is a valid PNG and upload it again.',
     'error_no_png' => 'We need your design as a PNG for the order. Export it as PNG, ideally with a transparent background.',
+    'error_sin_ppp' => 'Your PNG does not state its resolution (DPI). Export it again with the resolution set, ideally 300 DPI at print size, and upload it again.',
     'error_pesado' => 'The file is larger than :mb MB. Export it again as a PNG without layers or metadata.',
     'error_enorme' => 'The image is more than :px pixels on one side. Make it smaller: printing at 300 dpi needs far less.',
     'error_pequeno' => 'Your design is :ancho × :alto pixels without its transparent margins. We need at least :px pixels per side.',

@@ -30,6 +30,7 @@ return [
     // Errores al subir el diseño (fase 4).
     'error_ilegible' => 'No hemos podido leer el archivo. Comprueba que es un PNG válido y vuelve a subirlo.',
     'error_no_png' => 'Para el pedido necesitamos tu diseño en PNG. Expórtalo como PNG, a ser posible con fondo transparente.',
+    'error_sin_ppp' => 'Tu PNG no indica su resolución (ppp). Expórtalo de nuevo indicando la resolución, a ser posible 300 ppp al tamaño de impresión, y vuelve a subirlo.',
     'error_pesado' => 'El archivo pesa más de :mb MB. Expórtalo de nuevo en PNG sin capas ni metadatos.',
     'error_enorme' => 'La imagen mide más de :px píxeles por lado. Redúcela: para imprimir a 300 ppp basta con mucho menos.',
     'error_pequeno' => 'Tu diseño mide :ancho × :alto píxeles sin contar los márgenes transparentes. Necesitamos al menos :px píxeles por lado.',

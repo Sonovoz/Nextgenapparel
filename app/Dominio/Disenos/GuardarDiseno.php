@@ -36,7 +36,8 @@ final class GuardarDiseno
 
     public function __construct(private readonly AnalizadorPng $analizador) {}
 
-    public function __invoke(UploadedFile $archivo, Dueno $dueno): Diseno
+    /** @param  bool  $exigirPpp  false al repetir un pedido: el diseño ya se aceptó e imprimió (D206) */
+    public function __invoke(UploadedFile $archivo, Dueno $dueno, bool $exigirPpp = true): Diseno
     {
         $origen = (string) $archivo->getRealPath();
         $sha256 = (string) hash_file('sha256', $origen);
@@ -50,8 +51,12 @@ final class GuardarDiseno
 
         $miniatura = null;
         // Cierre normal, no «fn»: la miniatura tiene que salir por referencia.
-        $analisis = $this->conTurno(function () use ($origen, &$miniatura): AnalisisPng {
-            return $this->analizador->analizar($origen, conImagen: function (Imagick $imagen, AnalisisPng $a) use (&$miniatura): void {
+        $limites = AnalizadorPng::limites();
+        if (! $exigirPpp) {
+            $limites['exigir_ppp'] = 0;
+        }
+        $analisis = $this->conTurno(function () use ($origen, $limites, &$miniatura): AnalisisPng {
+            return $this->analizador->analizar($origen, $limites, conImagen: function (Imagick $imagen, AnalisisPng $a) use (&$miniatura): void {
                 $miniatura = $this->miniatura($imagen, $a);
             });
         });
