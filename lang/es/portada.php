@@ -84,7 +84,7 @@ return [
     'pie_estudio' => 'Estudio',
     'soltar_arrastra' => 'o arrástralo aquí',
     'subiendo' => 'Subiendo tu logo',
-    'juego_linea' => 'Has configurado mundos de juego, ahora toca configurar tus diseños',
+    'juego_linea' => 'En 3 pasos, tu colección de prendas en marcha',
     'hud_skin' => 'Dragón',
     'hud_alt' => 'Camiseta blanca con un dragón impreso en DTI Textil',
     'hud_girar' => 'Arrastra para girarla',

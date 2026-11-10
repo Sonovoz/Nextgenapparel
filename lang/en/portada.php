@@ -84,7 +84,7 @@ return [
     'pie_estudio' => 'Studio',
     'soltar_arrastra' => 'or drag it here',
     'subiendo' => 'Uploading your logo',
-    'juego_linea' => "You've customised game worlds, now it's time to customise your designs",
+    'juego_linea' => 'In 3 steps, your clothing collection up and running',
     'hud_skin' => 'Dragon',
     'hud_alt' => 'White T-shirt with a dragon printed with DTI Textile',
     'hud_girar' => 'Drag to turn it',
