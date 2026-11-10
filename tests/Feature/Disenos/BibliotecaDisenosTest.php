@@ -128,7 +128,7 @@ class BibliotecaDisenosTest extends TestCase
         // 3000 px a 300 ppp: 25,4 cm.
         $this->get(DisenoResource::getUrl('view', ['record' => $diseno], panel: 'admin'))->assertOk()
             ->assertSee('3000 × 3000 px')->assertSee('25,4 × 25,4 cm')
-            ->assertSee(__('disenos.derechos_casilla'));
+            ->assertSee('En las condiciones de venta del pedido');
 
         $descarga = $this->get(route('backend.disenos.original', $diseno))->assertOk();
         $this->assertSame(Storage::disk('disenos')->get($diseno->ruta), $descarga->streamedContent());

@@ -37,7 +37,7 @@ return [
     'soltar_texto' => 'Suelta aquí tu logo y míralo sobre una camiseta en un segundo.',
     'soltar_boton' => 'Elegir mi logo',
     'soltar_privacidad' => 'Tu archivo no sale de tu dispositivo.',
-    'soltar_error' => 'Ese archivo no es una imagen que podamos mostrar. Prueba con PNG, JPG, SVG o WebP.',
+    'soltar_error' => 'Solo aceptamos diseños en PNG. Expórtalo como PNG (mejor con fondo transparente) y vuelve a probar.',
     'packs_etiqueta' => 'Bundles',
     'packs_titulo' => 'Packs listos para jugar',
     'packs_texto' => 'Prendas, tallas e impresión incluidas a precio cerrado. Tú solo subes tu diseño.',

@@ -12,7 +12,7 @@ return [
     'estado_cancelado' => 'Cancelado',
     'estado_reembolsado' => 'Reembolsado',
     // Lo que acepta al confirmar (se guarda tal cual en el pedido). Texto provisional hasta la revisión del asesor (fase 8).
-    'condiciones_acepto' => 'He leído y acepto las condiciones de venta y la política de privacidad, y confirmo que los datos del pedido son correctos.',
+    'condiciones_acepto' => 'He leído y acepto las condiciones de venta y la política de privacidad, confirmo que los datos del pedido son correctos y declaro que tengo los derechos sobre las imágenes y diseños que he aportado.',
     'no_creado_vacio' => 'Tu carrito está vacío: el pedido ya se creó o has quitado las prendas.',
     'no_creado_no_confirmable' => 'Hay algo en tu carrito que impide cerrar el pedido. Revísalo y vuelve a intentarlo.',
     'no_creado_total_cambiado' => 'El total ha cambiado desde que lo viste (un precio, una oferta o el cupón). Revisa el nuevo total y confirma de nuevo.',

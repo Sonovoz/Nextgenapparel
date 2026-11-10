@@ -11,7 +11,7 @@ return [
     'estado_entregado' => 'Delivered',
     'estado_cancelado' => 'Cancelled',
     'estado_reembolsado' => 'Refunded',
-    'condiciones_acepto' => 'I have read and accept the terms of sale and the privacy policy, and I confirm that the order details are correct.',
+    'condiciones_acepto' => 'I have read and accept the terms of sale and the privacy policy, I confirm that the order details are correct, and I declare that I hold the rights to the images and designs I have provided.',
     'no_creado_vacio' => 'Your cart is empty: the order was already created or you removed the garments.',
     'no_creado_no_confirmable' => 'Something in your cart prevents closing the order. Please review it and try again.',
     'no_creado_total_cambiado' => 'The total has changed since you saw it (a price, an offer or the coupon). Check the new total and confirm again.',
