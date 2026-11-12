@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 12/11 | **Texto de «Procesando» al subir el diseño**: «PROCESANDO · Subiendo archivos y comprobando calidad de impresión». | `procesando-texto-diseno` | D212 |
 | 12/11 | **Capa «Procesando»** (oscurece con anillo de luz y texto) al pasar a tallas, añadir al pedido, actualizar el carrito e ir al pago; tallas de la pestaña *Prenda* como texto, no como botones. | `procesando-y-tallas` | D212 |
 | 12/11 | **Presupuesto sin duplicar el carrito**: tras pedirlo (el carrito sigue igual) la página ofrece «Volver al carrito»; «Pasar al carrito» no vuelve a poner lo que ya está. | `presupuesto-sin-duplicar` | — |
 | 12/11 | **Zonas para todos los colores**: al guardar las zonas de una maqueta se copian a los demás colores de la misma cara (casilla, marcada de serie); un color nuevo parte de las ya colocadas. | `zonas-todos-los-colores` | D211 |
