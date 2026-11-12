@@ -1,5 +1,49 @@
 # Despliegue en el servidor dedicado de OVH
 
+## Servidor compartido de OVH (D207, el que se usa)
+
+El servidor de OVH ya tiene sus contenedores, compartidos por varios proyectos. El portal **no lleva contenedores propios**: corre dentro de `php-web` y usa la base de datos y el Redis del servidor.
+
+```
+Internet ──► npm (Nginx Proxy Manager: dominio y SSL) ──► php-web (PHP 8.3) ──► mariadb 10.11 · redis
+```
+
+| Contenedor del servidor | Para el portal |
+|---|---|
+| `php-web` | PHP 8.3: sirve el portal (carpeta raíz: `public/`) |
+| `mariadb` | MariaDB 10.11: una base y un usuario propios para cada entorno |
+| `redis` | Caché, sesiones y cola; cada entorno con su prefijo y su base (`REDIS_PREFIX`, `REDIS_DB`) |
+| `npm` | Nginx Proxy Manager: el dominio, el certificado SSL y el paso a `php-web` |
+| `phpmyadmin` | Para crear la base y el usuario |
+| `db-backup` | Las copias de la base del servidor (además de las del portal, *Herramientas → Copias*) |
+| `filebrowser` | Para subir o revisar archivos |
+
+**Instalación (una vez por entorno: pruebas y producción):**
+
+1. **Base de datos**: en phpMyAdmin, crea la base (`utf8mb4`) y un usuario con permisos solo sobre ella.
+2. **Código**: deja el proyecto en la carpeta que sirve `php-web` (con `git clone` o con filebrowser) y apunta la raíz del sitio a su carpeta `public/`.
+3. **`.env`**: copia `docker/env/produccion.env.example` (o `pruebas.env.example`) como `.env` y rellena `APP_KEY`, `APP_URL`, la base de datos (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`) y el resto de claves. **Las contraseñas solo aquí**, nunca en el código ni en el chat.
+4. **Dentro de `php-web`** (`docker exec -it php-web bash`, en la carpeta del proyecto):
+
+```bash
+composer install --no-dev --optimize-autoloader
+php artisan key:generate
+php artisan migrate --force
+php artisan storage:link
+php artisan optimize
+```
+
+5. **Tareas y colas**: no hay contenedores de cola ni de tareas. En el servidor (fuera de los contenedores), una línea de `crontab -e` por entorno; las tareas programadas procesan también la cola cada minuto:
+
+```
+* * * * * docker exec php-web php /ruta/del/proyecto/artisan schedule:run >> /dev/null 2>&1
+```
+
+6. **Dominio**: en Nginx Proxy Manager, un *Proxy Host* para el dominio hacia `php-web`, con SSL de Let's Encrypt y «Force SSL». El portal ya se fía de la cabecera del proxy (`trustProxies`) para saber que va por HTTPS.
+7. **Comprobar**: *Herramientas → Servidor* (PHP 8.3, extensiones, base de datos y Redis) y *Herramientas → Estado del sistema*, todo en verde. Si falta la extensión `redis` en `php-web`, pon `REDIS_CLIENT=predis`; si falta `imagick`, pídela al administrador del servidor: sin ella no se pueden subir diseños.
+
+## Instalación con contenedores propios (alternativa)
+
 Pruebas y producción viven en el mismo servidor, cada uno con sus contenedores, su base de datos, sus archivos y su `.env` (D25). Delante de los dos está **Caddy**, que recibe el tráfico de los dominios y renueva los certificados SSL solo.
 
 ```
