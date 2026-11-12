@@ -6,6 +6,10 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 12/11 | **Fotos del catálogo sin depender del enlace**: el disco público se sirve por `/storage` aunque falte `public/storage` (daban 403); el disco privado deja de servirse. | `fotos-sin-enlace` | — |
+| 12/11 | **Fotos que no se ven en el servidor**: *Herramientas → Servidor* avisa si `APP_URL` no es la dirección por la que se entra o si falta `public/storage`, con botones «Crear el enlace de las fotos» y «Recargar el .env» (sin consola). | `servidor-enlace-y-url` | — |
+| 12/11 | **Primera instalación sin consola**: `/instalar` con una clave temporal que el portal deja en `storage/app/private/acceso-temporal.txt`; al crear el primer superadministrador la clave se borra. | `instalacion-acceso-temporal` | D208 |
+| 12/11 | **Cambiar la contraseña desde el servidor**: `php artisan usuarios:cambiar-contrasena <correo>` la pide dos veces sin mostrarla, anula el «Recordarme» y queda en la actividad. | `usuarios-cambiar-contrasena` | — |
 | 12/11 | **Servidor de OVH compartido**: guía de instalación en `php-web` con el `mariadb` y el `redis` del servidor y Nginx Proxy Manager; *Herramientas → Servidor*; CI con MariaDB 10.11; predis por si falta la extensión redis. | `servidor-ovh-compartido` | D207 |
 | 10/11 | **Diseños solo en PNG y con ppp declarados**: se anota la resolución del archivo; sin ella no se admite (configurable en *Ajustes → General*). | `disenos-png-dpi` | D206 |
 | 10/11 | **PDF elegantes**: factura, presupuesto y orden de trabajo con logo, línea de marca, bloques, tablas limpias, total destacado y pie con página. | `pdf-diseno` | D205 |
@@ -13,6 +17,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 | 09/11 | **PDF del presupuesto con la foto de lo creado**: cada línea lleva la maqueta de cada cara con los diseños del cliente. | `pdf-maquetas` | D200 |
 | 10/11 | **Derechos de los diseños en las condiciones de venta**: fuera la casilla del estudio y de los packs; la declaración va en «Acepto las condiciones de venta» y en una cláusula nueva de las condiciones (es/en). | `configurador-guiado` | D202 |
 | 09/11 | **Carrito**: las cantidades por talla se guardan solas y el precio se actualiza; «Cerrar el pedido» guarda antes los cambios pendientes. | `carrito-cantidades-auto` | D201 |
+| 09/11 | **Portada**: las burbujas que subían en la cabecera pasan a líneas onduladas de luz que se mecen, al estilo del menú de una consola (sin partículas). | `portada-ambiente` | — |
 | 09/11 | **Ajustes → Correos**: «Enviar correo de prueba» ya no dice «enviado» si el `.env` tiene `MAIL_MAILER=log`; avisa de que se ha escrito en el log y de cómo enviarlo de verdad. | `correo-prueba-honesto` | — |
 | 09/11 | **Portada**: entre la cabecera y «Cómo configurar tu marca en 3 pasos», la misma línea con luz que recorre el pie. | `portada-separador` | — |
 | 09/11 | **Configurador en 3 pasos**: sube tu diseño y lo colocamos, con «¿Dónde lo ponemos?» (Frontal, Pecho, Espalda) en el mismo paso y un botón por zona libre para otro diseño, tallas y colores, resumen y pago; declaración de derechos junto al botón de subir; «Escribir mi marca» oculto por ahora (D199); «Siguiente» dice qué falta; errores de subida que explican qué pasa (en local, con la causa). | `configurador-guiado` | D198 |

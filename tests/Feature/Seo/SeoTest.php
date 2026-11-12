@@ -125,6 +125,7 @@ class SeoTest extends TestCase
 
     public function test_el_backend_queda_fuera_de_los_buscadores(): void
     {
+        $this->usuarioConRol(Rol::Superadministrador); // ya instalado (D208)
         $this->get('/admin/login')->assertOk()->assertHeader('X-Robots-Tag', 'noindex, nofollow');
     }
 

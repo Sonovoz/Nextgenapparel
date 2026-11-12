@@ -40,7 +40,8 @@ php artisan optimize
 ```
 
 6. **Dominio**: en Nginx Proxy Manager, un *Proxy Host* para el dominio hacia `php-web`, con SSL de Let's Encrypt y «Force SSL». El portal ya se fía de la cabecera del proxy (`trustProxies`) para saber que va por HTTPS.
-7. **Comprobar**: *Herramientas → Servidor* (PHP 8.3, extensiones, base de datos y Redis) y *Herramientas → Estado del sistema*, todo en verde. Si falta la extensión `redis` en `php-web`, pon `REDIS_CLIENT=predis`; si falta `imagick`, pídela al administrador del servidor: sin ella no se pueden subir diseños.
+7. **Primer usuario del backend** (D208), sin consola: abre `https://<dominio>/admin`. Mientras no hay ningún superadministrador te lleva a `/instalar`. Con filebrowser abre `storage/app/private/acceso-temporal.txt` dentro de la carpeta del proyecto, copia la clave, y en `/instalar` crea tu usuario. La clave y el archivo se borran solos y entras en el backend.
+8. **Comprobar**: *Herramientas → Servidor* (si las fotos no se ven: `APP_URL` del `.env` con la dirección real y botones «Crear el enlace de las fotos» y «Recargar el .env») (PHP 8.3, extensiones, base de datos y Redis) y *Herramientas → Estado del sistema*, todo en verde. Si falta la extensión `redis` en `php-web`, pon `REDIS_CLIENT=predis`; si falta `imagick`, pídela al administrador del servidor: sin ella no se pueden subir diseños.
 
 ## Instalación con contenedores propios (alternativa)
 
@@ -149,7 +150,7 @@ En el backend: **Herramientas → Estado del sistema**.
 Antes de abrir la tienda, en este orden. *Herramientas → Puesta en marcha* muestra esta lista comprobada con los datos reales y enlaza a cada ajuste (D196).
 
 1. **Correo**: SMTP real en *Ajustes → Correos* (o `MAIL_*` en `produccion.env`), con «Enviar correo de prueba». También `ALERTAS_EMAIL`, para recibir los errores y los avisos de salud.
-2. **Equipo**: cada persona entra al panel y configura la **verificación en dos pasos** con una app autenticadora. Guarda sus códigos de recuperación. Si alguien pierde el móvil: `php artisan usuarios:quitar-dos-pasos <correo>`.
+2. **Equipo**: cada persona entra al panel y configura la **verificación en dos pasos** con una app autenticadora. Guarda sus códigos de recuperación. Si alguien pierde el móvil: `php artisan usuarios:quitar-dos-pasos <correo>`. Si alguien olvida la contraseña: `php artisan usuarios:cambiar-contrasena <correo>`.
 3. **Datos fiscales** en *Ajustes → Facturación*, y **textos legales** revisados por la asesoría en *Ajustes → Textos legales*.
 4. **Redsys**: el TPV real y su prueba (ver «Pagos con Redsys»).
 5. **Copias fuera del servidor**: contrata OVH Object Storage y rellena `COPIAS_EXTERNAS_*` con `COPIAS_EXTERNAS_ACTIVAS=true`. Comprueba en *Herramientas → Copias de seguridad* que se suben, y haz una prueba de restauración.

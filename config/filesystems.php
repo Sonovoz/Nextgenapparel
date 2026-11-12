@@ -33,7 +33,8 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Privado: no se sirve por /storage (lo ocupa el disco público).
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],
@@ -83,6 +84,9 @@ return [
             'root' => storage_path('app/public'),
             'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
             'visibility' => 'public',
+            // Fotos del catálogo: con el enlace public/storage las sirve el servidor web; sin él, Laravel
+            // (en el servidor compartido de OVH puede faltar el enlace y las fotos daban 403).
+            'serve' => true,
             'throw' => false,
             'report' => false,
         ],
