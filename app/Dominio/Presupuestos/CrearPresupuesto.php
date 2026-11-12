@@ -9,6 +9,7 @@ use App\Models\Ajuste;
 use App\Models\Carrito;
 use App\Models\Cliente;
 use App\Models\ImpresionCarrito;
+use App\Models\LineaCarrito;
 use App\Models\Presupuesto;
 use App\Models\Talla;
 use Illuminate\Support\Facades\DB;
@@ -44,14 +45,7 @@ final class CrearPresupuesto
                 'unidades' => $calculada->unidades,
                 'neto' => $calculada->neto(),
             ];
-            $origen[] = [
-                'tipo' => $linea->tipo->value, 'prenda_id' => $linea->prenda_id, 'color_id' => $linea->color_id, 'pack_id' => $linea->pack_id,
-                'tallas' => $esPack ? null : $linea->unidadesPorTalla(), 'elecciones' => $linea->elecciones,
-                'impresiones' => $linea->impresiones->mapWithKeys(fn (ImpresionCarrito $i) => [$i->zona_impresion_id => array_filter([
-                    'diseno' => $i->diseno?->uuid, 'texto' => $i->texto, 'fuente' => $i->fuente, 'tinta' => $i->tinta,
-                    'ancho_mm' => $i->ancho_mm, 'alto_mm' => $i->alto_mm, 'desde_cuello_mm' => $i->desde_cuello_mm, 'desde_centro_mm' => $i->desde_centro_mm,
-                ], fn ($v) => $v !== null)])->all(),
-            ];
+            $origen[] = self::origenDe($linea);
         }
 
         return DB::transaction(fn () => Presupuesto::create([
@@ -65,5 +59,23 @@ final class CrearPresupuesto
             'total' => $r->total(),
             'valido_hasta' => now()->addDays(max(1, (int) Ajuste::obtener('presupuestos.dias_validez')))->toDateString(),
         ]));
+    }
+
+    /**
+     * Lo que hace falta para volver a poner la línea en un carrito (PasarAlCarrito) y para reconocerla
+     * si ya está en él (HuellaLinea).
+     *
+     * @return array<string, mixed>
+     */
+    public static function origenDe(LineaCarrito $linea): array
+    {
+        return [
+            'tipo' => $linea->tipo->value, 'prenda_id' => $linea->prenda_id, 'color_id' => $linea->color_id, 'pack_id' => $linea->pack_id,
+            'tallas' => $linea->tipo === TipoLinea::Pack ? null : $linea->unidadesPorTalla(), 'elecciones' => $linea->elecciones,
+            'impresiones' => $linea->impresiones->mapWithKeys(fn (ImpresionCarrito $i) => [$i->zona_impresion_id => array_filter([
+                'diseno' => $i->diseno?->uuid, 'texto' => $i->texto, 'fuente' => $i->fuente, 'tinta' => $i->tinta,
+                'ancho_mm' => $i->ancho_mm, 'alto_mm' => $i->alto_mm, 'desde_cuello_mm' => $i->desde_cuello_mm, 'desde_centro_mm' => $i->desde_centro_mm,
+            ], fn ($v) => $v !== null)])->all(),
+        ];
     }
 }

@@ -17,4 +17,7 @@ return [
     'unidades' => 'Qty',
     'importe' => 'Amount excl. VAT',
     'enlace_pdf' => 'To order it, open this link while it is valid and press «Add to cart»:',
+    'volver_carrito' => 'Back to cart',
+    'ya_en_carrito' => 'Your cart already has everything in this quote: we have not duplicated it.',
+    'ya_estaban' => '{1} 1 line was already in your cart and was not duplicated.|[2,*] :n lines were already in your cart and were not duplicated.',
 ];

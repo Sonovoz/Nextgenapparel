@@ -38,6 +38,8 @@ class PresupuestoController
     public function ver(Presupuesto $presupuesto): View
     {
         return view('presupuestos.ver', ['presupuesto' => $presupuesto,
+            // Si el carrito ya lo tiene todo (acaba de pedir el presupuesto), se ofrece volver, no pasarlo otra vez.
+            'enCarrito' => PasarAlCarrito::yaEnCarrito($presupuesto, CarritoActual::de(request())),
             'alternos' => collect(config('idiomas.disponibles'))->keys()->mapWithKeys(fn ($i) => [$i => self::url('ver', $presupuesto, $i)])->all()]);
     }
 
@@ -62,7 +64,12 @@ class PresupuestoController
         $vacio = $carrito->lineas()->doesntExist();
         $r = $pasar($presupuesto, $carrito, $dueno);
 
-        $mensaje = trans_choice('presupuestos.pasado', $r['anadidas'], ['n' => $r['anadidas']]);
+        $mensaje = $r['anadidas'] === 0 && $r['ya'] > 0
+            ? __('presupuestos.ya_en_carrito')
+            : trans_choice('presupuestos.pasado', $r['anadidas'], ['n' => $r['anadidas']]);
+        if ($r['anadidas'] > 0 && $r['ya'] > 0) {
+            $mensaje .= ' '.trans_choice('presupuestos.ya_estaban', $r['ya'], ['n' => $r['ya']]);
+        }
         if ($r['omitidas'] > 0) {
             $mensaje .= ' '.trans_choice('presupuestos.omitidas', $r['omitidas'], ['n' => $r['omitidas']]);
         }
