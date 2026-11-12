@@ -1,5 +1,6 @@
 <x-filament-panels::page>
     <form wire:submit.prevent>{{ $this->form }}</form>
+    @include('filament.partials.guardar-fijo')
     <x-filament::section>
         <x-slot name="heading">Últimos 30 días</x-slot>
         <dl style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; font-size: .875rem;">

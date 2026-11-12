@@ -154,7 +154,7 @@ class AjustesCorreos extends Page implements HasSchemas
                     Actividad::apuntar('ajustes', 'Correos del pedido cambiados');
                 }
                 $this->mount();
-                Notification::make()->title('Ajustes guardados')->success()->send();
+                Notification::make()->title('Ajustes guardados')->body('Ya se aplican en la tienda.')->success()->send();
             }),
             Action::make('prueba')->label('Enviar correo de prueba')->icon(Heroicon::OutlinedPaperAirplane)->color('gray')
                 ->fillForm(fn () => ['para' => auth()->user()?->email])
