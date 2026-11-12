@@ -248,7 +248,7 @@ class AjustesGenerales extends Page implements HasSchemas
                 $textos = collect($datos['ia_texto'] ?? [])->map(fn ($t, $i) => trim((string) $t) === '' || trim((string) $t) === MejoraIa::porDefecto($i) ? null : trim((string) $t))->filter()->all();
                 Ajuste::guardar('disenos.ia_texto', $textos ?: null);
 
-                Notification::make()->title('Ajustes guardados')->success()->send();
+                Notification::make()->title('Ajustes guardados')->body('Ya se aplican en la tienda.')->success()->send();
                 if ($optimizarFotos) {
                     OptimizarFotosAction::ejecutar();
                 }
