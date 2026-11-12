@@ -282,4 +282,63 @@ class FotosTest extends TestCase
 
         $this->get(EditPrenda::getUrl(['record' => $this->prenda]))->assertForbidden();
     }
+
+    public function test_las_zonas_colocadas_en_un_color_se_aplican_a_los_demas_colores_de_la_misma_cara(): void
+    {
+        // D211: el equipo coloca las zonas una vez; los demás colores las toman.
+        $blanco = Color::factory()->create(['nombre' => ['es' => 'Blanco']]);
+        $this->subir(['tipo' => 'maqueta', 'color_id' => $this->negro->id, 'cara' => 'delantera']);
+        $this->subir(['tipo' => 'maqueta', 'color_id' => $blanco->id, 'cara' => 'delantera']);
+        $this->subir(['tipo' => 'maqueta', 'color_id' => $blanco->id, 'cara' => 'trasera']);
+        $negra = Foto::where('color_id', $this->negro->id)->sole();
+        $blanca = Foto::where('color_id', $blanco->id)->where('cara', 'delantera')->sole();
+        $espalda = Foto::where('cara', 'trasera')->sole();
+        $frontal = $negra->zonas()->whereHas('zona', fn ($q) => $q->where('clave', 'frontal'))->sole();
+        $pecho = $negra->zonas()->whereHas('zona', fn ($q) => $q->where('clave', 'pecho'))->sole();
+
+        // Frontal 28 × 38 cm: con un 30 % de ancho, el alto es 30·5·380/(280·6) ≈ 33,9 %.
+        $this->tabla()
+            ->mountAction(TestAction::make('edit')->table($negra))
+            ->fillForm(['zonas' => [
+                "record-{$frontal->id}" => ['x' => 35, 'y' => 25, 'ancho' => 30, 'alto' => 33.9],
+                "record-{$pecho->id}" => ['x' => 55, 'y' => 24, 'ancho' => 12, 'alto' => 13.6],
+            ], 'copiar_a_colores' => true])
+            ->callMountedAction()
+            ->assertHasNoFormErrors()
+            ->assertNotified('Zonas copiadas al otro color');
+
+        $copiada = $blanca->zonas()->where('zona_impresion_id', $frontal->zona_impresion_id)->sole();
+        $this->assertSame([3500, 2500, 3000, 3390], [$copiada->x, $copiada->y, $copiada->ancho, $copiada->alto]);
+        $this->assertSame(0, $espalda->zonas()->where('zona_impresion_id', $frontal->zona_impresion_id)->count()); // otra cara: no
+
+        // Un color nuevo parte de las posiciones ya colocadas.
+        $rojo = Color::factory()->create(['nombre' => ['es' => 'Rojo']]);
+        $this->subir(['tipo' => 'maqueta', 'color_id' => $rojo->id, 'cara' => 'delantera']);
+        $nueva = Foto::where('color_id', $rojo->id)->sole()->zonas()->where('zona_impresion_id', $frontal->zona_impresion_id)->sole();
+        $this->assertSame(3500, $nueva->x);
+    }
+
+    public function test_sin_la_casilla_las_zonas_de_los_demas_colores_no_cambian(): void
+    {
+        $blanco = Color::factory()->create(['nombre' => ['es' => 'Blanco']]);
+        $this->subir(['tipo' => 'maqueta', 'color_id' => $this->negro->id, 'cara' => 'delantera']);
+        $this->subir(['tipo' => 'maqueta', 'color_id' => $blanco->id, 'cara' => 'delantera']);
+        $negra = Foto::where('color_id', $this->negro->id)->sole();
+        $blanca = Foto::where('color_id', $blanco->id)->sole();
+        $frontal = $negra->zonas()->whereHas('zona', fn ($q) => $q->where('clave', 'frontal'))->sole();
+        $pecho = $negra->zonas()->whereHas('zona', fn ($q) => $q->where('clave', 'pecho'))->sole();
+        $antes = $blanca->zonas()->where('zona_impresion_id', $frontal->zona_impresion_id)->sole()->x;
+
+        $this->tabla()
+            ->mountAction(TestAction::make('edit')->table($negra))
+            ->fillForm(['zonas' => [
+                "record-{$frontal->id}" => ['x' => 35, 'y' => 25, 'ancho' => 30, 'alto' => 33.9],
+                "record-{$pecho->id}" => ['x' => 55, 'y' => 24, 'ancho' => 12, 'alto' => 13.6],
+            ], 'copiar_a_colores' => false])
+            ->callMountedAction()
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(3500, $frontal->fresh()->x);
+        $this->assertSame($antes, $blanca->zonas()->where('zona_impresion_id', $frontal->zona_impresion_id)->sole()->x);
+    }
 }

@@ -43,6 +43,9 @@ class ZonasPorDefecto
             return 0;
         }
 
+        // D211: si otro color de la prenda ya tiene esta cara colocada, se parte de esas posiciones.
+        CopiarZonas::desdeOtroColor($foto);
+
         $creadas = 0;
 
         foreach ($foto->prenda->zonas()->where('cara', $foto->cara->value)->get() as $zona) {
