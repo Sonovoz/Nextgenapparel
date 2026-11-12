@@ -21,6 +21,7 @@ use App\Http\Controllers\Cuenta\MisDisenosController;
 use App\Http\Controllers\Cuenta\RegistroController;
 use App\Http\Controllers\Cuenta\VerificacionController;
 use App\Http\Controllers\DisenoController;
+use App\Http\Controllers\InstalacionController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\ModoController;
 use App\Http\Controllers\PackController;
@@ -45,6 +46,10 @@ Route::get('/', function (Request $request) {
 });
 
 // Backend: archivos privados de la biblioteca de diseños (fase 4), solo con permiso.
+// Primera instalación (D208): solo existe mientras no hay ningún superadministrador.
+Route::get('/instalar', [InstalacionController::class, 'formulario'])->name('instalacion');
+Route::post('/instalar', [InstalacionController::class, 'crear'])->middleware('throttle:instalacion');
+
 Route::prefix('admin/archivos-disenos/{diseno}')->group(function () {
     Route::get('/miniatura', [ArchivoDisenoController::class, 'miniatura'])->name('backend.disenos.miniatura');
     Route::get('/original', [ArchivoDisenoController::class, 'original'])->name('backend.disenos.original');
