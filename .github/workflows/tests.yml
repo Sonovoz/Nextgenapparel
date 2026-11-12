@@ -50,7 +50,7 @@ jobs:
     name: Tests en MariaDB estricta
     services:
       mariadb:
-        image: mariadb:10.4
+        image: mariadb:10.11 # la del servidor de OVH (contenedor mariadb compartido, D207)
         env:
           MARIADB_DATABASE: pruebas
           MARIADB_ROOT_PASSWORD: root

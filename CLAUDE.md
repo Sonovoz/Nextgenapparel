@@ -36,6 +36,7 @@ Portal de pedidos de prendas personalizadas con impresión DTI (camisetas, polos
 ## Pila técnica
 
 - PHP 8.x, Laravel (última versión estable), Filament (backend), Livewire (frontend).
-- MariaDB/MySQL, Redis (colas, caché, sesiones), contenedores de cola (`queue:work`) y de tareas programadas (`schedule:work`).
+- MariaDB/MySQL, Redis (colas, caché, sesiones); tareas programadas con `schedule:run` (cron del servidor), que también procesa la cola cada minuto.
 - Imagick (análisis de PNG y maquetas), generación de PDF, ZIP nativo.
-- Local: Herd + SQLite. Servidor: Docker Compose con entornos de **pruebas** y **producción** en el mismo dedicado, detrás de Caddy (`docs/DESPLIEGUE_OVH.md`).
+- Local: Herd + SQLite.
+- **Servidor de OVH (regla para todos los proyectos de OVH, D207):** el servidor tiene contenedores compartidos: **`php-web` con PHP 8.3**, **`mariadb` 10.11** y **`redis`**, detrás de **Nginx Proxy Manager** (`npm`), más phpMyAdmin, `db-backup` y filebrowser. El proyecto no lleva contenedores propios: corre en `php-web`, usa una base y un usuario propios en `mariadb` (los facilita el cliente y van **solo en el `.env`**, nunca en el código ni en el chat), Redis con prefijo y base propios por entorno, y las tareas y colas con un cron del servidor (`schedule:run`). Pruebas y producción, cada uno con su base y su `.env`. Pasos en `docs/DESPLIEGUE_OVH.md`; *Herramientas → Servidor* comprueba PHP, extensiones, base de datos y Redis.
