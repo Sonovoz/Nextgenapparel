@@ -205,11 +205,14 @@ class FotosTest extends TestCase
             'getRecord' => fn () => $foto,
             'zonasFormulario' => [['zona_impresion_id' => $frontal->zona_impresion_id, 'x' => 33.3, 'y' => 21, 'ancho' => 30, 'alto' => 30]],
             'ejemplo' => 'vertical',
+            'getStatePath' => fn () => 'mountedActions.0.data.vista_previa',
         ])->render();
 
-        $this->assertStringContainsString('Vista previa con un diseño de ejemplo', $html);
+        // Editor visual (arrastrar y cambiar el tamaño): con esos valores y escribiendo en las casillas de «zonas».
+        $this->assertStringContainsString('Coloca las zonas sobre la foto', $html);
         $this->assertStringContainsString('data-ejemplo="vertical"', $html);
-        $this->assertStringContainsString('left: 33.3%', $html);
+        $this->assertStringContainsString('33.3', $html);
+        $this->assertStringContainsString('mountedActions.0.data.zonas', $html);
         $this->assertStringContainsString('preserveAspectRatio="xMidYMin meet"', $html); // centrado y arriba, como la tienda
     }
 
