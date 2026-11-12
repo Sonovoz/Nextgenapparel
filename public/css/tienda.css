@@ -545,10 +545,6 @@ body.estudio-abierto { overflow: hidden; }
 @keyframes onda { to { transform: translateX(-50%); } }
 @keyframes mecer { from { translate: 0 -6%; scale: 1 .9; } to { translate: 0 6%; scale: 1 1.12; } }
 /* Polvo de luz: flota en círculos lentos y titila; los lejanos, más grandes, borrosos y tenues (bokeh) */
-.polvo { position: absolute; left: var(--x); top: var(--y); width: var(--t); height: var(--t); border-radius: 50%; background: #DDE3FF; box-shadow: 0 0 8px 1px rgba(142, 160, 255, .9); opacity: 0; animation: flotar var(--d) ease-in-out var(--r) infinite, titilar calc(var(--d) / 3) ease-in-out var(--r) infinite; }
-.polvo.lejos { background: rgba(142, 160, 255, .5); box-shadow: none; filter: blur(2px); }
-@keyframes flotar { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(18px, -14px); } 50% { transform: translate(-8px, -30px); } 75% { transform: translate(-20px, -10px); } }
-@keyframes titilar { 0%, 100% { opacity: .15; } 50% { opacity: .85; } }
 
 .arena-rejilla { display: flex; flex-direction: column; gap: 22px; }
 .arena-texto { display: contents; }
@@ -621,8 +617,7 @@ body.estudio-abierto { overflow: hidden; }
     .escenario { height: min(78vh, 640px); }
 }
 @media (prefers-reduced-motion: reduce) {
-    .arena-halo, .arena-suelo, .onda, .polvo, .vivo, .giro, .sombra, .atributos .barra i { animation: none !important; }
-    .polvo { opacity: .4; }
+    .arena-halo, .arena-suelo, .onda, .vivo, .giro, .sombra, .atributos .barra i { animation: none !important; }
 }
 
 /* ── Ambiente de consola en las secciones (D139) ── */
