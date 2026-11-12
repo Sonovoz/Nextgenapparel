@@ -63,6 +63,11 @@ Schedule::command('carritos:avisar')
     ->hourly()
     ->withoutOverlapping();
 
+Schedule::command('catalogo:optimizar-fotos')
+    ->description('Pasar a WebP y al tamaño máximo las fotos del catálogo que falten (D210)')
+    ->hourly()
+    ->withoutOverlapping();
+
 Schedule::command('pedidos:caducar')
     ->description('Cancelar los pedidos sin pagar pasados los días de Ajustes → General (devuelven el cupón)')
     ->dailyAt('03:25')

@@ -111,7 +111,7 @@ class FotosRelationManager extends RelationManager
                         }
                     }
                 })
-                ->helperText('PNG, JPG o WebP de hasta 5 MB. Maqueta: proporción 5:6 (por ejemplo, 1000 × 1200 px), mejor con fondo transparente y la prenda centrada.'),
+                ->helperText('PNG, JPG o WebP de hasta 5 MB. Al guardar se pasa a WebP y se reduce al tamaño de Ajustes → General, sin perder la transparencia. Maqueta: proporción 5:6 (por ejemplo, 1000 × 1200 px), mejor con fondo transparente y la prenda centrada.'),
             CamposTraducibles::texto('texto_alternativo', 'Texto alternativo'),
             TextInput::make('orden')->label('Orden')->numeric()->integer()->minValue(0)->default(0),
 

@@ -31,6 +31,9 @@ class Ajuste extends Model
         // D206: no se admite un PNG que no declare su resolución (ppp, fragmento pHYs).
         'disenos.exigir_ppp' => 1,
         'disenos.dias_sin_pedido' => 30,
+        // Fotos del catálogo (D210): al subirlas se pasan a WebP con este lado mayor y esta calidad (1-100).
+        'catalogo.foto_max_px' => 2000,
+        'catalogo.foto_calidad' => 82,
         // Frenos al abuso: subidas por hora e IP y diseños nuevos por visitante y día.
         'disenos.subidas_hora' => 60,
         'disenos.max_dia' => 40,
