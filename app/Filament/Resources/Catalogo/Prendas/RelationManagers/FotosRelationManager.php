@@ -139,7 +139,7 @@ class FotosRelationManager extends RelationManager
                     $porcentaje('ancho', 'Ancho')->rule($dentro('x', 'Desde la izquierda')),
                     $porcentaje('alto', 'Alto')->rule($dentro('y', 'Desde arriba'))->rule($proporcionada),
                 ])
-                ->helperText('En % de la foto. La vista previa cambia al salir de cada casilla.'),
+                ->helperText('En % de la foto. Se rellenan solas al mover las zonas sobre la foto; si las escribes, la foto se actualiza al salir de cada casilla.'),
         ]);
     }
 
