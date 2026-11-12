@@ -83,7 +83,7 @@ final class InformeServidor
         $add('Aplicación', 'Dirección (APP_URL)', self::urlCorrecta() ? $url : $url.' · no coincide con '.request()->getSchemeAndHttpHost().': cámbiala en el .env y pulsa «Recargar el .env»', self::urlCorrecta() ? 'correcto' : 'fallo');
         $add('Aplicación', 'Zona horaria', (string) config('app.timezone'), 'correcto');
         $add('Aplicación', 'Carpeta storage con escritura', is_writable(storage_path()) ? 'Sí' : 'No', is_writable(storage_path()) ? 'correcto' : 'fallo');
-        $add('Aplicación', 'Enlace public/storage (fotos de las prendas)', self::enlaceCorrecto() ? 'Sí' : 'Falta: sin él no se ven las fotos. Pulsa «Crear el enlace de las fotos»', self::enlaceCorrecto() ? 'correcto' : 'fallo');
+        $add('Aplicación', 'Enlace public/storage (fotos de las prendas)', self::enlaceCorrecto() ? 'Sí' : 'Falta: las fotos se ven igual, pero más rápido con él. Pulsa «Crear el enlace de las fotos»', self::enlaceCorrecto() ? 'correcto' : 'aviso');
 
         return $f;
     }
