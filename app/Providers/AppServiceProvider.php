@@ -105,6 +105,8 @@ class AppServiceProvider extends ServiceProvider
             'cuenta-verificar' => 10, 'cuenta-reenviar' => 3, 'disenos-lista' => 120, 'disenos-borrar' => 60, 'precio' => 120, 'carrito' => 60,
             // Área de cliente: piden la contraseña actual; por usuario e IP (revisión N3 del 5.3, M2 y B2).
             'cuenta-datos' => 10, 'cuenta-contrasena' => 6, 'cuenta-borrado' => 5,
+            // Primera instalación (D208): la clave temporal no se puede adivinar a base de intentos.
+            'instalacion' => 5,
         ] as $nombre => $porMinuto) {
             RateLimiter::for($nombre, fn (Request $request) => Limit::perMinute($porMinuto)->by($nombre.'|'.($request->user()?->id ?? '-').'|'.$request->ip()));
         }

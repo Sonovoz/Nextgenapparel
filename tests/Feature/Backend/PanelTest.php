@@ -28,6 +28,7 @@ class PanelTest extends TestCase
 
     public function test_la_pantalla_de_acceso_esta_en_espanol(): void
     {
+        $this->usuarioConRol(); // ya instalado (D208)
         $this->get('/admin/login', ['Accept-Language' => 'en-GB,en;q=0.9'])
             ->assertOk()
             ->assertSee('lang="es"', false)

@@ -6,6 +6,8 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 12/11 | **Primera instalación sin consola**: `/instalar` con una clave temporal que el portal deja en `storage/app/private/acceso-temporal.txt`; al crear el primer superadministrador la clave se borra. | `instalacion-acceso-temporal` | D208 |
+| 12/11 | **Cambiar la contraseña desde el servidor**: `php artisan usuarios:cambiar-contrasena <correo>` la pide dos veces sin mostrarla, anula el «Recordarme» y queda en la actividad. | `usuarios-cambiar-contrasena` | — |
 | 12/11 | **Servidor de OVH compartido**: guía de instalación en `php-web` con el `mariadb` y el `redis` del servidor y Nginx Proxy Manager; *Herramientas → Servidor*; CI con MariaDB 10.11; predis por si falta la extensión redis. | `servidor-ovh-compartido` | D207 |
 | 10/11 | **Diseños solo en PNG y con ppp declarados**: se anota la resolución del archivo; sin ella no se admite (configurable en *Ajustes → General*). | `disenos-png-dpi` | D206 |
 | 10/11 | **PDF elegantes**: factura, presupuesto y orden de trabajo con logo, línea de marca, bloques, tablas limpias, total destacado y pie con página. | `pdf-diseno` | D205 |
