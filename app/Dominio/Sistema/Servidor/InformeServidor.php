@@ -80,10 +80,10 @@ final class InformeServidor
         $add('Aplicación', 'Entorno', (string) app()->environment(), 'correcto');
         $add('Aplicación', 'Depuración (APP_DEBUG)', config('app.debug') ? 'Activada' : 'Desactivada', config('app.debug') && $produccion ? 'fallo' : 'correcto');
         $url = (string) config('app.url');
-        $add('Aplicación', 'Dirección (APP_URL)', $url, $produccion && ! str_starts_with($url, 'https://') ? 'fallo' : 'correcto');
+        $add('Aplicación', 'Dirección (APP_URL)', self::urlCorrecta() ? $url : $url.' · no coincide con '.request()->getSchemeAndHttpHost().': cámbiala en el .env y pulsa «Recargar el .env»', self::urlCorrecta() ? 'correcto' : 'fallo');
         $add('Aplicación', 'Zona horaria', (string) config('app.timezone'), 'correcto');
         $add('Aplicación', 'Carpeta storage con escritura', is_writable(storage_path()) ? 'Sí' : 'No', is_writable(storage_path()) ? 'correcto' : 'fallo');
-        $add('Aplicación', 'Enlace public/storage', is_link(public_path('storage')) || is_dir(public_path('storage')) ? 'Sí' : 'Falta: php artisan storage:link', is_link(public_path('storage')) || is_dir(public_path('storage')) ? 'correcto' : 'aviso');
+        $add('Aplicación', 'Enlace public/storage (fotos de las prendas)', self::enlaceCorrecto() ? 'Sí' : 'Falta: sin él no se ven las fotos. Pulsa «Crear el enlace de las fotos»', self::enlaceCorrecto() ? 'correcto' : 'fallo');
 
         return $f;
     }
@@ -92,6 +92,32 @@ final class InformeServidor
     public static function listo(): bool
     {
         return collect(self::filas())->every(fn (array $fila) => $fila['estado'] !== 'fallo');
+    }
+
+    /**
+     * APP_URL es la dirección por la que se entra: con ella se forman las fotos, los correos y los avisos de Redsys.
+     * Fuera del navegador (consola, colas) no hay con qué comparar. En producción, además, con https.
+     */
+    public static function urlCorrecta(): bool
+    {
+        $url = (string) config('app.url');
+        if (app()->environment('production') && ! str_starts_with($url, 'https://')) {
+            return false;
+        }
+        if (app()->runningInConsole() && ! app()->runningUnitTests()) {
+            return true;
+        }
+
+        return strcasecmp((string) parse_url($url, PHP_URL_HOST), request()->getHost()) === 0;
+    }
+
+    /** public/storage apunta a storage/app/public: sin él, /storage/... no sirve las fotos subidas. */
+    public static function enlaceCorrecto(): bool
+    {
+        $enlace = public_path('storage');
+        $destino = realpath(storage_path('app/public'));
+
+        return $destino !== false && realpath($enlace) === $destino;
     }
 
     /** «256M» → bytes; -1 (sin límite) se devuelve tal cual. */

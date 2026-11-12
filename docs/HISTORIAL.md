@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 12/11 | **Fotos que no se ven en el servidor**: *Herramientas → Servidor* avisa si `APP_URL` no es la dirección por la que se entra o si falta `public/storage`, con botones «Crear el enlace de las fotos» y «Recargar el .env» (sin consola). | `servidor-enlace-y-url` | — |
 | 12/11 | **Primera instalación sin consola**: `/instalar` con una clave temporal que el portal deja en `storage/app/private/acceso-temporal.txt`; al crear el primer superadministrador la clave se borra. | `instalacion-acceso-temporal` | D208 |
 | 12/11 | **Cambiar la contraseña desde el servidor**: `php artisan usuarios:cambiar-contrasena <correo>` la pide dos veces sin mostrarla, anula el «Recordarme» y queda en la actividad. | `usuarios-cambiar-contrasena` | — |
 | 12/11 | **Servidor de OVH compartido**: guía de instalación en `php-web` con el `mariadb` y el `redis` del servidor y Nginx Proxy Manager; *Herramientas → Servidor*; CI con MariaDB 10.11; predis por si falta la extensión redis. | `servidor-ovh-compartido` | D207 |

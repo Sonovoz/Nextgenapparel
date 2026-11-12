@@ -41,7 +41,7 @@ php artisan optimize
 
 6. **Dominio**: en Nginx Proxy Manager, un *Proxy Host* para el dominio hacia `php-web`, con SSL de Let's Encrypt y «Force SSL». El portal ya se fía de la cabecera del proxy (`trustProxies`) para saber que va por HTTPS.
 7. **Primer usuario del backend** (D208), sin consola: abre `https://<dominio>/admin`. Mientras no hay ningún superadministrador te lleva a `/instalar`. Con filebrowser abre `storage/app/private/acceso-temporal.txt` dentro de la carpeta del proyecto, copia la clave, y en `/instalar` crea tu usuario. La clave y el archivo se borran solos y entras en el backend.
-8. **Comprobar**: *Herramientas → Servidor* (PHP 8.3, extensiones, base de datos y Redis) y *Herramientas → Estado del sistema*, todo en verde. Si falta la extensión `redis` en `php-web`, pon `REDIS_CLIENT=predis`; si falta `imagick`, pídela al administrador del servidor: sin ella no se pueden subir diseños.
+8. **Comprobar**: *Herramientas → Servidor* (si las fotos no se ven: `APP_URL` del `.env` con la dirección real y botones «Crear el enlace de las fotos» y «Recargar el .env») (PHP 8.3, extensiones, base de datos y Redis) y *Herramientas → Estado del sistema*, todo en verde. Si falta la extensión `redis` en `php-web`, pon `REDIS_CLIENT=predis`; si falta `imagick`, pídela al administrador del servidor: sin ella no se pueden subir diseños.
 
 ## Instalación con contenedores propios (alternativa)
 
