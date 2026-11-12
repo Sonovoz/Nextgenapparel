@@ -91,6 +91,11 @@ class CarritoController
             throw ValidationException::withMessages(['linea_'.$uuid => $e->textos()]);
         }
 
+        // Si se guardaron al pulsar «Cerrar el pedido», se sigue al cierre con las cantidades nuevas.
+        if ($request->input('seguir') === 'cerrar') {
+            return redirect(self::url('cerrar'));
+        }
+
         return redirect(self::url('ver').'#linea-'.$uuid)->with('estado', __('carrito.cantidades_guardadas'));
     }
 
