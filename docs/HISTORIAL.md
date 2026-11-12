@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 12/11 | **Fotos del catálogo sin depender del enlace**: el disco público se sirve por `/storage` aunque falte `public/storage` (daban 403); el disco privado deja de servirse. | `fotos-sin-enlace` | — |
 | 12/11 | **Fotos que no se ven en el servidor**: *Herramientas → Servidor* avisa si `APP_URL` no es la dirección por la que se entra o si falta `public/storage`, con botones «Crear el enlace de las fotos» y «Recargar el .env» (sin consola). | `servidor-enlace-y-url` | — |
 | 12/11 | **Primera instalación sin consola**: `/instalar` con una clave temporal que el portal deja en `storage/app/private/acceso-temporal.txt`; al crear el primer superadministrador la clave se borra. | `instalacion-acceso-temporal` | D208 |
 | 12/11 | **Cambiar la contraseña desde el servidor**: `php artisan usuarios:cambiar-contrasena <correo>` la pide dos veces sin mostrarla, anula el «Recordarme» y queda en la actividad. | `usuarios-cambiar-contrasena` | — |
