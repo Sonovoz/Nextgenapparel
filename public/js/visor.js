@@ -436,6 +436,18 @@
     }
 
     var estampar = false;
+    var turnoGiro = 0;
+
+    // La otra cara del color, ya descargada: al girar no hay que esperarla.
+    var precargadas = {};
+    function precargarCaras(color) {
+        Object.keys(color.caras).forEach(function (cara) {
+            var url = color.caras[cara] && color.caras[cara].url;
+            if (!url || precargadas[url]) return;
+            precargadas[url] = new Image();
+            precargadas[url].src = url;
+        });
+    }
 
     function pintar(transicion) {
         var color = colores[estado.color];
@@ -457,18 +469,32 @@
             lupaSucia = true;
         };
 
-        if (transicion === 'giro' && !sinMovimiento) {
-            lienzo.classList.add('girando');
-            setTimeout(function () {
-                cambiar();
-                lienzo.classList.remove('girando');
-                lienzo.classList.add('volviendo');
-                void lienzo.offsetWidth;
-                lienzo.classList.remove('volviendo');
-            }, 190);
+        if (transicion === 'giro' && !sinMovimiento && lienzo.firstChild) {
+            // Giro sin hueco: la cara nueva espera a tener su foto lista (como mucho 1,5 s; mientras, se sigue viendo la actual) y entra girando
+            // mientras la anterior sale hacia el otro lado; nunca se ponen de canto ni queda el visor vacío.
+            var foto = nueva.querySelector('img');
+            var lista = foto && foto.decode ? foto.decode().catch(function () {}) : Promise.resolve();
+            var turno = ++turnoGiro;
+            Promise.race([lista, new Promise(function (r) { setTimeout(r, 1500); })]).then(function () {
+                if (turno !== turnoGiro) return; // ya se ha pedido otro giro
+                var sentido = estado.cara === 'trasera' ? 1 : -1;
+                var viejas = Array.prototype.slice.call(lienzo.children);
+                viejas.forEach(function (v) { v.style.setProperty('--sentido', sentido); v.classList.remove('gira-entra'); v.classList.add('gira-sale'); });
+                nueva.style.setProperty('--sentido', sentido);
+                nueva.classList.add('gira-entra');
+                lienzo.appendChild(nueva);
+                lienzo.classList.remove('destello'); void lienzo.offsetWidth; lienzo.classList.add('destello');
+                lupaSucia = true;
+                setTimeout(function () {
+                    viejas.forEach(function (v) { v.remove(); });
+                    nueva.classList.remove('gira-entra');
+                    if (turno === turnoGiro) lienzo.classList.remove('destello');
+                }, 560);
+            });
         } else {
             cambiar();
         }
+        precargarCaras(color);
 
         document.getElementById('nombre-color').textContent = color.nombre;
         document.querySelectorAll('.piel').forEach(function (b) { b.setAttribute('aria-pressed', String(Number(b.dataset.color) === estado.color)); });
