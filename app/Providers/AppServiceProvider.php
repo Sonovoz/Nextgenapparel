@@ -41,6 +41,7 @@ use App\Policies\DisenoPolicy;
 use App\Policies\FacturaPolicy;
 use App\Policies\PedidoPolicy;
 use App\Policies\SeccionPolicy;
+use Filament\Pages\BasePage;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\SessionGuard;
@@ -86,6 +87,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Backend: «Guardar cambios» siempre a la vista, fijo abajo, en todas las fichas (crear y editar).
+        BasePage::stickyFormActions();
+
         // SMTP escrito en Ajustes → Correos (paso 6.4): manda sobre el .env, al crear el correo.
         $smtpAplicado = false;
         $this->app->beforeResolving('mail.manager', function () use (&$smtpAplicado): void {

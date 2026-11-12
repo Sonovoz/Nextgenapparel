@@ -112,7 +112,7 @@ class AjustesFacturacion extends Page implements HasSchemas
                 if (Emisor::falta() === []) {
                     Artisan::queue('facturas:emitir-pendientes');
                 }
-                Notification::make()->title('Ajustes guardados')->success()->send();
+                Notification::make()->title('Ajustes guardados')->body('Ya se aplican en la tienda.')->success()->send();
             }),
         ];
     }

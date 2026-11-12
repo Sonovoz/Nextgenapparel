@@ -86,7 +86,7 @@ class CarritosAbandonados extends Page implements HasSchemas
                 Ajuste::guardar('carritos.avisos_activos', (bool) $datos['activos']);
                 Ajuste::guardar('carritos.secuencia', $secuencia);
                 Actividad::apuntar('ajustes', 'Carritos abandonados: ajustes guardados', propiedades: ['activos' => (bool) $datos['activos'], 'secuencia' => $secuencia]);
-                Notification::make()->title('Ajustes guardados')->success()->send();
+                Notification::make()->title('Ajustes guardados')->body('Ya se aplican en la tienda.')->success()->send();
             }),
         ];
     }
