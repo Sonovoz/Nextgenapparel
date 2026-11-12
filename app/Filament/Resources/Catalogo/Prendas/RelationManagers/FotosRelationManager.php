@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Catalogo\Prendas\RelationManagers;
 
 use App\Dominio\Catalogo\Cara;
+use App\Dominio\Catalogo\CopiarZonas;
 use App\Dominio\Catalogo\TipoFoto;
 use App\Dominio\Catalogo\ZonasPorDefecto;
 use App\Filament\Concerns\CamposTraducibles;
@@ -17,8 +18,10 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\ViewField;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
@@ -39,6 +42,9 @@ class FotosRelationManager extends RelationManager
     protected static string $relationship = 'fotos';
 
     protected static ?string $title = 'Fotos';
+
+    /** D211: ¿copiar las zonas editadas a los demás colores? (casilla del formulario, no es un campo de la foto) */
+    public bool $copiarZonas = false;
 
     protected static ?string $modelLabel = 'foto';
 
@@ -125,6 +131,11 @@ class FotosRelationManager extends RelationManager
                 // Con los valores del formulario: se actualiza sin guardar.
                 ->viewData(fn (Get $get) => ['zonasFormulario' => $get('zonas') ?? [], 'ejemplo' => $get('ejemplo') ?: 'cuadrado'])
                 ->visible(fn (string $operation, ?Foto $record) => $operation === 'edit' && $record?->tipo === TipoFoto::Maqueta),
+            Toggle::make('copiar_a_colores')
+                ->label(fn (?Foto $record) => 'Aplicar estas posiciones a '.(($n = $record ? count(CopiarZonas::hermanas($record)) : 0) === 1 ? 'la maqueta del otro color' : "las maquetas de los otros {$n} colores").' (misma cara)')
+                ->helperText('Las fotos de una prenda suelen tener el mismo encuadre: colocas las zonas una vez. Desmárcalo si este color tiene la foto encuadrada distinta.')
+                ->default(true)
+                ->visible(fn (string $operation, ?Foto $record) => $operation === 'edit' && $record !== null && CopiarZonas::esMaqueta($record) && CopiarZonas::hermanas($record) !== []),
             Repeater::make('zonas')->label('Zonas de impresión sobre la foto')
                 ->relationship('zonas')
                 ->defaultItems(0)
@@ -164,9 +175,20 @@ class FotosRelationManager extends RelationManager
             ])
             ->recordActions([
                 EditAction::make()
-                    ->mutateRecordDataUsing(fn (array $data, Model $record) => CamposTraducibles::rellenar($data, $record))
-                    ->mutateDataUsing(fn (array $data) => CamposTraducibles::limpiar($data, ['texto_alternativo']))
-                    ->after(fn (Foto $record) => app(ZonasPorDefecto::class)($record)),
+                    ->mutateRecordDataUsing(fn (array $data, Model $record) => CamposTraducibles::rellenar($data, $record) + ['copiar_a_colores' => true])
+                    ->mutateDataUsing(function (array $data): array {
+                        // No es un campo de la foto: se recuerda para después de guardar (D211).
+                        $this->copiarZonas = (bool) ($data['copiar_a_colores'] ?? false);
+                        unset($data['copiar_a_colores']);
+
+                        return CamposTraducibles::limpiar($data, ['texto_alternativo']);
+                    })
+                    ->after(function (Foto $record): void {
+                        app(ZonasPorDefecto::class)($record);
+                        if ($this->copiarZonas && ($n = CopiarZonas::aOtrosColores($record)) > 0) {
+                            Notification::make()->success()->title($n === 1 ? 'Zonas copiadas al otro color' : "Zonas copiadas a los otros {$n} colores")->send();
+                        }
+                    }),
                 DeleteAction::make(),
             ]);
     }
