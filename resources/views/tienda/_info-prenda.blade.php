@@ -29,11 +29,8 @@
 
 <div>
     <p class="suave" style="margin-bottom: 10px;">{{ __('tienda.tallas_disponibles') }}</p>
-    <div class="chips">
-        @foreach ($tallas as $talla)
-            <span class="chip">{{ $talla }}</span>
-        @endforeach
-    </div>
+    {{-- Solo informativas: texto, no botones (las tallas se eligen en el paso 2). --}}
+    <p class="tallas-texto">@foreach ($tallas as $talla)<span>{{ $talla }}</span>@endforeach</p>
     <p class="suave" style="margin-top: 10px; font-size: 13px;">{{ __('tienda.tallas_nota') }}</p>
 </div>
 

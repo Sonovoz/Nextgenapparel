@@ -1659,10 +1659,19 @@
         caja.hidden = avisos.length === 0;
     }
 
+    // Capa «Procesando» de la tienda (tienda/_procesando): oscurece y dice que estamos trabajando.
+    function procesando(texto, detalle) { if (window.Procesando) window.Procesando.mostrar(texto, detalle); }
+    function finProcesando() { if (window.Procesando) window.Procesando.ocultar(); }
+
     function irANivel(nombre) {
         if (nombre !== 'diseno' && zonasConDiseno().length && pendientesDeSubir().length) {
             if (estado.subiendo) return;
-            subirDisenos().then(function (ok) { if (ok) mostrarNivel(nombre); });
+            // Subir y analizar los diseños tarda: el cliente lo ve («Preparando tu diseño…»).
+            procesando(textos.procesando_diseno, textos.procesando_diseno_detalle);
+            subirDisenos().then(function (ok) {
+                finProcesando();
+                if (ok) mostrarNivel(nombre);
+            }, finProcesando);
             return;
         }
         mostrarNivel(nombre);
@@ -1940,6 +1949,7 @@
         errorAnadir.textContent = '';
         botonAnadir.textContent = textos.anadiendo;
         pintarAnadir();
+        procesando(textos.procesando_pedido, textos.procesando_pedido_detalle); // sigue hasta que se abre el carrito
         fetch(visor.dataset.anadir, {
             method: 'POST',
             credentials: 'same-origin',
@@ -1953,6 +1963,7 @@
                 throw new Error(r.status === 419 ? textos.error_caducada : (r.status === 422 && mensaje ? mensaje : textos.error_anadir));
             });
         }).catch(function (e) {
+            finProcesando();
             estado.anadiendoPedido = false;
             errorAnadir.textContent = e && e.message && e.message !== 'Failed to fetch' ? e.message : textos.error_anadir;
             botonAnadir.textContent = textos.anadir_pedido;

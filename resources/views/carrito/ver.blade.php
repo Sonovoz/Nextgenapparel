@@ -88,7 +88,7 @@
                                     @endif
 
                                     @if (! $esPack && $v['tallas'])
-                                        <form class="carrito-tallas" method="POST" action="{{ CarritoController::url('tallas', ['uuid' => $linea->uuid]) }}">
+                                        <form class="carrito-tallas" method="POST" data-procesando="{{ __('tienda.procesando_carrito') }}" action="{{ CarritoController::url('tallas', ['uuid' => $linea->uuid]) }}">
                                             @csrf @method('PATCH')
                                             <fieldset>
                                                 <legend>{{ __('carrito.cantidades') }}</legend>
@@ -169,7 +169,8 @@
                 form.dataset.enviando = '1';
                 form.querySelector('[name=seguir]').value = seguir || '';
                 form.querySelector('button[type=submit]').textContent = @json(__('carrito.guardando'));
-                form.submit();
+                if (window.Procesando) window.Procesando.mostrar(@json(__('tienda.procesando_carrito')), @json(__('carrito.actualizando')));
+                form.submit(); // submit() no lanza el evento: la capa se muestra aquí
             }
             formularios.forEach(function (form) {
                 var espera = null;
