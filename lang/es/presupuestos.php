@@ -17,4 +17,7 @@ return [
     'unidades' => 'Uds.',
     'importe' => 'Importe sin IVA',
     'enlace_pdf' => 'Para pedirlo, abre este enlace mientras esté vigente y pulsa «Pasar al carrito»:',
+    'volver_carrito' => 'Volver al carrito',
+    'ya_en_carrito' => 'Tu carrito ya tiene todo lo de este presupuesto: no lo hemos duplicado.',
+    'ya_estaban' => '{1} 1 línea ya estaba en tu carrito y no la hemos duplicado.|[2,*] :n líneas ya estaban en tu carrito y no las hemos duplicado.',
 ];

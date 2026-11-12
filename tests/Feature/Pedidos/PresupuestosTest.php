@@ -96,4 +96,39 @@ class PresupuestosTest extends TestCase
         $this->actingAs($this->usuarioConRol(Rol::GestorTienda))->get(PresupuestoResource::getUrl('index'))->assertOk()->assertSee('PRE-0001');
         $this->actingAs($this->usuarioConRol(Rol::Produccion))->get(PresupuestoResource::getUrl('index'))->assertForbidden();
     }
+
+    public function test_pedir_el_presupuesto_descargarlo_y_volver_no_duplica_el_carrito(): void
+    {
+        // Error real: tras bajar el PDF, «Pasar al carrito» volvía a poner las líneas que ya estaban.
+        $this->conCarrito()->post(route('presupuestos.es.crear'));
+        $p = Presupuesto::sole();
+        $this->conCarrito()->get(PresupuestoController::url('pdf', $p))->assertOk();
+
+        // La página del presupuesto ofrece volver al carrito, no pasarlo otra vez.
+        $this->conCarrito()->get(PresupuestoController::url('ver', $p))->assertOk()
+            ->assertSee(__('presupuestos.volver_carrito'))->assertDontSee(__('presupuestos.pasar'));
+
+        // Y aunque se envíe (doble clic, pestaña vieja), no se duplica.
+        $this->conCarrito()->post(PresupuestoController::url('pasar', $p))->assertSessionHas('estado', __('presupuestos.ya_en_carrito'));
+        $this->assertSame(1, $this->carrito->lineas()->count());
+
+        // Una segunda vuelta tampoco: el carrito sigue con su producto, una vez.
+        $this->conCarrito()->post(route('presupuestos.es.crear'));
+        $p2 = Presupuesto::latest('id')->first();
+        $this->conCarrito()->get(PresupuestoController::url('pdf', $p2))->assertOk();
+        $this->conCarrito()->post(PresupuestoController::url('pasar', $p2));
+        $this->assertSame(1, $this->carrito->lineas()->count());
+        $this->assertSame(1, Carrito::count());
+    }
+
+    public function test_si_el_carrito_ya_no_lo_tiene_se_puede_pasar_otra_vez(): void
+    {
+        $this->conCarrito()->post(route('presupuestos.es.crear'));
+        $p = Presupuesto::sole();
+        $this->carrito->lineas()->delete(); // lo ha quitado del carrito
+
+        $this->conCarrito()->get(PresupuestoController::url('ver', $p))->assertSee(__('presupuestos.pasar'));
+        $this->conCarrito()->post(PresupuestoController::url('pasar', $p));
+        $this->assertSame(1, $this->carrito->lineas()->count());
+    }
 }

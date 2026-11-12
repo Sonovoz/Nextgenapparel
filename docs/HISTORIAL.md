@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 12/11 | **Presupuesto sin duplicar el carrito**: tras pedirlo (el carrito sigue igual) la página ofrece «Volver al carrito»; «Pasar al carrito» no vuelve a poner lo que ya está. | `presupuesto-sin-duplicar` | — |
 | 12/11 | **Zonas para todos los colores**: al guardar las zonas de una maqueta se copian a los demás colores de la misma cara (casilla, marcada de serie); un color nuevo parte de las ya colocadas. | `zonas-todos-los-colores` | D211 |
 | 12/11 | **«Guardar cambios» siempre a la vista**: fijo abajo en todas las fichas del backend y en los ajustes; al guardar una prenda avisa de que ya se ve en la tienda, con enlace. | `guardar-siempre-visible` | — |
 | 12/11 | **Editor visual de zonas**: en la foto de la maqueta se arrastran las zonas, se cambian de tamaño por la esquina con su proporción real, línea de centro con imán, medidas en cm y flechas para afinar; las casillas se rellenan solas. | `zonas-editor-visual` | — |

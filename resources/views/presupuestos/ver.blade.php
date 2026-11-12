@@ -16,7 +16,10 @@
             </div>
             <div class="botones-formulario" style="margin-top: 20px;">
                 <a class="boton" href="{{ PresupuestoController::url('pdf', $presupuesto) }}">{{ __('presupuestos.descargar') }}</a>
-                @if ($presupuesto->vigente())
+                @if ($enCarrito)
+                    {{-- El carrito ya tiene este presupuesto (no se pasa dos veces). --}}
+                    <a class="boton principal" href="{{ \App\Http\Controllers\CarritoController::url('ver') }}">{{ __('presupuestos.volver_carrito') }}</a>
+                @elseif ($presupuesto->vigente())
                     <form method="POST" action="{{ PresupuestoController::url('pasar', $presupuesto) }}">@csrf<button type="submit" class="boton principal">{{ __('presupuestos.pasar') }}</button></form>
                 @endif
             </div>
