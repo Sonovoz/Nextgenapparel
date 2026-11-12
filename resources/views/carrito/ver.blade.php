@@ -99,6 +99,7 @@
                                                     </label>
                                                 @endforeach
                                             </fieldset>
+                                            <input type="hidden" name="seguir" value="">
                                             <button type="submit" class="boton-texto">{{ __('carrito.guardar_cantidades') }}<span class="oculto"> · {{ $nombre }}</span></button>
                                         </form>
                                     @endif
@@ -148,7 +149,7 @@
                         @endif
 
                         @if ($valoracion->confirmable())
-                            <a class="boton principal" href="{{ CarritoController::url('cerrar') }}">{{ __('carrito.cerrar_pedido') }} <span class="flecha" aria-hidden="true">→</span></a>
+                            <a class="boton principal" id="ir-cierre" href="{{ CarritoController::url('cerrar') }}">{{ __('carrito.cerrar_pedido') }} <span class="flecha" aria-hidden="true">→</span></a>
                             <form method="POST" action="{{ route('presupuestos.'.app()->getLocale().'.crear') }}">@csrf<button type="submit" class="boton-texto">{{ __('presupuestos.boton') }}</button></form>
                         @else
                             <p class="carrito-siguiente">{{ __('carrito.revisa_antes') }}</p>
@@ -159,4 +160,36 @@
             @endif
         </div>
     </section>
+    {{-- Las cantidades se guardan solas (D201): el precio lo recalcula el servidor. Sin JavaScript, el botón. --}}
+    <script>
+        (function () {
+            var formularios = Array.prototype.slice.call(document.querySelectorAll('form.carrito-tallas'));
+            function guardar(form, seguir) {
+                if (form.dataset.enviando) return;
+                form.dataset.enviando = '1';
+                form.querySelector('[name=seguir]').value = seguir || '';
+                form.querySelector('button[type=submit]').textContent = @json(__('carrito.guardando'));
+                form.submit();
+            }
+            formularios.forEach(function (form) {
+                var espera = null;
+                var boton = form.querySelector('button[type=submit]');
+                form.addEventListener('input', function () {
+                    form.classList.add('sin-guardar');
+                    boton.textContent = @json(__('carrito.actualizando'));
+                    clearTimeout(espera);
+                    espera = setTimeout(function () { guardar(form); }, 1200);
+                });
+                form.addEventListener('change', function () { clearTimeout(espera); espera = setTimeout(function () { guardar(form); }, 500); });
+            });
+            // Con cantidades sin guardar, «Cerrar el pedido» las guarda primero y sigue al cierre.
+            var cierre = document.getElementById('ir-cierre');
+            if (cierre) cierre.addEventListener('click', function (e) {
+                var pendiente = formularios.filter(function (f) { return f.classList.contains('sin-guardar'); })[0];
+                if (!pendiente) return;
+                e.preventDefault();
+                guardar(pendiente, 'cerrar');
+            });
+        })();
+    </script>
 </x-tienda>
