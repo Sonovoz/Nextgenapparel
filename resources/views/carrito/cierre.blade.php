@@ -100,7 +100,7 @@
                         <ul class="mensajes impedimentos">@foreach ($r->textos('impedimentos') as $i)<li>{{ $i }}</li>@endforeach @if ($valoracion->conProblemas())<li>{{ __('carrito.revisa_antes') }}</li>@endif</ul>
                     @elseif ($datos && ! $bloqueo && $valoracion->confirmable())
                         {{-- Confirmar (paso 6.1, D169): el servidor vuelve a valorar y solo crea el pedido con este mismo total. --}}
-                        <form class="confirmar-pedido" method="POST" action="{{ CarritoController::url('confirmar') }}" onsubmit="this.querySelector('button[type=submit]').disabled = true;">
+                        <form class="confirmar-pedido" method="POST" data-procesando="{{ __('tienda.procesando_pago') }}" data-procesando-detalle="{{ __('tienda.procesando_pago_detalle') }}" action="{{ CarritoController::url('confirmar') }}" onsubmit="this.querySelector('button[type=submit]').disabled = true;">
                             @csrf
                             <input type="hidden" name="total" value="{{ $r->total() }}">
                             <label class="casilla-cuenta"><input type="checkbox" name="condiciones" value="1" required @checked(old('condiciones'))> <span>{{ __('pedidos.condiciones_acepto') }}</span></label>

@@ -38,7 +38,7 @@
             @endif
             @if ($pedido->estado === E::PendientePago && $pedido->correoConfirmado())
                 @php $pasarela = app(\App\Dominio\Pagos\Pasarela::class); @endphp
-                <form class="aviso-cuenta verificar pedido-pagar" method="POST" action="{{ route('pedidos.'.app()->getLocale().'.pagar', ['pedido' => $pedido->uuid]) }}">@csrf
+                <form class="aviso-cuenta verificar pedido-pagar" method="POST" data-procesando="{{ __('tienda.procesando_pago') }}" data-procesando-detalle="{{ __('tienda.procesando_pago_detalle') }}" action="{{ route('pedidos.'.app()->getLocale().'.pagar', ['pedido' => $pedido->uuid]) }}">@csrf
                     <p><strong>{{ __('pagos.pagar_titulo', ['total' => Formato::euros($pedido->total)]) }}</strong></p>
                     <fieldset>
                         <legend class="oculto">{{ __('pagos.metodo') }}</legend>

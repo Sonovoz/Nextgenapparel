@@ -158,4 +158,14 @@ return [
     'ia_copiado' => 'Copied!',
     'ia_subir' => 'Upload the improved design',
     'ia_aviso' => 'AI can change details: check that the result is faithful to your design. You can only print designs you hold the rights to.',
+    // Capa «Procesando» (toda la tienda): mientras algo tarda, el cliente ve que trabajamos.
+    'procesando' => 'Processing',
+    'procesando_diseno' => 'Preparing your design',
+    'procesando_diseno_detalle' => 'We are uploading it and checking its print quality. One moment.',
+    'procesando_pedido' => 'Adding to your order',
+    'procesando_pedido_detalle' => 'Saving your garments, sizes and designs.',
+    'procesando_carrito' => 'Updating your order',
+    'procesando_pago' => 'Connecting to the bank',
+    'procesando_pago_detalle' => 'Taking you to the secure payment page.',
+    'procesando_detalle' => 'We are working on it.',
 ];

@@ -22,7 +22,7 @@
                 @endif
 
                 {{-- 1. Subir un diseño (formulario aparte: vuelve con él elegido). --}}
-                <form class="pack-subir" method="POST" action="{{ route('packs.subir', ['pack' => request()->route('pack')]) }}" enctype="multipart/form-data">
+                <form class="pack-subir" method="POST" data-procesando="{{ __('tienda.procesando_diseno') }}" data-procesando-detalle="{{ __('tienda.procesando_diseno_detalle') }}" action="{{ route('packs.subir', ['pack' => request()->route('pack')]) }}" enctype="multipart/form-data">
                     @csrf
                     <h2>{{ __('packs.subir_titulo') }}</h2>
                     <label for="campo-archivo">{{ __('packs.subir_png', ['mb' => $maxMb]) }}</label>
@@ -32,7 +32,7 @@
             </div>
 
             {{-- 2. Elegir diseño o texto, repartir y añadir. --}}
-            <form class="carrito-resumen" method="POST" action="{{ route('packs.anadir', ['pack' => request()->route('pack')]) }}">
+            <form class="carrito-resumen" method="POST" data-procesando="{{ __('tienda.procesando_pedido') }}" action="{{ route('packs.anadir', ['pack' => request()->route('pack')]) }}">
                 @csrf
                 <h2>{{ __('packs.tu_diseno') }}</h2>
                 <fieldset class="pack-origen">
