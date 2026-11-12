@@ -24,6 +24,35 @@ final class OptimizarFoto
         ];
     }
 
+    /**
+     * Optimiza todas las fotos que lo necesiten. Con un límite de segundos (desde el backend, para no pasar
+     * del tiempo máximo de una petición) para a tiempo y dice cuántas quedan: se siguen en la tarea programada.
+     *
+     * @return array{fotos: int, ahorro: int, quedan: int}
+     */
+    public static function todas(?int $segundos = null): array
+    {
+        $fin = $segundos === null ? null : microtime(true) + $segundos;
+        $fotos = $ahorro = $quedan = 0;
+        foreach (Foto::query()->orderBy('id')->lazy() as $foto) {
+            if (! self::pendiente($foto)) {
+                continue;
+            }
+            if ($fin !== null && microtime(true) > $fin) {
+                $quedan++;
+
+                continue;
+            }
+            $bytes = rescue(fn () => self::aplicar($foto));
+            if ($bytes !== null) {
+                $fotos++;
+                $ahorro += $bytes;
+            }
+        }
+
+        return ['fotos' => $fotos, 'ahorro' => $ahorro, 'quedan' => $quedan];
+    }
+
     /** ¿Hay que optimizarla? Si no es WebP o es más grande que el máximo. */
     public static function pendiente(Foto $foto): bool
     {

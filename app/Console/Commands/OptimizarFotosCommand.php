@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Dominio\Catalogo\OptimizarFoto;
-use App\Models\Foto;
 use Illuminate\Console\Command;
 use Illuminate\Support\Number;
 
@@ -25,15 +24,7 @@ class OptimizarFotosCommand extends Command
             return self::SUCCESS;
         }
 
-        $fotos = 0;
-        $ahorro = 0;
-        Foto::query()->orderBy('id')->each(function (Foto $foto) use (&$fotos, &$ahorro): void {
-            $bytes = rescue(fn () => OptimizarFoto::aplicar($foto));
-            if ($bytes !== null) {
-                $fotos++;
-                $ahorro += $bytes;
-            }
-        });
+        ['fotos' => $fotos, 'ahorro' => $ahorro] = OptimizarFoto::todas();
 
         $this->components->info($fotos === 0 ? 'Todas las fotos ya estaban optimizadas.' : "{$fotos} fotos optimizadas: ".Number::fileSize($ahorro, 1).' menos.');
 
