@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Dominio\Carrito\CarritoActual;
+use App\Dominio\Catalogo\OptimizarFoto;
 use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Disenos\Calidad;
 use App\Dominio\Disenos\MejoraIa;
@@ -60,6 +61,8 @@ class AjustesGenerales extends Page implements HasSchemas
             ...Calidad::umbrales(),
             ...AnalizadorPng::limites(),
             'dias_sin_pedido' => (int) Ajuste::obtener('disenos.dias_sin_pedido'),
+            'foto_max_px' => OptimizarFoto::limites()['max_px'],
+            'foto_calidad' => OptimizarFoto::limites()['calidad'],
             'recargo_lo_indica' => Ajuste::obtener('clientes.recargo_lo_indica'),
             'carrito_dias' => CarritoActual::dias(),
             'subidas_hora' => (int) Ajuste::obtener('disenos.subidas_hora'),
@@ -92,6 +95,15 @@ class AjustesGenerales extends Page implements HasSchemas
                     TextInput::make('correcto')->label('Calidad excelente desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required()->gt('aceptable'),
                     TextInput::make('aceptable')->label('Buena calidad desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required()->gt('minimo'),
                     TextInput::make('minimo')->label('Calidad justa desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required(),
+                ]),
+            Section::make('Fotos del catálogo')
+                ->description('Al subir una foto de producto se pasa a WebP y se reduce a este lado mayor, para que la tienda cargue rápido. Las zonas de impresión no se mueven. Las que ya estaban se optimizan en la próxima hora.')
+                ->columns(2)
+                ->schema([
+                    TextInput::make('foto_max_px')->label('Lado mayor, como mucho')->integer()->minValue(400)->maxValue(6000)->suffix('px')->required()
+                        ->helperText('2000 px se ven nítidas en pantallas grandes.'),
+                    TextInput::make('foto_calidad')->label('Calidad WebP')->integer()->minValue(40)->maxValue(100)->required()
+                        ->helperText('82 apenas se distingue del original y pesa mucho menos.'),
                 ]),
             Section::make('Archivos de diseño')
                 ->description('Límites de los PNG que suben los clientes. El mínimo se mide sin los márgenes transparentes, sobre lo que se imprime. Los diseños que no llegan a un pedido se borran pasados los días indicados.')
@@ -196,6 +208,13 @@ class AjustesGenerales extends Page implements HasSchemas
                 }
                 if ($archivosAnteriores !== $archivosNuevos) {
                     Actividad::apuntar('ajustes', 'Límites de los archivos de diseño cambiados', propiedades: ['old' => $archivosAnteriores, 'attributes' => $archivosNuevos]);
+                }
+
+                $fotosAntes = OptimizarFoto::limites();
+                Ajuste::guardar('catalogo.foto_max_px', (int) $datos['foto_max_px']);
+                Ajuste::guardar('catalogo.foto_calidad', (int) $datos['foto_calidad']);
+                if ($fotosAntes !== OptimizarFoto::limites()) {
+                    Actividad::apuntar('ajustes', 'Tamaño y calidad de las fotos del catálogo cambiados', propiedades: ['old' => $fotosAntes, 'attributes' => OptimizarFoto::limites()]);
                 }
 
                 $recargoAntes = Ajuste::obtener('clientes.recargo_lo_indica');

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Dominio\Catalogo\Cara;
 use App\Dominio\Catalogo\DatoCatalogoInvalido;
+use App\Dominio\Catalogo\OptimizarFoto;
 use App\Dominio\Catalogo\Origen;
 use App\Dominio\Catalogo\TipoFoto;
 use App\Models\Concerns\Traducible;
@@ -66,6 +67,10 @@ class Foto extends Model
         static::saved(function (Foto $foto): void {
             if ($foto->tipo !== TipoFoto::Maqueta) {
                 $foto->zonas()->delete();
+            }
+            // Foto nueva o cambiada: en WebP y al tamaño máximo (D210). Si falla, se queda la original.
+            if ($foto->wasRecentlyCreated || $foto->wasChanged('ruta')) {
+                rescue(fn () => OptimizarFoto::aplicar($foto));
             }
         });
     }
