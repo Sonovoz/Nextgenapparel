@@ -59,6 +59,12 @@ class Ajuste extends Model
         'ia.precio_salida' => 60,
         // v2 (D189): carritos abandonados. Desactivado hasta que el equipo lo active; horas desde el último cambio y cupón opcional.
         'carritos.avisos_activos' => false,
+        // v2 (D190): nueva compra tras la entrega y reactivación, desactivadas hasta que el equipo las active.
+        'campanas.nueva_compra_activa' => false,
+        'campanas.nueva_compra_dias' => 30,
+        'campanas.reactivacion_activa' => false,
+        'campanas.reactivacion_dias' => 180,
+        'campanas.reactivacion_cupon' => null,
         'carritos.secuencia' => [['horas' => 1, 'cupon' => null], ['horas' => 24, 'cupon' => null], ['horas' => 72, 'cupon' => null]],
         // Paso 6.4: SMTP del panel (contraseña cifrada), estados que avisan al cliente, plantillas
         // propias por estado e idioma y nombres visibles de los estados (vacíos: los de lang/).
