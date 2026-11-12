@@ -85,7 +85,7 @@ class AjustesIa extends Page implements HasSchemas
                     Ajuste::guardar('ia.'.$clave, $clave === 'modelo' ? trim((string) $valor) : ($clave === 'activa' ? (bool) $valor : (int) $valor));
                 }
                 Actividad::apuntar('ajustes', 'Ajustes de IA guardados');
-                Notification::make()->title('Ajustes guardados')->success()->send();
+                Notification::make()->title('Ajustes guardados')->body('Ya se aplican en la tienda.')->success()->send();
             }),
         ];
     }
