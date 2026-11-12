@@ -15,11 +15,14 @@ class ServidorTest extends TestCase
 
     public function test_muestra_php_extensiones_y_base_de_datos_sin_contrasenas(): void
     {
-        config()->set('database.connections.sqlite.password', 'clave-muy-secreta');
+        // La contraseña de la conexión que se usa (SQLite en local, MariaDB en la CI) y la de Redis nunca salen.
+        $conexion = config('database.default');
+        config()->set("database.connections.{$conexion}.password", 'clave-muy-secreta');
         config()->set('database.redis.default.password', 'otra-clave-secreta');
+        $version = collect(InformeServidor::filas())->firstWhere('nombre', 'Tipo y versión')['valor'];
 
         $this->actingAs($this->usuarioConRol(Rol::Administrador))->get(Servidor::getUrl(panel: 'admin'))->assertOk()
-            ->assertSee(PHP_VERSION)->assertSee('pdo_mysql')->assertSee('imagick')->assertSee('SQLite')
+            ->assertSee(PHP_VERSION)->assertSee('pdo_mysql')->assertSee('imagick')->assertSee($version)
             ->assertDontSee('clave-muy-secreta')->assertDontSee('otra-clave-secreta');
         $this->actingAs($this->usuarioConRol(Rol::GestorTienda))->get(Servidor::getUrl(panel: 'admin'))->assertForbidden();
     }
