@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 12/11 | **Botón «Optimizar todas las fotos del catálogo»** en *Productos* y en *Ajustes → General*: las optimiza en el momento, sin esperar a la tarea de cada hora; también al cambiar el tamaño o la calidad. | `fotos-optimizar-ahora` | D210 |
 | 12/11 | **Fotos del catálogo más ligeras**: al subirlas pasan a WebP y al lado mayor configurado (2000 px, calidad 82, con transparencia); las ya subidas se optimizan solas cada hora. | `fotos-optimizadas` | D210 |
 | 12/11 | **Fotos del catálogo sin depender del enlace**: el disco público se sirve por `/storage` aunque falte `public/storage` (daban 403); el disco privado deja de servirse. | `fotos-sin-enlace` | — |
 | 12/11 | **Fotos que no se ven en el servidor**: *Herramientas → Servidor* avisa si `APP_URL` no es la dirección por la que se entra o si falta `public/storage`, con botones «Crear el enlace de las fotos» y «Recargar el .env» (sin consola). | `servidor-enlace-y-url` | — |

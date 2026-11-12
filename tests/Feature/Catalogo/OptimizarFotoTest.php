@@ -3,12 +3,16 @@
 namespace Tests\Feature\Catalogo;
 
 use App\Dominio\Catalogo\OptimizarFoto;
+use App\Dominio\Sistema\Acceso\Rol;
+use App\Filament\Resources\Catalogo\Prendas\Pages\ListPrendas;
 use App\Models\Ajuste;
 use App\Models\Foto;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Imagick;
 use ImagickPixel;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 /** D210: las fotos del catálogo se guardan en WebP y al tamaño máximo de Ajustes → General. */
@@ -75,5 +79,20 @@ class OptimizarFotoTest extends TestCase
         $foto = Foto::factory()->create(['ruta' => 'catalogo/3/no-existe.png']);
 
         $this->assertSame('catalogo/3/no-existe.png', $foto->fresh()->ruta);
+    }
+
+    public function test_el_boton_del_catalogo_las_optimiza_en_el_momento(): void
+    {
+        $this->png('catalogo/4/antigua.png', 750, 900);
+        $foto = Foto::factory()->make(['ruta' => 'catalogo/4/antigua.png']);
+        $foto->saveQuietly(); // subida antes de optimizar al subir
+
+        Filament::setCurrentPanel('admin');
+        $this->actingAs($this->usuarioConRol(Rol::Administrador));
+        Livewire::test(ListPrendas::class)->callAction('optimizar_fotos')->assertNotified();
+
+        $this->assertSame('catalogo/4/antigua.webp', $foto->fresh()->ruta);
+        Storage::disk('public')->assertMissing('catalogo/4/antigua.png');
+        Livewire::test(ListPrendas::class)->callAction('optimizar_fotos')->assertNotified('Todas las fotos ya estaban optimizadas');
     }
 }

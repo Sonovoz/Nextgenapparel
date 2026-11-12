@@ -8,6 +8,7 @@ use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Disenos\Calidad;
 use App\Dominio\Disenos\MejoraIa;
 use App\Dominio\Sistema\Actividad\Actividad;
+use App\Filament\Acciones\OptimizarFotosAction;
 use App\Filament\Navegacion\GrupoNavegacion;
 use App\Models\Ajuste;
 use BackedEnum;
@@ -97,7 +98,7 @@ class AjustesGenerales extends Page implements HasSchemas
                     TextInput::make('minimo')->label('Calidad justa desde')->integer()->minValue(50)->maxValue(1200)->suffix('ppp')->required(),
                 ]),
             Section::make('Fotos del catálogo')
-                ->description('Al subir una foto de producto se pasa a WebP y se reduce a este lado mayor, para que la tienda cargue rápido. Las zonas de impresión no se mueven. Las que ya estaban se optimizan en la próxima hora.')
+                ->description('Al subir una foto de producto se pasa a WebP y se reduce a este lado mayor, para que la tienda cargue rápido. Las zonas de impresión no se mueven. Para las que ya estaban, pulsa «Optimizar todas las fotos del catálogo» arriba (también se hace solo cada hora).')
                 ->columns(2)
                 ->schema([
                     TextInput::make('foto_max_px')->label('Lado mayor, como mucho')->integer()->minValue(400)->maxValue(6000)->suffix('px')->required()
@@ -179,8 +180,10 @@ class AjustesGenerales extends Page implements HasSchemas
     protected function getHeaderActions(): array
     {
         return [
+            OptimizarFotosAction::make(),
             Action::make('guardar')->label('Guardar cambios')->action(function (): void {
                 $datos = $this->form->getState();
+                $optimizarFotos = false;
                 Ajuste::guardar('tienda.nombre', $datos['nombre']);
                 Ajuste::guardar('tienda.correo_contacto', $datos['correo_contacto']);
 
@@ -215,6 +218,7 @@ class AjustesGenerales extends Page implements HasSchemas
                 Ajuste::guardar('catalogo.foto_calidad', (int) $datos['foto_calidad']);
                 if ($fotosAntes !== OptimizarFoto::limites()) {
                     Actividad::apuntar('ajustes', 'Tamaño y calidad de las fotos del catálogo cambiados', propiedades: ['old' => $fotosAntes, 'attributes' => OptimizarFoto::limites()]);
+                    $optimizarFotos = true;
                 }
 
                 $recargoAntes = Ajuste::obtener('clientes.recargo_lo_indica');
@@ -245,6 +249,9 @@ class AjustesGenerales extends Page implements HasSchemas
                 Ajuste::guardar('disenos.ia_texto', $textos ?: null);
 
                 Notification::make()->title('Ajustes guardados')->success()->send();
+                if ($optimizarFotos) {
+                    OptimizarFotosAction::ejecutar();
+                }
             }),
         ];
     }
