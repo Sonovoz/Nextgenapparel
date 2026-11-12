@@ -7,6 +7,7 @@ use App\Dominio\Sistema\Acceso\Rol;
 use App\Dominio\Sistema\Copias\Copias;
 use App\Dominio\Sistema\Correo\Smtp;
 use App\Dominio\Sistema\Salud\ComprobarSalud;
+use App\Dominio\Sistema\Servidor\InformeServidor;
 use App\Filament\Pages\AjustesCorreos;
 use App\Filament\Pages\AjustesFacturacion;
 use App\Filament\Pages\AjustesGenerales;
@@ -15,6 +16,7 @@ use App\Filament\Pages\AjustesLegales;
 use App\Filament\Pages\AjustesPagos;
 use App\Filament\Pages\CopiasSeguridad;
 use App\Filament\Pages\EstadoSistema;
+use App\Filament\Pages\Servidor;
 use App\Filament\Resources\Catalogo\Prendas\PrendaResource;
 use App\Filament\Resources\Pedidos\PedidoResource;
 use App\Filament\Resources\Precios\ZonaEnvioResource;
@@ -51,6 +53,8 @@ final class PuestaEnMarcha
         $prueba = Copias::ultimaPrueba();
 
         return [
+            new Paso('Servidor preparado', 'PHP 8.3 con sus extensiones, la base de datos y Redis respondiendo (Herramientas → Servidor).', Servidor::class,
+                rescue(fn () => InformeServidor::listo(), false, report: false)),
             new Paso('Datos de la tienda', 'Nombre de la tienda y correo de contacto.', AjustesGenerales::class,
                 filled(Ajuste::obtener('tienda.correo_contacto'))),
             new Paso('Correo de salida (SMTP)', 'Servidor, usuario y remitente en Ajustes → Correos; pulsa «Enviar correo de prueba».', AjustesCorreos::class,
