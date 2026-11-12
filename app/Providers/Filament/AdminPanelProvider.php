@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\Login;
 use App\Filament\AvatarIniciales;
 use App\Filament\Pages\Escritorio;
 use App\Http\Middleware\DosPasosEquipo;
@@ -31,7 +32,8 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            // En la primera instalación lleva a /instalar (D208).
+            ->login(Login::class)
             // «Mi perfil»: nombre, contraseña y verificación en dos pasos (D186).
             ->profile(isSimple: false)
             // Dos pasos con app autenticadora y códigos de recuperación, obligatoria para el equipo (portada de Clave de Alma).
