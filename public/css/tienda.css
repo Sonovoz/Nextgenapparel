@@ -1126,3 +1126,34 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .asistente-formulario input { flex: 1; min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--linea-fuerte); background: var(--fondo); color: var(--tinta); font: inherit; font-size: 16px; }
 .asistente-formulario button { min-height: 44px; padding: 0 14px; border-radius: 10px; border: 0; background: var(--azul); color: #fff; font: inherit; cursor: pointer; }
 .asistente-aviso { margin: 0; padding: 0 16px 10px; font-size: 11px; color: var(--tinta-suave); }
+
+/* Capa «Procesando» (toda la tienda): oscurece la pantalla con un velo y un anillo de luz de la marca. */
+.procesando { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; padding: 24px;
+    background: radial-gradient(60% 50% at 50% 45%, rgba(45, 75, 255, .18), transparent 70%), rgba(5, 6, 12, .74);
+    -webkit-backdrop-filter: blur(6px) saturate(.85); backdrop-filter: blur(6px) saturate(.85);
+    opacity: 0; transition: opacity .3s ease; cursor: progress; }
+.procesando.visible { opacity: 1; }
+.procesando[hidden] { display: none; }
+.procesando-caja { text-align: center; color: #fff; max-width: 420px; transform: translateY(8px) scale(.98); transition: transform .4s cubic-bezier(.2, .8, .2, 1); }
+.procesando.visible .procesando-caja { transform: none; }
+.procesando-orbita { position: relative; display: block; width: 76px; height: 76px; margin: 0 auto 22px; border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0 55%, rgba(142, 160, 255, .35) 70%, #8EA0FF 88%, #fff 100%);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+    animation: procesando-giro 1.1s linear infinite; filter: drop-shadow(0 0 10px rgba(142, 160, 255, .7)); }
+.procesando-orbita i { position: absolute; inset: 16px; border-radius: 50%; background: radial-gradient(circle, rgba(142, 160, 255, .55), rgba(45, 75, 255, 0) 70%); animation: procesando-latido 1.6s ease-in-out infinite; }
+.procesando-titulo { margin: 0; font-size: 14px; font-weight: 600; letter-spacing: .28em; text-transform: uppercase; }
+.procesando-detalle { margin: 10px 0 0; font-size: 14px; color: #C8CCE4; line-height: 1.5; }
+.procesando-puntos i { display: inline-block; width: 4px; height: 4px; margin-left: 4px; border-radius: 50%; background: currentColor; vertical-align: middle; animation: procesando-punto 1.2s ease-in-out infinite; }
+.procesando-puntos i:nth-child(2) { animation-delay: .15s; }
+.procesando-puntos i:nth-child(3) { animation-delay: .3s; }
+@keyframes procesando-giro { to { transform: rotate(1turn); } }
+@keyframes procesando-latido { 50% { transform: scale(.7); opacity: .5; } }
+@keyframes procesando-punto { 0%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) {
+    .procesando-orbita { animation-duration: 3s; }
+    .procesando-orbita i, .procesando-puntos i { animation: none; }
+}
+
+/* Tallas de la prenda: información, no botones (no se pulsan) */
+.tallas-texto { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: .04em; }
+.tallas-texto span + span::before { content: '·'; margin: 0 .55em; font-weight: 400; opacity: .5; }

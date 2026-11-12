@@ -228,6 +228,7 @@
             elementos.forEach(function (el) { observador.observe(el); });
         })();
     </script>
+    @include('tienda._procesando')
     @stack('scripts')
 </body>
 </html>
