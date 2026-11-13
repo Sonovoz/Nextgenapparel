@@ -7,12 +7,10 @@ use App\Dominio\Precios\AplicaA;
 use App\Dominio\Precios\Efecto;
 use App\Dominio\Precios\Importe;
 use App\Dominio\Precios\Impuestos;
-use App\Dominio\Precios\MetodoEnvio;
 use App\Dominio\Precios\RepartoPack;
 use App\Dominio\Precios\TipoMinimo;
 use App\Dominio\Precios\TipoRegla;
 use App\Models\Ajuste;
-use App\Models\Caja;
 use App\Models\Cupon;
 use App\Models\Pack;
 use App\Models\Prenda;
@@ -20,7 +18,6 @@ use App\Models\ReglaMinimo;
 use App\Models\ReglaPrecio;
 use App\Models\Talla;
 use App\Models\Variante;
-use App\Models\ZonaEnvio;
 
 /**
  * Motor de precios (ficha § 6 y § 6 bis). Determinista: los mismos datos dan
@@ -470,50 +467,25 @@ final class MotorPrecios
     /** @param  list<LineaCalculada>  $lineas */
     private function calcularEnvio(Destino $destino, array $lineas): ?array
     {
-        $zona = ZonaEnvio::paraDestino($destino->pais, $destino->codigoPostal)?->load('tarifas');
-
-        if ($zona === null) {
+        // El cálculo vive en CalculoEnvio para que el backend lo pueda probar (D225).
+        $calculo = CalculoEnvio::para(
+            $destino,
+            array_sum(array_map(fn ($l) => $l->pesoGramos, $lineas)),
+            array_sum(array_map(fn ($l) => $l->unidades, $lineas)),
+            array_sum(array_map(fn ($l) => $l->neto(), $lineas)),
+        );
+        if ($calculo['envio'] === null) {
             $this->impedimentos[] = new Mensaje('sin_envio');
 
             return null;
         }
-
-        $peso = array_sum(array_map(fn ($l) => $l->pesoGramos, $lineas));
-        $unidades = array_sum(array_map(fn ($l) => $l->unidades, $lineas));
-        $mercancia = array_sum(array_map(fn ($l) => $l->neto(), $lineas));
-        $bultos = null;
-
-        if ($zona->metodo === MetodoEnvio::PorKilo) {
-            $tarifa = $zona->tarifas->first(fn ($t) => $t->hasta_gramos >= $peso);
-            $ultima = $zona->tarifas->last();
-            if ($tarifa !== null) {
-                $importe = $tarifa->precio;
-            } elseif ($ultima !== null && $zona->precio_kg_extra !== null) {
-                $importe = $ultima->precio + (int) ceil(($peso - $ultima->hasta_gramos) / 1000) * $zona->precio_kg_extra;
-            } else {
-                $this->impedimentos[] = new Mensaje('sin_envio');
-
-                return null;
-            }
-        } else {
-            $caja = Caja::where('activa', true)->orderByDesc('capacidad_prendas')->first();
-            if ($caja === null || $zona->precio_caja === null) {
-                $this->impedimentos[] = new Mensaje('sin_envio');
-
-                return null;
-            }
-            $bultos = max((int) ceil($unidades / $caja->capacidad_prendas), (int) ceil($peso / $caja->peso_max_gramos), 1);
-            $importe = $bultos * $zona->precio_caja;
-        }
-
-        if ($zona->gratis_desde !== null && $mercancia >= $zona->gratis_desde) {
-            $importe = 0;
+        if ($calculo['gratis'] === true) {
             $this->avisos[] = new Mensaje('envio_gratis');
-        } elseif ($zona->gratis_desde !== null) {
-            $this->avisos[] = new Mensaje('envio_gratis_cerca', ['faltan' => ['euros' => $zona->gratis_desde - $mercancia]]);
+        } elseif ($calculo['gratis'] === false) {
+            $this->avisos[] = new Mensaje('envio_gratis_cerca', ['faltan' => ['euros' => $calculo['faltan_gratis']]]);
         }
 
-        return ['zona' => $zona->nombre, 'metodo' => $zona->metodo->value, 'importe' => $importe, 'plazo_dias' => $zona->plazo_dias, 'peso_gramos' => $peso, 'bultos' => $bultos];
+        return $calculo['envio'];
     }
 
     // ── 8. Impuestos ──────────────────────────────────────────────────

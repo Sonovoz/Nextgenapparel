@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Precios;
 
 use App\Dominio\Precios\MetodoEnvio;
+use App\Dominio\Precios\Motor\CalculoEnvio;
 use App\Filament\Concerns\CampoDinero;
 use App\Filament\Concerns\CamposTraducibles;
 use App\Filament\Navegacion\GrupoNavegacion;
@@ -92,6 +93,10 @@ class ZonaEnvioResource extends RecursoPrecios
                 TextColumn::make('gratis_desde')->label('Gratis desde')->formatStateUsing(fn ($state) => CampoDinero::formatear($state === null ? null : (int) $state))->placeholder('—'),
                 TextColumn::make('plazo_dias')->label('Plazo')->suffix(' días'),
                 IconColumn::make('activa')->label('Activa')->boolean(),
+                // D225: lo que le falta a la zona para poder cobrar envíos.
+                TextColumn::make('estado')->label('Estado')->badge()->wrap()
+                    ->state(fn (ZonaEnvio $record) => CalculoEnvio::problemas($record) === [] ? 'Lista' : implode(' ', CalculoEnvio::problemas($record)))
+                    ->color(fn (ZonaEnvio $record) => CalculoEnvio::problemas($record) === [] ? 'success' : 'danger'),
             ])
             ->recordActions([static::accionEditar(), static::accionBorrar()]);
     }

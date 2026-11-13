@@ -4,10 +4,26 @@ namespace App\Models;
 
 use App\Dominio\Precios\MetodoEnvio;
 use App\Models\Concerns\Traducible;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/** Ajustes → Envío: zona (países y prefijos de código postal), método y tarifas. */
+/**
+ * Ajustes → Envío: zona (países y prefijos de código postal), método y tarifas.
+ *
+ * @property int $id
+ * @property string $nombre
+ * @property ?list<string> $paises
+ * @property ?list<string> $prefijos_cp
+ * @property MetodoEnvio $metodo
+ * @property ?int $precio_kg_extra
+ * @property ?int $precio_caja
+ * @property ?int $gratis_desde
+ * @property int $plazo_dias
+ * @property int $prioridad
+ * @property bool $activa
+ * @property-read Collection<int, TarifaEnvio> $tarifas
+ */
 class ZonaEnvio extends Model
 {
     use Traducible;
@@ -44,6 +60,7 @@ class ZonaEnvio extends Model
             ->first();
     }
 
+    /** @return HasMany<TarifaEnvio, $this> */
     public function tarifas(): HasMany
     {
         return $this->hasMany(TarifaEnvio::class)->orderBy('hasta_gramos');
