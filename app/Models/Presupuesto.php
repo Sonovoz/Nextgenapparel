@@ -42,11 +42,11 @@ class Presupuesto extends Model
 
     public function vigente(): bool
     {
-        return now()->startOfDay()->lessThanOrEqualTo($this->valido_hasta);
+        return now()->lessThanOrEqualTo($this->valido_hasta);
     }
 
     protected function casts(): array
     {
-        return ['contenido' => 'array', 'origen' => 'array', 'total' => 'integer', 'valido_hasta' => 'date', 'convertido_en' => 'datetime'];
+        return ['contenido' => 'array', 'origen' => 'array', 'total' => 'integer', 'valido_hasta' => 'datetime', 'convertido_en' => 'datetime'];
     }
 }

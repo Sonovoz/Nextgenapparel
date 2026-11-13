@@ -58,7 +58,7 @@ class PresupuestosTest extends TestCase
         $this->assertSame(['PRE-0001', 10500, 12705], [$p->numero, $p->contenido['bruto'], $p->total]);
         $this->assertSame('Camiseta Essential · Negro', $p->contenido['lineas'][0]['descripcion']);
         $this->assertStringContainsString('Frontal 10 × 6 cm', $p->contenido['lineas'][0]['detalle']);
-        $this->assertSame(now()->addDays(15)->toDateString(), $p->valido_hasta->toDateString());
+        $this->assertSame(now()->addHours(48)->format('Y-m-d H:i'), $p->valido_hasta->format('Y-m-d H:i')); // D216: 48 horas
         $this->get(PresupuestoController::url('ver', $p))->assertOk()->assertSee('PRE-0001')->assertSee('127,05');
         $pdf = $this->get(PresupuestoController::url('pdf', $p))->assertOk()->assertHeader('Content-Type', 'application/pdf');
         $this->assertStringStartsWith('%PDF', $pdf->getContent());
@@ -84,7 +84,7 @@ class PresupuestosTest extends TestCase
         $this->assertNotNull($p->fresh()->convertido_en);
         $this->assertSame(1, Carrito::sole()->lineas()->count());
 
-        $this->travel(16)->days();
+        $this->travel(49)->hours();
         $this->post(PresupuestoController::url('pasar', $p))->assertSessionHas('estado', __('presupuestos.caducado'));
     }
 
@@ -130,5 +130,19 @@ class PresupuestosTest extends TestCase
         $this->conCarrito()->get(PresupuestoController::url('ver', $p))->assertSee(__('presupuestos.pasar'));
         $this->conCarrito()->post(PresupuestoController::url('pasar', $p));
         $this->assertSame(1, $this->carrito->lineas()->count());
+    }
+
+    public function test_el_pdf_es_el_premium_con_jost_y_enlaza_preguntas_y_condiciones(): void
+    {
+        // D215: la letra de la marca, el texto de la colección y los enlaces a las preguntas frecuentes y las condiciones.
+        $this->conCarrito()->post(route('presupuestos.es.crear'));
+        $p = Presupuesto::sole();
+
+        $pdf = $this->get(PresupuestoController::url('pdf', $p))->assertOk()->getContent();
+
+        $this->assertStringContainsString('Jost', $pdf);
+        $this->assertStringContainsString(route('portada', ['idioma' => 'es']).'#preguntas', $pdf);
+        $this->assertStringContainsString(route('legal', ['idioma' => 'es', 'pagina' => 'condiciones-de-venta']), $pdf);
+        $this->assertStringContainsString(PresupuestoController::url('ver', $p), $pdf); // «Abrir mi presupuesto»
     }
 }

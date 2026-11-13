@@ -51,7 +51,8 @@ class Ajuste extends Model
         // Paso 7.2 (D182): el cliente cancela un pedido pagado y sin producir al momento (devolución automática) o lo pide al equipo.
         'pagos.cancelacion_automatica' => false,
         // D187: días que vale un presupuesto.
-        'presupuestos.dias_validez' => 15,
+        // D216: horas que vale un presupuesto (los precios pueden variar sin previo aviso).
+        'presupuestos.horas_validez' => 48,
         // v2 (D194): asistente IA (OpenAI). Desactivado hasta que el equipo lo active; límite del mes en €;
         // precios por millón de tokens en céntimos (los de la tarifa de OpenAI del modelo elegido).
         'ia.activa' => false,

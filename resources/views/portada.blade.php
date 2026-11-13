@@ -401,7 +401,7 @@
     </section>
 
     {{-- 7. Preguntas y llamada final --}}
-    <section class="seccion" aria-labelledby="titulo-preguntas">
+    <section class="seccion" id="preguntas" aria-labelledby="titulo-preguntas">
         <div class="contenedor">
             <h2 class="titulo-seccion aparece" id="titulo-preguntas" style="text-align: center;">{{ __('portada.faq_titulo') }}</h2>
             <div class="separador corto" style="margin: 24px auto;"><span></span></div>
