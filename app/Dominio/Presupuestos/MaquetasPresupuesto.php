@@ -25,7 +25,7 @@ final class MaquetasPresupuesto
 {
     public function __construct(private readonly GenerarMaquetas $generar) {}
 
-    /** @return array<int, list<string>> por índice de línea, sus maquetas como JPEG embebido (data URI) */
+    /** @return array<int, list<array{cara: string, src: string}>> por índice de línea, cada cara como JPEG embebido (data URI) */
     public function __invoke(Presupuesto $presupuesto): array
     {
         if (! extension_loaded('imagick')) {
@@ -33,10 +33,10 @@ final class MaquetasPresupuesto
         }
 
         // El presupuesto no cambia: sus maquetas se componen una vez al día como mucho.
-        return Cache::remember("presupuesto.{$presupuesto->uuid}.maquetas", now()->addDay(), fn () => $this->componer($presupuesto));
+        return Cache::remember("presupuesto.{$presupuesto->uuid}.maquetas.v2", now()->addDay(), fn () => $this->componer($presupuesto));
     }
 
-    /** @return array<int, list<string>> */
+    /** @return array<int, list<array{cara: string, src: string}>> */
     private function componer(Presupuesto $presupuesto): array
     {
         $resultado = [];
@@ -71,7 +71,7 @@ final class MaquetasPresupuesto
                 try {
                     $imagen = $this->generar->componer($prendaId, $colorId, $hex, $cara, $porCara[$cara->value], "Presupuesto {$presupuesto->numero}");
                     if ($imagen !== null) {
-                        $resultado[$i][] = self::jpeg($imagen);
+                        $resultado[$i][] = ['cara' => $cara->value, 'src' => self::jpeg($imagen)];
                     }
                 } catch (Throwable $e) {
                     Log::warning("Presupuesto {$presupuesto->numero}: no se ha podido componer su maqueta ({$e->getMessage()}).");
@@ -83,7 +83,7 @@ final class MaquetasPresupuesto
     }
 
     /** JPEG embebido: dompdf no lee WebP en todos los servidores ni archivos remotos. */
-    private static function jpeg(Imagick $imagen): string
+    public static function jpeg(Imagick $imagen): string
     {
         $imagen->setImageBackgroundColor('white');
         $plana = $imagen->mergeImageLayers(Imagick::LAYERMETHOD_FLATTEN);

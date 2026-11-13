@@ -4,12 +4,14 @@ namespace Tests\Feature\Pedidos;
 
 use App\Dominio\Catalogo\Cara;
 use App\Dominio\Catalogo\TipoFoto;
+use App\Dominio\Documentos\FotosFactura;
 use App\Dominio\Pedidos\EstadoPedido;
 use App\Dominio\Pedidos\GenerarMaquetas;
 use App\Dominio\Presupuestos\MaquetasPresupuesto;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\PresupuestoController;
 use App\Models\Color;
+use App\Models\Factura;
 use App\Models\Familia;
 use App\Models\Foto;
 use App\Models\FotoZona;
@@ -186,7 +188,7 @@ class MaquetasPedidoTest extends TestCase
     public function test_el_presupuesto_lleva_la_maqueta_de_lo_que_ha_creado(): void
     {
         $presupuesto = Presupuesto::create([
-            'uuid' => (string) Str::uuid(), 'numero' => 'PRE-0001', 'idioma' => 'es', 'total' => 0, 'valido_hasta' => now()->addDays(15)->toDateString(),
+            'uuid' => (string) Str::uuid(), 'numero' => 'PRE-0001', 'idioma' => 'es', 'total' => 0, 'valido_hasta' => now()->addHours(48),
             'contenido' => ['lineas' => [['descripcion' => 'Camiseta', 'detalle' => 'Frontal', 'unidades' => 15, 'neto' => 0]], 'bruto' => 0, 'descuentos' => 0, 'descuento_nombre' => null, 'base' => 0, 'impuestos' => 0, 'total' => 0],
             'origen' => [['tipo' => 'prenda', 'prenda_id' => $this->linea->prenda_id, 'color_id' => $this->linea->color_id, 'pack_id' => null, 'tallas' => [], 'elecciones' => null,
                 'impresiones' => [$this->zona->id => ['texto' => 'NEXT', 'fuente' => 2, 'tinta' => 'negro', 'ancho_mm' => 140, 'alto_mm' => 100, 'desde_cuello_mm' => 75, 'desde_centro_mm' => 0]]]],
@@ -195,11 +197,26 @@ class MaquetasPedidoTest extends TestCase
         $maquetas = app(MaquetasPresupuesto::class)($presupuesto);
 
         $this->assertCount(1, $maquetas[0]);
+        $this->assertSame('delantera', $maquetas[0][0]['cara']); // con su cara, para el rótulo del PDF
         $imagen = new Imagick;
-        $imagen->readImageBlob((string) base64_decode(substr($maquetas[0][0], strlen('data:image/jpeg;base64,'))));
+        $imagen->readImageBlob((string) base64_decode(substr($maquetas[0][0]['src'], strlen('data:image/jpeg;base64,'))));
         $imagen->transformImageColorspace(Imagick::COLORSPACE_GRAY);
         $this->assertLessThan(0.2 * Imagick::getQuantum(), $imagen->getImageChannelRange(Imagick::CHANNEL_GRAY)['minima']); // la tinta negra está
         $pdf = $this->get(PresupuestoController::url('pdf', $presupuesto))->assertOk()->getContent();
         $this->assertStringContainsString('/Subtype /Image', $pdf);
+    }
+
+    /** D215: la factura enseña la colección con la foto de cada cara; la rectificativa, no. */
+    public function test_la_factura_lleva_las_fotos_de_la_coleccion(): void
+    {
+        $this->impresion(['texto' => 'NG', 'fuente' => 2, 'tinta' => 'negro']);
+        app(GenerarMaquetas::class)($this->pedido);
+
+        $coleccion = FotosFactura::de(new Factura(['pedido_id' => $this->pedido->id, 'idioma' => 'es']));
+
+        $this->assertCount(1, $coleccion);
+        $this->assertSame('delantera', $coleccion[0]['fotos'][0]['cara']);
+        $this->assertStringStartsWith('data:image/jpeg;base64,', $coleccion[0]['fotos'][0]['src']);
+        $this->assertSame([], FotosFactura::de((new Factura(['pedido_id' => $this->pedido->id, 'idioma' => 'es', 'rectifica_id' => 999]))->setRelation('rectifica', new Factura)));
     }
 }

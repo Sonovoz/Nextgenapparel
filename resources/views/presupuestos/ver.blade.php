@@ -3,7 +3,7 @@
     <section class="carrito-pagina">
         <div class="contenedor">
             <h1 class="titulo-cuenta">{{ __('presupuestos.titulo', ['numero' => $presupuesto->numero]) }}</h1>
-            <p class="entradilla">{{ $presupuesto->vigente() ? __('presupuestos.valido', ['fecha' => $presupuesto->valido_hasta->locale(app()->getLocale())->isoFormat('LL')]) : __('presupuestos.caducado') }}</p>
+            <p class="entradilla">{{ $presupuesto->vigente() ? __('presupuestos.valido', ['fecha' => $presupuesto->valido_hasta->timezone('Europe/Madrid')->locale(app()->getLocale())->isoFormat('LLL')]) : __('presupuestos.caducado') }}</p>
             @if (session('estado'))<p class="aviso-cuenta verificar" role="status">{{ session('estado') }}</p>@endif
             <div class="pedido-tarjeta">
                 <ul class="pedido-impresiones">

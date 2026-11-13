@@ -46,7 +46,7 @@ class PresupuestoResource extends Resource
                 TextColumn::make('cliente.nombre')->label('Cliente')->placeholder('Sin cuenta'),
                 TextColumn::make('total')->label('Total')->alignEnd()->formatStateUsing(fn (int $state) => Formato::euros($state, 'es')),
                 TextColumn::make('estado')->label('Estado')->badge()
-                    ->state(fn (Presupuesto $r) => $r->convertido_en !== null ? 'Pasado al carrito' : ($r->vigente() ? 'Vigente hasta '.$r->valido_hasta->format('d/m/Y') : 'Caducado'))
+                    ->state(fn (Presupuesto $r) => $r->convertido_en !== null ? 'Pasado al carrito' : ($r->vigente() ? 'Vigente hasta '.$r->valido_hasta->timezone('Europe/Madrid')->format('d/m/Y H:i') : 'Caducado'))
                     ->color(fn (Presupuesto $r) => $r->convertido_en !== null ? 'success' : ($r->vigente() ? 'info' : 'gray')),
             ])
             ->recordActions([

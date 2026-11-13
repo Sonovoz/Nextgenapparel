@@ -1,4 +1,5 @@
 @php
+    use App\Dominio\Documentos\EnlacesPdf;
     use App\Dominio\Precios\Formato;
     $i = $factura->idioma;
     $e = fn (int $c) => Formato::euros($c, $i);
@@ -6,6 +7,8 @@
     $emisor = $factura->emisor;
     $dest = $factura->destinatario;
     $dir = $dest['direccion'] ?? [];
+    $correo = EnlacesPdf::correo($emisor['correo'] ?? null);
+    $rectificativa = $factura->rectifica !== null;
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $i }}">
@@ -17,7 +20,7 @@
 </style>
 </head>
 <body>
-@include('pdf._pie', ['texto' => $emisor['razon_social'].' · '.__('facturas.nif', [], $i).' '.$emisor['nif'].' · '.$factura->codigo])
+@include('pdf._pie', ['idioma' => $i, 'texto' => $emisor['razon_social'].' · '.__('facturas.nif', [], $i).' '.$emisor['nif'].' · '.$factura->codigo, 'enlaces' => EnlacesPdf::para($i)])
 
 {{-- Veri*Factu: el QR va al principio de la factura (D175). --}}
 @if ($factura->verifactu)
@@ -34,7 +37,22 @@
 @endphp
 @include('pdf._cabecera', ['tipo' => $factura->tipo->etiqueta($i), 'numero' => $factura->codigo, 'datos' => $datos])
 
-<table class="bloques"><tr>
+{{-- D215: la emoción de haber encargado su colección (en las rectificativas, un texto neutro). --}}
+<div class="bienvenida">
+    @if ($rectificativa)
+        <p class="entradilla" style="margin-top: 0;">{{ __('pdf.rectificativa_texto', [], $i) }}</p>
+    @else
+        <p class="titular">{{ __('pdf.factura_titular', [], $i) }}</p>
+        <p class="entradilla">{{ __('pdf.factura_texto', [], $i) }}</p>
+    @endif
+</div>
+
+@if (! empty($coleccion))
+    <p class="seccion">{{ __('pdf.tu_coleccion', [], $i) }}</p>
+    @include('pdf._coleccion', ['idioma' => $i, 'lineas' => $coleccion])
+@endif
+
+<table class="bloques" style="margin-top: 7mm;"><tr>
     <td style="width: 49%;"><div class="bloque">
         <p class="etiqueta">{{ __('facturas.emisor', [], $i) }}</p>
         <p><strong>{{ $emisor['razon_social'] }}</strong><br>{{ __('facturas.nif', [], $i) }} {{ $emisor['nif'] }}<br>{{ $emisor['direccion'] }}<br>
@@ -75,5 +93,15 @@
         </tbody></table>
     </td>
 </tr></table>
+
+<div class="disposicion"><table class="bloques"><tr>
+    <td style="width: 62%;">
+        <p class="titulo">{{ __('pdf.disposicion', [], $i) }}</p>
+        <p class="tenue" style="margin-top: 1.2mm;">{{ __('pdf.disposicion_texto', [], $i) }}</p>
+    </td>
+    <td style="width: 38%; text-align: right; vertical-align: middle;">
+        @if ($correo)<p><a href="mailto:{{ $correo }}" class="fuerte">{{ $correo }}</a></p>@endif
+    </td>
+</tr></table></div>
 </body>
 </html>
