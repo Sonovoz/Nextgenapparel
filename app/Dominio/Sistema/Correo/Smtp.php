@@ -44,6 +44,11 @@ final class Smtp
         if (($contrasena = self::contrasena()) !== null) {
             config(['mail.mailers.smtp.password' => $contrasena]);
         }
+        // Con un servidor puesto en el panel, el correo sale por él aunque el .env diga MAIL_MAILER=log (D234).
+        // En los tests (correo «array») no se toca: nunca se manda un correo de verdad.
+        if (filled($s['servidor'] ?? null) && config('mail.default') !== 'array') {
+            config(['mail.default' => 'smtp']);
+        }
     }
 
     /**

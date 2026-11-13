@@ -160,11 +160,11 @@ class AjustesCorreos extends Page implements HasSchemas
                 ->fillForm(fn () => ['para' => auth()->user()?->email])
                 ->schema([TextInput::make('para')->label('Enviar a')->email()->required()])
                 ->action(function (array $data): void {
-                    // Con MAIL_MAILER=log el correo no sale: se escribe en el log. Se dice claro.
+                    // D234: si el correo no sale por SMTP (falta el servidor en el panel y el .env dice «log»), no se dice «enviado».
+                    Smtp::aplicar();
                     if (config('mail.default') === 'log') {
-                        Notification::make()->title('El correo no se ha enviado')
-                            ->body('El .env tiene MAIL_MAILER='.config('mail.default').': los correos se escriben en '.storage_path('logs'.DIRECTORY_SEPARATOR.'laravel.log').'. Pon MAIL_MAILER=smtp en el .env y ejecuta «php artisan config:clear».')
-                            ->warning()->persistent()->send();
+                        Notification::make()->title('El correo no se ha enviado')->danger()->persistent()
+                            ->body('No hay servidor SMTP: rellena «Servidor SMTP», usuario y contraseña aquí arriba y pulsa «Guardar cambios» antes de probar.')->send();
 
                         return;
                     }
