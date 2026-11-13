@@ -26,6 +26,10 @@ class LegalTest extends TestCase
         $condiciones = TextoLegal::actual(PaginaLegal::Condiciones);
         $this->assertContains('razón social', $condiciones->pendientes);
         $this->assertStringContainsString('103.c', $condiciones->contenido);
+        // Una vez impresas, el pedido no se cancela; devoluciones solo si el error es nuestro.
+        $this->assertStringContainsString('Una vez impresas las prendas, el pedido no se puede cancelar', $condiciones->contenido);
+        $this->assertStringContainsString('Lo que no es un defecto', $condiciones->contenido);
+        $this->assertStringContainsString('Una vez impresas las prendas, el pedido no se puede cancelar', TextoLegal::actual(PaginaLegal::Envios)->contenido);
 
         Ajuste::guardar('facturacion.emisor', ['razon_social' => 'DTI Textil SL', 'nif' => 'B12345674', 'direccion' => 'Calle Industria 4', 'codigo_postal' => '28001', 'localidad' => 'Madrid', 'correo' => 'hola@dti.es']);
         $this->assertSame(10, app(GenerarTextosLegales::class)()); // todas cambian: versión nueva

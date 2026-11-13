@@ -22,6 +22,8 @@ The shipping price depends on the destination and the weight of the order and is
 
 If something arrives wrong, report it from your order page within **{{ $diasIncidencia }} days** of delivery: tell us what happened and add photos. We will reply with a reprint, a partial refund or an explanation.
 
-## Returns
+## Cancellations and returns
 
-As the garments are personalised, returns by withdrawal are not accepted (see the [terms of sale](condiciones-de-venta)). You do have the 3-year legal guarantee for lack of conformity.
+- **Cancelling:** from the order page, until it goes into printing. **Once the garments are printed, the order can no longer be cancelled.**
+- **Returns:** as the garments are personalised, returns by withdrawal or because you changed your mind, size or colour are not accepted (see the [terms of sale](condiciones-de-venta)).
+- **If the mistake is ours:** a reprint or a refund at no cost to you, with the 3-year legal guarantee for lack of conformity.

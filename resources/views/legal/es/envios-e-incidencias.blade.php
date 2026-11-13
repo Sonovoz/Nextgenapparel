@@ -22,6 +22,8 @@ El precio del envío depende del destino y del peso del pedido, y se muestra ant
 
 Si algo llega mal, ábrela desde la página de tu pedido en los **{{ $diasIncidencia }} días** siguientes a la entrega: cuéntanos qué pasa y añade fotos. Te responderemos con una reimpresión, un reembolso parcial o una explicación.
 
-## Devoluciones
+## Cancelaciones y devoluciones
 
-Al ser prendas personalizadas, no se admiten devoluciones por desistimiento (ver las [condiciones de venta](condiciones-de-venta)). Sí tienes la garantía legal de 3 años por falta de conformidad.
+- **Cancelar:** desde la página del pedido, mientras no haya entrado en impresión. **Una vez impresas las prendas, el pedido no se puede cancelar.**
+- **Devoluciones:** al ser prendas personalizadas, no se admiten devoluciones por desistimiento ni por cambio de opinión, de talla o de color (ver las [condiciones de venta](condiciones-de-venta)).
+- **Si el error es nuestro:** reimpresión o reembolso sin coste para ti, con la garantía legal de 3 años por falta de conformidad.
