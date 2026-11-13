@@ -10,6 +10,7 @@ use App\Dominio\Sistema\Salud\Comprobaciones\Comprobacion;
 use App\Dominio\Sistema\Salud\Comprobaciones\Configuracion;
 use App\Dominio\Sistema\Salud\Comprobaciones\CopiasSeguridad;
 use App\Dominio\Sistema\Salud\Comprobaciones\Correo;
+use App\Dominio\Sistema\Salud\Comprobaciones\CorreosPendientes;
 use App\Dominio\Sistema\Salud\Comprobaciones\ErroresCriticos;
 use App\Dominio\Sistema\Salud\Comprobaciones\EspacioDisco;
 use App\Dominio\Sistema\Salud\Comprobaciones\Imagenes;
@@ -38,6 +39,7 @@ class ComprobarSalud
             TareasProgramadas::class,
             Colas::class,
             Correo::class,
+            CorreosPendientes::class, // D235
             EspacioDisco::class,
             Almacenamiento::class, // D231
             Limpieza::class,       // D231
