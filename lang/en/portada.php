@@ -107,4 +107,7 @@ return [
     'error_inicio_detalle' => 'Start again from the home page',
     'error_prendas' => 'See the garments',
     'error_prendas_detalle' => 'T-shirts, polo shirts and sweatshirts',
+    // D221: «Choose your mode» inside the packs.
+    'modos_pregunta' => 'What are they for?',
+    'modos_todos' => 'All',
 ];

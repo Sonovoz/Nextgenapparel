@@ -324,11 +324,46 @@
             @if ($packs->isEmpty())
                 <p class="entradilla">{{ __('portada.sin_packs') }}</p>
             @else
-                <div class="carrusel">
+                {{-- D221: «Elige tu modo» dentro de los packs: filtra sin salir de la portada (sin JavaScript, lleva a la página del modo). --}}
+                <nav class="modos-filtro aparece" aria-label="{{ __('portada.quien_titulo') }}">
+                    <p class="modos-pregunta">{{ __('portada.modos_pregunta') }}</p>
+                    <div class="modos-opciones">
+                        <a href="#packs" data-modo="" aria-current="true">{{ __('portada.modos_todos') }}</a>
+                        @foreach (\App\Dominio\Catalogo\ModoCliente::cases() as $modo)
+                            <a href="{{ route('modo', ['modo' => $modo->value]) }}" data-modo="{{ $modo->value }}" data-texto="{{ __('portada.quien_'.$modo->numero().'_texto') }}">{{ __('portada.quien_'.$modo->numero()) }}</a>
+                        @endforeach
+                    </div>
+                    <p class="modos-texto" aria-live="polite" hidden></p>
+                </nav>
+                <div class="carrusel" id="carrusel-packs">
                     @foreach ($packs as $pack)
                         @include('tienda._pack', ['pack' => $pack])
                     @endforeach
                 </div>
+                <p class="entradilla modos-vacio" hidden>{{ __('portada.modo_sin_packs') }} <a class="enlace-flecha" href="#pasos">{{ __('portada.cta_coleccion') }}</a></p>
+                <script>
+                (() => {
+                    const nav = document.querySelector('.modos-filtro'), carrusel = document.getElementById('carrusel-packs');
+                    const texto = nav.querySelector('.modos-texto'), vacio = document.querySelector('.modos-vacio');
+                    nav.addEventListener('click', (e) => {
+                        const a = e.target.closest('[data-modo]');
+                        if (!a) return;
+                        e.preventDefault();
+                        nav.querySelectorAll('[data-modo]').forEach((b) => b.removeAttribute('aria-current'));
+                        a.setAttribute('aria-current', 'true');
+                        const modo = a.dataset.modo;
+                        let visibles = 0;
+                        carrusel.querySelectorAll('.pack').forEach((p) => {
+                            const modos = p.dataset.modos.split(' ').filter(Boolean);
+                            const ver = !modo || !modos.length || modos.includes(modo);
+                            p.hidden = !ver; visibles += ver ? 1 : 0;
+                        });
+                        texto.textContent = a.dataset.texto || ''; texto.hidden = !a.dataset.texto;
+                        carrusel.hidden = !visibles; vacio.hidden = !!visibles;
+                        carrusel.scrollTo({ left: 0, behavior: 'smooth' });
+                    });
+                })();
+                </script>
             @endif
         </div>
     </section>
@@ -380,25 +415,6 @@
         </div>
     </section>
 
-    {{-- 6. Para quién --}}
-    <section class="seccion" aria-labelledby="titulo-quien">
-        <div class="contenedor">
-            <p class="etiqueta aparece">{{ __('portada.quien_etiqueta') }}</p>
-            <h2 class="titulo-seccion aparece" id="titulo-quien">{{ __('portada.quien_titulo') }}</h2>
-            <div class="quien-rejilla">
-                {{-- Cada modo lleva a sus packs (D203). --}}
-                @foreach (\App\Dominio\Catalogo\ModoCliente::cases() as $modo)
-                    @php $i = $modo->numero(); @endphp
-                    <a class="quien-tarjeta aparece retraso-{{ $i }}" href="{{ route('modo', ['modo' => $modo->value]) }}">
-                        <p class="modo">{{ __('portada.modo') }} 0{{ $i }}</p>
-                        <h3>{{ __('portada.quien_'.$i) }}</h3>
-                        <p>{{ __('portada.quien_'.$i.'_texto') }}</p>
-                        <span class="quien-ver">{{ __('portada.modo_ver_packs') }} <span aria-hidden="true">→</span></span>
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </section>
 
     {{-- 7. Preguntas y llamada final --}}
     <section class="seccion" id="preguntas" aria-labelledby="titulo-preguntas">
