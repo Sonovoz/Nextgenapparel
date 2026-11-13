@@ -55,7 +55,7 @@ final class Portada
      * Los packs vigentes que se pueden comprar, listos para la tarjeta. Con modo, los de ese modo primero y
      * después los genéricos (D203).
      *
-     * @return Collection<int, array{nombre: string, url: string, descripcion: ?string, unidades: int, precio: string, neto: ?string, zonas: string, foto: ?Foto, imagen: ?string}>
+     * @return Collection<int, array{nombre: string, url: string, descripcion: ?string, unidades: int, precio: string, neto: ?string, zonas: string, foto: ?Foto, imagen: ?string, modos: list<string>}>
      */
     public static function packs(?ModoCliente $modo = null): Collection
     {
@@ -75,6 +75,7 @@ final class Portada
             'zonas' => $p->zonas->map(fn (ZonaImpresion $z) => $z->nombre)->implode(', '),
             'foto' => Escaparate::fotoPrincipal($p->lineas->first()->prenda),
             'imagen' => $p->imagenUrl(), // D217
+            'modos' => $p->modos ?: [], // D221: para filtrar en la portada; vacío = genérico, sale en todos
         ])->values();
     }
 
