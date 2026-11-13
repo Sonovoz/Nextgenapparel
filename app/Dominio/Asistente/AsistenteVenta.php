@@ -2,14 +2,19 @@
 
 namespace App\Dominio\Asistente;
 
+use App\Dominio\Pedidos\EstadoPedido;
 use App\Models\Ajuste;
 use App\Models\Cliente;
 use App\Models\ConsumoIa;
+use App\Models\Pedido;
 use Illuminate\Support\Facades\Cache;
 
 /**
  * Asistente IA de venta (v2, D194): solo clientes con cuenta, guía en pasos y consulta el motor con herramientas.
  * Límites de mensajes por cliente y día y de gasto del mes (Ajustes → IA); si la IA falla, se oculta 10 minutos.
+ * D218: solo con el correo confirmado; quien aún no ha comprado tiene una cuota moderada (Ajustes → IA) y a
+ * quien ya ha comprado se le recuerdan sus pedidos (prendas y unidades, sin datos personales) y se le anima a
+ * repetir o ampliar su colección.
  */
 final class AsistenteVenta
 {
@@ -22,6 +27,7 @@ final class AsistenteVenta
     public static function disponible(?Cliente $cliente): bool
     {
         return $cliente !== null && $cliente->activo
+            && $cliente->usuario?->hasVerifiedEmail() === true
             && (bool) Ajuste::obtener('ia.activa') && filled(config('ia.openai_key')) && ! Cache::has(self::CAIDA)
             && self::gastoDelMes() < (int) Ajuste::obtener('ia.limite_mensual') * 100 * 1000; // euros → milésimas de céntimo
     }
@@ -40,12 +46,13 @@ final class AsistenteVenta
         if (! self::disponible($cliente)) {
             throw new IaNoDisponible('Asistente no disponible.');
         }
+        $pedidos = self::pedidosComprados($cliente);
         $hoy = ConsumoIa::where('cliente_id', $cliente->id)->where('uso', 'venta')->where('created_at', '>=', now()->startOfDay())->count();
-        if ($hoy >= (int) Ajuste::obtener('ia.mensajes_dia')) {
-            return __('asistente.limite_dia', [], $idioma);
+        if ($hoy >= self::limiteDiario($pedidos !== [])) {
+            return __($pedidos === [] ? 'asistente.limite_dia_nuevo' : 'asistente.limite_dia', [], $idioma);
         }
 
-        $mensajes = [['role' => 'system', 'content' => self::instrucciones($idioma)]];
+        $mensajes = [['role' => 'system', 'content' => self::instrucciones($idioma).self::memoria($pedidos)]];
         foreach (array_slice($historial, -12) as $m) {
             $mensajes[] = ['role' => $m['rol'] === 'asistente' ? 'assistant' : 'user', 'content' => mb_substr($m['texto'], 0, 1000)];
         }
@@ -79,6 +86,40 @@ final class AsistenteVenta
                 ConsumoIa::create(['cliente_id' => $cliente->id, 'uso' => 'venta', 'tokens_entrada' => $entrada, 'tokens_salida' => $salida, 'coste' => self::coste($entrada, $salida)]);
             }
         }
+    }
+
+    /** D218: mensajes al día; cuota moderada para quien aún no ha comprado. */
+    public static function limiteDiario(bool $haComprado): int
+    {
+        return (int) Ajuste::obtener($haComprado ? 'ia.mensajes_dia' : 'ia.mensajes_dia_nuevos');
+    }
+
+    /**
+     * Los últimos pedidos pagados del cliente, para recordárselos (D218): número, fecha y qué prendas, sin
+     * importes (la IA no da precios) ni datos personales.
+     *
+     * @return list<string>
+     */
+    public static function pedidosComprados(Cliente $cliente): array
+    {
+        $noComprados = [EstadoPedido::PendientePago->value, EstadoPedido::Cancelado->value, EstadoPedido::Reembolsado->value];
+
+        return Pedido::where('cliente_id', $cliente->id)->whereNotIn('estado', $noComprados)->with('lineas')->latest('id')->limit(5)->get()
+            ->map(fn (Pedido $p) => $p->numero.' ('.$p->created_at->format('d/m/Y').'): '.$p->lineas
+                ->map(fn ($l) => $l->nombreEn('es').(($c = $l->colorEn('es')) ? ' · '.$c : '').' × '.$l->unidades)->implode('; '))
+            ->values()->all();
+    }
+
+    /** @param list<string> $pedidos */
+    private static function memoria(array $pedidos): string
+    {
+        if ($pedidos === []) {
+            return ' Este cliente aún no ha comprado: ayúdale a dar el primer paso con su colección, sin presionar.';
+        }
+
+        return ' Este cliente ya ha comprado con nosotros. Sus últimos pedidos: '.implode(' | ', $pedidos).'. '
+            .'Recuérdaselos con naturalidad cuando venga al caso y anímale a repetir o a ampliar su colección (por ejemplo, la misma prenda en otro color '
+            .'o con su diseño en una sudadera); en Mi cuenta → Pedidos puede repetir un pedido. No des importes de esos pedidos: si pregunta precios, usa las herramientas.';
     }
 
     /** Coste en milésimas de céntimo con los precios por millón de tokens de Ajustes → IA (en céntimos). */

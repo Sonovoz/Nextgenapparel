@@ -57,7 +57,8 @@ class Ajuste extends Model
         // precios por millón de tokens en céntimos (los de la tarifa de OpenAI del modelo elegido).
         'ia.activa' => false,
         'ia.modelo' => 'gpt-4o-mini',
-        'ia.mensajes_dia' => 30,
+        'ia.mensajes_dia' => 30,            // D218: clientes que ya han comprado
+        'ia.mensajes_dia_nuevos' => 5,      // D218: cuota moderada para quien aún no ha comprado
         'ia.limite_mensual' => 20,
         'ia.precio_entrada' => 15,
         'ia.precio_salida' => 60,

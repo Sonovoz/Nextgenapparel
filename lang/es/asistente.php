@@ -10,4 +10,5 @@ return [
     'limite_dia' => 'Por hoy he llegado al límite de mensajes. Puedes seguir con el configurador de cada prenda o escribirnos.',
     'no_se' => 'No he podido completar la respuesta. Prueba a preguntarlo de otra forma.',
     'aviso' => 'Respuestas de IA: los precios salen de la calculadora de la tienda.',
+    'limite_dia_nuevo' => 'Por hoy has llegado al límite de consultas. Con tu primer pedido tendrás más; mientras, puedes seguir con el configurador de cada prenda o escribirnos.',
 ];

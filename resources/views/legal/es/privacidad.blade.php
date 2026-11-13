@@ -21,6 +21,7 @@
 | Las fotos de una incidencia (sin ubicación ni datos de la cámara: los quitamos al recibirlas) | Resolver la incidencia | Ejecución del contrato |
 | Si creas una cuenta (es opcional): correo, nombre, contraseña cifrada y direcciones guardadas | Darte acceso a tus pedidos, diseños y facturas | Ejecución del contrato que aceptas al registrarte |
 | La dirección IP con la que confirmas el pedido | Probar la aceptación de las condiciones | Interés legítimo (art. 6.1.f RGPD) |
+| Si usas el asistente de IA (con cuenta y el correo confirmado): lo que le escribes y, si ya has comprado, qué prendas y cuántas pediste (sin tu nombre, correo ni dirección) | Responderte y recordarte tus pedidos para ayudarte a repetirlos o ampliarlos | Interés legítimo (art. 6.1.f RGPD); puedes no usarlo |
 
 **No pedimos ni guardamos los datos de tu tarjeta**: pagas en la página segura de Redsys, la plataforma de pago de los bancos. **No enviamos publicidad**, no hacemos perfiles ni decisiones automatizadas.
 
@@ -28,6 +29,7 @@
 
 - **Redsys y nuestro banco**, para cobrar el pedido (importe y número del pedido).
 - **La empresa de transporte**, que recibe tu nombre, dirección y teléfono para entregar el paquete.
+- **El proveedor de IA del asistente (OpenAI)**, como encargado del tratamiento, solo si usas el asistente: recibe lo que le escribes y, si ya has comprado, el resumen de tus pedidos, nunca tus datos de contacto ni de pago.
 - **Los proveedores que alojan la web y envían los correos**, como encargados del tratamiento: {!! $f(null, 'proveedores de alojamiento y de correo (los indica la asesoría)') !!}.
 - **La Administración Tributaria**, cuando la ley lo exija.
 

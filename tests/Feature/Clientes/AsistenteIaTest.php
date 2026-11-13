@@ -3,6 +3,7 @@
 namespace Tests\Feature\Clientes;
 
 use App\Dominio\Asistente\AsistenteVenta;
+use App\Dominio\Pedidos\EstadoPedido;
 use App\Dominio\Sistema\Acceso\Rol;
 use App\Filament\Pages\AjustesIa;
 use App\Models\Ajuste;
@@ -10,6 +11,7 @@ use App\Models\Cliente;
 use App\Models\Color;
 use App\Models\ConsumoIa;
 use App\Models\Familia;
+use App\Models\Pedido;
 use App\Models\Prenda;
 use App\Models\Talla;
 use App\Models\User;
@@ -101,10 +103,11 @@ class AsistenteIaTest extends TestCase
         $this->assertTrue(AsistenteVenta::disponible($cliente));
         $this->actingAs($this->usuario)->get('/es')->assertSee('id="asistente"', false);
 
-        Ajuste::guardar('ia.mensajes_dia', 1);
+        // D218: quien aún no ha comprado tiene su propia cuota (moderada).
+        Ajuste::guardar('ia.mensajes_dia_nuevos', 1);
         ConsumoIa::create(['cliente_id' => $cliente->id, 'uso' => 'venta', 'tokens_entrada' => 1, 'tokens_salida' => 1, 'coste' => 1]);
         Http::fake();
-        $this->actingAs($this->usuario)->postJson('/es/asistente', ['mensajes' => [['rol' => 'cliente', 'texto' => 'Hola']]])->assertJson(['respuesta' => __('asistente.limite_dia')]);
+        $this->actingAs($this->usuario)->postJson('/es/asistente', ['mensajes' => [['rol' => 'cliente', 'texto' => 'Hola']]])->assertJson(['respuesta' => __('asistente.limite_dia_nuevo')]);
         Http::assertNothingSent();
 
         ConsumoIa::create(['uso' => 'venta', 'tokens_entrada' => 1, 'tokens_salida' => 1, 'coste' => 20 * 100 * 1000]); // 20 € gastados
@@ -119,5 +122,35 @@ class AsistenteIaTest extends TestCase
     {
         $this->actingAs($this->usuarioConRol(Rol::Administrador))->get(AjustesIa::getUrl(panel: 'admin'))->assertOk()->assertSee('Gastado este mes');
         $this->actingAs($this->usuarioConRol(Rol::GestorTienda))->get(AjustesIa::getUrl(panel: 'admin'))->assertForbidden();
+    }
+
+    public function test_solo_con_el_correo_confirmado(): void
+    {
+        // D218: con cuenta pero sin confirmar el correo, no hay asistente.
+        $this->usuario->forceFill(['email_verified_at' => null])->save();
+
+        $this->assertFalse(AsistenteVenta::disponible($this->usuario->fresh()->cliente));
+        $this->actingAs($this->usuario->fresh())->get('/es')->assertDontSee('id="asistente"', false);
+    }
+
+    public function test_a_quien_ya_ha_comprado_le_recuerda_sus_pedidos_y_tiene_su_limite(): void
+    {
+        // D218: con compras, el límite de los clientes que ya han comprado y sus pedidos en las instrucciones.
+        $cliente = $this->usuario->cliente;
+        $pedido = Pedido::factory()->create(['cliente_id' => $cliente->id, 'estado' => EstadoPedido::Entregado, 'numero' => 'PED-0042']);
+        $pedido->lineas()->create(['tipo' => 'prenda', 'prenda_id' => $this->ids['prenda'], 'color_id' => $this->ids['color'], 'color_hex' => '#000000',
+            'nombre' => ['es' => 'Camiseta Essential'], 'color_nombre' => ['es' => 'Negro'], 'unidades' => 20, 'prendas' => 0, 'impresion' => 0, 'descuento' => 0, 'cupon' => 0, 'neto' => 0, 'tipo_iva' => 2100, 'recargo' => 0]);
+        Pedido::factory()->create(['cliente_id' => $cliente->id, 'estado' => EstadoPedido::PendientePago, 'numero' => 'PED-0043']); // sin pagar: no cuenta
+
+        $this->assertSame(['PED-0042 ('.now()->format('d/m/Y').'): Camiseta Essential · Negro × 20'], AsistenteVenta::pedidosComprados($cliente));
+        Ajuste::guardar('ia.mensajes_dia_nuevos', 1);
+        Ajuste::guardar('ia.mensajes_dia', 30);
+        ConsumoIa::create(['cliente_id' => $cliente->id, 'uso' => 'venta', 'tokens_entrada' => 1, 'tokens_salida' => 1, 'coste' => 1]);
+        Http::fake(['api.openai.com/*' => Http::response(['choices' => [['message' => ['role' => 'assistant', 'content' => '¡Hola de nuevo!']]], 'usage' => ['prompt_tokens' => 10, 'completion_tokens' => 5]])]);
+
+        $this->actingAs($this->usuario)->postJson('/es/asistente', ['mensajes' => [['rol' => 'cliente', 'texto' => 'Hola']]])->assertJson(['respuesta' => '¡Hola de nuevo!']);
+
+        Http::assertSent(fn (PeticionHttp $p) => str_contains($p['messages'][0]['content'], 'PED-0042') && str_contains($p['messages'][0]['content'], 'anímale a repetir')
+            && ! str_contains($p['messages'][0]['content'], 'PED-0043') && ! str_contains($p['messages'][0]['content'], $this->usuario->email));
     }
 }
