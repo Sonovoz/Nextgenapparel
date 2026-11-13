@@ -6,7 +6,13 @@
     </div>
     <div class="pack-cuerpo">
         <h3>{{ $pack['nombre'] }}</h3>
-        <p class="pack-precio">{{ $pack['precio'] }}<small>{{ __('portada.pack_iva') }}</small></p>
+        @if ($pack['neto'] ?? null)
+            {{-- D219: neto + IVA delante y, debajo, el precio final con IVA (el que paga el consumidor). --}}
+            <p class="pack-precio">{{ $pack['neto'] }}<small>{{ __('portada.pack_mas_iva') }}</small></p>
+            <p class="pack-precio-final">{{ $pack['precio'] }} {{ __('portada.pack_iva') }}</p>
+        @else
+            <p class="pack-precio">{{ $pack['precio'] }}<small>{{ __('portada.pack_iva') }}</small></p>
+        @endif
         <ul class="pack-datos">
             <li>{{ __('portada.pack_prendas', ['n' => $pack['unidades']]) }}</li>
             @if ($pack['zonas'])<li>{{ __('portada.pack_impresion', ['zonas' => $pack['zonas']]) }}</li>@endif
