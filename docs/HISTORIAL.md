@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 13/11 | **Botón «Siguiente» destacado** en el configurador: degradado con brillo, halo que respira y flecha que avanza. | `boton-siguiente-vivo` | — |
 | 13/11 | **SMTP del panel**: manda aunque el `.env` diga «log»; el correo de prueba ya no dice «enviado» si no sale. | `smtp-panel-manda` | D234 |
 | 13/11 | **Asistente de packs con IA**: propuesta con el catálogo real, cifras del motor (catálogo, coste, sugerido, margen) y precio decidido por el equipo. | `ia-packs` | D233 |
 | 13/11 | **Último envío sin precio** visible en Ajustes → Envío: país, CP, peso, prendas y motivo. | `envio-ultimo-fallo` | D232 |
