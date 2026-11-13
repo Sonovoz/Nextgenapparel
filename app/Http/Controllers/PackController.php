@@ -13,8 +13,6 @@ use App\Dominio\Disenos\DisenoNoValido;
 use App\Dominio\Disenos\Dueno;
 use App\Dominio\Disenos\GuardarDiseno;
 use App\Dominio\Precios\Formato;
-use App\Dominio\Precios\Impuestos;
-use App\Dominio\Precios\Iva;
 use App\Dominio\Precios\RepartoPack;
 use App\Models\Color;
 use App\Models\Diseno;
@@ -42,7 +40,8 @@ class PackController
 
         return view('packs.ver', [
             'pack' => $pack,
-            'precio' => Formato::euros(Iva::conIva($pack->precio, Impuestos::tipoIva($pack->clase_impuesto_id))),
+            'precio' => Formato::euros($pack->precioParaMostrar()['con_iva']),
+            'neto' => ($n = $pack->precioParaMostrar()['neto']) === null ? null : Formato::euros($n), // D219
             'libre' => $pack->reparto === RepartoPack::Libre,
             'lineas' => $pack->lineas->map(fn ($l) => [
                 'linea' => $l,

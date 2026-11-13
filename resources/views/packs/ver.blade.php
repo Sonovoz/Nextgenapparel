@@ -5,7 +5,13 @@
             <div>
                 <p class="etiqueta">{{ __('packs.etiqueta') }}</p>
                 <h1 class="titulo-cuenta" id="titulo-pack">{{ $pack->nombre }}</h1>
-                <p class="pack-precio">{{ $precio }}<small>{{ __('portada.pack_iva') }}</small></p>
+                @if ($neto ?? null)
+                    {{-- D219: neto + IVA delante y, debajo, el precio final con IVA. --}}
+                    <p class="pack-precio">{{ $neto }}<small>{{ __('portada.pack_mas_iva') }}</small></p>
+                    <p class="pack-precio-final">{{ $precio }} {{ __('portada.pack_iva') }}</p>
+                @else
+                    <p class="pack-precio">{{ $precio }}<small>{{ __('portada.pack_iva') }}</small></p>
+                @endif
                 @if ($pack->descripcion)<p class="claro">{{ $pack->descripcion }}</p>@endif
                 <ul class="carrito-impresiones">
                     @foreach ($lineas as $l)

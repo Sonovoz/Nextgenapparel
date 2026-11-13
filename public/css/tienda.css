@@ -232,6 +232,7 @@ body.menu-abierto { overflow: hidden; }
 .pack-cuerpo h3 { font-size: 28px; }
 .pack-precio { font-family: var(--display); font-weight: 800; font-size: 34px; }
 .pack-precio small { font-family: var(--sans); font-size: 13px; color: var(--tinta-suave); margin-left: 6px; }
+.pack-precio-final { margin: -6px 0 0; font-size: 13px; color: var(--tinta-suave); }
 .pack-datos { list-style: none; margin: 0; padding: 0; color: var(--tinta-suave); font-size: 14px; display: grid; gap: 4px; }
 .pack .boton { margin-top: auto; min-height: 46px; font-size: 12px; }
 /* El carrusel deja sitio alrededor para el brillo de las tarjetas: con el desplazamiento horizontal, lo que sale de su caja se recorta. */
