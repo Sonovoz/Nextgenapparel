@@ -1,7 +1,8 @@
 {{-- Tarjeta de un pack (portada y páginas de modo, D203); $pack viene de Portada::packs(). --}}
 <article class="pack aparece">
-    <div class="pack-foto">
-        @if ($pack['foto'])<img src="{{ $pack['foto']->url() }}" alt="" width="1000" height="1200" loading="lazy">@endif
+    <div class="pack-foto{{ $pack['imagen'] ?? null ? ' con-imagen' : '' }}">
+        @if ($pack['imagen'] ?? null)<img src="{{ $pack['imagen'] }}" alt="" width="1000" height="1200" loading="lazy">
+        @elseif ($pack['foto'])<img src="{{ $pack['foto']->url() }}" alt="" width="1000" height="1200" loading="lazy">@endif
     </div>
     <div class="pack-cuerpo">
         <h3>{{ $pack['nombre'] }}</h3>
