@@ -40,14 +40,14 @@ final class EditarCarrito
      * @param  array<int, array{color?: int, tallas?: array<int, int>}>  $elecciones  linea_pack_id => elección (reparto libre)
      * @param  array<int, array{diseno: string, ancho_mm: int, alto_mm: int, desde_cuello_mm: int, desde_centro_mm: int}>  $impresiones  zona_id => impresión
      */
-    public function anadirPack(Carrito $carrito, Dueno $dueno, int $packId, array $elecciones, array $impresiones): LineaCarrito
+    public function anadirPack(Carrito $carrito, Dueno $dueno, int $packId, array $elecciones, array $impresiones, ?string $coleccion = null): LineaCarrito
     {
         $impresiones = $this->impresiones($dueno, $impresiones);
         $elecciones = self::elecciones($elecciones);
         $this->validar($this->comprobar->pack($packId, $impresiones, now()));
         $this->validar($this->comprobar->reparto($packId, $elecciones, $impresiones, now()));
 
-        return $this->guardar($carrito, ['tipo' => TipoLinea::Pack, 'pack_id' => $packId, 'elecciones' => $elecciones], $impresiones);
+        return $this->guardar($carrito, ['tipo' => TipoLinea::Pack, 'pack_id' => $packId, 'elecciones' => $elecciones, 'coleccion' => filled($coleccion) ? trim($coleccion) : null], $impresiones);
     }
 
     /**

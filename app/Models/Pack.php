@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Dominio\Catalogo\ModoCliente;
+use App\Dominio\Precios\Impuestos;
+use App\Dominio\Precios\Iva;
 use App\Dominio\Precios\RepartoPack;
 use App\Models\Concerns\Traducible;
 use Illuminate\Database\Eloquent\Builder;
@@ -45,7 +47,7 @@ class Pack extends Model
 
     protected function casts(): array
     {
-        return ['precio' => 'integer', 'reparto' => RepartoPack::class, 'activo' => 'boolean', 'desde' => 'datetime', 'hasta' => 'datetime', 'modos' => 'array'];
+        return ['precio_neto' => 'boolean', 'precio' => 'integer', 'reparto' => RepartoPack::class, 'activo' => 'boolean', 'desde' => 'datetime', 'hasta' => 'datetime', 'modos' => 'array'];
     }
 
     /** @return HasMany<LineaPack, $this> */
@@ -72,6 +74,20 @@ class Pack extends Model
         }
 
         return isset(self::IMAGENES_RECURSO[$this->imagen_recurso ?? '']) ? asset('img/packs/'.$this->imagen_recurso.'.webp') : null;
+    }
+
+    /**
+     * El precio para mostrar (D219), en céntimos: con IVA siempre (es el precio final para el consumidor) y,
+     * si el pack se muestra en neto, también sin IVA para ponerlo delante («300,00 € + IVA»).
+     *
+     * @return array{con_iva: int, neto: ?int}
+     */
+    public function precioParaMostrar(): array
+    {
+        return [
+            'con_iva' => Iva::conIva($this->precio, Impuestos::tipoIva($this->clase_impuesto_id)),
+            'neto' => $this->precio_neto ? $this->precio : null,
+        ];
     }
 
     public function unidades(): int

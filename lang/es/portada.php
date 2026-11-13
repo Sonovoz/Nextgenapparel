@@ -42,6 +42,7 @@ return [
     'packs_titulo' => 'Packs que se ajustan a tu presupuesto',
     'packs_texto' => 'Prendas, tallas e impresión incluidas a precio cerrado. Tú solo subes tu diseño.',
     'pack_prendas' => ':n prendas',
+    'pack_mas_iva' => '+ IVA',
     'pack_iva' => 'IVA incluido',
     'pack_impresion' => 'Impresión incluida: :zonas',
     'pack_elegir' => 'Elegir este pack',

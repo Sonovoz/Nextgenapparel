@@ -7,18 +7,21 @@ use App\Dominio\Carrito\ColocacionInicial;
 use App\Dominio\Carrito\EditarCarrito;
 use App\Dominio\Carrito\Impresion;
 use App\Dominio\Carrito\LineaNoValida;
+use App\Dominio\Catalogo\Cara;
+use App\Dominio\Catalogo\CopiarZonas;
 use App\Dominio\Catalogo\Escaparate;
 use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Disenos\DisenoNoValido;
 use App\Dominio\Disenos\Dueno;
 use App\Dominio\Disenos\GuardarDiseno;
 use App\Dominio\Precios\Formato;
-use App\Dominio\Precios\Impuestos;
-use App\Dominio\Precios\Iva;
 use App\Dominio\Precios\RepartoPack;
 use App\Models\Color;
 use App\Models\Diseno;
+use App\Models\Foto;
+use App\Models\LineaPack;
 use App\Models\Pack;
+use App\Models\Prenda;
 use App\Models\Talla;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,22 +41,31 @@ class PackController
     {
         $pack = $this->pack($pack, $idioma);
         $dueno = Dueno::de($request, crear: false);
-        $nombresTalla = Talla::pluck('nombre', 'id');
+        $tallas = Talla::orderBy('orden')->get(['id', 'nombre']);
+        $libre = $pack->reparto === RepartoPack::Libre;
 
         return view('packs.ver', [
             'pack' => $pack,
-            'precio' => Formato::euros(Iva::conIva($pack->precio, Impuestos::tipoIva($pack->clase_impuesto_id))),
-            'libre' => $pack->reparto === RepartoPack::Libre,
-            'lineas' => $pack->lineas->map(fn ($l) => [
-                'linea' => $l,
-                'colores' => Color::whereIn('id', $l->colores ?? [])->orderBy('orden')->get(),
-                'tallas' => collect($pack->reparto === RepartoPack::Libre ? ($l->tallas_permitidas ?? []) : array_keys($l->reparto_tallas ?? []))
-                    ->map(fn ($id) => ['id' => (int) $id, 'nombre' => $nombresTalla[$id] ?? '?', 'fijas' => (int) ($l->reparto_tallas[$id] ?? 0)])->all(),
-            ]),
+            'precio' => Formato::euros($pack->precioParaMostrar()['con_iva']),
+            'neto' => ($n = $pack->precioParaMostrar()['neto']) === null ? null : Formato::euros($n), // D219
+            'libre' => $libre,
+            // D220: cada prenda del pack con sus colores (muestra y foto de ese color) y sus tallas en orden de talla.
+            'lineas' => $pack->lineas->map(function (LineaPack $l) use ($libre, $tallas) {
+                $ids = array_map('intval', $libre ? ($l->tallas_permitidas ?? []) : array_keys($l->reparto_tallas ?? []));
+                $general = Escaparate::fotoPrincipal($l->prenda)?->url();
+
+                return [
+                    'linea' => $l,
+                    'colores' => Color::whereIn('id', $l->colores ?? [])->orderBy('orden')->get()->map(fn (Color $c) => [
+                        'id' => $c->id, 'nombre' => $c->nombre, 'hex' => $c->codigo_hex, 'foto' => self::fotoDeColor($l->prenda, $c->id) ?? $general,
+                    ])->all(),
+                    'tallas' => $tallas->whereIn('id', $ids)->map(fn (Talla $t) => ['id' => $t->id, 'nombre' => $t->nombre, 'fijas' => (int) ($l->reparto_tallas[$t->id] ?? 0)])->values()->all(),
+                    'foto' => $general,
+                ];
+            }),
             'disenos' => $dueno === null ? collect() : $dueno->filtrar(Diseno::query())->where('estado', '!=', 'rechazado')->latest('id')->limit(24)->get(),
             'maxMb' => AnalizadorPng::maxMbEfectivo(),
-            'foto' => Escaparate::fotoPrincipal($pack->lineas->first()->prenda),
-            'imagen' => $pack->imagenUrl(), // D217
+            'imagen' => $pack->imagenUrl() ?? Escaparate::fotoPrincipal($pack->lineas->first()->prenda)?->url(), // D217
             'alternos' => collect(config('idiomas.disponibles'))->keys()
                 ->mapWithKeys(fn ($i) => [$i => route('packs.ver', ['idioma' => $i, 'pack' => $pack->getTranslation('slug', $i)])])->all(),
         ]);
@@ -68,6 +80,7 @@ class PackController
             'texto' => ['required_if:origen,texto', 'nullable', 'string', 'max:'.Impresion::MAXIMO_TEXTO],
             'fuente' => ['nullable', 'integer', 'min:0', 'max:'.(Impresion::FUENTES - 1)],
             'tinta' => ['nullable', Rule::in(Impresion::TINTAS)],
+            'coleccion' => ['nullable', 'string', 'max:60'],
             'elecciones' => ['nullable', 'array'],
             'elecciones.*.color' => ['nullable', 'integer'],
             'elecciones.*.tallas' => ['nullable', 'array'],
@@ -89,7 +102,7 @@ class PackController
         ], fn ($v) => $v !== null))->all();
 
         try {
-            $editar->anadirPack(CarritoActual::de($request, crear: true), Dueno::de($request), $pack->id, $elecciones, $impresiones);
+            $editar->anadirPack(CarritoActual::de($request, crear: true), Dueno::de($request), $pack->id, $elecciones, $impresiones, $datos['coleccion'] ?? null);
         } catch (LineaNoValida $e) {
             throw ValidationException::withMessages(['pack' => $e->textos()]);
         }
@@ -116,6 +129,19 @@ class PackController
         }
 
         return back()->with('diseno_elegido', $diseno->uuid)->with('estado', __('packs.diseno_subido'));
+    }
+
+    /** Foto de la prenda en ese color: su maqueta delantera o, si no hay, cualquiera de ese color. */
+    private static function fotoDeColor(Prenda $prenda, int $colorId): ?string
+    {
+        $fotos = Foto::where('prenda_id', $prenda->id)->where('color_id', $colorId)->orderBy('orden')->get();
+        $delantera = $fotos->first(function (Foto $f): bool {
+            $cara = $f->getAttribute('cara');
+
+            return CopiarZonas::esMaqueta($f) && ($cara instanceof Cara ? $cara : Cara::tryFrom((string) $cara)) === Cara::Delantera;
+        });
+
+        return ($delantera ?? $fotos->first())?->url();
     }
 
     private function pack(string $slug, string $idioma): Pack

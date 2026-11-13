@@ -50,7 +50,7 @@ class PackTest extends TestCase
     public function test_con_reparto_libre_se_reparte_y_el_logo_se_coloca_solo_en_su_zona(): void
     {
         $diseno = $this->diseno(['propietario' => null]);
-        $this->get('/es/packs/pack-joven')->assertOk()->assertSee('Pack joven')->assertSee('99,00 €')->assertSee('Reparte las tallas');
+        $this->get('/es/packs/pack-joven')->assertOk()->assertSee('Pack joven')->assertSee('99,00 €')->assertSee('Reparte las 10 prendas entre las tallas');
         $this->get('/en/packs/young-pack')->assertOk();
 
         $lineaPack = $this->pack->lineas()->sole();
@@ -62,6 +62,22 @@ class PackTest extends TestCase
         $impresion = Carrito::sole()->lineas()->sole()->impresiones()->sole();
         // Logo de 2:1 en una frontal de 28 × 38 cm: a todo el ancho, centrado y arriba (7,5 cm bajo el cuello).
         $this->assertSame([$diseno->id, 280, 140, 75, 0], [$impresion->diseno_id, $impresion->ancho_mm, $impresion->alto_mm, $impresion->desde_cuello_mm, $impresion->desde_centro_mm]);
+    }
+
+    /** D220: el nombre de la colección viaja con el pack del carrito al pedido; la página trae el lienzo sin «Escribir mi marca». */
+    public function test_el_nombre_de_la_coleccion_se_guarda_con_el_pack(): void
+    {
+        $diseno = $this->diseno(['propietario' => null]);
+        $this->get('/es/packs/pack-joven')->assertOk()->assertSee('Nombre de tu marca o colección')->assertSee('Repartir por mí')->assertDontSee('Escribir mi marca');
+
+        $lineaPack = $this->pack->lineas()->sole();
+        $this->post('/es/packs/pack-joven', ['origen' => 'diseno', 'diseno' => $diseno->uuid, 'coleccion' => '  La Vaca Lola  ', 'elecciones' => [
+            $lineaPack->id => ['color' => (string) $this->negro->id, 'tallas' => [$this->tallas['L'] => '4', $this->tallas['XL'] => '6']],
+        ]])->assertRedirect('/es/carrito')->assertSessionHasNoErrors();
+
+        $this->assertSame('La Vaca Lola', Carrito::sole()->lineas()->sole()->coleccion);
+
+        $this->post('/es/packs/pack-joven', ['origen' => 'diseno', 'diseno' => $diseno->uuid, 'coleccion' => str_repeat('a', 61)])->assertSessionHasErrors('coleccion');
     }
 
     public function test_un_reparto_incompleto_o_un_diseno_ajeno_no_se_anaden(): void
@@ -84,7 +100,7 @@ class PackTest extends TestCase
         $this->pack->update(['reparto' => 'fijo']);
         $this->pack->lineas()->sole()->update(['tallas_permitidas' => null, 'reparto_tallas' => [$this->tallas['L'] => 4, $this->tallas['XL'] => 6]]);
 
-        $this->get('/es/packs/pack-joven')->assertOk()->assertSee('L × 4')->assertDontSee('Reparte las tallas');
+        $this->get('/es/packs/pack-joven')->assertOk()->assertSee('L × 4')->assertDontSee('Repartir por mí');
         $this->post('/es/packs/pack-joven', ['origen' => 'texto', 'texto' => 'NEXTGEN', 'fuente' => '2', 'tinta' => 'dorado'])->assertRedirect('/es/carrito');
         $this->assertSame('NEXTGEN', Carrito::sole()->lineas()->sole()->impresiones()->sole()->texto);
 

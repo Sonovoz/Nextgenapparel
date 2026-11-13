@@ -99,6 +99,11 @@ class PackResource extends RecursoPrecios
                         ->placeholder('La de por defecto'),
                     ToggleButtons::make('reparto')->label('Tallas y color')->options(RepartoPack::class)->inline()->required()->live()->default(RepartoPack::Fijo),
                 ]),
+                // D219: cómo se ve el precio en la tienda. En neto, debajo sale siempre el precio final con IVA.
+                ToggleButtons::make('precio_neto')->label('Cómo se muestra el precio')->inline()->default(false)
+                    ->options([0 => 'IVA incluido', 1 => 'Neto + IVA'])
+                    ->formatStateUsing(fn ($state) => (int) (bool) $state)->dehydrateStateUsing(fn ($state) => (bool) $state)
+                    ->helperText('«Neto + IVA» enseña «300,00 € + IVA» y, debajo, el precio final con IVA (obligatorio para consumidores).'),
                 Select::make('zonas')->label('Impresión incluida')->relationship('zonas', 'id')->multiple()->preload()->required()
                     ->getOptionLabelFromRecordUsing(fn (ZonaImpresion $record) => $record->nombre)
                     ->helperText('Otras zonas se cobran aparte con la tarifa de cada prenda.')

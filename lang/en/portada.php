@@ -42,6 +42,7 @@ return [
     'packs_titulo' => 'Packs that fit your budget',
     'packs_texto' => 'Garments, sizes and printing included at a fixed price. You just upload your design.',
     'pack_prendas' => ':n garments',
+    'pack_mas_iva' => '+ VAT',
     'pack_iva' => 'VAT included',
     'pack_impresion' => 'Printing included: :zonas',
     'pack_elegir' => 'Choose this pack',

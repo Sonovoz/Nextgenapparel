@@ -55,7 +55,7 @@ final class Portada
      * Los packs vigentes que se pueden comprar, listos para la tarjeta. Con modo, los de ese modo primero y
      * después los genéricos (D203).
      *
-     * @return Collection<int, array{nombre: string, url: string, descripcion: ?string, unidades: int, precio: string, zonas: string, foto: ?Foto, imagen: ?string, modos: list<string>}>
+     * @return Collection<int, array{nombre: string, url: string, descripcion: ?string, unidades: int, precio: string, neto: ?string, zonas: string, foto: ?Foto, imagen: ?string, modos: list<string>}>
      */
     public static function packs(?ModoCliente $modo = null): Collection
     {
@@ -70,7 +70,8 @@ final class Portada
             'url' => route('packs.ver', ['pack' => $p->getTranslation('slug', app()->getLocale())]),
             'descripcion' => $p->descripcion,
             'unidades' => $p->unidades(),
-            'precio' => Formato::euros(Iva::conIva($p->precio, Impuestos::tipoIva($p->clase_impuesto_id))),
+            'precio' => Formato::euros($p->precioParaMostrar()['con_iva']),
+            'neto' => ($n = $p->precioParaMostrar()['neto']) === null ? null : Formato::euros($n), // D219
             'zonas' => $p->zonas->map(fn (ZonaImpresion $z) => $z->nombre)->implode(', '),
             'foto' => Escaparate::fotoPrincipal($p->lineas->first()->prenda),
             'imagen' => $p->imagenUrl(), // D217

@@ -149,6 +149,7 @@
                                 </div>
                             @endif
                             <h2>{{ $linea->nombreEn() }}@if ($linea->colorEn()) · {{ $linea->colorEn() }}@endif</h2>
+                            @if ($linea->coleccion)<p class="linea-coleccion">{{ __('carrito.coleccion', ['nombre' => $linea->coleccion]) }}</p>@endif
                             <p class="claro">
                                 @if ($linea->tallas)
                                     {{ collect($linea->tallas)->map(fn ($t) => $t['nombre'].' × '.$t['unidades'])->join(' · ') }} ·

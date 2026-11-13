@@ -1,79 +1,246 @@
-@php $elegido = old('diseno', session('diseno_elegido', $disenos->first()?->uuid)); $origen = old('origen', $disenos->isEmpty() ? 'texto' : 'diseno'); @endphp
+@php
+    // D220: un solo lienzo con tres pasos (diseño, nombre de la colección, color y tallas) y un resumen fijo
+    // con el contador. Sin JavaScript sigue funcionando: subir el PNG y añadir son formularios normales.
+    $elegido = old('diseno', session('diseno_elegido', $disenos->first()?->uuid));
+    $paso = 0;
+@endphp
 <x-tienda :titulo="$pack->nombre.' · Nextgenapparel'" :descripcion="$pack->descripcion ?: __('packs.entradilla')" :alternos="$alternos">
-    <section class="carrito-pagina pack-pagina" aria-labelledby="titulo-pack">
-        <div class="contenedor carrito-rejilla">
-            <div>
-                <p class="etiqueta">{{ __('packs.etiqueta') }}</p>
-                <h1 class="titulo-cuenta" id="titulo-pack">{{ $pack->nombre }}</h1>
-                <p class="pack-precio">{{ $precio }}<small>{{ __('portada.pack_iva') }}</small></p>
-                @if ($pack->descripcion)<p class="claro">{{ $pack->descripcion }}</p>@endif
-                <ul class="carrito-impresiones">
-                    @foreach ($lineas as $l)
-                        <li><strong>{{ $l['linea']->unidades }} × {{ $l['linea']->prenda->nombre }}</strong>
-                            @if (! $libre)<span>{{ collect($l['tallas'])->map(fn ($t) => $t['nombre'].' × '.$t['fijas'])->implode(' · ') }}</span>@endif</li>
-                    @endforeach
-                    <li><strong>{{ __('packs.impresion') }}</strong><span>{{ $pack->zonas->pluck('nombre')->implode(', ') }}</span></li>
-                </ul>
-
-                @if (session('estado'))<p class="aviso-cuenta correcto" role="status">{{ session('estado') }}</p>@endif
-                @if ($errors->any())
-                    <div class="aviso-cuenta error" role="alert" tabindex="-1" id="resumen-errores"><ul>@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
-                    <script>document.getElementById('resumen-errores').focus();</script>
-                @endif
-
-                {{-- 1. Subir un diseño (formulario aparte: vuelve con él elegido). --}}
-                <form class="pack-subir" method="POST" data-procesando="{{ __('tienda.procesando_diseno') }}" data-procesando-detalle="{{ __('tienda.procesando_diseno_detalle') }}" action="{{ route('packs.subir', ['pack' => request()->route('pack')]) }}" enctype="multipart/form-data">
-                    @csrf
-                    <h2>{{ __('packs.subir_titulo') }}</h2>
-                    <label for="campo-archivo">{{ __('packs.subir_png', ['mb' => $maxMb]) }}</label>
-                    <input type="file" id="campo-archivo" name="archivo" accept="image/png" required>
-                    <button type="submit" class="boton">{{ __('packs.subir') }}</button>
-                </form>
-            </div>
-
-            {{-- 2. Elegir diseño o texto, repartir y añadir. --}}
-            <form class="carrito-resumen" method="POST" data-procesando="{{ __('tienda.procesando_pedido') }}" action="{{ route('packs.anadir', ['pack' => request()->route('pack')]) }}">
-                @csrf
-                <h2>{{ __('packs.tu_diseno') }}</h2>
-                <fieldset class="pack-origen">
-                    <legend class="oculto">{{ __('packs.tu_diseno') }}</legend>
-                    <label class="casilla"><input type="radio" name="origen" value="diseno" @checked($origen === 'diseno') @disabled($disenos->isEmpty())> {{ __('packs.usar_logo') }}</label>
-                    @if ($disenos->isEmpty())
-                        <p class="claro">{{ __('packs.sin_disenos') }}</p>
+    <section class="pack-pagina" aria-labelledby="titulo-pack">
+        <div class="contenedor">
+            <header class="pack-cabecera">
+                @if ($imagen)<img class="pack-cabecera-foto" src="{{ $imagen }}" alt="" width="200" height="240">@endif
+                <div>
+                    <p class="etiqueta">{{ __('packs.etiqueta') }}</p>
+                    <h1 class="titulo-cuenta" id="titulo-pack">{{ $pack->nombre }}</h1>
+                    @if ($neto ?? null)
+                        {{-- D219: neto + IVA delante y, debajo, el precio final con IVA. --}}
+                        <p class="pack-precio">{{ $neto }}<small>{{ __('portada.pack_mas_iva') }}</small></p>
+                        <p class="pack-precio-final">{{ $precio }} {{ __('portada.pack_iva') }}</p>
                     @else
-                        <div class="pack-disenos">
+                        <p class="pack-precio">{{ $precio }}<small>{{ __('portada.pack_iva') }}</small></p>
+                    @endif
+                    @if ($pack->descripcion)<p class="claro">{{ $pack->descripcion }}</p>@endif
+                    <ul class="pack-chips">
+                        @foreach ($lineas as $l)<li>{{ $l['linea']->unidades }} × {{ $l['linea']->prenda->nombre }}</li>@endforeach
+                        <li>{{ __('packs.impresion') }}: {{ $pack->zonas->pluck('nombre')->implode(', ') }}</li>
+                    </ul>
+                </div>
+            </header>
+
+            @if (session('estado'))<p class="aviso-cuenta correcto" role="status">{{ session('estado') }}</p>@endif
+            @if ($errors->any())
+                <div class="aviso-cuenta error" role="alert" tabindex="-1" id="resumen-errores"><ul>@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
+                <script>document.getElementById('resumen-errores').focus();</script>
+            @endif
+
+            <form class="pack-lienzo" id="pack-anadir" method="POST" data-procesando="{{ __('tienda.procesando_pedido') }}" action="{{ route('packs.anadir', ['pack' => request()->route('pack')]) }}">
+                @csrf
+                <input type="hidden" name="origen" value="diseno">
+                <div class="pack-pasos">
+                    {{-- 1. Diseño: elegir uno de los suyos o subir uno nuevo, en el mismo sitio. --}}
+                    <section class="pack-paso" aria-labelledby="paso-diseno">
+                        <h2 id="paso-diseno"><span class="pack-numero">{{ ++$paso }}</span>{{ __('packs.paso_diseno') }}</h2>
+                        <p class="claro">{{ __('packs.paso_diseno_ayuda') }}</p>
+                        <div class="pack-disenos" role="radiogroup" aria-labelledby="paso-diseno">
+                            <label class="pack-subir-tesela">
+                                <input type="file" name="archivo" form="pack-subir" accept="image/png" aria-describedby="ayuda-png">
+                                <span class="pack-mas" aria-hidden="true">+</span>
+                                <span>{{ __('packs.subir') }}</span>
+                                <small id="ayuda-png">{{ __('packs.subir_png', ['mb' => $maxMb]) }}</small>
+                            </label>
                             @foreach ($disenos as $d)
-                                <label><input type="radio" name="diseno" value="{{ $d->uuid }}" @checked($elegido === $d->uuid)>
-                                    <img src="{{ route('disenos.miniatura', ['diseno' => $d->uuid]) }}" alt="{{ $d->nombre_original }}" width="72" height="72" loading="lazy"></label>
+                                <label class="pack-diseno" title="{{ $d->nombre_original }}">
+                                    <input type="radio" name="diseno" value="{{ $d->uuid }}" @checked($elegido === $d->uuid)>
+                                    <img src="{{ route('disenos.miniatura', ['diseno' => $d->uuid]) }}" alt="{{ $d->nombre_original }}" width="96" height="96" loading="lazy">
+                                    <span class="pack-check" aria-hidden="true">✓</span>
+                                </label>
                             @endforeach
                         </div>
-                    @endif
-                    <label class="casilla"><input type="radio" name="origen" value="texto" @checked($origen === 'texto')> {{ __('packs.usar_texto') }}</label>
-                    <input type="text" name="texto" value="{{ old('texto') }}" maxlength="60" placeholder="NEXTGEN" aria-label="{{ __('packs.campo_texto') }}" class="campo-pack">
-                    <div class="fila-cupon">
-                        <select name="fuente" aria-label="{{ __('tienda.tipografia') }}" class="campo-pack">@foreach (range(1, 4) as $n)<option value="{{ $n - 1 }}" @selected((int) old('fuente') === $n - 1)>{{ __('packs.fuente', ['n' => $n]) }}</option>@endforeach</select>
-                        <select name="tinta" aria-label="{{ __('tienda.tinta') }}" class="campo-pack">@foreach (\App\Dominio\Carrito\Impresion::TINTAS as $t)<option value="{{ $t }}" @selected(old('tinta', 'auto') === $t)>{{ __('tienda.tinta_'.$t) }}</option>@endforeach</select>
-                    </div>
-                </fieldset>
-                <p class="claro">{{ __('packs.colocacion') }}</p>
+                        <noscript><button type="submit" form="pack-subir" class="boton">{{ __('packs.subir') }}</button></noscript>
+                        <p class="pack-nota">{{ __('packs.colocacion') }}</p>
+                    </section>
 
-                @if ($libre)
-                    <h2>{{ __('packs.reparte') }}</h2>
-                    @foreach ($lineas as $l)
-                        <fieldset class="carrito-tallas">
-                            <legend>{{ trans_choice('packs.reparte_linea', $l['linea']->unidades, ['n' => $l['linea']->unidades, 'prenda' => $l['linea']->prenda->nombre]) }}</legend>
-                            <label><span>{{ __('packs.color') }}</span>
-                                <select name="elecciones[{{ $l['linea']->id }}][color]" class="campo-pack">@foreach ($l['colores'] as $c)<option value="{{ $c->id }}" @selected((int) old('elecciones.'.$l['linea']->id.'.color') === $c->id)>{{ $c->nombre }}</option>@endforeach</select></label>
-                            @foreach ($l['tallas'] as $t)
-                                <label><span>{{ $t['nombre'] }}</span><input type="number" name="elecciones[{{ $l['linea']->id }}][tallas][{{ $t['id'] }}]" value="{{ old('elecciones.'.$l['linea']->id.'.tallas.'.$t['id'], 0) }}" min="0" max="10000" inputmode="numeric"></label>
-                            @endforeach
-                        </fieldset>
-                    @endforeach
-                @endif
+                    {{-- 2. Nombre de la colección (su marca): para reconocerla en el carrito, el pedido y al repetir. --}}
+                    <section class="pack-paso" aria-labelledby="paso-coleccion">
+                        <h2 id="paso-coleccion"><span class="pack-numero">{{ ++$paso }}</span>{{ __('packs.paso_coleccion') }} <small>{{ __('packs.opcional') }}</small></h2>
+                        <label class="oculto" for="campo-coleccion">{{ __('packs.paso_coleccion') }}</label>
+                        <input type="text" id="campo-coleccion" name="coleccion" value="{{ old('coleccion') }}" maxlength="60" placeholder="{{ __('packs.coleccion_ejemplo') }}" class="campo-pack" autocomplete="off" aria-describedby="ayuda-coleccion">
+                        <p class="pack-nota" id="ayuda-coleccion">{{ __('packs.coleccion_ayuda') }}</p>
+                    </section>
 
-                <button type="submit" class="boton principal">{{ __('tienda.anadir_pedido') }}</button>
-                <p class="claro">{{ __('packs.sin_cupon') }}</p>
+                    {{-- 3. Color y tallas de cada prenda del pack. --}}
+                    <section class="pack-paso" aria-labelledby="paso-tallas">
+                        <h2 id="paso-tallas"><span class="pack-numero">{{ ++$paso }}</span>{{ $libre ? __('packs.paso_tallas') : __('packs.paso_tallas_fijas') }}</h2>
+                        @foreach ($lineas as $l)
+                            @php
+                                $id = $l['linea']->id;
+                                $unidades = (int) $l['linea']->unidades;
+                                $colorElegido = (int) old('elecciones.'.$id.'.color', $l['colores'][0]['id'] ?? 0);
+                                $actual = collect($l['colores'])->firstWhere('id', $colorElegido) ?? ($l['colores'][0] ?? null);
+                            @endphp
+                            <fieldset class="pack-prenda" data-linea data-unidades="{{ $unidades }}">
+                                <legend class="oculto">{{ $l['linea']->prenda->nombre }}</legend>
+                                <div class="pack-prenda-cabecera">
+                                    @if ($actual['foto'] ?? $l['foto'])<img src="{{ $actual['foto'] ?? $l['foto'] }}" alt="" width="84" height="100" data-foto-prenda>@endif
+                                    <div>
+                                        <h3>{{ $l['linea']->prenda->nombre }}</h3>
+                                        <p class="claro">{{ trans_choice('packs.prendas', $unidades, ['n' => $unidades]) }} · <span data-nombre-color>{{ $actual['nombre'] ?? '' }}</span></p>
+                                    </div>
+                                </div>
+
+                                @if ($libre)
+                                    <p class="pack-subtitulo">{{ trans_choice('packs.color_elige', count($l['colores'])) }}</p>
+                                    <div class="pack-colores">
+                                        @foreach ($l['colores'] as $c)
+                                            <label class="pack-color" title="{{ $c['nombre'] }}">
+                                                <input type="radio" name="elecciones[{{ $id }}][color]" value="{{ $c['id'] }}" data-foto="{{ $c['foto'] }}" data-nombre="{{ $c['nombre'] }}" @checked($c['id'] === ($actual['id'] ?? null))>
+                                                <span class="pack-muestra" style="background: {{ $c['hex'] }}" aria-hidden="true"></span>
+                                                <span class="pack-color-nombre">{{ $c['nombre'] }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+
+                                    <div class="pack-subtitulo-fila">
+                                        <p class="pack-subtitulo">{{ __('packs.tallas_reparte', ['n' => $unidades]) }}</p>
+                                        <button type="button" class="pack-enlace" data-repartir hidden>{{ __('packs.repartir_por_mi') }}</button>
+                                    </div>
+                                    <div class="pack-tallas">
+                                        @foreach ($l['tallas'] as $t)
+                                            <div class="pack-talla">
+                                                <label for="talla-{{ $id }}-{{ $t['id'] }}">{{ $t['nombre'] }}</label>
+                                                <div class="pack-contador">
+                                                    <button type="button" data-menos aria-label="{{ __('packs.menos', ['talla' => $t['nombre']]) }}" hidden>−</button>
+                                                    <input type="number" id="talla-{{ $id }}-{{ $t['id'] }}" name="elecciones[{{ $id }}][tallas][{{ $t['id'] }}]" value="{{ (int) old('elecciones.'.$id.'.tallas.'.$t['id'], 0) }}" min="0" max="{{ $unidades }}" inputmode="numeric">
+                                                    <button type="button" data-mas aria-label="{{ __('packs.mas', ['talla' => $t['nombre']]) }}" hidden>+</button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="pack-progreso" aria-live="polite">
+                                        <div class="pack-barra"><span data-barra></span></div>
+                                        <p><strong data-suma>0</strong> / {{ $unidades }} · <span data-estado></span></p>
+                                    </div>
+                                @else
+                                    <ul class="pack-fijas">
+                                        @foreach ($l['tallas'] as $t)<li>{{ $t['nombre'] }} × {{ $t['fijas'] }}</li>@endforeach
+                                    </ul>
+                                @endif
+                            </fieldset>
+                        @endforeach
+                    </section>
+                </div>
+
+                {{-- Resumen fijo: lo que falta, el contador total y el botón. --}}
+                <aside class="pack-resumen" aria-label="{{ __('packs.resumen') }}">
+                    <p class="etiqueta">{{ __('packs.resumen') }}</p>
+                    <h2>{{ $pack->nombre }}</h2>
+                    <p class="pack-resumen-precio">{{ $neto ?? $precio }}<small>{{ ($neto ?? null) ? __('portada.pack_mas_iva') : __('portada.pack_iva') }}</small></p>
+                    <ol class="pack-checklist">
+                        <li data-check="diseno" @class(['hecho' => $elegido !== null])>{{ __('packs.check_diseno') }}</li>
+                        <li data-check="coleccion">{{ __('packs.check_coleccion') }}</li>
+                        <li data-check="tallas" @class(['hecho' => ! $libre])>{{ $libre ? __('packs.check_tallas') : __('packs.check_tallas_fijas') }}
+                            @if ($libre)<span class="pack-total"><span data-total>0</span> / {{ $lineas->sum(fn ($l) => $l['linea']->unidades) }}</span>@endif</li>
+                    </ol>
+                    <button type="submit" class="boton principal">{{ __('tienda.anadir_pedido') }}</button>
+                    <p class="pack-falta" data-falta aria-live="polite"></p>
+                    <button type="button" class="pack-ia" data-preguntar="{{ __('packs.ia_pregunta', ['n' => $lineas->sum(fn ($l) => $l['linea']->unidades), 'prenda' => $lineas->first()['linea']->prenda->nombre]) }}" hidden>{{ __('packs.ia_boton') }}</button>
+                    <p class="claro pack-nota">{{ __('packs.sin_cupon') }}</p>
+                </aside>
             </form>
+
+            {{-- Subir un PNG: formulario aparte (el campo está en el paso 1 con form="pack-subir"); vuelve con él elegido. --}}
+            <form id="pack-subir" method="POST" action="{{ route('packs.subir', ['pack' => request()->route('pack')]) }}" enctype="multipart/form-data"
+                  data-procesando="{{ __('tienda.procesando_diseno') }}" data-procesando-detalle="{{ __('tienda.procesando_diseno_detalle') }}">@csrf</form>
         </div>
     </section>
+
+    <script>
+    (() => {
+        const t = @js(['falta' => __('packs.falta'), 'sobra' => __('packs.sobra'), 'listo' => __('packs.listo'), 'sin_diseno' => __('packs.falta_diseno'), 'faltan_tallas' => __('packs.falta_tallas')]);
+        const formulario = document.getElementById('pack-anadir');
+        const lineas = [...formulario.querySelectorAll('[data-linea]')];
+        const falta = formulario.querySelector('[data-falta]');
+        formulario.querySelectorAll('[data-menos],[data-mas],[data-repartir]').forEach((b) => { b.hidden = false; });
+
+        // Subir: al elegir el archivo se envía solo (con la capa «Procesando»).
+        const archivo = formulario.querySelector('input[name=archivo]');
+        archivo?.addEventListener('change', () => { if (archivo.files.length) document.getElementById('pack-subir').requestSubmit(); });
+
+        const estadoLinea = (l) => {
+            const objetivo = +l.dataset.unidades;
+            const suma = [...l.querySelectorAll('input[type=number]')].reduce((s, i) => s + Math.max(0, parseInt(i.value, 10) || 0), 0);
+            l.querySelector('[data-suma]').textContent = suma;
+            l.querySelector('[data-barra]').style.width = Math.min(100, suma / objetivo * 100) + '%';
+            const resto = objetivo - suma;
+            l.querySelector('[data-estado]').textContent = resto === 0 ? t.listo : (resto > 0 ? t.falta : t.sobra).replace(':n', Math.abs(resto));
+            l.classList.toggle('completo', resto === 0);
+            l.classList.toggle('sobra', resto < 0);
+            return { suma, resto };
+        };
+        const actualizar = () => {
+            let total = 0, pendientes = 0;
+            lineas.forEach((l) => { const e = estadoLinea(l); total += e.suma; pendientes += e.resto !== 0 ? 1 : 0; });
+            const totalNodo = formulario.querySelector('[data-total]');
+            if (totalNodo) totalNodo.textContent = total;
+            const diseno = !!formulario.querySelector('input[name=diseno]:checked');
+            formulario.querySelector('[data-check=diseno]').classList.toggle('hecho', diseno);
+            if (lineas.length) formulario.querySelector('[data-check=tallas]').classList.toggle('hecho', pendientes === 0);
+            formulario.querySelector('[data-check=coleccion]').classList.toggle('hecho', formulario.coleccion.value.trim() !== '');
+            const mensaje = !diseno ? t.sin_diseno : (pendientes ? t.faltan_tallas : '');
+            falta.textContent = mensaje;
+            return mensaje;
+        };
+
+        lineas.forEach((l) => {
+            const campos = [...l.querySelectorAll('input[type=number]')];
+            l.addEventListener('click', (e) => {
+                const b = e.target.closest('[data-menos],[data-mas]');
+                if (!b) return;
+                const campo = b.parentElement.querySelector('input');
+                campo.value = Math.max(0, (parseInt(campo.value, 10) || 0) + (b.hasAttribute('data-mas') ? 1 : -1));
+                actualizar();
+            });
+            // Repartir automáticamente: más en las tallas centrales (curva normal), que suma justo las prendas del pack.
+            l.querySelector('[data-repartir]')?.addEventListener('click', () => {
+                const n = campos.length, objetivo = +l.dataset.unidades, centro = (n - 1) / 2, sigma = Math.max(1, n / 3.2);
+                const pesos = campos.map((_, i) => Math.exp(-((i - centro) ** 2) / (2 * sigma * sigma)));
+                const suma = pesos.reduce((a, b) => a + b, 0);
+                const exactos = pesos.map((p) => p / suma * objetivo), base = exactos.map(Math.floor);
+                let quedan = objetivo - base.reduce((a, b) => a + b, 0);
+                exactos.map((x, i) => [x - base[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (quedan-- > 0) base[i]++; });
+                campos.forEach((c, i) => { c.value = base[i]; });
+                actualizar();
+            });
+            // Color: cambia la foto y el nombre.
+            l.querySelectorAll('input[type=radio]').forEach((r) => r.addEventListener('change', () => {
+                const foto = l.querySelector('[data-foto-prenda]');
+                if (foto && r.dataset.foto) foto.src = r.dataset.foto;
+                l.querySelector('[data-nombre-color]').textContent = r.dataset.nombre;
+            }));
+        });
+        formulario.addEventListener('input', actualizar);
+        formulario.addEventListener('change', actualizar);
+        formulario.addEventListener('submit', (e) => {
+            const mensaje = actualizar();
+            if (!mensaje) return;
+            e.preventDefault();
+            const destino = !formulario.querySelector('input[name=diseno]:checked') ? document.getElementById('paso-diseno') : lineas.find((l) => !l.classList.contains('completo'));
+            destino?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            window.AvisoTienda?.mostrar(mensaje);
+        });
+        actualizar();
+
+        // IA (si el asistente está disponible para este cliente): abre el chat con una pregunta sobre las tallas.
+        const ia = formulario.querySelector('[data-preguntar]'), asistente = document.getElementById('asistente');
+        if (ia && asistente) {
+            ia.hidden = false;
+            ia.addEventListener('click', () => {
+                asistente.querySelector('.asistente-panel').hidden && asistente.querySelector('.asistente-abrir').click();
+                const campo = asistente.querySelector('input[name=texto]');
+                campo.value = ia.dataset.preguntar;
+                campo.focus();
+            });
+        }
+    })();
+    </script>
 </x-tienda>

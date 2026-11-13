@@ -74,4 +74,16 @@ class ModosTest extends TestCase
         $pack->update(['imagen' => null, 'imagen_recurso' => null]);
         $this->assertNull($pack->fresh()->imagenUrl()); // sin imagen: la foto de su primera prenda
     }
+
+    public function test_el_precio_del_pack_se_muestra_con_iva_o_en_neto_mas_iva(): void
+    {
+        // D219: precio 50,00 € sin IVA (21 %): 60,50 € con IVA.
+        $pack = $this->pack('Pack festival', null);
+
+        $this->get('/es/modo/eventos')->assertOk()->assertSee('60,50')->assertDontSee('+ IVA');
+
+        $pack->update(['precio_neto' => true]);
+        $this->get('/es/modo/eventos')->assertOk()->assertSeeInOrder(['50,00', '+ IVA', '60,50', 'IVA incluido']);
+        $this->get(route('packs.ver', ['idioma' => 'es', 'pack' => 'pack-festival']))->assertOk()->assertSeeInOrder(['50,00', '+ IVA', '60,50']);
+    }
 }

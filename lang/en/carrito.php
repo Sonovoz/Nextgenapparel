@@ -79,4 +79,6 @@ return [
     'completa_titulo' => 'Complete your collection',
     'completa_ayuda' => 'More garments with your design already placed: pick one and choose sizes and colours.',
     'completa_desde' => 'from',
+    // D220: nombre de la colección que da el cliente al añadir un pack.
+    'coleccion' => 'Collection “:nombre”',
 ];
