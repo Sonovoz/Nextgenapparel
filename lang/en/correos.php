@@ -24,4 +24,9 @@ return [
     'sin_fecha' => 'we will confirm it soon',
     'prueba_asunto' => 'Test email from :tienda',
     'prueba_texto' => 'If you can read this, the shop email goes out fine over SMTP.',
+    'pie_lema' => 'Custom clothing with DTI Textile printing',
+    'resumen_prenda' => 'Your order',
+    'resumen_unidades' => 'Qty',
+    'resumen_envio' => 'Shipping',
+    'resumen_total' => 'Total (VAT included)',
 ];
