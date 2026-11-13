@@ -7,6 +7,7 @@ use App\Models\Pack;
 use App\Models\Prenda;
 use App\Models\ZonaImpresion;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /** «Elige tu modo» (D203): cada modo enseña sus packs y, después, los genéricos. */
@@ -43,5 +44,22 @@ class ModosTest extends TestCase
 
         // La portada enlaza cada modo.
         $this->get('/es')->assertOk()->assertSee(route('modo', ['idioma' => 'es', 'modo' => 'eventos']), false);
+    }
+
+    public function test_la_tarjeta_del_pack_usa_su_imagen_de_recurso_o_la_subida(): void
+    {
+        // D217: cinco imágenes de recurso para los packs; una propia subida manda.
+        $pack = $this->pack('Pack festival', null);
+        $pack->update(['imagen_recurso' => 'pack-abanico']);
+        foreach (array_keys(Pack::IMAGENES_RECURSO) as $clave) {
+            $this->assertFileExists(public_path('img/packs/'.$clave.'.webp'));
+        }
+
+        $this->get('/es/modo/eventos')->assertOk()->assertSee(asset('img/packs/pack-abanico.webp'), false)->assertSee('con-imagen', false);
+
+        $pack->update(['imagen' => 'packs/propia.webp']);
+        $this->assertSame(Storage::disk(Pack::DISCO_IMAGEN)->url('packs/propia.webp'), $pack->fresh()->imagenUrl());
+        $pack->update(['imagen' => null, 'imagen_recurso' => null]);
+        $this->assertNull($pack->fresh()->imagenUrl()); // sin imagen: la foto de su primera prenda
     }
 }

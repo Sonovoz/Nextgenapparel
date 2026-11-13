@@ -53,6 +53,7 @@ class PackController
             'disenos' => $dueno === null ? collect() : $dueno->filtrar(Diseno::query())->where('estado', '!=', 'rechazado')->latest('id')->limit(24)->get(),
             'maxMb' => AnalizadorPng::maxMbEfectivo(),
             'foto' => Escaparate::fotoPrincipal($pack->lineas->first()->prenda),
+            'imagen' => $pack->imagenUrl(), // D217
             'alternos' => collect(config('idiomas.disponibles'))->keys()
                 ->mapWithKeys(fn ($i) => [$i => route('packs.ver', ['idioma' => $i, 'pack' => $pack->getTranslation('slug', $i)])])->all(),
         ]);

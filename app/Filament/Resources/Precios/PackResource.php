@@ -22,6 +22,7 @@ use Closure;
 use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -151,6 +152,16 @@ class PackResource extends RecursoPrecios
                             ->options(fn () => Talla::orderBy('orden')->pluck('nombre', 'id'))
                             ->dehydrateStateUsing(fn ($state) => array_values(array_map('intval', $state ?? []))),
                     ]),
+            ]),
+            // D217: la imagen de la tarjeta del pack. Sin imagen, la foto de su primera prenda.
+            Section::make('Imagen del pack')->columns(2)->schema([
+                Select::make('imagen_recurso')->label('Imagen de recurso')->native(false)->allowHtml()
+                    ->options(collect(Pack::IMAGENES_RECURSO)->mapWithKeys(fn (string $nombre, string $clave) => [$clave => '<span style="display:flex;align-items:center;gap:10px;"><img src="'.e(asset('img/packs/'.$clave.'.webp')).'" alt="" style="width:40px;height:48px;object-fit:cover;border-radius:4px;">'.e($nombre).'</span>'])->all())
+                    ->placeholder('Ninguna: la foto de su primera prenda')
+                    ->helperText('Cinco imágenes preparadas con la marca. Si subes una propia, se usa la tuya.'),
+                FileUpload::make('imagen')->label('O sube la tuya')->image()->disk(Pack::DISCO_IMAGEN)->visibility('public')->directory('packs')
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])->maxSize(5120)
+                    ->helperText('Vertical 5:6 (por ejemplo, 1000 × 1200 px). PNG, JPG o WebP de hasta 5 MB.'),
             ]),
             Section::make('Publicación')->columns(3)->schema([
                 DateTimePicker::make('desde')->label('Desde')->seconds(false),
