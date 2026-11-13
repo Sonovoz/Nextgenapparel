@@ -17,7 +17,7 @@ final class RedactorSeo
 
     public static function disponible(): bool
     {
-        return filled(config('ia.openai_key')) && ! Cache::has('ia.caida') && AsistenteVenta::gastoDelMes() < (int) Ajuste::obtener('ia.limite_mensual') * 100 * 1000;
+        return ClaveIa::configurada() && ! Cache::has('ia.caida') && AsistenteVenta::gastoDelMes() < (int) Ajuste::obtener('ia.limite_mensual') * 100 * 1000;
     }
 
     /**
