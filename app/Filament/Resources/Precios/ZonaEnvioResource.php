@@ -9,6 +9,7 @@ use App\Filament\Concerns\CamposTraducibles;
 use App\Filament\Navegacion\GrupoNavegacion;
 use App\Models\ZonaEnvio;
 use BackedEnum;
+use Carbon\CarbonImmutable;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
@@ -93,7 +94,14 @@ class ZonaEnvioResource extends RecursoPrecios
     public static function table(Table $table): Table
     {
         return $table->defaultSort('prioridad', 'desc')
-            ->description('El envío lleva el IVA de la clase por defecto. Solo se envía a los destinos que tengan zona.')
+            ->description(function (): string {
+                $texto = 'El envío lleva el IVA de la clase por defecto. Solo se envía a los destinos que tengan zona.';
+                // D232: el último pedido que no se pudo enviar y por qué.
+                $f = CalculoEnvio::ultimoFallo();
+
+                return $f === null ? $texto : $texto.' ⚠ Último envío sin precio ('.CarbonImmutable::parse($f['fecha'])->format('d/m H:i').'): '
+                    .$f['pais'].' '.$f['cp'].', '.rtrim(rtrim(number_format($f['peso'] / 1000, 2, ',', ''), '0'), ',').' kg, '.$f['unidades'].' prendas. '.$f['motivo'];
+            })
             ->columns([
                 TextColumn::make('nombre')->label('Zona'),
                 TextColumn::make('transportista.nombre')->label('Transportista')->placeholder('Sin asignar'),

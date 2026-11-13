@@ -5,6 +5,7 @@ namespace App\Dominio\Precios\Motor;
 use App\Dominio\Precios\MetodoEnvio;
 use App\Models\Caja;
 use App\Models\ZonaEnvio;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Paso 7 del motor de precios (envío), aparte para poder probarlo desde el backend (D225):
@@ -111,6 +112,28 @@ final class CalculoEnvio
         }
 
         return $problemas;
+    }
+
+    public const ULTIMO_FALLO = 'envio.ultimo_fallo';
+
+    /**
+     * D232: el último envío que no se pudo calcular (sin datos del cliente: país, CP, peso, prendas y motivo),
+     * para que Ajustes → Envío diga qué le falta a la zona.
+     */
+    public static function apuntarFallo(Destino $destino, int $peso, int $unidades, string $motivo, ?ZonaEnvio $zona): void
+    {
+        Cache::put(self::ULTIMO_FALLO, [
+            'pais' => $destino->pais, 'cp' => $destino->codigoPostal, 'peso' => $peso, 'unidades' => $unidades,
+            'motivo' => self::texto($motivo, $zona), 'fecha' => now()->toIso8601String(),
+        ], now()->addDays(30));
+    }
+
+    /** @return ?array{pais: string, cp: string, peso: int, unidades: int, motivo: string, fecha: string} */
+    public static function ultimoFallo(): ?array
+    {
+        $fallo = Cache::get(self::ULTIMO_FALLO);
+
+        return is_array($fallo) ? $fallo : null;
     }
 
     public static function texto(string $motivo, ?ZonaEnvio $zona = null): string

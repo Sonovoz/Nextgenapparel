@@ -60,4 +60,18 @@ class CalculoEnvioTest extends TestCase
             ->callAction('probar', ['pais' => 'ES', 'cp' => '28001', 'kilos' => '3', 'unidades' => '10'])
             ->assertNotified('Envío: 6,90 € sin IVA');
     }
+
+    /** D232: el último envío sin precio (país, CP, peso, prendas y motivo) se ve en Ajustes → Envío. */
+    public function test_el_ultimo_envio_sin_precio_se_ve_en_el_backend(): void
+    {
+        $this->actingAs($this->usuarioConRol(Rol::Superadministrador));
+        $zona = ZonaEnvio::create(['nombre' => ['es' => 'Península'], 'paises' => ['ES'], 'metodo' => 'por_kilo', 'plazo_dias' => 2]);
+        $zona->tarifas()->create(['hasta_gramos' => 5000, 'precio' => 690]);
+        $calculo = CalculoEnvio::para(new Destino('ES', '29300'), 12400, 60, 0);
+
+        CalculoEnvio::apuntarFallo(new Destino('ES', '29300'), 12400, 60, (string) $calculo['motivo'], $calculo['zona']);
+
+        Livewire::test(ManageZonaEnvio::class)->assertSee('Último envío sin precio')->assertSee('ES 29300, 12,4 kg, 60 prendas')
+            ->assertSee('pesa más que el último tramo');
+    }
 }
