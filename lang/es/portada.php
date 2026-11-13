@@ -106,4 +106,7 @@ return [
     'error_inicio_detalle' => 'Empieza de nuevo desde la portada',
     'error_prendas' => 'Ver las prendas',
     'error_prendas_detalle' => 'Camisetas, polos y sudaderas',
+    // D221: «Elige tu modo» dentro de los packs.
+    'modos_pregunta' => '¿Para qué los quieres?',
+    'modos_todos' => 'Todos',
 ];

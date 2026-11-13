@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 13/11 | **Modos fundidos con los packs** en la portada: filtro por modo encima del carrusel; fuera la sección «Elige tu modo». | `portada-modos-packs` | D221 |
 | 13/11 | **Reglas de la IA**: asistente solo con el correo confirmado, cuota propia para quien aún no ha comprado y memoria de pedidos para animar a repetir; privacidad actualizada. | `ia-reglas-clientes` | D218 |
 | 13/11 | **Portada**: «Packs listos para jugar» pasa a «Packs que se ajustan a tu presupuesto». | `portada-packs-presupuesto` | — |
 | 13/11 | **Imágenes de los packs**: cinco imágenes de recurso y «Imagen del pack» en el backend (elegir una o subir la propia); el brillo de las tarjetas ya no se recorta. | `packs-imagenes` | D217 |

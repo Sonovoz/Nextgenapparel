@@ -1198,3 +1198,14 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .aviso-tienda-botones { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 22px; }
 @keyframes aviso-sacudida { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
 @media (prefers-reduced-motion: reduce) { .aviso-tienda.visible .aviso-tienda-caja { animation: none; } }
+
+/* D221: «Elige tu modo» fundido en los packs de la portada: píldoras que filtran el carrusel. */
+.modos-filtro { margin-top: 28px; }
+.modos-pregunta { margin: 0 0 12px; font-size: 12px; letter-spacing: .24em; text-transform: uppercase; color: var(--tinta-suave); }
+.modos-opciones { display: flex; flex-wrap: wrap; gap: 10px; }
+.modos-opciones a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 99px; border: 1px solid var(--linea-fuerte); color: var(--tinta); text-decoration: none; font-size: 14px; letter-spacing: .04em; transition: border-color .2s ease, background .2s ease, box-shadow .2s ease; }
+.modos-opciones a:hover { border-color: var(--neon); }
+.modos-opciones a[aria-current="true"] { background: var(--azul); border-color: var(--azul); color: #fff; box-shadow: 0 0 0 1px rgba(142, 160, 255, .35), 0 10px 28px -10px rgba(45, 75, 255, .85); }
+.modos-texto { margin: 14px 0 0; color: var(--tinta-suave); font-size: 15px; }
+.carrusel .pack[hidden] { display: none; }
+.modos-vacio { margin-top: 28px; }

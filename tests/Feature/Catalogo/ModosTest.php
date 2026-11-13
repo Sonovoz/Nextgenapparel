@@ -46,6 +46,18 @@ class ModosTest extends TestCase
         $this->get('/es')->assertOk()->assertSee(route('modo', ['idioma' => 'es', 'modo' => 'eventos']), false);
     }
 
+    /** D221: en la portada, «Elige tu modo» va dentro de los packs: cada tarjeta lleva sus modos para filtrar y ya no hay sección aparte. */
+    public function test_los_modos_filtran_los_packs_de_la_portada(): void
+    {
+        $this->pack('Pack generico', null, 0);
+        $this->pack('Pack festival', ['eventos', 'empresas'], 1);
+
+        $this->get('/es')->assertOk()
+            ->assertSeeInOrder(['id="titulo-packs"', '¿Para qué los quieres?', 'data-modo="creadores"', 'data-modo="eventos"', 'data-modo="empresas"', 'Pack generico', 'Pack festival'], false)
+            ->assertSee('data-modos=""', false)->assertSee('data-modos="eventos empresas"', false)
+            ->assertDontSee('id="titulo-quien"', false);
+    }
+
     public function test_la_tarjeta_del_pack_usa_su_imagen_de_recurso_o_la_subida(): void
     {
         // D217: cinco imágenes de recurso para los packs; una propia subida manda.
