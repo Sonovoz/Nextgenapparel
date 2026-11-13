@@ -2,6 +2,7 @@
 
 use App\Dominio\Sistema\Salud\Latido;
 use App\Jobs\LatidoCola;
+use App\Models\RegistroCorreo;
 use App\Models\RegistroError;
 use Illuminate\Support\Facades\Schedule;
 
@@ -40,7 +41,7 @@ Schedule::command('nga:comprobar-salud')
     ->withoutOverlapping();
 
 // Limpiezas nocturnas.
-Schedule::command('model:prune', ['--model' => [RegistroError::class]])
+Schedule::command('model:prune', ['--model' => [RegistroError::class, RegistroCorreo::class]])
     ->description('Borrar errores resueltos hace más de 90 días')
     ->dailyAt('03:10');
 

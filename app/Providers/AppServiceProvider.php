@@ -9,6 +9,7 @@ use App\Dominio\Pagos\Pasarela;
 use App\Dominio\Pagos\PasarelaRedsys;
 use App\Dominio\Pagos\PasarelaSimulada;
 use App\Dominio\Sistema\Actividad\Actividad;
+use App\Dominio\Sistema\Correo\RegistrarCorreos;
 use App\Dominio\Sistema\Correo\Smtp;
 use App\Dominio\Sistema\Errores\ErrorDeCopia;
 use App\Models\Ajuste;
@@ -26,6 +27,7 @@ use App\Models\Pack;
 use App\Models\Pedido;
 use App\Models\Prenda;
 use App\Models\Proveedor;
+use App\Models\RegistroCorreo;
 use App\Models\ReglaMinimo;
 use App\Models\ReglaPrecio;
 use App\Models\Talla;
@@ -40,6 +42,7 @@ use App\Policies\DireccionPolicy;
 use App\Policies\DisenoPolicy;
 use App\Policies\FacturaPolicy;
 use App\Policies\PedidoPolicy;
+use App\Policies\RegistroCorreoPolicy;
 use App\Policies\SeccionPolicy;
 use Filament\Pages\BasePage;
 use Illuminate\Auth\Events\Failed;
@@ -87,6 +90,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // D235: registro de cada correo (cola, envío, fallo).
+        RegistrarCorreos::escuchar();
+
         // Backend: «Guardar cambios» siempre a la vista, fijo abajo, en todas las fichas (crear y editar).
         BasePage::stickyFormActions();
 
@@ -126,6 +132,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::after(fn (User $usuario, string $habilidad, ?bool $resultado) => $resultado ?? ($usuario->esSuperadministrador() ? true : null));
 
         Gate::policy(Activity::class, ActividadPolicy::class);
+        Gate::policy(RegistroCorreo::class, RegistroCorreoPolicy::class);
         Gate::policy(Diseno::class, DisenoPolicy::class);
         Gate::policy(Cliente::class, ClientePolicy::class);
         Gate::policy(Pedido::class, PedidoPolicy::class);
