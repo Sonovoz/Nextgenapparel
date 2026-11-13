@@ -168,4 +168,9 @@ return [
     'procesando_pago' => 'Conectando con el banco',
     'procesando_pago_detalle' => 'Te llevamos a la página segura de pago.',
     'procesando_detalle' => 'Estamos trabajando en ello.',
+    // D214: aviso de error claro
+    'aviso_titulo' => 'Hay un problema',
+    'aviso_archivo' => 'No podemos usar este archivo',
+    'aviso_otro' => 'Elegir otro archivo',
+    'aviso_cerrar' => 'Cerrar',
 ];

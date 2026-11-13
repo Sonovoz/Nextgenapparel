@@ -168,4 +168,9 @@ return [
     'procesando_pago' => 'Connecting to the bank',
     'procesando_pago_detalle' => 'Taking you to the secure payment page.',
     'procesando_detalle' => 'We are working on it.',
+    // D214: aviso de error claro
+    'aviso_titulo' => 'There is a problem',
+    'aviso_archivo' => 'We cannot use this file',
+    'aviso_otro' => 'Choose another file',
+    'aviso_cerrar' => 'Close',
 ];

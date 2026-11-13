@@ -804,9 +804,15 @@
     var entrada = document.getElementById('archivo-diseno');
     var soltar = document.getElementById('soltar');
 
-    function mostrarError(mensaje) {
+    /** El error queda escrito junto al archivo y, además, se avisa en el centro de la pantalla (D214). */
+    function mostrarError(mensaje, soloTexto) {
         errorMarca.textContent = mensaje || '';
         errorMarca.hidden = !mensaje;
+        if (mensaje && !soloTexto) avisarError(mensaje);
+    }
+    function avisarError(mensaje) {
+        if (!window.AvisoTienda) return;
+        window.AvisoTienda.mostrar(mensaje, { titulo: textos.aviso_archivo, boton: textos.aviso_otro, alPulsar: function () { entrada.click(); } });
     }
 
     /* Animación de carga: «Estampando tu diseño…» con un cabezal de luz que barre la
@@ -887,7 +893,7 @@
             if (estado.subiendo) { // empezó la subida mientras se leía (Gauntlet N1)
                 URL.revokeObjectURL(url);
                 ocultarCarga();
-                mostrarError(textos.espera_subida);
+                mostrarError(textos.espera_subida, true);
                 return;
             }
             var w = img.naturalWidth || 1000, h = img.naturalHeight || 1000;
@@ -1574,6 +1580,7 @@
         estado.subiendo = false;
         estado.errorSubida = mensaje;
         pintarCapas();
+        avisarError(mensaje);
         var aviso = document.querySelector('#capas-pie .error-subida');
         if (aviso && aviso.scrollIntoView) aviso.scrollIntoView({ block: 'nearest', behavior: sinMovimiento ? 'auto' : 'smooth' });
         return false;
