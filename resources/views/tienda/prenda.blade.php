@@ -158,6 +158,11 @@
         .calidad .calidad-ajustar:hover { background: #E8E6F2; }
         .calidad .calidad-ajustar[hidden] { display: none; }
         .aviso-pixelado { position: absolute; z-index: 6; left: 50%; top: 64px; transform: translateX(-50%); margin: 0; padding: 8px 14px; border-radius: 99px; font-size: 13px; font-weight: 600; white-space: nowrap; color: #fff; background: rgba(240,98,77,.95); box-shadow: 0 6px 20px rgba(0,0,0,.35); pointer-events: none; }
+        .medidas-cursor { position: absolute; z-index: 7; margin: 0; padding: 7px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; white-space: nowrap; color: #fff; background: rgba(12,13,20,.92); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 8px 24px rgba(0,0,0,.4); pointer-events: none; }
+        .medidas-cursor::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 99px; margin-right: 8px; background: #3DBE7A; vertical-align: 1px; }
+        .medidas-cursor[data-nivel="buena"]::before { background: #A6CF4F; }
+        .medidas-cursor[data-nivel="justa"]::before { background: #F2B33D; }
+        .medidas-cursor[data-nivel="baja"]::before { background: #F0624D; }
         .aviso-pixelado.justa { background: rgba(242,179,61,.96); color: #1b1407; }
         .lupa { position: absolute; width: 170px; height: 170px; border-radius: 999px; overflow: hidden; pointer-events: none; background: #fff; box-shadow: 0 0 0 3px #fff, 0 14px 36px rgba(22,22,26,.35); z-index: 3; }
         .lupa .capa { position: absolute; }
@@ -308,6 +313,8 @@
                     </div>
                     {{-- D229: aviso sobre la prenda cuando el diseño se verá pixelado (fuera del lienzo, que se redibuja). --}}
                     <p class="aviso-pixelado" id="aviso-pixelado" role="status" hidden></p>
+                    {{-- D229: medidas de impresión del diseño bajo el cursor. --}}
+                    <p class="medidas-cursor" id="medidas-cursor" aria-hidden="true" hidden></p>
                     <div class="visor-lienzo" id="lienzo">
                         <div class="capa">
                             @if ($fotoInicial)

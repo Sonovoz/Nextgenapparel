@@ -282,7 +282,7 @@ class TiendaTest extends TestCase
 
         $html = $this->get('/es/camisetas/camiseta-essential')->assertOk()
             ->assertSee('Tamaño de impresión en la prenda')->assertSee('id="medida-zona"', false)
-            ->assertSee('id="aviso-pixelado"', false)->assertSee('id="calidad-ajustar"', false)->getContent();
+            ->assertSee('id="aviso-pixelado"', false)->assertSee('id="calidad-ajustar"', false)->assertSee('id="medidas-cursor"', false)->getContent();
         preg_match("/data-textos='([^']+)'/", $html, $coincidencia);
         $textos = json_decode(html_entity_decode($coincidencia[1] ?? '{}'), true);
         $this->assertStringContainsString('se verá pixelado', (string) ($textos['pixelado_aviso'] ?? ''));

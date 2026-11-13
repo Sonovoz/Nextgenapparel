@@ -1292,6 +1292,37 @@
     }
     var avisadoPixelado = '';
 
+    /* D229: al pasar el ratón por un diseño, sus medidas de impresión y su calidad junto al cursor. */
+    function medidasDe(id) {
+        return conDiseno(id, function () {
+            var zona = zonaActual();
+            if (!zona) return null;
+            var color = colores[estado.color], g = geometriaMm(disenoPara(color), zona);
+            var info = zonas.filter(function (z) { return z.id === id; })[0];
+            var texto = (info ? info.nombre + ' · ' : '') + cm(g.w) + ' × ' + cm(g.h) + ' cm';
+            if (estado.modo !== 'logo' || !estado.logoPx || estado.logoTipo === 'vectorial') return { texto: texto, nivel: 'correcta' };
+            var valor = Math.min(ppp(estado.logoPx.w, g.w), ppp(estado.logoPx.h, g.h)), n = nivel(valor);
+            return { texto: texto + ' · ' + calidad.textos['nivel_' + n] + ' (' + calidad.textos.ppp.replace(':ppp', valor) + ')', nivel: n };
+        });
+    }
+    var etiquetaMedidas = document.getElementById('medidas-cursor');
+    if (etiquetaMedidas && conRaton) {
+        lienzo.addEventListener('pointermove', function (e) {
+            var c = e.target.closest && e.target.closest('canvas.movible');
+            var m = c && e.pointerType === 'mouse' && !arrastre ? medidasDe(Number(c.dataset.zona)) : null;
+            if (!m) { etiquetaMedidas.hidden = true; return; }
+            var v = visor.getBoundingClientRect();
+            etiquetaMedidas.textContent = m.texto;
+            etiquetaMedidas.dataset.nivel = m.nivel;
+            etiquetaMedidas.hidden = false;
+            var x = Math.min(e.clientX - v.left + 16, v.width - etiquetaMedidas.offsetWidth - 8);
+            etiquetaMedidas.style.left = Math.max(8, x) + 'px';
+            etiquetaMedidas.style.top = Math.max(8, e.clientY - v.top - etiquetaMedidas.offsetHeight - 14) + 'px';
+        });
+        lienzo.addEventListener('pointerleave', function () { etiquetaMedidas.hidden = true; });
+        lienzo.addEventListener('pointerdown', function () { etiquetaMedidas.hidden = true; });
+    }
+
     var esperaTamano = null;
     tamano.addEventListener('input', function () {
         var zona = zonaActual();
