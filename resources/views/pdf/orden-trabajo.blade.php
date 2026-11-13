@@ -21,7 +21,7 @@
 
 @include('pdf._cabecera', ['tipo' => 'Orden de trabajo', 'numero' => $pedido->numero, 'datos' => [
     'Pedido del '.$pedido->created_at->timezone('Europe/Madrid')->format('d/m/Y').' · '.$pedido->lineas->sum('unidades').' prendas',
-    '<strong style="color: #0B0B10;">Entrega estimada: '.e($pedido->fecha_estimada_entrega?->format('d/m/Y') ?? '—').'</strong>',
+    '<strong style="color: #FFFFFF;">Entrega estimada: '.e($pedido->fecha_estimada_entrega?->format('d/m/Y') ?? '—').'</strong>',
 ]])
 
 @foreach ($pedido->lineas->values() as $i => $linea)

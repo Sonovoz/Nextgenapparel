@@ -57,7 +57,7 @@ final class CrearPresupuesto
                 'base' => $r->baseImponible(), 'impuestos' => $r->totalImpuestos(), 'total' => $r->total()],
             'origen' => $origen,
             'total' => $r->total(),
-            'valido_hasta' => now()->addDays(max(1, (int) Ajuste::obtener('presupuestos.dias_validez')))->toDateString(),
+            'valido_hasta' => now()->addHours(max(1, (int) Ajuste::obtener('presupuestos.horas_validez'))),
         ]));
     }
 

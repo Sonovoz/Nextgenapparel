@@ -68,6 +68,7 @@
         'resumen_prendas' => __('tienda.resumen_prendas'),
         'resumen_total' => __('tienda.resumen_total'),
         'anadir_pedido' => __('tienda.anadir_pedido'),
+        'anadido_desde' => __('tienda.anadido_desde'),
         'anadiendo' => __('tienda.anadiendo'),
         'error_anadir' => __('tienda.error_anadir'),
         'calculando' => __('tienda.calculando'),
@@ -264,6 +265,10 @@
                         <span><kbd>L</kbd> {{ __('tienda.lupa') }}</span>
                         <span><kbd>Esc</kbd> {{ __('tienda.atajo_salir') }}</span>
                     </p>
+                    @if ($pedidoActual)
+                        {{-- D213: lo ya añadido sigue ahí; se está ampliando el pedido, no empezando otro. --}}
+                        <a class="estudio-pedido" href="{{ \App\Http\Controllers\CarritoController::url('ver') }}">{{ trans_choice('tienda.tu_pedido', $pedidoActual['lineas'], ['n' => $pedidoActual['lineas'], 'uds' => $pedidoActual['unidades']]) }}</a>
+                    @endif
                     @if ($precio)
                         <p class="estudio-precio" id="estudio-precio" aria-live="polite"><span id="precio-etiqueta">{{ __('tienda.desde') }}</span> <strong id="precio-importe">{{ $precio }}</strong> <small id="precio-detalle">{{ __('tienda.por_unidad') }} · {{ __('tienda.iva_incluido') }}</small></p>
                     @endif
@@ -272,7 +277,7 @@
                 <div class="estudio-escena">
                 <button type="button" class="girar anterior" data-girar aria-label="{{ __('tienda.atajo_girar') }}">‹</button>
                 <div class="marco-visor">
-                <div class="visor" id="visor" data-subida="{{ route('disenos.subir') }}" data-biblioteca="{{ route('disenos.lista') }}" data-borrar="{{ route('disenos.borrar', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-prenda="{{ $prenda->id }}" data-anadir="{{ \App\Http\Controllers\CarritoController::url('anadir') }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
+                <div class="visor" id="visor" data-llevar='@json($llevar)' data-otras='@json($otras)' data-subida="{{ route('disenos.subir') }}" data-biblioteca="{{ route('disenos.lista') }}" data-borrar="{{ route('disenos.borrar', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-prenda="{{ $prenda->id }}" data-anadir="{{ \App\Http\Controllers\CarritoController::url('anadir') }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
                     <div class="visor-controles">
                         <div class="segmento" role="group" aria-label="{{ __('tienda.delantera') }} / {{ __('tienda.trasera') }}">
                             <button type="button" class="boton-pildora" data-cara="delantera" aria-pressed="true">{{ __('tienda.delantera') }}</button>
@@ -330,5 +335,19 @@
             @endunless
         </div>
 
+    </div>
+    {{-- D213: tras «Añadir a mi pedido», el siguiente paso natural: otra prenda con el mismo diseño ya puesto. --}}
+    <div class="anadido" id="anadido" role="dialog" aria-modal="true" aria-labelledby="anadido-titulo" hidden>
+        <div class="anadido-hoja">
+            <p class="anadido-ok" aria-hidden="true">✓</p>
+            <h2 id="anadido-titulo">{{ __('tienda.anadido_titulo') }}</h2>
+            <p class="anadido-resumen" id="anadido-resumen"></p>
+            <div id="anadido-otras-bloque">
+                <h3>{{ __('tienda.anadido_otra') }}</h3>
+                <p class="claro">{{ __('tienda.anadido_otra_ayuda') }}</p>
+                <ul class="anadido-otras" id="anadido-otras"></ul>
+            </div>
+            <a class="boton principal anadido-pedido" id="anadido-pedido" href="{{ \App\Http\Controllers\CarritoController::url('ver') }}">{{ __('tienda.anadido_ver_pedido') }} <span class="flecha" aria-hidden="true">→</span></a>
+        </div>
     </div>
 </x-tienda>

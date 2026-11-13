@@ -2,6 +2,7 @@
 
 namespace App\Dominio\Facturacion;
 
+use App\Dominio\Documentos\FotosFactura;
 use App\Models\Factura;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -14,7 +15,7 @@ final class PdfFactura
         // El QR de cotejo solo hace falta con Veri*Factu activado (hoy no): al activarlo se añade su librería.
         $qr = null;
 
-        return Pdf::loadView('pdf.factura', ['factura' => $factura, 'qr' => $qr])
+        return Pdf::loadView('pdf.factura', ['factura' => $factura, 'qr' => $qr, 'coleccion' => FotosFactura::de($factura)])
             ->setPaper('a4')
             ->setOption(['defaultFont' => 'DejaVu Sans', 'isRemoteEnabled' => false, 'isFontSubsettingEnabled' => true])
             ->output();

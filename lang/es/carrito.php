@@ -76,4 +76,7 @@ return [
     'recargo' => 'Recargo de equivalencia',
     'base' => 'Base imponible',
     'siguiente_fase' => 'Todo listo. Muy pronto podrás confirmar el pedido y pagarlo aquí mismo; si no tienes cuenta, te enviaremos un enlace para confirmar tu correo.',
+    'completa_titulo' => 'Completa tu colección',
+    'completa_ayuda' => 'Las mismas prendas con tu diseño ya colocado: elige y pasa a tallas y colores.',
+    'completa_desde' => 'desde',
 ];

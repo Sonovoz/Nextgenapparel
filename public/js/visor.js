@@ -1964,7 +1964,7 @@
             body: JSON.stringify({ prenda: Number(visor.dataset.prenda), lineas: lineas, impresiones: impresiones })
         }).then(function (r) {
             return r.json().catch(function () { return {}; }).then(function (json) {
-                if (r.ok && json.url) { window.location.href = json.url; return; }
+                if (r.ok && json.url) { mostrarAnadido(json); return; }
                 var mensaje = json.message;
                 if (json.errors) mensaje = json.errors[Object.keys(json.errors)[0]][0];
                 throw new Error(r.status === 419 ? textos.error_caducada : (r.status === 422 && mensaje ? mensaje : textos.error_anadir));
@@ -1978,10 +1978,99 @@
         });
     });
 
+    /* ---------- D213: otra prenda con el mismo diseño ----------
+       Tras añadir, una hoja ofrece otras prendas con el diseño ya puesto (vista previa en el navegador);
+       al elegir una, la prenda nueva abre con los diseños colocados en las mismas zonas (?con=línea). */
+
+    function leerJson(valor) { try { return JSON.parse(valor || '[]') || []; } catch (e) { return []; } }
+    var otrasPrendas = leerJson(visor.dataset.otras);
+    var llevados = leerJson(visor.dataset.llevar);
+    var urlsDiseno = {};
+
+    /** Zona de destino en otra prenda: la misma (clave); si no la tiene, la primera libre de la misma cara. */
+    function zonaDestino(lista, clave, usadas) {
+        return lista.filter(function (z) { return clave && z.clave === clave && !usadas[z.clave + z.x]; })[0]
+            || lista.filter(function (z) { return !usadas[z.clave + z.x]; })[0] || null;
+    }
+
+    function tarjetaOtra(p, linea) {
+        var conDiseno = zonasConDiseno().map(function (id) { return zonas.filter(function (z) { return z.id === id; })[0]; }).filter(Boolean);
+        var cara = conDiseno.some(function (z) { return z.cara === 'delantera'; }) || !p.caras.trasera ? 'delantera' : 'trasera';
+        var datos = p.caras[cara] || p.caras.delantera || p.caras.trasera;
+        var li = el('li');
+        var a = el('a', 'anadido-otra');
+        a.href = p.url + (p.url.indexOf('?') === -1 ? '?' : '&') + 'con=' + encodeURIComponent(linea);
+        var foto = el('span', 'anadido-foto');
+        if (datos) {
+            var img = el('img'); img.src = datos.url; img.alt = ''; img.loading = 'lazy';
+            foto.appendChild(img);
+            var usadas = {};
+            conDiseno.filter(function (z) { return z.cara === cara; }).forEach(function (z) {
+                var destino = zonaDestino(datos.zonas, z.rect.clave, usadas);
+                var d = estado.disenos[z.id];
+                if (!destino || !d || !d.logo) return;
+                usadas[destino.clave + destino.x] = true;
+                if (!urlsDiseno[z.id]) urlsDiseno[z.id] = d.logo.toDataURL('image/png');
+                var capa = el('img', 'anadido-capa'); capa.src = urlsDiseno[z.id]; capa.alt = '';
+                capa.style.cssText = 'left:' + destino.x + '%;top:' + destino.y + '%;width:' + destino.ancho + '%;height:' + destino.alto + '%';
+                foto.appendChild(capa);
+            });
+        }
+        a.appendChild(foto);
+        a.appendChild(el('strong', '', p.nombre));
+        if (p.desde) a.appendChild(el('small', '', textos.anadido_desde + ' ' + p.desde));
+        li.appendChild(a);
+        return li;
+    }
+
+    function mostrarAnadido(json) {
+        finProcesando();
+        var hoja = document.getElementById('anadido');
+        if (!hoja) { window.location.href = json.url; return; }
+        var unidades = estado.lineas.reduce(function (s, i) { return s + unidadesDe(colores[i].id); }, 0);
+        var titulo = document.querySelector('.estudio-titulo');
+        document.getElementById('anadido-resumen').textContent = (titulo ? titulo.textContent.trim() + ' · ' : '') + textoUds(unidades);
+        var lista = document.getElementById('anadido-otras');
+        lista.replaceChildren();
+        if (json.linea) otrasPrendas.forEach(function (p) { lista.appendChild(tarjetaOtra(p, json.linea)); });
+        document.getElementById('anadido-otras-bloque').hidden = lista.children.length === 0;
+        document.getElementById('anadido-pedido').href = json.url;
+        hoja.hidden = false;
+        void hoja.offsetWidth;
+        hoja.classList.add('visible');
+        document.getElementById('anadido-titulo').tabIndex = -1;
+        document.getElementById('anadido-titulo').focus();
+    }
+
+    /** Viene de otra prenda del pedido: coloca sus diseños en las mismas zonas, sin subirlos otra vez. */
+    function colocarLlevados(lista) {
+        var usadas = {};
+        var cadena = Promise.resolve();
+        lista.forEach(function (d) {
+            var libres = zonas.filter(function (z) { return !usadas[z.id]; });
+            var z = libres.filter(function (o) { return d.clave && o.rect.clave === d.clave; })[0]
+                || libres.filter(function (o) { return o.cara === d.cara; })[0] || libres[0];
+            if (!z) return;
+            usadas[z.id] = true;
+            cadena = cadena.then(function () {
+                return cargarFoto(d.miniatura).then(function (img) {
+                    fijarZona(z.id);
+                    estado.zonaElegida = true;
+                    var c = document.createElement('canvas');
+                    c.width = img.naturalWidth; c.height = img.naturalHeight;
+                    c.getContext('2d').drawImage(img, 0, 0);
+                    ponerLogo({ lienzo: c, tipo: d.fondo, px: { w: d.ancho_px, h: d.alto_px }, nombre: d.nombre, archivo: null, uuid: d.uuid, avisos: d.avisos || [] });
+                }, function () {});
+            });
+        });
+        return cadena;
+    }
+
     if (esPagina) {
         document.body.classList.add('estudio-abierto');
         refrescarColeccion();
     }
 
     pintar();
+    if (llevados.length) colocarLlevados(llevados);
 })();

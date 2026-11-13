@@ -73,7 +73,7 @@ class AjustesGenerales extends Page implements HasSchemas
             'pedidos_dias_confirmar' => Ajuste::obtener('pedidos.dias_confirmar_correo'),
             'pedidos_dias_sin_pago' => Ajuste::obtener('pedidos.dias_sin_pago'),
             'incidencias_dias' => Ajuste::obtener('incidencias.dias'),
-            'presupuestos_dias' => Ajuste::obtener('presupuestos.dias_validez'),
+            'presupuestos_horas' => Ajuste::obtener('presupuestos.horas_validez'),
             'cancelacion_automatica' => (bool) Ajuste::obtener('pagos.cancelacion_automatica'),
             'pedidos_tramos' => (array) Ajuste::obtener('pedidos.plazo_tramos'),
             'ia_activa' => MejoraIa::activa(),
@@ -145,7 +145,8 @@ class AjustesGenerales extends Page implements HasSchemas
                         ->helperText('Se cancela solo y devuelve el uso del cupón.'),
                     TextInput::make('incidencias_dias')->label('Plazo para abrir una incidencia')->integer()->minValue(1)->maxValue(90)->suffix('días')->required()
                         ->helperText('Desde la entrega (o desde el envío si no se marcó).'),
-                    TextInput::make('presupuestos_dias')->label('Validez de los presupuestos')->integer()->minValue(1)->maxValue(90)->suffix('días')->required(),
+                    TextInput::make('presupuestos_horas')->label('Validez de los presupuestos')->integer()->minValue(1)->maxValue(2160)->suffix('horas')->required()
+                        ->helperText('48 horas por defecto. El PDF lo dice junto a que los precios pueden variar sin previo aviso.'),
                     Toggle::make('cancelacion_automatica')->label('El cliente cancela un pedido pagado al momento')->columnSpanFull()
                         ->helperText('Si está pagado y aún no está en producción, se cancela y se le devuelve el dinero por Redsys. Desactivado: queda una petición para el equipo.'),
                     Repeater::make('pedidos_tramos')->label('Días extra según las unidades')->columnSpanFull()->columns(2)->defaultItems(0)
@@ -237,7 +238,7 @@ class AjustesGenerales extends Page implements HasSchemas
                 Ajuste::guardar('pedidos.dias_confirmar_correo', (int) $datos['pedidos_dias_confirmar']);
                 Ajuste::guardar('pedidos.dias_sin_pago', (int) $datos['pedidos_dias_sin_pago']);
                 Ajuste::guardar('incidencias.dias', (int) $datos['incidencias_dias']);
-                Ajuste::guardar('presupuestos.dias_validez', (int) $datos['presupuestos_dias']);
+                Ajuste::guardar('presupuestos.horas_validez', (int) $datos['presupuestos_horas']);
                 Ajuste::guardar('pagos.cancelacion_automatica', (bool) $datos['cancelacion_automatica']);
                 Ajuste::guardar('pedidos.plazo_tramos', collect($datos['pedidos_tramos'] ?? [])
                     ->map(fn ($t) => ['desde' => (int) $t['desde'], 'dias' => (int) $t['dias']])->sortBy('desde')->values()->all());

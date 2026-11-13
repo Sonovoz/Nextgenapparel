@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Dominio\Carrito\CarritoActual;
+use App\Dominio\Carrito\DisenosDeLinea;
 use App\Dominio\Carrito\EditarCarrito;
 use App\Dominio\Carrito\LineaNoValida;
 use App\Dominio\Carrito\Maqueta;
 use App\Dominio\Carrito\TipoLinea;
 use App\Dominio\Carrito\ValorarCarrito;
+use App\Dominio\Catalogo\OtrasPrendas;
 use App\Dominio\Disenos\Dueno;
 use App\Dominio\Disenos\GuardarDiseno;
 use App\Models\Carrito;
@@ -48,8 +50,32 @@ class CarritoController
             'carrito' => $carrito,
             'valoracion' => $valoracion,
             'lineas' => $lineas,
+            'completa' => self::completa($carrito),
             'alternos' => collect(config('idiomas.disponibles'))->keys()->mapWithKeys(fn ($i) => [$i => self::url('ver', idioma: $i)])->all(),
         ]);
+    }
+
+    /**
+     * «Completa tu colección» (D213): otras prendas con el diseño de la última línea ya puesto, para
+     * seguir el pedido sin volver a empezar. Las que ya están en el carrito no se ofrecen.
+     *
+     * @return list<array{nombre: string, url: string, desde: ?string, previa: array{foto: ?string, capas: list<array{url: string, x: float, y: float, ancho: float, alto: float}>}}>
+     */
+    private static function completa(?Carrito $carrito): array
+    {
+        $ultima = DisenosDeLinea::ultimaConDisenos($carrito);
+        if ($carrito === null || $ultima === null) {
+            return [];
+        }
+        $disenos = DisenosDeLinea::deLinea($ultima);
+        $enCarrito = $carrito->lineas()->whereNotNull('prenda_id')->pluck('prenda_id')->map(fn ($id) => (int) $id)->all();
+
+        return array_map(fn (array $p) => [
+            'nombre' => $p['nombre'],
+            'url' => $p['url'].'?con='.$ultima->uuid,
+            'desde' => $p['desde'],
+            'previa' => OtrasPrendas::previa($p, $disenos),
+        ], OtrasPrendas::para($enCarrito));
     }
 
     /** Desde el configurador: una línea por color, todas con los mismos diseños. Todo o nada. */
@@ -67,16 +93,20 @@ class CarritoController
         $carrito = CarritoActual::de($request, crear: true);
 
         try {
-            DB::transaction(function () use ($datos, $prenda, $dueno, $carrito, $editar): void {
+            $ultima = DB::transaction(function () use ($datos, $prenda, $dueno, $carrito, $editar): ?LineaCarrito {
+                $ultima = null;
                 foreach ($datos['lineas'] as $linea) {
-                    $editar->anadirPrenda($carrito, $dueno, $prenda->id, $linea['color'], $linea['tallas'], $datos['impresiones']);
+                    $ultima = $editar->anadirPrenda($carrito, $dueno, $prenda->id, $linea['color'], $linea['tallas'], $datos['impresiones']);
                 }
+
+                return $ultima;
             });
         } catch (LineaNoValida $e) {
             return response()->json(['message' => implode(' ', $e->textos()), 'problemas' => $e->textos()], 422);
         }
 
-        return response()->json(['url' => self::url('ver'), 'lineas' => $carrito->lineas()->count()], 201);
+        // La línea añadida: «Añade otra prenda con este diseño» la lleva a la siguiente prenda (D213).
+        return response()->json(['url' => self::url('ver'), 'lineas' => $carrito->lineas()->count(), 'linea' => $ultima?->uuid], 201);
     }
 
     public function tallas(Request $request, EditarCarrito $editar, string $uuid): RedirectResponse

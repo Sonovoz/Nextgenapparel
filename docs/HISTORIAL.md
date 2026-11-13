@@ -6,8 +6,10 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 13/11 | **PDF premium**: Jost, cabecera oscura, «Tu colección» con las fotos de cada cara (presupuesto y factura), textos de emoción y «Estamos a tu disposición», enlaces a preguntas frecuentes y condiciones; presupuesto con fecha y validez de 48 horas con aviso de precios. | `pdf-premium` | D215, D216 |
 | 13/11 | **Aviso de error claro**: si el archivo no vale (p. ej. PNG sin ppp) o falla la subida, aviso en el centro con la pantalla oscurecida y «Elegir otro archivo» (configurador y portada). | `aviso-error-visible` | D214 |
 | 13/11 | **Condiciones de venta y devoluciones**: textos de tienda de prendas personalizadas (sin desistimiento, reimpresión o reembolso si el error es nuestro, qué no es defecto) y aviso claro: una vez impresas, el pedido no se puede cancelar. | `legal-condiciones-devoluciones` | — |
+| 13/11 | **Otra prenda con el mismo diseño**: hoja «Añadido a tu pedido» con otras prendas y el diseño puesto, la prenda nueva abre con los diseños colocados, «Completa tu colección» en el carrito y «Tu pedido: N prendas · M uds» en el configurador. | `otra-prenda-mismo-diseno` | D213 |
 | 12/11 | **Texto de «Procesando» al subir el diseño**: «PROCESANDO · Subiendo archivos y comprobando calidad de impresión». | `procesando-texto-diseno` | D212 |
 | 12/11 | **Capa «Procesando»** (oscurece con anillo de luz y texto) al pasar a tallas, añadir al pedido, actualizar el carrito e ir al pago; tallas de la pestaña *Prenda* como texto, no como botones. | `procesando-y-tallas` | D212 |
 | 12/11 | **Presupuesto sin duplicar el carrito**: tras pedirlo (el carrito sigue igual) la página ofrece «Volver al carrito»; «Pasar al carrito» no vuelve a poner lo que ya está. | `presupuesto-sin-duplicar` | — |

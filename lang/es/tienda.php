@@ -168,6 +168,13 @@ return [
     'procesando_pago' => 'Conectando con el banco',
     'procesando_pago_detalle' => 'Te llevamos a la página segura de pago.',
     'procesando_detalle' => 'Estamos trabajando en ello.',
+    // D213: otra prenda con el mismo diseño
+    'tu_pedido' => '{1} Tu pedido: 1 prenda · :uds uds|[2,*] Tu pedido: :n prendas · :uds uds',
+    'anadido_titulo' => 'Añadido a tu pedido',
+    'anadido_otra' => 'Añade otra prenda con este diseño',
+    'anadido_otra_ayuda' => 'Tu diseño ya va colocado: solo revisa, elige tallas y colores. Lo que has añadido sigue en tu pedido.',
+    'anadido_ver_pedido' => 'Ver mi pedido y pagar',
+    'anadido_desde' => 'desde',
     // D214: aviso de error claro
     'aviso_titulo' => 'Hay un problema',
     'aviso_archivo' => 'No podemos usar este archivo',
