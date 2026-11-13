@@ -180,4 +180,16 @@ return [
     'aviso_archivo' => 'We cannot use this file',
     'aviso_otro' => 'Choose another file',
     'aviso_cerrar' => 'Close',
+    // D229: clear print size and pixelation warning.
+    'tamano_impresion' => 'Print size on the garment',
+    'mas_pequeno' => 'Smaller',
+    'mas_grande' => 'Bigger',
+    'medida_zona' => 'Maximum in this area: :medida',
+    'ajustar_nitido' => 'Set it to :medida so it prints sharp',
+    'pixelado_lienzo' => '⚠ It will look pixelated at this size',
+    'borroso_lienzo' => '⚠ It may look a bit blurry',
+    'pixelado_titulo' => 'Your design will look pixelated',
+    'pixelado_aviso' => ':zona: at :medida your file only gives :ppp ppi and will look pixelated or blurry. Reduce it to :nitido to print sharp, or upload a bigger version. To continue anyway, press «Add to my order» again.',
+    'pixelado_aviso_sin_nitido' => ':zona: at :medida your file only gives :ppp ppi and will look pixelated or blurry, even at the smallest size. Upload a bigger version. To continue anyway, press «Add to my order» again.',
+    'pixelado_ajustar' => 'Adjust the size',
 ];

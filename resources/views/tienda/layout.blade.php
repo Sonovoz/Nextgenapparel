@@ -191,6 +191,7 @@
                 <span>© {{ now()->year }} {{ $nombreTienda }}</span>
                 <span>{{ __('portada.firma') }}</span>
             </div>
+            <div class="pie-credito">@include('partials.credito-minimedia')</div>
         </div>
     </footer>
 

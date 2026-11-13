@@ -93,11 +93,14 @@ class PanelTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        preg_match_all('/(?:src|href)="(https?:\/\/[^"]+)"/', $html, $coincidencias);
+        // Lo que el navegador carga solo: src de imágenes y scripts y <link href> (estilos, fuentes, iconos).
+        // Un enlace <a href> (p. ej. el crédito de Minimedia) no carga nada hasta que se pulsa.
+        preg_match_all('/(?:\bsrc="|<link\b[^>]*\bhref=")(https?:\/\/[^"]+)"/', $html, $coincidencias);
         $externas = array_filter($coincidencias[1], fn (string $url) => ! str_starts_with($url, url('/')));
 
         $this->assertSame([], array_values($externas));
         $this->assertStringNotContainsString('ui-avatars.com', $html);
+        $this->assertStringContainsString('<a class="credito-minimedia" href="https://www.minimedia.es"', $html); // un enlace, no una carga
     }
 
     public function test_el_avatar_muestra_las_iniciales(): void
