@@ -61,6 +61,7 @@ class PaginaCarritoTest extends TestCase
         ]));
 
         $respuesta->assertCreated()->assertJson(['url' => url('/es/carrito'), 'lineas' => 2])->assertCookie(CarritoActual::COOKIE);
+        $this->assertSame(Carrito::sole()->lineas()->reorder()->latest('id')->first()->uuid, $respuesta->json('linea')); // D213: para llevar el diseño a otra prenda
         $carrito = Carrito::sole();
         $this->assertNull($carrito->cliente_id);
         $this->assertSame(['NEXTGEN', 2, 'dorado'], [$carrito->lineas[0]->impresiones->sole()->texto, $carrito->lineas[0]->impresiones->sole()->fuente, $carrito->lineas[0]->impresiones->sole()->tinta]);
