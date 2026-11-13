@@ -159,7 +159,7 @@ class BackendPreciosTest extends TestCase
         Livewire::test(ManageZonaEnvio::class)
             ->callAction('create', [
                 'nombre' => ['es' => 'Península'], 'paises' => ['ES'], 'plazo_dias' => 2, 'metodo' => 'por_kilo', 'prioridad' => 0, 'activa' => true,
-                'tarifas' => [['hasta_gramos' => 2000, 'precio' => '4,90'], ['hasta_gramos' => 2000, 'precio' => '5,90']],
+                'tarifas' => [['hasta_gramos' => '2', 'precio' => '4,90'], ['hasta_gramos' => '2', 'precio' => '5,90']],
             ])
             ->assertHasFormErrors();
         $this->assertSame(0, ZonaEnvio::count());
@@ -190,13 +190,16 @@ class BackendPreciosTest extends TestCase
             ->callAction('create', [
                 'nombre' => ['es' => 'Península'], 'paises' => ['es'], 'prefijos_cp' => [], 'plazo_dias' => 2, 'metodo' => 'por_kilo',
                 'gratis_desde' => '500', 'precio_kg_extra' => '0,80', 'prioridad' => 0, 'activa' => true,
-                'tarifas' => [['hasta_gramos' => 2000, 'precio' => '4,90'], ['hasta_gramos' => 5000, 'precio' => '6,90']],
+                'tarifas' => [['hasta_gramos' => '2,5', 'precio' => '4,90'], ['hasta_gramos' => '5', 'precio' => '6,90']],
             ])
             ->assertHasNoFormErrors();
 
+        // Los tramos se escriben en kilos y se guardan en gramos.
         $zona = ZonaEnvio::with('tarifas')->sole();
         $this->assertSame([['ES'], 50000, 80], [$zona->paises, $zona->gratis_desde, $zona->precio_kg_extra]);
-        $this->assertSame([2000 => 490, 5000 => 690], $zona->tarifas->pluck('precio', 'hasta_gramos')->all());
+        $this->assertSame([2500 => 490, 5000 => 690], $zona->tarifas->pluck('precio', 'hasta_gramos')->all());
+        $editar = Livewire::test(ManageZonaEnvio::class)->mountAction(TestAction::make('edit')->table($zona));
+        $this->assertSame(['2,5', '5'], array_values(array_column($editar->instance()->mountedActions[0]['data']['tarifas'], 'hasta_gramos')));
     }
 
     private function datosPack(array $cambios = []): array
