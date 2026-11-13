@@ -15,7 +15,8 @@ class ProcesandoTest extends TestCase
     {
         $this->get('/es')->assertOk()
             ->assertSee('id="procesando"', false)
-            ->assertSee('window.Procesando', false);
+            ->assertSee('window.Procesando', false)
+            ->assertSee('id="aviso-tienda"', false); // D214: los errores que impiden seguir, en el centro
     }
 
     public function test_la_ficha_muestra_las_tallas_como_texto_y_el_configurador_avisa_al_preparar_el_diseno(): void
@@ -27,5 +28,6 @@ class ProcesandoTest extends TestCase
         $this->assertStringContainsString('class="tallas-texto"', $html);
         $this->assertStringNotContainsString('class="chip"', $html);
         $this->assertStringContainsString('procesando_diseno', $html); // texto de la capa al pasar a tallas
+        $this->assertStringContainsString('aviso_otro', $html); // «Elegir otro archivo» en el aviso de error
     }
 }

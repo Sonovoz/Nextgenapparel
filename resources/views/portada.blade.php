@@ -146,7 +146,11 @@
                     return null;
                 }, function () { return null; });
             }
-            function fallo() { zona.classList.remove('subiendo'); error.textContent = caja.dataset.error; error.hidden = false; }
+            // El error se escribe junto a la zona y, además, se avisa en el centro de la pantalla (D214).
+            function fallo(mensaje) {
+                zona.classList.remove('subiendo'); error.textContent = mensaje || caja.dataset.error; error.hidden = false;
+                if (window.AvisoTienda) window.AvisoTienda.mostrar(error.textContent, { titulo: @json(__('tienda.aviso_archivo')), boton: @json(__('tienda.aviso_otro')), alPulsar: function () { entrada.click(); } });
+            }
             // El original, sin reducir, también se queda en este navegador (IndexedDB) para el pedido.
             function guardarOriginal(archivo) {
                 try {
@@ -163,7 +167,7 @@
                 if (!archivo || !esPng(archivo)) { fallo(); return; } // solo PNG (D206)
                 if (caja.dataset.exigirPpp === '1' && !archivo.revisado) {
                     pppDeclarados(archivo).then(function (declara) {
-                        if (declara === false) { fallo(); error.textContent = caja.dataset.errorPpp; return; }
+                        if (declara === false) { fallo(caja.dataset.errorPpp); return; }
                         archivo.revisado = true;
                         leer(archivo);
                     });
