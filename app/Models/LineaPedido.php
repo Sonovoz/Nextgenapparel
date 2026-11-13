@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property ?int $prenda_id
  * @property ?int $color_id
  * @property ?int $pack_id
+ * @property ?string $coleccion nombre que el cliente da a su colección (D220)
  * @property array<string, string> $nombre
  * @property ?array<string, string> $color_nombre
  * @property ?string $color_hex

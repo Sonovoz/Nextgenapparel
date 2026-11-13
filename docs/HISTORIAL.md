@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 13/11 | **Lienzo del pack**: pasos numerados, subir diseño en el mismo sitio, nombre de la colección (carrito → pedido), muestras de color, contador de tallas y resumen fijo; botón al asistente IA. | `pack-lienzo` | D220 |
 | 13/11 | **Precio de los packs en neto o con IVA**: opción por pack; en neto se ve «+ IVA» y debajo el precio final. | `packs-precio-neto` | D219 |
 | 13/11 | **Reglas de la IA**: asistente solo con el correo confirmado, cuota propia para quien aún no ha comprado y memoria de pedidos para animar a repetir; privacidad actualizada. | `ia-reglas-clientes` | D218 |
 | 13/11 | **Portada**: «Packs listos para jugar» pasa a «Packs que se ajustan a tu presupuesto». | `portada-packs-presupuesto` | — |

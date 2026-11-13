@@ -171,6 +171,7 @@ final class CrearPedido
         $copia = $pedido->lineas()->create([
             'orden' => $orden,
             'tipo' => $linea->tipo->value,
+            'coleccion' => $linea->coleccion,
             'prenda_id' => $linea->prenda_id,
             'color_id' => $linea->color_id,
             'pack_id' => $linea->pack_id,

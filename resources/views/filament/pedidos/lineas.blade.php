@@ -18,6 +18,7 @@
             </div>
             <div style="flex: 1; min-width: 220px; font-size: 14px; display: flex; flex-direction: column; gap: 6px;">
                 <strong>{{ $linea->nombreEn('es') }}@if ($linea->colorEn('es')) · {{ $linea->colorEn('es') }}@endif @if ($linea->tipo === 'pack') (pack)@endif</strong>
+                @if ($linea->coleccion)<span>Colección: <strong>{{ $linea->coleccion }}</strong></span>@endif
                 <span>
                     @if ($linea->tallas){{ collect($linea->tallas)->map(fn ($t) => $t['nombre'].' × '.$t['unidades'])->join(' · ') }} · @endif
                     {{ $linea->unidades }} {{ $linea->unidades === 1 ? 'prenda' : 'prendas' }}

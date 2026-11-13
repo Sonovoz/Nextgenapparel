@@ -62,6 +62,7 @@
 
                                 <div class="carrito-detalle">
                                     <h2>{{ $nombre ?? __('carrito.no_disponible') }}</h2>
+                                    @if ($linea->coleccion)<p class="linea-coleccion">{{ __('carrito.coleccion', ['nombre' => $linea->coleccion]) }}</p>@endif
                                     @if (! $esPack && $linea->color)
                                         <p class="claro"><span class="muestra" style="background: {{ $linea->color->codigo_hex }}" aria-hidden="true"></span> {{ $linea->color->nombre }} · {{ trans_choice('carrito.unidades', $unidades, ['n' => $unidades]) }}</p>
                                     @elseif ($esPack)

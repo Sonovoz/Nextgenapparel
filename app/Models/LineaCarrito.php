@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property ?int $prenda_id
  * @property ?int $color_id
  * @property ?int $pack_id
+ * @property ?string $coleccion nombre que el cliente da a su colección (D220)
  * @property ?array<int, array{color?: int, tallas?: array<int, int>}> $elecciones linea_pack_id => elección
  */
 class LineaCarrito extends Model

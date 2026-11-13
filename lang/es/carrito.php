@@ -79,4 +79,6 @@ return [
     'completa_titulo' => 'Completa tu colección',
     'completa_ayuda' => 'Las mismas prendas con tu diseño ya colocado: elige y pasa a tallas y colores.',
     'completa_desde' => 'desde',
+    // D220: nombre de la colección que da el cliente al añadir un pack.
+    'coleccion' => 'Colección «:nombre»',
 ];
