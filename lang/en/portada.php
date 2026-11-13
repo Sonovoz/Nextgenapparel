@@ -39,7 +39,7 @@ return [
     'soltar_privacidad' => 'Your file never leaves your device.',
     'soltar_error' => 'We only accept designs in PNG. Export it as PNG (ideally with a transparent background) and try again.',
     'packs_etiqueta' => 'Bundles',
-    'packs_titulo' => 'Packs ready to play',
+    'packs_titulo' => 'Packs that fit your budget',
     'packs_texto' => 'Garments, sizes and printing included at a fixed price. You just upload your design.',
     'pack_prendas' => ':n garments',
     'pack_iva' => 'VAT included',
