@@ -7,7 +7,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
 /**
- * Llamada a OpenAI (Chat Completions con herramientas) por HTTP, sin SDK (v2, D194). La clave sale del .env y
+ * Llamada a OpenAI (Chat Completions con herramientas) por HTTP, sin SDK (v2, D194). La clave sale de ClaveIa (D227) y
  * el modelo de Ajustes → IA. Cualquier fallo es IaNoDisponible.
  */
 class ClienteOpenAi
@@ -19,9 +19,9 @@ class ClienteOpenAi
      */
     public function chat(array $mensajes, array $herramientas = [], bool $json = false): array
     {
-        $clave = (string) config('ia.openai_key');
+        $clave = (string) ClaveIa::actual(); // D227: la del .env o la guardada cifrada en Ajustes → IA
         if ($clave === '') {
-            throw new IaNoDisponible('Falta OPENAI_API_KEY en el .env.');
+            throw new IaNoDisponible('Falta la clave de OpenAI (Ajustes → IA o OPENAI_API_KEY en el .env).');
         }
         try {
             $respuesta = Http::withToken($clave)->acceptJson()->timeout(30)->post(rtrim((string) config('ia.openai_url'), '/').'/chat/completions', array_filter([

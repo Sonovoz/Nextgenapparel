@@ -2,6 +2,7 @@
 
 namespace App\Dominio\Sistema\PuestaEnMarcha;
 
+use App\Dominio\Asistente\ClaveIa;
 use App\Dominio\Legal\PaginaLegal;
 use App\Dominio\Sistema\Acceso\Rol;
 use App\Dominio\Sistema\Copias\Copias;
@@ -84,7 +85,7 @@ final class PuestaEnMarcha
             new Paso('Abrir a los buscadores', 'Activa la indexación en Ajustes → General al abrir la tienda.', AjustesGenerales::class,
                 (bool) Ajuste::obtener('seo.indexar')),
             new Paso('Asistente con IA', 'OPENAI_API_KEY en el .env y activarlo en Ajustes → IA.', AjustesIa::class,
-                filled(config('ia.openai_key')) && (bool) Ajuste::obtener('ia.activa'), opcional: true),
+                ClaveIa::configurada() && (bool) Ajuste::obtener('ia.activa'), opcional: true),
         ];
     }
 
