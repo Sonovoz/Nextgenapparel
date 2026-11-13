@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 13/11 | **Actualizaciones numeradas**: el backend dice qué actualización tiene instalada (pie y Herramientas → Actualizaciones), contadas desde este historial. | `actualizaciones-numeradas` | D236 |
 | 13/11 | **Registro de correos**: cola, envío, error del SMTP y no enviados, en Herramientas; salud: correos atascados o fallidos. | `registro-correos` | D235 |
 | 13/11 | **Botón «Siguiente» destacado** en el configurador: degradado con brillo, halo que respira y flecha que avanza. | `boton-siguiente-vivo` | — |
 | 13/11 | **SMTP del panel**: manda aunque el `.env` diga «log»; el correo de prueba ya no dice «enviado» si no sale. | `smtp-panel-manda` | D234 |
