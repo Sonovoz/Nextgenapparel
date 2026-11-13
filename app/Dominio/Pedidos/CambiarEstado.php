@@ -6,6 +6,7 @@ use App\Jobs\DevolverPedido;
 use App\Jobs\EmitirFacturaPedido;
 use App\Models\Cupon;
 use App\Models\Pedido;
+use App\Models\Transportista;
 use App\Models\User;
 use App\Notifications\Pedidos\CorreoDelPedido;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +49,9 @@ final class CambiarEstado
                 if ($transportista === '' || $seguimiento === '') {
                     throw new CambioNoValido("Para enviar el pedido {$pedido->numero} faltan el transportista y el número de seguimiento.");
                 }
-                $cambios += ['transportista' => $transportista, 'numero_seguimiento' => $seguimiento];
+                // D226: si el transportista tiene ficha con enlace de seguimiento, el pedido guarda el enlace.
+                $cambios += ['transportista' => $transportista, 'numero_seguimiento' => $seguimiento,
+                    'url_seguimiento' => Transportista::where('nombre', $transportista)->first()?->enlace($seguimiento)];
             }
 
             if ($nuevo === EstadoPedido::Cancelado && $pedido->cupon !== null && $actual->cuentaComoUso()) {

@@ -46,6 +46,10 @@ class ZonaEnvioResource extends RecursoPrecios
     {
         return $schema->columns(1)->components([
             CamposTraducibles::texto('nombre', 'Nombre', obligatorio: true),
+            // D226: qué empresa lleva esta zona; sus tarifas son las de abajo.
+            Select::make('transportista_id')->label('Transportista')->native(false)->placeholder('Sin asignar')
+                ->relationship('transportista', 'nombre')
+                ->helperText('Se propone al marcar como enviado un pedido de esta zona. Las fichas están en Ajustes → Transportistas.'),
             Grid::make(3)->schema([
                 TagsInput::make('paises')->label('Países (código ISO)')->required()->placeholder('ES')
                     ->dehydrateStateUsing(fn ($state) => array_values(array_map(fn ($p) => strtoupper(trim($p)), $state ?? []))),
@@ -87,6 +91,7 @@ class ZonaEnvioResource extends RecursoPrecios
             ->description('El envío lleva el IVA de la clase por defecto. Solo se envía a los destinos que tengan zona.')
             ->columns([
                 TextColumn::make('nombre')->label('Zona'),
+                TextColumn::make('transportista.nombre')->label('Transportista')->placeholder('Sin asignar'),
                 TextColumn::make('paises')->label('Países')->badge(),
                 TextColumn::make('prefijos_cp')->label('Prefijos CP')->badge()->placeholder('Todo el país'),
                 TextColumn::make('metodo')->label('Método')->badge(),

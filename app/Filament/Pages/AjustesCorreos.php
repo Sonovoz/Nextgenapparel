@@ -107,7 +107,7 @@ class AjustesCorreos extends Page implements HasSchemas
                 $campos[] = Textarea::make("estados.{$estado->value}.texto.{$i}")->label("Texto ({$nombre})")->rows(5)->maxLength(2000);
             }
             $secciones[] = Section::make($estado->etiqueta())->columns(2)->collapsed()
-                ->description('Huecos: :nombre, :numero, :estado, :total, :fecha_entrega, :transportista, :seguimiento. El correo lleva siempre el botón con el enlace privado al pedido.')
+                ->description('Huecos: :nombre, :numero, :estado, :total, :fecha_entrega, :transportista, :seguimiento, :enlace_seguimiento. El correo lleva siempre el botón con el enlace privado al pedido.')
                 ->schema($campos);
         }
 

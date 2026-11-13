@@ -6,6 +6,7 @@ use App\Dominio\Precios\MetodoEnvio;
 use App\Models\Concerns\Traducible;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @property int $id
  * @property string $nombre
+ * @property ?int $transportista_id
+ * @property-read ?Transportista $transportista
  * @property ?list<string> $paises
  * @property ?list<string> $prefijos_cp
  * @property MetodoEnvio $metodo
@@ -58,6 +61,12 @@ class ZonaEnvio extends Model
                 && ($z->prefijos_cp === null || $z->prefijos_cp === [] || collect($z->prefijos_cp)->contains(fn ($p) => str_starts_with($cp, (string) $p))))
             ->sortBy([fn ($a, $b) => empty($a->prefijos_cp) <=> empty($b->prefijos_cp), fn ($a, $b) => $b->prioridad <=> $a->prioridad])
             ->first();
+    }
+
+    /** @return BelongsTo<Transportista, $this> */
+    public function transportista(): BelongsTo
+    {
+        return $this->belongsTo(Transportista::class);
     }
 
     /** @return HasMany<TarifaEnvio, $this> */

@@ -47,6 +47,7 @@ return [
     'maqueta_trasera' => 'Back mock-up of :prenda',
     'entrega_estimada' => 'Estimated delivery',
     'seguimiento' => 'Shipped with :transportista · tracking :numero',
+    'seguir_envio' => 'Track my parcel', // D226
     'novedades' => 'Order updates',
     'progreso' => 'Tracking',
     'paso_pedido' => 'Order placed',

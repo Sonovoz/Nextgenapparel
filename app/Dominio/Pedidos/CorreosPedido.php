@@ -52,6 +52,7 @@ final class CorreosPedido
             ':fecha_entrega' => $fecha,
             ':transportista' => (string) $pedido->transportista,
             ':seguimiento' => (string) $pedido->numero_seguimiento,
+            ':enlace_seguimiento' => (string) $pedido->url_seguimiento, // D226
         ]);
     }
 }

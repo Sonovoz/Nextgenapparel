@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\Storage;
  * @property array<string, mixed> $desglose
  * @property ?Carbon $fecha_estimada_entrega
  * @property ?string $transportista
+ * @property ?string $url_seguimiento enlace de seguimiento del transportista (D226)
  * @property ?string $numero_seguimiento
  * @property ?Carbon $cancelacion_solicitada_en
  * @property ?string $motivo_cancelacion

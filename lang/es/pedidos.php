@@ -48,6 +48,7 @@ return [
     'maqueta_trasera' => 'Maqueta trasera de :prenda',
     'entrega_estimada' => 'Entrega estimada',
     'seguimiento' => 'Enviado con :transportista · seguimiento :numero',
+    'seguir_envio' => 'Seguir mi envío', // D226
     'novedades' => 'Novedades de tu pedido',
     'progreso' => 'Seguimiento',
     'paso_pedido' => 'Pedido hecho',

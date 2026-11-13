@@ -22,7 +22,7 @@
             <h1 class="titulo-cuenta" id="titulo-pedido">{{ __('pedidos.titulo', ['numero' => $pedido->numero]) }}</h1>
             <p class="entradilla">{{ __('pedidos.estado') }}: <strong>{{ $pedido->estado->visible() }}</strong> · {{ __('pedidos.fecha') }}: {{ $pedido->created_at->locale(app()->getLocale())->isoFormat('LL') }}
                 @if ($pedido->fecha_estimada_entrega) · {{ __('pedidos.entrega_estimada') }}: <strong>{{ $pedido->fecha_estimada_entrega->locale(app()->getLocale())->isoFormat('LL') }}</strong>@endif
-                @if ($pedido->numero_seguimiento)<br>{{ __('pedidos.seguimiento', ['transportista' => $pedido->transportista, 'numero' => $pedido->numero_seguimiento]) }}@endif</p>
+                @if ($pedido->numero_seguimiento)<br>{{ __('pedidos.seguimiento', ['transportista' => $pedido->transportista, 'numero' => $pedido->numero_seguimiento]) }}@if ($pedido->url_seguimiento) · <a href="{{ $pedido->url_seguimiento }}" target="_blank" rel="noopener noreferrer">{{ __('pedidos.seguir_envio') }}</a>@endif @endif</p>
 
             @if (session('estado_pedido'))
                 <p class="aviso-cuenta correcto" role="status">{{ session('estado_pedido') }}</p>
