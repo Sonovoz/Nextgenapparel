@@ -31,17 +31,29 @@ After payment we review the designs. If one cannot be printed well, we write to 
 
 **Your designs and their rights.** By providing images, logos or text to be printed, you declare that you own them or are authorised to use and print them, and that they do not infringe third-party rights (copyright, trademark, image rights or any other). You make this declaration when you accept these terms on confirming the order. You are solely responsible for it: if a third party makes a claim over a design you have provided, you answer for that claim and hold {!! $f($e['razon_social'], 'razón social') !!} harmless from any resulting damages, costs and penalties.
 
-## 6. Cancellation
+## 6. Cancelling the order
 
-You can cancel the order from its page **until printing starts**. If you have already paid, we refund you to the same payment method and issue the credit note. Once printing starts it can no longer be cancelled.
+You can cancel the order from its page **until it goes into printing**. If you have already paid, we refund the full amount to the same payment method and issue the credit note.
+
+**Once the garments are printed, the order can no longer be cancelled or changed**: each garment is made exclusively with your design and cannot be sold to anyone else.
 
 ## 7. No right of withdrawal
 
-The garments are made **to your specifications and personalised**, so there is no right of withdrawal (article 103.c of the Spanish consumer protection law, Real Decreto Legislativo 1/2007).
+The garments are made **to your specifications and personalised**, so there is no right of withdrawal (article 103.c of the Spanish consumer protection law, Real Decreto Legislativo 1/2007). Therefore returns because you changed your mind, size or colour are not accepted once the order has been made. Before confirming, check the mock-up, the sizes (each garment has its size guide), the colours and the quantities carefully.
 
-## 8. Guarantee and issues
+## 8. Guarantee, issues and returns
 
-The garments carry the **3-year legal guarantee** for lack of conformity. If something arrives wrong (a printing defect, a damaged garment, a size or colour you did not order, or a missing garment), report an **issue** from your order page within {{ $diasIncidencia }} days of delivery, with photos if you can. We resolve it with a reprint, a partial refund or, if it does not apply, an explanation. After that period you can write to {!! $f($e['correo'], 'correo de contacto') !!} within the legal guarantee.
+The garments carry the **3-year legal guarantee** for lack of conformity. If something arrives wrong (a printing defect, a damaged garment, a size or colour you did not order, or a missing garment), report an **issue** from your order page within {{ $diasIncidencia }} days of delivery, with photos if you can. After that period you can write to {!! $f($e['correo'], 'correo de contacto') !!} within the legal guarantee.
+
+**How we resolve it.** If the mistake is ours, we reprint the affected garments or refund them, at no cost to you: if you need to send them back, we pay the shipping. Refunds go to the same payment method within 14 days of our accepting them.
+
+**What is not a defect:**
+
+- Small colour differences between the screen and the garment, or between the manufacturer's batches.
+- Small variations in the position and size of the design, within the usual tolerances of textile printing.
+- The result of a low-quality design that you accepted after seeing the quality warning.
+- Mistakes in the design itself (texts, spelling, colours) or in the sizes and quantities you chose.
+- Wear from use or from not following the washing and care instructions.
 
 ## 9. Customer service and law
 

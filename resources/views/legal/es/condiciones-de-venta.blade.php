@@ -31,17 +31,29 @@ Tras el pago revisamos los diseños. Si alguno no se puede imprimir bien, te esc
 
 **Tus diseños y sus derechos.** Al aportar imágenes, logotipos o textos para imprimir declaras que eres su titular o que tienes autorización para usarlos e imprimirlos, y que no infringen derechos de terceros (de autor, de marca, de imagen o de cualquier otro tipo). Esta declaración la haces al aceptar estas condiciones al confirmar el pedido. Eres el único responsable de ella: si un tercero reclama por un diseño que has aportado, respondes tú frente a esa reclamación y mantienes indemne a {!! $f($e['razon_social'], 'razón social') !!} de los daños, gastos y sanciones que se deriven.
 
-## 6. Cancelación
+## 6. Cancelación del pedido
 
-Puedes cancelar el pedido desde su página **mientras no esté en impresión**. Si ya lo has pagado, te devolvemos el dinero en el mismo medio de pago y emitimos la factura rectificativa. Una vez empieza la impresión ya no se puede cancelar.
+Puedes cancelar el pedido desde su página **mientras no haya entrado en impresión**. Si ya lo has pagado, te devolvemos el importe íntegro por el mismo medio de pago y emitimos la factura rectificativa.
+
+**Una vez impresas las prendas, el pedido no se puede cancelar ni modificar**: cada prenda se fabrica en exclusiva con tu diseño y no puede venderse a nadie más.
 
 ## 7. Sin derecho de desistimiento
 
-Las prendas se fabrican **según tus indicaciones y personalizadas**, por lo que no tienen derecho de desistimiento (artículo 103.c del texto refundido de la Ley General para la Defensa de los Consumidores y Usuarios).
+Las prendas se fabrican **según tus indicaciones y personalizadas**, por lo que no tienen derecho de desistimiento (artículo 103.c del texto refundido de la Ley General para la Defensa de los Consumidores y Usuarios). Por eso no se admiten devoluciones por cambio de opinión, de talla o de color una vez fabricado el pedido. Antes de confirmar, revisa con calma la maqueta, las tallas (tienes la guía de medidas en cada prenda), los colores y las cantidades.
 
-## 8. Garantía e incidencias
+## 8. Garantía, incidencias y devoluciones
 
-Las prendas tienen la **garantía legal de 3 años** por falta de conformidad. Si algo llega mal (un defecto de impresión, una prenda dañada, una talla o un color que no pediste, o falta alguna prenda), abre una **incidencia** desde la página de tu pedido en los {{ $diasIncidencia }} días siguientes a la entrega, con fotos si puedes. La resolvemos con una reimpresión, un reembolso parcial o, si no procede, te explicamos por qué. Pasado ese plazo puedes escribirnos a {!! $f($e['correo'], 'correo de contacto') !!} dentro de la garantía legal.
+Las prendas tienen la **garantía legal de 3 años** por falta de conformidad. Si algo llega mal (un defecto de impresión, una prenda dañada, una talla o un color que no pediste, o falta alguna prenda), abre una **incidencia** desde la página de tu pedido en los {{ $diasIncidencia }} días siguientes a la entrega, con fotos si puedes. Pasado ese plazo puedes escribirnos a {!! $f($e['correo'], 'correo de contacto') !!} dentro de la garantía legal.
+
+**Cómo lo resolvemos.** Si el error es nuestro, reimprimimos las prendas afectadas o te devolvemos su importe, sin coste para ti: si hace falta que nos las envíes, el envío corre de nuestra cuenta. El reembolso se hace por el mismo medio de pago, en un plazo máximo de 14 días desde que lo aceptamos.
+
+**Lo que no es un defecto:**
+
+- Pequeñas diferencias de color entre la pantalla y la prenda, o entre lotes de prendas del fabricante.
+- Pequeñas variaciones de colocación y de tamaño del diseño, dentro de las tolerancias habituales de la impresión textil.
+- El resultado de un diseño que tenía una calidad baja y que aceptaste al ver el aviso de calidad.
+- Errores en el propio diseño (textos, ortografía, colores) o en las tallas y cantidades que elegiste.
+- El desgaste por el uso o por no seguir las instrucciones de lavado y cuidado de la prenda.
 
 ## 9. Atención al cliente y legislación
 
