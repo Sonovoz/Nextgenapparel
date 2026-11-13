@@ -29,7 +29,16 @@ final class CalculoEnvio
      */
     public static function para(Destino $destino, int $peso, int $unidades, int $mercancia): array
     {
-        $zona = ZonaEnvio::paraDestino($destino->pais, $destino->codigoPostal)?->load('tarifas');
+        return self::enZona(ZonaEnvio::paraDestino($destino->pais, $destino->codigoPostal)?->load('tarifas'), $peso, $unidades, $mercancia);
+    }
+
+    /**
+     * El mismo cálculo sobre una zona concreta, guardada o no (la vista previa del asistente de envíos, D228).
+     *
+     * @return array{envio: ?array{zona: string, metodo: string, importe: int, plazo_dias: int, peso_gramos: int, bultos: ?int}, motivo: ?string, zona: ?ZonaEnvio, gratis: ?bool, faltan_gratis: ?int}
+     */
+    public static function enZona(?ZonaEnvio $zona, int $peso, int $unidades, int $mercancia): array
+    {
         $fallo = fn (string $motivo) => ['envio' => null, 'motivo' => $motivo, 'zona' => $zona, 'gratis' => null, 'faltan_gratis' => null];
         if ($zona === null) {
             return $fallo(self::SIN_ZONA);
@@ -86,7 +95,7 @@ final class CalculoEnvio
             $problemas[] = 'No tiene países.';
         }
         if ($zona->metodo === MetodoEnvio::PorKilo) {
-            $ultima = $zona->tarifas()->orderByDesc('hasta_gramos')->first();
+            $ultima = $zona->exists && ! $zona->relationLoaded('tarifas') ? $zona->tarifas()->orderByDesc('hasta_gramos')->first() : $zona->tarifas->sortByDesc('hasta_gramos')->first();
             if ($ultima === null) {
                 $problemas[] = 'Faltan las tarifas por peso.';
             } elseif ($zona->precio_kg_extra === null) {

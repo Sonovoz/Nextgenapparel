@@ -7,6 +7,8 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
 | 13/11 | **Tramos de envío en kilos**: el formulario de la zona pide los tramos en kg (admite decimales) y avisa de qué pasa sin «kilo extra». | `envio-tramos-kg` | — |
+| 13/11 | **Asistente de envíos con IA**: «Crear con IA» pasa a limpio la tarifa del transportista; vista previa con el cálculo real; se crea al confirmar. | `ia-envios` | D228 |
+| 13/11 | **Clave de IA en Ajustes → IA**, cifrada; el `.env` sigue mandando si la tiene. | `ia-clave-backend` | D227 |
 | 13/11 | **Crédito de Minimedia** en el pie de la tienda y del backend (con la pantalla de entrada), enlazado a www.minimedia.es. | `credito-minimedia` | — |
 | 13/11 | **Transportistas**: fichas en Ajustes, zona → transportista, tarifas en la ficha y enlace de seguimiento en el pedido enviado. | `transportistas` | D226 |
 | 13/11 | **Diagnóstico de envíos**: estado de cada zona y «Probar envío» con el motivo exacto cuando no se puede enviar. | `envio-diagnostico` | D225 |

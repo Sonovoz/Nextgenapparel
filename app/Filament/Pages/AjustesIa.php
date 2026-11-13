@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Dominio\Asistente\AsistenteVenta;
+use App\Dominio\Asistente\ClaveIa;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Filament\Navegacion\GrupoNavegacion;
 use App\Models\Ajuste;
@@ -62,9 +63,16 @@ class AjustesIa extends Page implements HasSchemas
 
         return $schema->statePath('data')->components([
             Section::make('Asistente de venta')->columns(2)
-                ->description('Chat para clientes con cuenta y el correo confirmado que consulta el catálogo y el motor de precios (nunca inventa precios). Si OpenAI falla, se oculta y la tienda sigue. Clave: '
-                    .(filled(config('ia.openai_key')) ? 'configurada en el .env.' : 'falta OPENAI_API_KEY en el .env.')." Gastado este mes: {$gastado} €.")
+                ->description('Chat para clientes con cuenta y el correo confirmado que consulta el catálogo y el motor de precios (nunca inventa precios). Si OpenAI falla, se oculta y la tienda sigue.'." Gastado este mes: {$gastado} €.")
                 ->schema([
+                    // D227: la clave se guarda cifrada y no se vuelve a enseñar; vacía, se conserva la que hubiera.
+                    TextInput::make('clave')->label('Clave de OpenAI')->password()->revealable(false)->autocomplete('new-password')->maxLength(300)->columnSpanFull()
+                        ->placeholder(fn () => match (ClaveIa::origen()) {
+                            'env' => 'Configurada en el .env (manda sobre la del panel)',
+                            'panel' => 'Configurada ✓ · escribe otra para cambiarla',
+                            default => 'sk-…',
+                        })
+                        ->helperText('Se guarda cifrada y no se vuelve a mostrar. Si la APP_KEY del servidor cambia, hay que escribirla de nuevo.'),
                     Toggle::make('activa')->label('Mostrar el asistente a los clientes con cuenta')->columnSpanFull(),
                     TextInput::make('modelo')->label('Modelo de OpenAI')->required()->maxLength(60),
                     TextInput::make('mensajes_dia_nuevos')->label('Mensajes al día: clientes que aún no han comprado')->integer()->minValue(1)->maxValue(500)->required()
@@ -83,8 +91,23 @@ class AjustesIa extends Page implements HasSchemas
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('borrar_clave')->label('Borrar la clave')->color('danger')->requiresConfirmation()
+                ->visible(fn () => ClaveIa::origen() === 'panel')
+                ->modalDescription('El asistente y las ayudas de IA dejan de funcionar hasta que guardes otra.')
+                ->action(function (): void {
+                    ClaveIa::guardar(null);
+                    Actividad::apuntar('ajustes', 'Clave de IA borrada');
+                    Notification::make()->title('Clave borrada')->success()->send();
+                }),
             Action::make('guardar')->label('Guardar cambios')->action(function (): void {
-                foreach ($this->form->getState() as $clave => $valor) {
+                $estado = $this->form->getState();
+                if (filled($estado['clave'] ?? null)) {
+                    ClaveIa::guardar((string) $estado['clave']);
+                    Actividad::apuntar('ajustes', 'Clave de IA cambiada'); // nunca la clave
+                }
+                unset($estado['clave']);
+                $this->data['clave'] = null;
+                foreach ($estado as $clave => $valor) {
                     Ajuste::guardar('ia.'.$clave, $clave === 'modelo' ? trim((string) $valor) : ($clave === 'activa' ? (bool) $valor : (int) $valor));
                 }
                 Actividad::apuntar('ajustes', 'Ajustes de IA guardados');

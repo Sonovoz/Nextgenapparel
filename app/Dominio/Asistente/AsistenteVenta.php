@@ -28,7 +28,7 @@ final class AsistenteVenta
     {
         return $cliente !== null && $cliente->activo
             && $cliente->usuario?->hasVerifiedEmail() === true
-            && (bool) Ajuste::obtener('ia.activa') && filled(config('ia.openai_key')) && ! Cache::has(self::CAIDA)
+            && (bool) Ajuste::obtener('ia.activa') && ClaveIa::configurada() && ! Cache::has(self::CAIDA)
             && self::gastoDelMes() < (int) Ajuste::obtener('ia.limite_mensual') * 100 * 1000; // euros → milésimas de céntimo
     }
 

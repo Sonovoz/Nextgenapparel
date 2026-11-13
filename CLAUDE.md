@@ -19,7 +19,7 @@ Portal de pedidos de prendas personalizadas con impresión DTI (camisetas, polos
 7. **Dinero sin errores de redondeo:** importes en céntimos (enteros); precios guardados sin IVA más su tipo de impuesto, mostrados con IVA.
 8. **Alcance por versiones:** construir la versión 1 completa antes de cualquier función de la versión 2. La base de datos se diseña pensando en ambas.
 9. **No inventes resultados:** pruebas, métricas o auditorías no ejecutadas se declaran como no ejecutadas.
-10. **Secretos fuera del código:** claves de Redsys, SMTP e IA solo en variables de entorno.
+10. **Secretos fuera del código:** claves de Redsys solo en variables de entorno. La contraseña del SMTP y la clave de IA se pueden guardar en el panel, siempre cifradas con la APP_KEY y sin volver a mostrarse (D227); si están en el `.env`, manda el `.env`.
 11. **Una sola sesión trabaja en una rama a la vez.** Antes de empezar: `git fetch origin '+refs/heads/*:refs/remotes/origin/*'` y partir de la rama más reciente (nunca de una copia local vieja). Al cerrar una fase, actualiza el estado en `docs/FICHA.md` (sección «Estado»).
 12. **Reutiliza Clave de Alma** (`Sonovoz/Clavedealma`, misma pila: Laravel 13, Filament 5) antes de escribir desde cero: Redsys y Ajustes → Pagos, facturas y rectificativas con Veri*Factu, PDF, devoluciones, SMTP desde el panel, textos legales, registro de seguridad, 2FA del equipo e instalación en OVH. Se porta y se adapta a un solo vendedor (sin artistas ni comisiones), con sus tests (D171).
 
