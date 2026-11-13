@@ -110,4 +110,6 @@ return [
     // D221: «Choose your mode» inside the packs.
     'modos_pregunta' => 'What are they for?',
     'modos_todos' => 'All',
+    // Crédito del desarrollo.
+    'desarrollado_por' => 'Developed by',
 ];

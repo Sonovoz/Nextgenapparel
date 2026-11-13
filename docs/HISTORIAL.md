@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 13/11 | **Crédito de Minimedia** en el pie de la tienda y del backend (con la pantalla de entrada), enlazado a www.minimedia.es. | `credito-minimedia` | — |
 | 13/11 | **Transportistas**: fichas en Ajustes, zona → transportista, tarifas en la ficha y enlace de seguimiento en el pedido enviado. | `transportistas` | D226 |
 | 13/11 | **Diagnóstico de envíos**: estado de cada zona y «Probar envío» con el motivo exacto cuando no se puede enviar. | `envio-diagnostico` | D225 |
 | 13/11 | **Diseños del pack por zona**: el pack admite 1-3 diseños; el cliente elige cuál va en cada zona o la deja sin imprimir; maqueta con cada uno en su sitio. | `pack-disenos-por-zona` | D224 |
