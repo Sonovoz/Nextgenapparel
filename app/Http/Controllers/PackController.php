@@ -24,8 +24,10 @@ use App\Models\LineaPack;
 use App\Models\Pack;
 use App\Models\Prenda;
 use App\Models\Talla;
+use App\Models\ZonaImpresion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -80,8 +82,15 @@ class PackController
     public function anadir(Request $request, EditarCarrito $editar, string $idioma, string $pack): RedirectResponse
     {
         $pack = $this->pack($pack, $idioma);
+        $max = max(1, $pack->max_disenos);
         $datos = $request->validate([
-            'origen' => ['required', Rule::in(['diseno', 'texto'])],
+            // D224: «disenos» (Diseño 1, 2…) y «colocacion» (zona => número de diseño, vacío = sin imprimir).
+            'disenos' => ['required_with:colocacion', 'array', 'max:'.$max],
+            'disenos.*' => ['nullable', 'uuid'],
+            'colocacion' => ['nullable', 'array'],
+            'colocacion.*' => ['nullable', 'integer', 'min:0', 'max:'.$max],
+            // Forma anterior (un diseño o un texto en todas las zonas), que siguen usando los packs ya enlazados.
+            'origen' => ['required_without:colocacion', 'nullable', Rule::in(['diseno', 'texto'])],
             'diseno' => ['required_if:origen,diseno', 'nullable', 'uuid'],
             'texto' => ['required_if:origen,texto', 'nullable', 'string', 'max:'.Impresion::MAXIMO_TEXTO],
             'fuente' => ['nullable', 'integer', 'min:0', 'max:'.(Impresion::FUENTES - 1)],
@@ -91,16 +100,11 @@ class PackController
             'elecciones.*.color' => ['nullable', 'integer'],
             'elecciones.*.tallas' => ['nullable', 'array'],
             'elecciones.*.tallas.*' => ['nullable', 'integer', 'min:0', 'max:10000'],
-        ], [], ['diseno' => __('packs.campo_diseno'), 'texto' => __('packs.campo_texto')]);
+        ], ['disenos.max' => __('packs.max_disenos', ['n' => $max])], ['diseno' => __('packs.campo_diseno'), 'texto' => __('packs.campo_texto')]);
 
-        $esTexto = $datos['origen'] === 'texto';
-        $diseno = $esTexto ? null : Dueno::de($request)->filtrar(Diseno::query())->where('uuid', $datos['diseno'])->first();
-        $proporcion = $esTexto ? ColocacionInicial::deTexto($datos['texto']) : ($diseno ? $diseno->util_ancho_px / max(1, $diseno->util_alto_px) : 1.0);
-        $impresiones = [];
-        foreach ($pack->zonas as $zona) {
-            $impresiones[$zona->id] = [...ColocacionInicial::en($zona, $proporcion),
-                ...($esTexto ? ['texto' => $datos['texto'], 'fuente' => (int) ($datos['fuente'] ?? 0), 'tinta' => $datos['tinta'] ?? 'auto'] : ['diseno' => (string) $datos['diseno']])];
-        }
+        $impresiones = isset($datos['colocacion'])
+            ? $this->colocar($request, $pack, array_values(array_filter($datos['disenos'] ?? [])), $datos['colocacion'])
+            : $this->enTodas($request, $pack, $datos);
         // Del formulario llegan textos: el carrito quiere enteros.
         $elecciones = collect($datos['elecciones'] ?? [])->map(fn ($e) => array_filter([
             'color' => isset($e['color']) ? (int) $e['color'] : null,
@@ -114,6 +118,58 @@ class PackController
         }
 
         return redirect(CarritoController::url('ver'))->with('estado', __('packs.anadido', ['pack' => $pack->nombre]));
+    }
+
+    /**
+     * D224: cada zona incluida lleva el diseño que eligió el cliente (o ninguno), colocado como siempre
+     * (encajado, centrado y arriba). Los diseños se buscan entre los suyos.
+     *
+     * @param  list<string>  $uuids  Diseño 1, Diseño 2…
+     * @param  array<int|string, mixed>  $colocacion  zona_id => número de diseño (0 o vacío: sin imprimir)
+     * @return array<int, array<string, mixed>>
+     */
+    private function colocar(Request $request, Pack $pack, array $uuids, array $colocacion): array
+    {
+        $suyos = Diseno::whereIn('id', Dueno::de($request)->filtrar(Diseno::query())->whereIn('uuid', $uuids)->pluck('id'))->get()->keyBy('uuid');
+        $impresiones = [];
+        foreach (ZonaImpresion::whereIn('id', $pack->zonas->modelKeys())->get() as $zona) {
+            $numero = (int) ($colocacion[$zona->id] ?? 0);
+            if ($numero < 1) {
+                continue;
+            }
+            $uuid = $uuids[$numero - 1] ?? null;
+            if ($uuid === null) {
+                throw ValidationException::withMessages(['colocacion' => __('packs.falta_diseno_n', ['n' => $numero, 'zona' => $zona->nombre])]);
+            }
+            $diseno = $suyos->get($uuid);
+            $proporcion = $diseno ? $diseno->util_ancho_px / max(1, $diseno->util_alto_px) : 1.0;
+            $impresiones[$zona->id] = [...ColocacionInicial::en($zona, $proporcion), 'diseno' => $uuid];
+        }
+        if ($impresiones === []) {
+            throw ValidationException::withMessages(['colocacion' => __('packs.ninguna_zona')]);
+        }
+
+        return $impresiones;
+    }
+
+    /**
+     * Forma anterior: un diseño o un texto en todas las zonas del pack.
+     *
+     * @param  array<string, mixed>  $datos
+     * @return array<int, array<string, mixed>>
+     */
+    private function enTodas(Request $request, Pack $pack, array $datos): array
+    {
+        $esTexto = $datos['origen'] === 'texto';
+        $diseno = $esTexto ? null : Dueno::de($request)->filtrar(Diseno::query())->where('uuid', $datos['diseno'])->first();
+        $proporcion = $esTexto ? ColocacionInicial::deTexto($datos['texto']) : ($diseno ? $diseno->util_ancho_px / max(1, $diseno->util_alto_px) : 1.0);
+        $impresiones = [];
+        foreach ($pack->zonas as $zona) {
+            $impresiones[$zona->id] = [...ColocacionInicial::en($zona, $proporcion),
+                ...($esTexto ? ['texto' => $datos['texto'], 'fuente' => (int) ($datos['fuente'] ?? 0), 'tinta' => $datos['tinta'] ?? 'auto'] : ['diseno' => (string) $datos['diseno']])];
+        }
+
+        return $impresiones;
     }
 
     /** Subir un PNG desde la página del pack (sin JavaScript): vuelve con él elegido. */
@@ -134,7 +190,11 @@ class PackController
             throw ValidationException::withMessages(['archivo' => $error->mensaje()]);
         }
 
-        return back()->with('diseno_elegido', $diseno->uuid)->with('estado', __('packs.diseno_subido'));
+        // D224: vuelve con el nuevo elegido y, si el pack admite varios, con los que ya tenía marcados.
+        $mantener = array_values(array_filter((array) $request->input('mantener', []), fn ($u) => is_string($u) && Str::isUuid($u)));
+
+        return back()->with('diseno_elegido', $diseno->uuid)->with('disenos_elegidos', array_values(array_unique([...$mantener, $diseno->uuid])))
+            ->with('estado', __('packs.diseno_subido'));
     }
 
     /**
@@ -143,7 +203,7 @@ class PackController
      * igual que lo coloca ColocacionInicial al añadir.
      *
      * @param  list<int>  $zonasPack
-     * @return array<int, list<array{url: string, zonas: list<array{x: float, y: float, ancho: float, alto: float}>}>>
+     * @return array<int, list<array{url: string, zonas: list<array{id: int, x: float, y: float, ancho: float, alto: float}>}>>
      */
     private static function maqueta(LineaPack $linea, array $zonasPack): array
     {
@@ -156,7 +216,7 @@ class PackController
             $caras = collect($color['caras'])->filter()->map(fn (array $cara) => [
                 'url' => (string) $cara['url'],
                 'zonas' => collect($cara['zonas'])->filter(fn (array $z) => in_array($z['id'], $zonasPack, true))
-                    ->map(fn (array $z) => ['x' => (float) $z['x'], 'y' => (float) $z['y'], 'ancho' => (float) $z['ancho'], 'alto' => (float) $z['alto']])->values()->all(),
+                    ->map(fn (array $z) => ['id' => (int) $z['id'], 'x' => (float) $z['x'], 'y' => (float) $z['y'], 'ancho' => (float) $z['ancho'], 'alto' => (float) $z['alto']])->values()->all(),
             ]);
             $conZonas = $caras->filter(fn (array $c) => $c['zonas'] !== [])->values()->all();
             $maqueta[(int) $color['id']] = $conZonas !== [] ? $conZonas : $caras->take(1)->values()->all();

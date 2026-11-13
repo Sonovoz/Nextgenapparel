@@ -55,4 +55,15 @@ return [
     'maqueta_sin_diseno' => 'Elige o sube tu diseño y lo verás aquí, puesto en tus prendas.',
     // D223: cada prenda del pack lleva las zonas que ofrece.
     'segun_prenda' => '(según la prenda)',
+    // D224: varios diseños y dónde va cada uno.
+    'paso_disenos' => 'Tus diseños (hasta :n)',
+    'paso_disenos_ayuda' => 'Marca hasta :n diseños o sube uno nuevo: se numeran en orden (Diseño 1, Diseño 2…).',
+    'paso_colocacion' => '¿Dónde va tu diseño?',
+    'paso_colocacion_varios' => '¿Dónde va cada diseño?',
+    'colocacion_ayuda' => 'Se aplica a todas las prendas del pack; puedes dejar zonas sin imprimir.',
+    'sin_imprimir' => 'Sin imprimir',
+    'diseno_n' => 'Diseño :n',
+    'max_disenos' => 'Este pack admite hasta :n diseños.',
+    'falta_diseno_n' => 'Has puesto el Diseño :n en :zona: márcalo arriba o cambia la zona.',
+    'ninguna_zona' => 'Elige al menos una zona para tu diseño.',
 ];

@@ -21,6 +21,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * Productos → Packs: oferta cerrada con precio fijo (ficha § 6 bis, D105–D107).
  *
  * @property RepartoPack $reparto
+ * @property int $max_disenos diseños distintos que puede poner el cliente (D224)
  * @property ?list<string> $modos claves de ModoCliente; null o vacío: genérico (D203)
  */
 class Pack extends Model
@@ -47,7 +48,7 @@ class Pack extends Model
 
     protected function casts(): array
     {
-        return ['precio_neto' => 'boolean', 'precio' => 'integer', 'reparto' => RepartoPack::class, 'activo' => 'boolean', 'desde' => 'datetime', 'hasta' => 'datetime', 'modos' => 'array'];
+        return ['precio_neto' => 'boolean', 'precio' => 'integer', 'reparto' => RepartoPack::class, 'activo' => 'boolean', 'desde' => 'datetime', 'hasta' => 'datetime', 'modos' => 'array', 'max_disenos' => 'integer'];
     }
 
     /** @return HasMany<LineaPack, $this> */

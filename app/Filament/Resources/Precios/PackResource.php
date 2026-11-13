@@ -133,6 +133,10 @@ class PackResource extends RecursoPrecios
                             }
                         }
                     }),
+                // D224: cuántos diseños distintos puede poner el cliente; él decide en qué zonas incluidas va cada uno.
+                ToggleButtons::make('max_disenos')->label('Diseños que puede poner el cliente')->inline()->required()->default(1)
+                    ->options([1 => 'Uno', 2 => 'Dos', 3 => 'Tres'])
+                    ->helperText('El cliente elige dónde va cada diseño entre las zonas incluidas (por ejemplo, el 1 en el pecho y el 2 en la espalda) y puede dejar zonas sin imprimir.'),
             ]),
             Section::make('Prendas del pack')->schema([
                 Repeater::make('lineas')->hiddenLabel()->relationship('lineas')->minItems(1)->defaultItems(1)->columns(3)

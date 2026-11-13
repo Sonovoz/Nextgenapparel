@@ -55,4 +55,15 @@ return [
     'maqueta_sin_diseno' => 'Choose or upload your design and you will see it here, on your garments.',
     // D223: each pack garment gets the zones it offers.
     'segun_prenda' => '(depending on the garment)',
+    // D224: several designs and where each goes.
+    'paso_disenos' => 'Your designs (up to :n)',
+    'paso_disenos_ayuda' => 'Tick up to :n designs or upload a new one: they are numbered in order (Design 1, Design 2…).',
+    'paso_colocacion' => 'Where does your design go?',
+    'paso_colocacion_varios' => 'Where does each design go?',
+    'colocacion_ayuda' => 'It applies to every garment in the pack; you can leave areas unprinted.',
+    'sin_imprimir' => 'Not printed',
+    'diseno_n' => 'Design :n',
+    'max_disenos' => 'This pack allows up to :n designs.',
+    'falta_diseno_n' => 'You put Design :n on :zona: tick it above or change the area.',
+    'ninguna_zona' => 'Choose at least one area for your design.',
 ];
