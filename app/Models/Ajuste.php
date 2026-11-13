@@ -34,6 +34,10 @@ class Ajuste extends Model
         'disenos.horas_sin_venta' => 72,
         // D230: días que se guardan los archivos de impresión de un pedido desde su envío (o desde el pedido si no se envía).
         'pedidos.dias_archivos' => 90,
+        // D231: espacio máximo del proyecto (GB) y a qué porcentaje avisa la salud del sistema (aviso y fallo).
+        'almacenamiento.limite_gb' => 20,
+        'almacenamiento.aviso_pct' => 80,
+        'almacenamiento.fallo_pct' => 95,
         // Fotos del catálogo (D210): al subirlas se pasan a WebP con este lado mayor y esta calidad (1-100).
         'catalogo.foto_max_px' => 2000,
         'catalogo.foto_calidad' => 82,
