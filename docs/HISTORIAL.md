@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 13/11 | **Último envío sin precio** visible en Ajustes → Envío: país, CP, peso, prendas y motivo. | `envio-ultimo-fallo` | D232 |
 | 13/11 | **Medidas al pasar el cursor**: sobre el diseño, zona, ancho × alto en cm y calidad con sus ppp. | `medidas-al-pasar` | D229 |
 | 13/11 | **Tamaño de impresión y pixelado claros**: medida grande, máximo de la zona, aviso sobre la prenda, botón a tamaño nítido y aviso al añadir. | `tamano-impresion-claro` | D229 |
 | 13/11 | **Almacenamiento**: espacio por tipo frente al máximo, borrar sin venta, ZIP de originales antes de borrarlos; salud: espacio del proyecto y limpiezas al día. | `almacenamiento` | D231 |

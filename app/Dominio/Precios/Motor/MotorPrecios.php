@@ -468,14 +468,12 @@ final class MotorPrecios
     private function calcularEnvio(Destino $destino, array $lineas): ?array
     {
         // El cálculo vive en CalculoEnvio para que el backend lo pueda probar (D225).
-        $calculo = CalculoEnvio::para(
-            $destino,
-            array_sum(array_map(fn ($l) => $l->pesoGramos, $lineas)),
-            array_sum(array_map(fn ($l) => $l->unidades, $lineas)),
-            array_sum(array_map(fn ($l) => $l->neto(), $lineas)),
-        );
+        $peso = array_sum(array_map(fn ($l) => $l->pesoGramos, $lineas));
+        $unidades = array_sum(array_map(fn ($l) => $l->unidades, $lineas));
+        $calculo = CalculoEnvio::para($destino, $peso, $unidades, array_sum(array_map(fn ($l) => $l->neto(), $lineas)));
         if ($calculo['envio'] === null) {
             $this->impedimentos[] = new Mensaje('sin_envio');
+            CalculoEnvio::apuntarFallo($destino, $peso, $unidades, (string) $calculo['motivo'], $calculo['zona']); // D232
 
             return null;
         }
