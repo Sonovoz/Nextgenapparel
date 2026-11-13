@@ -68,10 +68,15 @@ class ZonaEnvioResource extends RecursoPrecios
                 ->visible(fn (Get $get) => static::metodo($get) === MetodoEnvio::PorKilo)
                 ->orderColumn(false)->columns(2)->defaultItems(1)
                 ->schema([
-                    TextInput::make('hasta_gramos')->label('Hasta')->integer()->minValue(1)->suffix('g')->required()->distinct(),
+                    // En kilos en el formulario (p. ej. 2,5); en la base, gramos.
+                    TextInput::make('hasta_gramos')->label('Hasta')->suffix('kg')->required()->distinct()->inputMode('decimal')->placeholder('5')
+                        ->rule('regex:/^\d{1,4}([.,]\d{1,3})?$/')->validationMessages(['regex' => 'Escribe los kilos, por ejemplo 5 o 2,5.'])
+                        ->formatStateUsing(fn ($state) => $state === null || $state === '' ? null : rtrim(rtrim(number_format((int) $state / 1000, 3, ',', ''), '0'), ','))
+                        ->dehydrateStateUsing(fn ($state) => (int) round((float) str_replace(',', '.', (string) $state) * 1000)),
                     CampoDinero::make('precio', 'Precio')->required(),
                 ]),
             CampoDinero::make('precio_kg_extra', 'Por cada kilo más del último tramo')->nullable()
+                ->helperText('Si lo dejas vacío, los pedidos más pesados que el último tramo no se pueden enviar.')
                 ->visible(fn (Get $get) => static::metodo($get) === MetodoEnvio::PorKilo)
                 ->dehydrateStateUsing(fn ($state) => blank($state) ? null : CampoDinero::aCentimos($state)),
             Toggle::make('activa')->label('Activa')->default(true),
