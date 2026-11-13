@@ -90,10 +90,17 @@
     <p class="claro" id="ajustador-vacio">{{ __('tienda.ajustar_vacio') }}</p>
     <div class="ajustador" id="ajustador" hidden>
         <h2 class="ajustador-titulo">{{ __('tienda.ajusta') }}</h2>
+        {{-- D229: el tamaño real de impresión, grande y claro, con el máximo de la zona. --}}
+        <div class="medida-impresion" id="medida-impresion">
+            <span class="medida-etiqueta">{{ __('tienda.tamano_impresion') }}</span>
+            <output id="medida-diseno" for="tamano-diseno" class="medida-valor"></output>
+            <span class="medida-zona" id="medida-zona"></span>
+        </div>
         <div class="fila-tamano">
             <label for="tamano-diseno" class="oculto">{{ __('tienda.tamano') }}</label>
+            <span class="fila-tamano-extremo" aria-hidden="true">{{ __('tienda.mas_pequeno') }}</span>
             <input type="range" id="tamano-diseno" min="20" max="100" step="1" value="100">
-            <output id="medida-diseno" for="tamano-diseno"></output>
+            <span class="fila-tamano-extremo" aria-hidden="true">{{ __('tienda.mas_grande') }}</span>
         </div>
         <p class="claro" style="font-size: 13px;">{{ __('tienda.arrastra') }}</p>
         <div class="opciones">
@@ -109,6 +116,8 @@
         <div class="calidad-barra" aria-hidden="true"><span id="calidad-relleno"></span></div>
         <p id="calidad-mensaje"></p>
         <p class="claro" id="calidad-consejo"></p>
+        {{-- D229: si se va a ver pixelado, un botón lo deja al mayor tamaño que se imprime nítido. --}}
+        <button type="button" class="boton-pildora calidad-ajustar" id="calidad-ajustar" hidden></button>
         <p id="calidad-fondo"></p>
     </div>
 

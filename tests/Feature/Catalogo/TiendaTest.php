@@ -273,6 +273,22 @@ class TiendaTest extends TestCase
         $this->assertSame('Calidad baja', $calidad['textos']['nivel_baja']);
     }
 
+    /** D229: el tamaño de impresión se ve grande y claro, y hay aviso y botón para cuando se verá pixelado. */
+    public function test_el_configurador_ensena_el_tamano_de_impresion_y_avisa_del_pixelado(): void
+    {
+        $camiseta = $this->camiseta();
+        $foto = Foto::create(['prenda_id' => $camiseta->id, 'color_id' => $camiseta->variantes()->first()->color_id, 'tipo' => TipoFoto::Maqueta, 'cara' => Cara::Delantera, 'ruta' => 'catalogo/1/x.webp']);
+        FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $camiseta->zonas()->first()->id, 'x' => 3000, 'y' => 2600, 'ancho' => 4000, 'alto' => 4200]);
+
+        $html = $this->get('/es/camisetas/camiseta-essential')->assertOk()
+            ->assertSee('Tamaño de impresión en la prenda')->assertSee('id="medida-zona"', false)
+            ->assertSee('id="aviso-pixelado"', false)->assertSee('id="calidad-ajustar"', false)->getContent();
+        preg_match("/data-textos='([^']+)'/", $html, $coincidencia);
+        $textos = json_decode(html_entity_decode($coincidencia[1] ?? '{}'), true);
+        $this->assertStringContainsString('se verá pixelado', (string) ($textos['pixelado_aviso'] ?? ''));
+        $this->assertSame('Ajustar el tamaño', $textos['pixelado_ajustar'] ?? null);
+    }
+
     public function test_los_textos_de_la_tienda_existen_en_los_dos_idiomas(): void
     {
         foreach (['tienda', 'disenos'] as $archivo) {
