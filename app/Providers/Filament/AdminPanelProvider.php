@@ -16,6 +16,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -40,6 +41,8 @@ class AdminPanelProvider extends PanelProvider
             ->multiFactorAuthentication([AppAuthentication::make()->recoverable()->brandName('Nextgenapparel')], isRequired: true)
             ->multiFactorAuthenticationRequiredMiddlewareName(DosPasosEquipo::class)
             ->brandName('Nextgenapparel')
+            // Crédito del desarrollo (Minimedia) en el pie del backend, también en la pantalla de entrada.
+            ->renderHook(PanelsRenderHook::FOOTER, fn () => view('filament.partials.credito'))
             ->defaultAvatarProvider(AvatarIniciales::class)
             ->colors([
                 // Gris neutro para todo el backend: sobrio y coherente con el frontend.
