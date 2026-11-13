@@ -2,10 +2,14 @@
 
 namespace Tests\Feature\Carrito;
 
+use App\Dominio\Catalogo\Cara;
+use App\Dominio\Catalogo\TipoFoto;
 use App\Models\Carrito;
 use App\Models\Color;
 use App\Models\Diseno;
 use App\Models\Familia;
+use App\Models\Foto;
+use App\Models\FotoZona;
 use App\Models\Pack;
 use App\Models\Prenda;
 use App\Models\Talla;
@@ -78,6 +82,20 @@ class PackTest extends TestCase
         $this->assertSame('La Vaca Lola', Carrito::sole()->lineas()->sole()->coleccion);
 
         $this->post('/es/packs/pack-joven', ['origen' => 'diseno', 'diseno' => $diseno->uuid, 'coleccion' => str_repeat('a', 61)])->assertSessionHasErrors('coleccion');
+    }
+
+    /** D222: la página del pack enseña la prenda con el diseño elegido en cada zona del pack. */
+    public function test_la_maqueta_viva_pone_el_diseno_elegido_en_la_zona_del_pack(): void
+    {
+        $prenda = $this->pack->lineas()->sole()->prenda;
+        $foto = Foto::create(['prenda_id' => $prenda->id, 'color_id' => $this->negro->id, 'tipo' => TipoFoto::Maqueta, 'cara' => Cara::Delantera, 'ruta' => 'catalogo/1/negro.webp']);
+        FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $this->frontal->id, 'x' => 3770, 'y' => 2260, 'ancho' => 2460, 'alto' => 2790]);
+        $this->get('/es/packs/pack-joven')->assertSee('Elige o sube tu diseño y lo verás aquí');
+
+        $diseno = $this->diseno([]);
+        $this->get('/es/packs/pack-joven')->assertOk()->assertSee('Así quedará tu colección')
+            ->assertSee('left: 37.7%; top: 22.6%; width: 24.6%; height: 27.9%;', false)
+            ->assertSee(route('disenos.miniatura', ['diseno' => $diseno->uuid]), false);
     }
 
     public function test_un_reparto_incompleto_o_un_diseno_ajeno_no_se_anaden(): void
