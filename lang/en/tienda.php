@@ -168,4 +168,11 @@ return [
     'procesando_pago' => 'Connecting to the bank',
     'procesando_pago_detalle' => 'Taking you to the secure payment page.',
     'procesando_detalle' => 'We are working on it.',
+    // D213: otra prenda con el mismo diseño
+    'tu_pedido' => '{1} Your order: 1 garment · :uds pcs|[2,*] Your order: :n garments · :uds pcs',
+    'anadido_titulo' => 'Added to your order',
+    'anadido_otra' => 'Add another garment with this design',
+    'anadido_otra_ayuda' => 'Your design is already placed: just check it and choose sizes and colours. What you added stays in your order.',
+    'anadido_ver_pedido' => 'View my order and pay',
+    'anadido_desde' => 'from',
 ];

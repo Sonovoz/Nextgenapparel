@@ -76,4 +76,7 @@ return [
     'recargo' => 'Equivalence surcharge',
     'base' => 'Taxable base',
     'siguiente_fase' => 'All set. Very soon you will be able to confirm and pay for your order right here; if you have no account, we will email you a link to confirm your address.',
+    'completa_titulo' => 'Complete your collection',
+    'completa_ayuda' => 'More garments with your design already placed: pick one and choose sizes and colours.',
+    'completa_desde' => 'from',
 ];

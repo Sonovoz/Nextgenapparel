@@ -158,6 +158,27 @@
                     </aside>
                 </div>
             @endif
+            @if (! empty($completa))
+                {{-- D213: seguir el pedido con otra prenda y el mismo diseño ya colocado. --}}
+                <section class="completa" aria-labelledby="titulo-completa">
+                    <h2 id="titulo-completa">{{ __('carrito.completa_titulo') }}</h2>
+                    <p class="claro">{{ __('carrito.completa_ayuda') }}</p>
+                    <ul class="completa-lista">
+                        @foreach ($completa as $otra)
+                            <li><a href="{{ $otra['url'] }}">
+                                <span class="completa-foto">
+                                    @if ($otra['previa']['foto'])<img src="{{ $otra['previa']['foto'] }}" alt="" loading="lazy">@endif
+                                    @foreach ($otra['previa']['capas'] as $capa)
+                                        <img class="completa-capa" src="{{ $capa['url'] }}" alt="" loading="lazy" style="left: {{ $capa['x'] }}%; top: {{ $capa['y'] }}%; width: {{ $capa['ancho'] }}%; height: {{ $capa['alto'] }}%;">
+                                    @endforeach
+                                </span>
+                                <strong>{{ $otra['nombre'] }}</strong>
+                                @if ($otra['desde'])<small class="claro">{{ __('carrito.completa_desde') }} {{ $otra['desde'] }}</small>@endif
+                            </a></li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
         </div>
     </section>
     {{-- Las cantidades se guardan solas (D201): el precio lo recalcula el servidor. Sin JavaScript, el botón. --}}

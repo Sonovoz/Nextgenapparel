@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Dominio\Carrito\CarritoActual;
+use App\Dominio\Carrito\DisenosDeLinea;
 use App\Dominio\Catalogo\Escaparate;
+use App\Dominio\Catalogo\OtrasPrendas;
 use App\Dominio\Catalogo\Portada;
 use App\Dominio\Precios\Configurador;
 use App\Dominio\Precios\Formato;
 use App\Dominio\Precios\Motor\MotorPrecios;
 use App\Dominio\Seo\DatosEstructurados;
+use App\Models\Carrito;
+use App\Models\LineaCarrito;
 use App\Models\Talla;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -88,6 +93,11 @@ class TiendaController
             'tallas' => Talla::whereIn('id', $prenda->variantes()->aLaVenta()->distinct()->pluck('talla_id'))->orderBy('orden')->pluck('nombre'),
             'medidas' => $prenda->medidas->sortBy(fn ($m) => $m->talla->orden)->values(),
             'precio' => Escaparate::precioDesde($prenda),
+            // D213: diseños que vienen de otra prenda del pedido («Añade otra prenda con este diseño»),
+            // otras prendas para seguir y lo que ya lleva el pedido.
+            'llevar' => DisenosDeLinea::de($carrito = CarritoActual::de(request()), request()->query('con')),
+            'otras' => OtrasPrendas::para([$prenda->id]),
+            'pedidoActual' => self::resumenPedido($carrito),
             'alternos' => $alternos,
             'seo' => [
                 'tipo' => 'product',
@@ -137,5 +147,16 @@ class TiendaController
     private function alternos(callable $url): array
     {
         return collect(config('idiomas.disponibles'))->keys()->mapWithKeys(fn ($i) => [$i => $url($i)])->all();
+    }
+
+    /** «Tu pedido: 2 prendas · 40 uds» para el configurador, o null con el carrito vacío. @return array{lineas: int, unidades: int}|null */
+    private static function resumenPedido(?Carrito $carrito): ?array
+    {
+        $lineas = $carrito?->lineas()->get() ?? collect();
+        if ($lineas->isEmpty()) {
+            return null;
+        }
+
+        return ['lineas' => $lineas->count(), 'unidades' => (int) $lineas->sum(fn (LineaCarrito $l) => array_sum($l->unidadesPorTalla()))];
     }
 }
