@@ -49,4 +49,8 @@ return [
     'falta_tallas' => 'Split all the garments across sizes to continue.',
     'ia_boton' => 'Not sure about sizes? Ask the assistant',
     'ia_pregunta' => 'How should I split the sizes of :n :prenda for my collection?',
+    // D222: live pack mock-up.
+    'maqueta_titulo' => 'This is how your collection will look',
+    'maqueta_nota' => 'Preview with your design on each pack zone. Your order shows the exact mock-up and print quality.',
+    'maqueta_sin_diseno' => 'Choose or upload your design and you will see it here, on your garments.',
 ];

@@ -1272,3 +1272,21 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .aviso-tienda-botones { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 22px; }
 @keyframes aviso-sacudida { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
 @media (prefers-reduced-motion: reduce) { .aviso-tienda.visible .aviso-tienda-caja { animation: none; } }
+
+/* D222: maqueta viva del pack: la prenda con el diseño elegido. En escritorio, en el resumen; en móvil, en el paso 1. */
+.pack-maqueta { border-radius: 16px; padding: 14px; background: radial-gradient(90% 80% at 50% 35%, #1C1E2C, var(--fondo-suave)); border: 1px solid var(--linea-fuerte); }
+.pack-maqueta.con-diseno { border-color: rgba(142, 160, 255, .45); box-shadow: 0 18px 50px -24px rgba(45, 75, 255, .9); }
+.pack-maqueta-titulo { margin: 0 0 10px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--neon); }
+.pack-maqueta-titulo::before { content: "✦ "; }
+.pack-maqueta-prendas { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.pack-maqueta-cara { position: relative; margin: 0; aspect-ratio: 5 / 6; border-radius: 12px; overflow: hidden; background: #F3F2EF; }
+.pack-maqueta-cara > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.pack-maqueta-zona { position: absolute; display: block; }
+.pack-maqueta-zona img { width: 100%; height: 100%; object-fit: contain; object-position: center top; display: block; }
+.pack-maqueta-zona.revela img { animation: maqueta-revela .7s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes maqueta-revela { from { opacity: 0; transform: scale(.82); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+@media (prefers-reduced-motion: reduce) { .pack-maqueta-zona.revela img { animation: none; } }
+.pack-maqueta .pack-nota { margin-top: 10px; }
+.pack-maqueta-resumen { display: none; }
+@media (min-width: 980px) { .pack-maqueta-resumen { display: block; } .pack-maqueta-paso { display: none; } }
+.pack-maqueta.vacia { display: none !important; }

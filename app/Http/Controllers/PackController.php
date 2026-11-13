@@ -43,6 +43,7 @@ class PackController
         $dueno = Dueno::de($request, crear: false);
         $tallas = Talla::orderBy('orden')->get(['id', 'nombre']);
         $libre = $pack->reparto === RepartoPack::Libre;
+        $zonasPack = $pack->zonas->pluck('id')->all();
 
         return view('packs.ver', [
             'pack' => $pack,
@@ -50,7 +51,7 @@ class PackController
             'neto' => ($n = $pack->precioParaMostrar()['neto']) === null ? null : Formato::euros($n), // D219
             'libre' => $libre,
             // D220: cada prenda del pack con sus colores (muestra y foto de ese color) y sus tallas en orden de talla.
-            'lineas' => $pack->lineas->map(function (LineaPack $l) use ($libre, $tallas) {
+            'lineas' => $pack->lineas->map(function (LineaPack $l) use ($libre, $tallas, $zonasPack) {
                 $ids = array_map('intval', $libre ? ($l->tallas_permitidas ?? []) : array_keys($l->reparto_tallas ?? []));
                 $general = Escaparate::fotoPrincipal($l->prenda)?->url();
 
@@ -61,6 +62,7 @@ class PackController
                     ])->all(),
                     'tallas' => $tallas->whereIn('id', $ids)->map(fn (Talla $t) => ['id' => $t->id, 'nombre' => $t->nombre, 'fijas' => (int) ($l->reparto_tallas[$t->id] ?? 0)])->values()->all(),
                     'foto' => $general,
+                    'maqueta' => self::maqueta($l, $zonasPack),
                 ];
             }),
             'disenos' => $dueno === null ? collect() : $dueno->filtrar(Diseno::query())->where('estado', '!=', 'rechazado')->latest('id')->limit(24)->get(),
@@ -129,6 +131,34 @@ class PackController
         }
 
         return back()->with('diseno_elegido', $diseno->uuid)->with('estado', __('packs.diseno_subido'));
+    }
+
+    /**
+     * D222: maqueta viva del pack. Por color de la línea, las caras de la prenda con alguna zona del pack
+     * y dónde está cada zona en la foto (en %). El diseño se dibuja encajado, centrado y arriba en la zona,
+     * igual que lo coloca ColocacionInicial al añadir.
+     *
+     * @param  list<int>  $zonasPack
+     * @return array<int, list<array{url: string, zonas: list<array{x: float, y: float, ancho: float, alto: float}>}>>
+     */
+    private static function maqueta(LineaPack $linea, array $zonasPack): array
+    {
+        $colores = array_map('intval', $linea->colores ?? []);
+        $maqueta = [];
+        foreach (Escaparate::colores($linea->prenda) as $color) {
+            if ($colores !== [] && ! in_array($color['id'], $colores, true)) {
+                continue;
+            }
+            $caras = collect($color['caras'])->filter()->map(fn (array $cara) => [
+                'url' => (string) $cara['url'],
+                'zonas' => collect($cara['zonas'])->filter(fn (array $z) => in_array($z['id'], $zonasPack, true))
+                    ->map(fn (array $z) => ['x' => (float) $z['x'], 'y' => (float) $z['y'], 'ancho' => (float) $z['ancho'], 'alto' => (float) $z['alto']])->values()->all(),
+            ]);
+            $conZonas = $caras->filter(fn (array $c) => $c['zonas'] !== [])->values()->all();
+            $maqueta[(int) $color['id']] = $conZonas !== [] ? $conZonas : $caras->take(1)->values()->all();
+        }
+
+        return $maqueta;
     }
 
     /** Foto de la prenda en ese color: su maqueta delantera o, si no hay, cualquiera de ese color. */

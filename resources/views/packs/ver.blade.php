@@ -3,6 +3,7 @@
     // con el contador. Sin JavaScript sigue funcionando: subir el PNG y añadir son formularios normales.
     $elegido = old('diseno', session('diseno_elegido', $disenos->first()?->uuid));
     $paso = 0;
+    $disenoUrl = $elegido && $disenos->contains('uuid', $elegido) ? route('disenos.miniatura', ['diseno' => $elegido]) : null;
 @endphp
 <x-tienda :titulo="$pack->nombre.' · Nextgenapparel'" :descripcion="$pack->descripcion ?: __('packs.entradilla')" :alternos="$alternos">
     <section class="pack-pagina" aria-labelledby="titulo-pack">
@@ -58,6 +59,7 @@
                         </div>
                         <noscript><button type="submit" form="pack-subir" class="boton">{{ __('packs.subir') }}</button></noscript>
                         <p class="pack-nota">{{ __('packs.colocacion') }}</p>
+                        @include('packs._maqueta', ['donde' => 'paso'])
                     </section>
 
                     {{-- 2. Nombre de la colección (su marca): para reconocerla en el carrito, el pedido y al repetir. --}}
@@ -132,6 +134,7 @@
 
                 {{-- Resumen fijo: lo que falta, el contador total y el botón. --}}
                 <aside class="pack-resumen" aria-label="{{ __('packs.resumen') }}">
+                    @include('packs._maqueta', ['donde' => 'resumen'])
                     <p class="etiqueta">{{ __('packs.resumen') }}</p>
                     <h2>{{ $pack->nombre }}</h2>
                     <p class="pack-resumen-precio">{{ $neto ?? $precio }}<small>{{ ($neto ?? null) ? __('portada.pack_mas_iva') : __('portada.pack_iva') }}</small></p>
@@ -229,6 +232,39 @@
             window.AvisoTienda?.mostrar(mensaje);
         });
         actualizar();
+
+        // D222: maqueta viva. Redibuja las prendas con el diseño elegido y el color de cada prenda.
+        const maquetas = @js($lineas->mapWithKeys(fn ($l) => [$l['linea']->id => ['maqueta' => $l['maqueta'], 'color' => $l['colores'][0]['id'] ?? null, 'nombre' => $l['linea']->prenda->nombre]]));
+        const notas = @js(['con' => __('packs.maqueta_nota'), 'sin' => __('packs.maqueta_sin_diseno')]);
+        const dibujar = (nuevo) => {
+            const elegido = formulario.querySelector('input[name=diseno]:checked');
+            const diseno = elegido ? elegido.parentElement.querySelector('img').src : null;
+            const figuras = Object.entries(maquetas).flatMap(([id, l]) => {
+                const marcado = formulario.querySelector(`input[name="elecciones[${id}][color]"]:checked`);
+                const caras = l.maqueta[marcado ? marcado.value : (l.color ?? Object.keys(l.maqueta)[0])] || [];
+                return caras.map((c) => {
+                    const f = document.createElement('figure'); f.className = 'pack-maqueta-cara';
+                    const foto = new Image(); foto.src = c.url; foto.alt = l.nombre; f.append(foto);
+                    if (diseno) c.zonas.forEach((z) => {
+                        const zona = document.createElement('span'); zona.className = 'pack-maqueta-zona' + (nuevo ? ' revela' : '');
+                        Object.assign(zona.style, { left: z.x + '%', top: z.y + '%', width: z.ancho + '%', height: z.alto + '%' });
+                        const img = new Image(); img.src = diseno; img.alt = ''; zona.append(img); f.append(zona);
+                    });
+                    return f;
+                });
+            });
+            document.querySelectorAll('[data-maqueta]').forEach((m) => {
+                m.querySelector('[data-maqueta-prendas]').replaceChildren(...figuras.map((f) => f.cloneNode(true)));
+                m.querySelector('[data-maqueta-nota]').textContent = diseno ? notas.con : notas.sin;
+                m.classList.toggle('con-diseno', !!diseno);
+                m.classList.toggle('vacia', !figuras.length); // ese color aún no tiene foto: no se deja un hueco
+            });
+        };
+        formulario.addEventListener('change', (e) => {
+            if (e.target.name === 'diseno') dibujar(true);
+            else if (/^elecciones\[\d+\]\[color\]$/.test(e.target.name)) dibujar(false);
+        });
+        dibujar(false);
 
         // IA (si el asistente está disponible para este cliente): abre el chat con una pregunta sobre las tallas.
         const ia = formulario.querySelector('[data-preguntar]'), asistente = document.getElementById('asistente');

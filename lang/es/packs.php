@@ -49,4 +49,8 @@ return [
     'falta_tallas' => 'Reparte todas las prendas entre las tallas para continuar.',
     'ia_boton' => '¿Dudas con las tallas? Pregunta al asistente',
     'ia_pregunta' => '¿Cómo reparto las tallas de :n :prenda para mi colección?',
+    // D222: maqueta viva del pack.
+    'maqueta_titulo' => 'Así quedará tu colección',
+    'maqueta_nota' => 'Vista previa con tu diseño en cada zona del pack. En tu pedido verás la maqueta exacta y la calidad de impresión.',
+    'maqueta_sin_diseno' => 'Elige o sube tu diseño y lo verás aquí, puesto en tus prendas.',
 ];
