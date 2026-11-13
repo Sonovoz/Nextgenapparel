@@ -1154,13 +1154,17 @@
             document.getElementById('calidad-relleno').style.width = '0';
         }
         mostrarMejoraIa(null);
+        avisoPixelado(null);
+        botonNitido.hidden = true;
         if (!zona) return;
 
         var color = colores[estado.color];
         var g = geometriaMm(disenoPara(color), zona);
         var anchoMm = g.w, altoMm = g.h;
         tamano.value = Math.round(ajusteDe(zona.id).escala * 100);
-        document.getElementById('medida-diseno').textContent = texto('medida_impresion', { medida: cm(anchoMm) + ' × ' + cm(altoMm) + ' cm' });
+        // D229: el tamaño real de impresión, grande, y el máximo de la zona.
+        document.getElementById('medida-diseno').textContent = cm(anchoMm) + ' × ' + cm(altoMm) + ' cm';
+        document.getElementById('medida-zona').textContent = texto('medida_zona', { medida: cm(zona.ancho_mm) + ' × ' + cm(zona.alto_mm) + ' cm' });
 
         var t = calidad.textos;
         var etiqueta = document.getElementById('calidad-etiqueta');
@@ -1194,6 +1198,13 @@
             consejo.textContent = t.consejo_mejorar.replace(':px', Math.ceil(anchoMm / 25.4 * calidad.umbrales.correcto));
         }
         mostrarMejoraIa(n, cm(anchoMm) + ' × ' + cm(altoMm) + ' cm');
+        // D229: aviso sobre la prenda y botón para dejarlo al mayor tamaño nítido.
+        avisoPixelado(n);
+        var nitida = escalaNitida(zona, disenoPara(color));
+        if ((n === 'justa' || n === 'baja') && nitida !== null) {
+            botonNitido.hidden = false;
+            botonNitido.textContent = texto('ajustar_nitido', { medida: cm(nitida.anchoMm) + ' cm' });
+        }
         if (estado.logoTipo === 'fondo') fondo.textContent = t.fondo;
         if (estado.logoTipo === 'fondo_blanco') fondo.textContent = t.fondo_blanco;
     }
@@ -1230,6 +1241,56 @@
             }
         });
     }
+
+    /* D229: el mayor tamaño al que el diseño sale con calidad excelente (null si ni al mínimo). */
+    var botonNitido = document.getElementById('calidad-ajustar');
+    var lienzoAviso = document.getElementById('aviso-pixelado');
+    function escalaNitida(zona, diseno) {
+        if (!estado.logoPx || estado.modo !== 'logo' || estado.logoTipo === 'vectorial') return null;
+        var anchoMax = estado.logoPx.w * 25.4 / calidad.umbrales.correcto;
+        var proporcion = diseno.width / diseno.height;
+        var escala = proporcion > zona.ancho_mm / zona.alto_mm ? anchoMax / zona.ancho_mm : (anchoMax / proporcion) / zona.alto_mm;
+        escala = Math.floor(Math.min(1, escala) * 100) / 100;
+        if (escala < Number(tamano.min) / 100) return null;
+        var aj = ajusteDe(zona.id), antes = aj.escala;
+        aj.escala = escala;
+        var g = geometriaMm(diseno, zona);
+        aj.escala = antes;
+        return { escala: escala, anchoMm: g.w };
+    }
+    function avisoPixelado(n) {
+        if (!lienzoAviso) return;
+        lienzoAviso.hidden = n !== 'baja' && n !== 'justa';
+        lienzoAviso.className = 'aviso-pixelado' + (n === 'justa' ? ' justa' : '');
+        lienzoAviso.textContent = n === 'baja' ? textos.pixelado_lienzo : (n === 'justa' ? textos.borroso_lienzo : '');
+    }
+    function dejarNitido(zonaId) {
+        var id = zonaId === undefined ? estado.zonaId : zonaId;
+        conDiseno(id, function () {
+            var zona = zonaActual();
+            var nitida = zona ? escalaNitida(zona, disenoPara(colores[estado.color])) : null;
+            if (nitida) ajusteDe(zona.id).escala = nitida.escala;
+        });
+        actualizarAjustador();
+        pintar(); refrescarColeccion();
+    }
+    if (botonNitido) botonNitido.addEventListener('click', function () { dejarNitido(); });
+
+    /** Calidad de cada zona con diseño, para avisar antes de añadir al pedido (D229). */
+    function zonasPixeladas() {
+        return zonasConDiseno().map(function (id) {
+            return conDiseno(id, function () {
+                var zona = zonaActual();
+                if (!zona || estado.modo !== 'logo' || !estado.logoPx || estado.logoTipo === 'vectorial') return null;
+                var color = colores[estado.color], diseno = disenoPara(color), g = geometriaMm(diseno, zona);
+                var valor = Math.min(ppp(estado.logoPx.w, g.w), ppp(estado.logoPx.h, g.h));
+                if (nivel(valor) !== 'baja') return null;
+                var info = zonas.filter(function (z) { return z.id === id; })[0];
+                return { id: id, nombre: info ? info.nombre : '', medida: cm(g.w) + ' × ' + cm(g.h) + ' cm', ppp: valor, nitida: escalaNitida(zona, diseno) };
+            });
+        }).filter(Boolean);
+    }
+    var avisadoPixelado = '';
 
     var esperaTamano = null;
     tamano.addEventListener('input', function () {
@@ -1944,6 +2005,19 @@
         botonAnadir.disabled = !(precio && precio.confirmable) || estado.anadiendoPedido;
     }
     if (botonAnadir) botonAnadir.addEventListener('click', function () {
+        // D229: si alguna zona se va a ver pixelada, se avisa una vez (con la opción de ajustarla); al volver a pulsar, sigue.
+        var pixeladas = zonasPixeladas();
+        var firma = pixeladas.map(function (z) { return z.id + ':' + z.medida; }).join('|');
+        if (pixeladas.length && firma !== avisadoPixelado && window.AvisoTienda) {
+            avisadoPixelado = firma;
+            var z = pixeladas[0];
+            window.AvisoTienda.mostrar(texto(z.nitida ? 'pixelado_aviso' : 'pixelado_aviso_sin_nitido', { zona: z.nombre, medida: z.medida, ppp: z.ppp, nitido: z.nitida ? cm(z.nitida.anchoMm) + ' cm' : '' }), {
+                titulo: textos.pixelado_titulo,
+                boton: z.nitida ? textos.pixelado_ajustar : null,
+                alPulsar: z.nitida ? function () { dejarNitido(z.id); } : null
+            });
+            return;
+        }
         var impresiones = {};
         zonasConDiseno().forEach(function (id) { var i = impresionEnMm(id); if (i) impresiones[id] = i; });
         var lineas = estado.lineas.map(function (i) {

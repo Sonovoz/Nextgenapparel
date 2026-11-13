@@ -180,4 +180,16 @@ return [
     'aviso_archivo' => 'No podemos usar este archivo',
     'aviso_otro' => 'Elegir otro archivo',
     'aviso_cerrar' => 'Cerrar',
+    // D229: tamaño de impresión claro y aviso de pixelado.
+    'tamano_impresion' => 'Tamaño de impresión en la prenda',
+    'mas_pequeno' => 'Más pequeño',
+    'mas_grande' => 'Más grande',
+    'medida_zona' => 'Máximo en esta zona: :medida',
+    'ajustar_nitido' => 'Dejarlo a :medida para que salga nítido',
+    'pixelado_lienzo' => '⚠ A este tamaño se verá pixelado',
+    'borroso_lienzo' => '⚠ Puede verse algo borroso',
+    'pixelado_titulo' => 'Tu diseño se verá pixelado',
+    'pixelado_aviso' => ':zona: a :medida tu archivo solo da :ppp ppp y se verá pixelado o borroso. Redúcelo a :nitido para que salga nítido, o sube una versión más grande. Si quieres seguir igualmente, vuelve a pulsar «Añadir a mi pedido».',
+    'pixelado_aviso_sin_nitido' => ':zona: a :medida tu archivo solo da :ppp ppp y se verá pixelado o borroso, incluso al tamaño más pequeño. Sube una versión más grande. Si quieres seguir igualmente, vuelve a pulsar «Añadir a mi pedido».',
+    'pixelado_ajustar' => 'Ajustar el tamaño',
 ];

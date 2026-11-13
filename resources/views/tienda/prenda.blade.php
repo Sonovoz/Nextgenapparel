@@ -19,6 +19,14 @@
         'error_archivo' => __('tienda.error_archivo'),
         'error_grande' => __('tienda.error_grande'),
         'medida_impresion' => __('tienda.medida_impresion'),
+        'medida_zona' => __('tienda.medida_zona'),
+        'ajustar_nitido' => __('tienda.ajustar_nitido'),
+        'pixelado_lienzo' => __('tienda.pixelado_lienzo'),
+        'borroso_lienzo' => __('tienda.borroso_lienzo'),
+        'pixelado_titulo' => __('tienda.pixelado_titulo'),
+        'pixelado_aviso' => __('tienda.pixelado_aviso'),
+        'pixelado_aviso_sin_nitido' => __('tienda.pixelado_aviso_sin_nitido'),
+        'pixelado_ajustar' => __('tienda.pixelado_ajustar'),
         'calidad_sin_diseno' => __('tienda.calidad_sin_diseno'),
         'tus_disenos' => __('tienda.tus_disenos'),
         'anadir_en' => __('tienda.anadir_en'),
@@ -138,6 +146,19 @@
         .calidad-cabecera { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
         .calidad-cabecera strong { font-size: 15px; font-weight: 600; }
         .calidad > p:empty, .calidad-cabecera span:empty { display: none; }
+        /* D229: tamaño de impresión grande y aviso de pixelado. */
+        .medida-impresion { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border-radius: 10px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); }
+        .medida-etiqueta { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: #A9A6BA; }
+        .medida-valor { font-family: var(--display); font-weight: 800; font-size: 30px; line-height: 1.1; letter-spacing: -.02em; }
+        .medida-zona { font-size: 13px; color: #A9A6BA; }
+        .fila-tamano-extremo { font-size: 12px; color: #A9A6BA; white-space: nowrap; }
+        .calidad[data-nivel="justa"] #calidad-mensaje, .calidad[data-nivel="baja"] #calidad-mensaje { font-weight: 600; font-size: 15px; }
+        .calidad[data-nivel="baja"] #calidad-mensaje::before, .calidad[data-nivel="justa"] #calidad-mensaje::before { content: "⚠ "; }
+        .calidad .calidad-ajustar { align-self: flex-start; margin-top: 6px; padding: 10px 16px; border-radius: 99px; border: 1px solid #fff; background: #fff; color: #111; font-weight: 600; cursor: pointer; }
+        .calidad .calidad-ajustar:hover { background: #E8E6F2; }
+        .calidad .calidad-ajustar[hidden] { display: none; }
+        .aviso-pixelado { position: absolute; z-index: 6; left: 50%; top: 64px; transform: translateX(-50%); margin: 0; padding: 8px 14px; border-radius: 99px; font-size: 13px; font-weight: 600; white-space: nowrap; color: #fff; background: rgba(240,98,77,.95); box-shadow: 0 6px 20px rgba(0,0,0,.35); pointer-events: none; }
+        .aviso-pixelado.justa { background: rgba(242,179,61,.96); color: #1b1407; }
         .lupa { position: absolute; width: 170px; height: 170px; border-radius: 999px; overflow: hidden; pointer-events: none; background: #fff; box-shadow: 0 0 0 3px #fff, 0 14px 36px rgba(22,22,26,.35); z-index: 3; }
         .lupa .capa { position: absolute; }
         .lupa .capa img { width: 100%; height: 100%; }
@@ -285,6 +306,8 @@
                         </div>
                         <button type="button" class="boton-borde" id="ver-zonas" aria-pressed="false">{{ __('tienda.ver_zonas') }}</button>
                     </div>
+                    {{-- D229: aviso sobre la prenda cuando el diseño se verá pixelado (fuera del lienzo, que se redibuja). --}}
+                    <p class="aviso-pixelado" id="aviso-pixelado" role="status" hidden></p>
                     <div class="visor-lienzo" id="lienzo">
                         <div class="capa">
                             @if ($fotoInicial)
