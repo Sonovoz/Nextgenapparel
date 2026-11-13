@@ -160,6 +160,14 @@ class AjustesCorreos extends Page implements HasSchemas
                 ->fillForm(fn () => ['para' => auth()->user()?->email])
                 ->schema([TextInput::make('para')->label('Enviar a')->email()->required()])
                 ->action(function (array $data): void {
+                    // D234: si el correo no sale por SMTP (falta el servidor en el panel y el .env dice «log»), no se dice «enviado».
+                    Smtp::aplicar();
+                    if (config('mail.default') === 'log') {
+                        Notification::make()->title('El correo no se ha enviado')->danger()->persistent()
+                            ->body('No hay servidor SMTP: rellena «Servidor SMTP», usuario y contraseña aquí arriba y pulsa «Guardar cambios» antes de probar.')->send();
+
+                        return;
+                    }
                     try {
                         Notificaciones::route('mail', $data['para'])->notifyNow(new CorreoDePrueba);
                         Notification::make()->title('Correo de prueba enviado a '.$data['para'])->body('Mira la bandeja de entrada y la de spam.')->success()->send();

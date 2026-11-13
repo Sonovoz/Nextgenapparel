@@ -141,4 +141,18 @@ class CorreosPedidoTest extends TestCase
         Livewire::test(AjustesCorreos::class)->callAction('prueba', data: ['para' => 'equipo@nextgenapparel.es'])->assertNotified('Correo de prueba enviado a equipo@nextgenapparel.es');
         Notification::assertSentOnDemand(CorreoDePrueba::class);
     }
+
+    /** D234: con el .env en «log», el correo de prueba no dice «enviado»; con un servidor en el panel, sale por SMTP. */
+    public function test_el_smtp_del_panel_manda_aunque_el_env_diga_log(): void
+    {
+        $this->actingAs($this->usuarioConRol(Rol::Administrador));
+        config()->set('mail.default', 'log');
+
+        Livewire::test(AjustesCorreos::class)->callAction('prueba', data: ['para' => 'equipo@nextgenapparel.es'])->assertNotified('El correo no se ha enviado');
+        Notification::assertNothingSent();
+
+        Smtp::guardar(['servidor' => 'smtp.gmail.com', 'puerto' => 587, 'cifrado' => 'tls', 'usuario' => 'prueba@gmail.com', 'contrasena' => 'clave-de-aplicacion', 'remitente' => 'prueba@gmail.com']);
+        Smtp::aplicar();
+        $this->assertSame(['smtp', 'smtp.gmail.com', 587, 'smtp'], [config('mail.default'), config('mail.mailers.smtp.host'), config('mail.mailers.smtp.port'), config('mail.mailers.smtp.scheme')]);
+    }
 }
