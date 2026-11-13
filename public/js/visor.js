@@ -695,7 +695,9 @@
             error.setAttribute('role', 'alert');
             pie.appendChild(error);
         }
-        var seguir = el('button', 'boton-siguiente', estado.subiendo ? textos.comprobando : textos.siguiente_cantidades + ' →');
+        var seguir = el('button', 'boton-siguiente' + (estado.subiendo ? '' : ' vivo'), estado.subiendo ? textos.comprobando : textos.siguiente_cantidades);
+        // Botón principal destacado: brillo que lo recorre, halo que respira y flecha que avanza (sin animación si el sistema la quita).
+        if (!estado.subiendo) seguir.appendChild(el('span', 'flecha-viva', '→'));
         seguir.type = 'button';
         seguir.dataset.foco = 'seguir';
         // aria-disabled y no disabled: un botón desactivado pierde el foco del teclado.
@@ -1995,7 +1997,9 @@
         pieSiguiente.hidden = !siguiente;
         if (siguiente) {
             pieSiguiente.dataset.ir = siguiente[0];
-            pieSiguiente.textContent = siguiente[1] + ' →';
+            pieSiguiente.textContent = siguiente[1];
+            pieSiguiente.appendChild(el('span', 'flecha-viva', '→'));
+            pieSiguiente.classList.add('vivo');
             pieSiguiente.disabled = siguiente[0] === 'resumen' && !(precio && precio.confirmable);
         }
     }
