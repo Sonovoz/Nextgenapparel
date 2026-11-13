@@ -21,6 +21,7 @@
 | Photos of an issue (we remove location and camera data on receipt) | Resolving the issue | Performance of the contract |
 | If you create an account (optional): email, name, encrypted password and saved addresses | Giving you access to your orders, designs and invoices | Performance of the contract you accept when signing up |
 | The IP address used to confirm the order | Proving acceptance of the terms | Legitimate interest (art. 6.1.f GDPR) |
+| If you use the AI assistant (with an account and a confirmed email): what you write to it and, if you have already bought, which garments and how many you ordered (without your name, email or address) | Answering you and reminding you of your orders to help you repeat or extend them | Legitimate interest (art. 6.1.f GDPR); you do not have to use it |
 
 **We never ask for or store your card details**: you pay on the secure page of Redsys, the Spanish banks' payment platform. **We do not send advertising**, build profiles or make automated decisions.
 
@@ -28,6 +29,7 @@
 
 - **Redsys and our bank**, to charge the order (amount and order number).
 - **The carrier**, which receives your name, address and phone number to deliver the parcel.
+- **The AI provider of the assistant (OpenAI)**, as a data processor, only if you use the assistant: it receives what you write and, if you have already bought, the summary of your orders, never your contact or payment details.
 - **The providers that host the website and send emails**, as data processors: {!! $f(null, 'proveedores de alojamiento y de correo (los indica la asesoría)') !!}.
 - **The Spanish Tax Agency**, when required by law.
 

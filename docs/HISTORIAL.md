@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 13/11 | **Reglas de la IA**: asistente solo con el correo confirmado, cuota propia para quien aún no ha comprado y memoria de pedidos para animar a repetir; privacidad actualizada. | `ia-reglas-clientes` | D218 |
 | 13/11 | **Portada**: «Packs listos para jugar» pasa a «Packs que se ajustan a tu presupuesto». | `portada-packs-presupuesto` | — |
 | 13/11 | **PDF premium**: Jost, cabecera oscura, «Tu colección» con las fotos de cada cara (presupuesto y factura), textos de emoción y «Estamos a tu disposición», enlaces a preguntas frecuentes y condiciones; presupuesto con fecha y validez de 48 horas con aviso de precios. | `pdf-premium` | D215, D216 |
 | 13/11 | **Aviso de error claro**: si el archivo no vale (p. ej. PNG sin ppp) o falla la subida, aviso en el centro con la pantalla oscurecida y «Elegir otro archivo» (configurador y portada). | `aviso-error-visible` | D214 |

@@ -53,7 +53,7 @@ class AjustesIa extends Page implements HasSchemas
 
     public function mount(): void
     {
-        $this->form->fill(collect(['activa', 'modelo', 'mensajes_dia', 'limite_mensual', 'precio_entrada', 'precio_salida'])->mapWithKeys(fn ($c) => [$c => Ajuste::obtener('ia.'.$c)])->all());
+        $this->form->fill(collect(['activa', 'modelo', 'mensajes_dia', 'mensajes_dia_nuevos', 'limite_mensual', 'precio_entrada', 'precio_salida'])->mapWithKeys(fn ($c) => [$c => Ajuste::obtener('ia.'.$c)])->all());
     }
 
     public function form(Schema $schema): Schema
@@ -62,12 +62,15 @@ class AjustesIa extends Page implements HasSchemas
 
         return $schema->statePath('data')->components([
             Section::make('Asistente de venta')->columns(2)
-                ->description('Chat para clientes con cuenta que consulta el catálogo y el motor de precios (nunca inventa precios). Si OpenAI falla, se oculta y la tienda sigue. Clave: '
+                ->description('Chat para clientes con cuenta y el correo confirmado que consulta el catálogo y el motor de precios (nunca inventa precios). Si OpenAI falla, se oculta y la tienda sigue. Clave: '
                     .(filled(config('ia.openai_key')) ? 'configurada en el .env.' : 'falta OPENAI_API_KEY en el .env.')." Gastado este mes: {$gastado} €.")
                 ->schema([
                     Toggle::make('activa')->label('Mostrar el asistente a los clientes con cuenta')->columnSpanFull(),
                     TextInput::make('modelo')->label('Modelo de OpenAI')->required()->maxLength(60),
-                    TextInput::make('mensajes_dia')->label('Mensajes por cliente y día')->integer()->minValue(1)->maxValue(500)->required(),
+                    TextInput::make('mensajes_dia_nuevos')->label('Mensajes al día: clientes que aún no han comprado')->integer()->minValue(1)->maxValue(500)->required()
+                        ->helperText('Cuota moderada para quien todavía no ha hecho ningún pedido.'),
+                    TextInput::make('mensajes_dia')->label('Mensajes al día: clientes que ya han comprado')->integer()->minValue(1)->maxValue(500)->required()
+                        ->helperText('A estos clientes el asistente les recuerda sus pedidos y les anima a repetir.'),
                     TextInput::make('limite_mensual')->label('Gasto máximo al mes')->suffix('€')->integer()->minValue(1)->maxValue(5000)->required()
                         ->helperText('Al llegar, el asistente se oculta hasta el mes siguiente.'),
                     TextInput::make('precio_entrada')->label('Precio por millón de tokens de entrada')->suffix('céntimos')->integer()->minValue(0)->required()
