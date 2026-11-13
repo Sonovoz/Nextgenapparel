@@ -269,7 +269,7 @@ class CrearPedidoTest extends TestCase
         $this->assertSame([['pack', 8182, 10], ['prenda', 10500, 15]], $lineas->map(fn ($l) => [$l->tipo, $l->neto, $l->unidades])->all());
         $texto = $lineas[0]->impresiones->sole();
         $this->assertSame(['NG', null, null], [$texto->texto, $texto->archivo, $texto->ppp]);
-        $this->assertEquals([$lineaPack->id => ['prenda' => $this->linea['prenda'], 'color' => $this->linea['color'], 'tallas' => [$this->linea['talla'] => 10]]], $lineas[0]->elecciones);
+        $this->assertEquals([$lineaPack->id => ['prenda' => $this->linea['prenda'], 'color' => $this->linea['color'], 'tallas' => [$this->linea['talla'] => 10], 'zonas' => [$this->linea['zona']]]], $lineas[0]->elecciones);
     }
 
     public function test_un_diseno_usado_en_un_pedido_no_lo_borra_la_limpieza(): void

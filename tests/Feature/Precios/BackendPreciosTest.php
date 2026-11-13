@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Precios;
 
+use App\Dominio\Catalogo\ZonasPack;
 use App\Dominio\Precios\Motor\Cesta;
 use App\Dominio\Precios\Motor\MotorPrecios;
 use App\Dominio\Precios\Motor\PackCesta;
@@ -23,6 +24,7 @@ use App\Models\ReglaMinimo;
 use App\Models\ReglaPrecio;
 use App\Models\Talla;
 use App\Models\ZonaEnvio;
+use App\Models\ZonaImpresion;
 use Database\Seeders\EjemplosCatalogoSeeder;
 use Database\Seeders\EjemplosPreciosSeeder;
 use Filament\Actions\Testing\TestAction;
@@ -257,14 +259,25 @@ class BackendPreciosTest extends TestCase
         $this->assertSame(0, Pack::count());
     }
 
-    public function test_un_pack_no_puede_incluir_una_zona_que_la_prenda_no_ofrece(): void
+    /** D223: una zona que la prenda no ofrece no es un error: esa prenda lleva las demás. Solo falla si no lleva ninguna. */
+    public function test_cada_prenda_del_pack_lleva_las_zonas_que_ofrece(): void
     {
         $this->actingAs($this->usuarioConRol(Rol::GestorTienda));
         $polo = Prenda::where('slug->es', 'polo-classic')->sole(); // sin frontal
+        $zona = fn (string $clave) => (int) ZonaImpresion::where('clave', $clave)->value('id');
         $datos = $this->datosPack();
         $datos['lineas'][0]['prenda_id'] = $polo->id;
+        $datos['lineas'][0]['colores'] = [$polo->variantes()->value('color_id')];
 
+        // Solo frontal: el polo no llevaría nada impreso.
         Livewire::test(ManagePacks::class)->callAction('create', $datos)->assertHasFormErrors(['zonas']);
+
+        // Frontal y espalda: el polo lleva la espalda y se guarda sin error.
+        $datos['zonas'] = [$zona('frontal'), $zona('espalda')];
+        Livewire::test(ManagePacks::class)->callAction('create', $datos)->assertHasNoFormErrors();
+        $this->assertSame([$zona('espalda')], ZonasPack::dePrenda($datos['zonas'], $polo->id));
+        $this->assertSame([['prenda' => (string) $polo->nombre, 'si' => ['Espalda grande'], 'no' => ['Frontal']]],
+            ZonasPack::resumen($datos['zonas'], [$polo->id]));
     }
 
     public function test_el_simulador_muestra_el_calculo_del_motor(): void

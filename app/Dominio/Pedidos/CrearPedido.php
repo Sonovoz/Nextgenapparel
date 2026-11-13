@@ -4,6 +4,7 @@ namespace App\Dominio\Pedidos;
 
 use App\Dominio\Carrito\TipoLinea;
 use App\Dominio\Carrito\ValorarCarrito;
+use App\Dominio\Catalogo\ZonasPack;
 use App\Dominio\Clientes\TipoCliente;
 use App\Dominio\Disenos\GuardarDiseno;
 use App\Dominio\Legal\PaginaLegal;
@@ -200,11 +201,13 @@ final class CrearPedido
      * tallas, también en los de reparto fijo, para que producción y la hoja de compra no
      * dependan de cómo quede el pack después.
      *
-     * @return array<int, array{prenda: int, color: int, tallas: array<int, int>}>
+     * @return array<int, array{prenda: int, color: int, tallas: array<int, int>, zonas: list<int>}>
      */
     private static function repartoPack(LineaCarrito $linea): array
     {
-        $fijo = Pack::find($linea->pack_id)?->reparto === RepartoPack::Fijo;
+        $pack = Pack::with('zonas')->find($linea->pack_id);
+        $fijo = $pack?->reparto === RepartoPack::Fijo;
+        $zonasPack = $pack?->zonas->pluck('id')->map(fn ($id) => (int) $id)->all() ?? [];
         $reparto = [];
         foreach (LineaPack::where('pack_id', $linea->pack_id)->orderBy('id')->get() as $lineaPack) {
             $eleccion = $linea->elecciones[$lineaPack->id] ?? [];
@@ -212,6 +215,8 @@ final class CrearPedido
                 'prenda' => $lineaPack->prenda_id,
                 'color' => (int) ($fijo ? ($lineaPack->colores[0] ?? 0) : ($eleccion['color'] ?? ($lineaPack->colores[0] ?? 0))),
                 'tallas' => array_map('intval', $fijo ? ($lineaPack->reparto_tallas ?? []) : ($eleccion['tallas'] ?? [])),
+                // D223: zonas del pack que lleva esta prenda (las que ofrece), congeladas para producción.
+                'zonas' => ZonasPack::dePrenda($zonasPack, $lineaPack->prenda_id),
             ];
         }
 

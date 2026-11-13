@@ -10,6 +10,7 @@ use App\Dominio\Carrito\LineaNoValida;
 use App\Dominio\Catalogo\Cara;
 use App\Dominio\Catalogo\CopiarZonas;
 use App\Dominio\Catalogo\Escaparate;
+use App\Dominio\Catalogo\ZonasPack;
 use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Disenos\DisenoNoValido;
 use App\Dominio\Disenos\Dueno;
@@ -63,6 +64,9 @@ class PackController
                     'tallas' => $tallas->whereIn('id', $ids)->map(fn (Talla $t) => ['id' => $t->id, 'nombre' => $t->nombre, 'fijas' => (int) ($l->reparto_tallas[$t->id] ?? 0)])->values()->all(),
                     'foto' => $general,
                     'maqueta' => self::maqueta($l, $zonasPack),
+                    // D223: zonas del pack que lleva esta prenda (las que ofrece).
+                    'zonas' => ZonasPack::nombres($zonasPack, $l->prenda_id),
+                    'todas' => count(ZonasPack::dePrenda($zonasPack, $l->prenda_id)) === count($zonasPack),
                 ];
             }),
             'disenos' => $dueno === null ? collect() : $dueno->filtrar(Diseno::query())->where('estado', '!=', 'rechazado')->latest('id')->limit(24)->get(),
