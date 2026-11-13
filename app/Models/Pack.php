@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -23,6 +24,17 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Pack extends Model
 {
     use LogsActivity, SoftDeletes, Traducible;
+
+    /** D217: imágenes de recurso para los packs (public/img/packs), con su nombre en el backend. */
+    public const IMAGENES_RECURSO = [
+        'pack-abanico' => 'Abanico de camisetas (fondo oscuro)',
+        'pack-frente-espalda' => 'Delantera y espalda',
+        'pack-coleccion' => 'Colección (seis camisetas)',
+        'pack-sudadera-camiseta' => 'Sudadera y camiseta',
+        'pack-calidad' => 'Detalle de impresión',
+    ];
+
+    public const DISCO_IMAGEN = 'public';
 
     protected $table = 'packs';
 
@@ -50,6 +62,16 @@ class Pack extends Model
     public function claseImpuesto(): BelongsTo
     {
         return $this->belongsTo(ClaseImpuesto::class);
+    }
+
+    /** La imagen del pack: la subida o la de recurso; null si no tiene (entonces se usa la foto de la prenda). */
+    public function imagenUrl(): ?string
+    {
+        if (filled($this->imagen)) {
+            return Storage::disk(self::DISCO_IMAGEN)->url($this->imagen);
+        }
+
+        return isset(self::IMAGENES_RECURSO[$this->imagen_recurso ?? '']) ? asset('img/packs/'.$this->imagen_recurso.'.webp') : null;
     }
 
     public function unidades(): int
