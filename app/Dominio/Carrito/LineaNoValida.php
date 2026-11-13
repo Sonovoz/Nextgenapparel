@@ -2,6 +2,7 @@
 
 namespace App\Dominio\Carrito;
 
+use App\Models\Ajuste;
 use RuntimeException;
 
 /** La línea no se puede añadir o cambiar; `problemas` son claves de lang/{es,en}/carrito.php. */
@@ -16,6 +17,6 @@ final class LineaNoValida extends RuntimeException
     /** @return list<string> */
     public function textos(?string $idioma = null): array
     {
-        return array_map(fn (string $p) => __('carrito.'.$p, ['maximo' => EditarCarrito::MAXIMO_LINEAS], $idioma), $this->problemas);
+        return array_map(fn (string $p) => __('carrito.'.$p, ['maximo' => EditarCarrito::MAXIMO_LINEAS, 'dias' => (int) Ajuste::obtener('pedidos.dias_archivos')], $idioma), $this->problemas);
     }
 }

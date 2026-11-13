@@ -1311,6 +1311,10 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .pack-zona-mini { width: 40px; height: 40px; flex: none; border-radius: 8px; background: #2a2b38 center / contain no-repeat; border: 1px solid var(--linea-fuerte); }
 .pack-zona-mini.vacia { background-image: none; opacity: .5; }
 .pack-diseno .pack-check:not(:empty) { font-weight: 700; }
+/* D230: aviso de custodia de los diseños. */
+.aviso-custodia { margin: 18px 0 0; padding: 12px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; color: var(--tinta-suave); background: var(--azul-suave); border: 1px solid rgba(142, 160, 255, .3); }
+.aviso-custodia strong { color: var(--tinta); }
+.aviso-custodia-cierre { font-size: 12px; margin: 6px 0 0; }
 
 /* Crédito del desarrollo: Minimedia (www.minimedia.es). */
 .pie-credito { display: flex; justify-content: center; padding: 22px 0 6px; }

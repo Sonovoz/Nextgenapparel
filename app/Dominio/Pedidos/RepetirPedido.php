@@ -75,7 +75,9 @@ final class RepetirPedido
     {
         $disco = Storage::disk(Pedido::DISCO);
         if ($impresion->archivo === null || ! $disco->exists($impresion->archivo)) {
-            throw new LineaNoValida(['diseno_no_disponible']);
+            // D230: pasado el plazo desde el envío ya no se guarda el original: hay que volver a subirlo.
+            $borrados = Pedido::whereKey(LineaPedido::whereKey($impresion->linea_pedido_id)->value('pedido_id'))->whereNotNull('archivos_borrados_en')->exists();
+            throw new LineaNoValida([$borrados ? 'archivos_caducados' : 'diseno_no_disponible']);
         }
         $temporal = (string) tempnam(sys_get_temp_dir(), 'repetir');
         try {

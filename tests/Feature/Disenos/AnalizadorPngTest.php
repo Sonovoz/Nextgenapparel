@@ -162,7 +162,7 @@ class AnalizadorPngTest extends TestCase
         $this->actingAs($this->usuarioConRol(Rol::Administrador));
 
         Livewire::test(AjustesGenerales::class)
-            ->assertSchemaStateSet(['max_mb' => 30, 'max_px' => 8000, 'min_px' => 300, 'dias_sin_pedido' => 30])
+            ->assertSchemaStateSet(['max_mb' => 30, 'max_px' => 8000, 'min_px' => 300, 'horas_sin_venta' => 72, 'dias_archivos' => 90])
             ->fillForm(['max_px' => 20000])
             ->callAction('guardar')
             ->assertHasFormErrors(['max_px']);

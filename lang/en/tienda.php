@@ -71,7 +71,7 @@ return [
     'coleccion_titulo' => 'Your collection',
     'coleccion_texto' => 'Your design in all :n colours of the :prenda. Tap one to see it up close.',
     'ver_en_grande' => 'See it up close: :color',
-    'privacidad' => '{1} While you try it on, your design stays on your device. We only upload it when you move on to sizes and colours, to prepare your order. During this visit you can remove it from «Your uploaded designs»; if it does not end up in an order, we delete it the next day.|[2,*] While you try it on, your design stays on your device. We only upload it when you move on to sizes and colours, to prepare your order. During this visit you can remove it from «Your uploaded designs»; if it does not end up in an order, we delete it after :dias days.',
+    'privacidad' => 'While you try it on, your design stays on your device. We only upload it when you move on to sizes and colours, to prepare your order. During this visit you can remove it from «Your uploaded designs»; if it does not end up in an order, we delete it after :horas hours.', // D230
     'error_archivo' => 'We only accept designs in PNG. Export it as PNG (ideally with a transparent background) and upload it again.',
     'error_grande' => 'The file is larger than 20 MB. Try a lighter version.',
     'ajusta' => 'Adjust your design',

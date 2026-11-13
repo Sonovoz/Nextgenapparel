@@ -71,7 +71,7 @@ return [
     'coleccion_titulo' => 'Tu colección',
     'coleccion_texto' => 'Tu diseño en los :n colores de :prenda. Pulsa uno para verlo en grande.',
     'ver_en_grande' => 'Ver en grande: :color',
-    'privacidad' => '{1} Mientras lo pruebas, tu diseño no sale de tu dispositivo. Solo lo subimos cuando pasas a tallas y colores, para preparar tu pedido. Durante esta visita puedes quitarlo desde «Tus diseños subidos»; si no llega a un pedido, lo borramos al día siguiente.|[2,*] Mientras lo pruebas, tu diseño no sale de tu dispositivo. Solo lo subimos cuando pasas a tallas y colores, para preparar tu pedido. Durante esta visita puedes quitarlo desde «Tus diseños subidos»; si no llega a un pedido, lo borramos a los :dias días.',
+    'privacidad' => 'Mientras lo pruebas, tu diseño no sale de tu dispositivo. Solo lo subimos cuando pasas a tallas y colores, para preparar tu pedido. Durante esta visita puedes quitarlo desde «Tus diseños subidos»; si no llega a un pedido, lo borramos a las :horas horas.', // D230
     'error_archivo' => 'Solo aceptamos diseños en PNG. Expórtalo como PNG (mejor con fondo transparente) y vuelve a subirlo.',
     'error_grande' => 'El archivo pesa más de 20 MB. Prueba con una versión más ligera.',
     'ajusta' => 'Ajusta tu diseño',

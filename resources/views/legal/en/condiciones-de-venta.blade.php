@@ -55,6 +55,10 @@ The garments carry the **3-year legal guarantee** for lack of conformity. If som
 - Mistakes in the design itself (texts, spelling, colours) or in the sizes and quantities you chose.
 - Wear from use or from not following the washing and care instructions.
 
-## 9. Customer service and law
+## 9. Custody of your designs
+
+We keep the print files of each order in custody for **{{ (int) \App\Models\Ajuste::obtener('pedidos.dias_archivos') }} working days** from shipping (if the order is never shipped, from the order date). After that period they are deleted from our database **with no possibility of recovery**. We reserve the right not to notify these deletions when they are made for technical reasons. **You are responsible for keeping a copy of all your designs**; to repeat an order after that period you will need to upload them again. The order, its mock-ups and the invoice are kept.
+
+## 10. Customer service and law
 
 You can write to us at {!! $f($e['correo'], 'correo de contacto') !!}. These terms are governed by Spanish law; consumers may go to the courts of their place of residence.

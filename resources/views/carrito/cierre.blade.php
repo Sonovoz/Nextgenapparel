@@ -104,6 +104,7 @@
                             @csrf
                             <input type="hidden" name="total" value="{{ $r->total() }}">
                             <label class="casilla-cuenta"><input type="checkbox" name="condiciones" value="1" required @checked(old('condiciones'))> <span>{{ __('pedidos.condiciones_acepto') }}</span></label>
+                            <p class="claro aviso-custodia-cierre">{{ __('pedidos.custodia', ['dias' => \App\Dominio\Pedidos\LimpiarArchivosPedidos::dias()]) }}</p>
                             <button type="submit" class="boton principal">{{ __('pedidos.confirmar_boton') }} <span class="sin-cortar">· {{ Formato::euros($r->total()) }}</span></button>
                             <p class="nota-cuenta">{{ $cliente ? __('pedidos.confirmar_nota_cuenta') : __('pedidos.confirmar_nota_invitado') }}</p>
                         </form>

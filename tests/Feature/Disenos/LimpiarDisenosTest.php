@@ -5,15 +5,17 @@ namespace Tests\Feature\Disenos;
 use App\Dominio\Disenos\GuardarDiseno;
 use App\Dominio\Disenos\LimpiarDisenos;
 use App\Models\Ajuste;
+use App\Models\Carrito;
 use App\Models\Cliente;
 use App\Models\Diseno;
+use App\Models\ZonaImpresion;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
-/** Retención de los diseños (paso 4.6): sin pedido y sin cuenta, se borran pasados los días de Ajustes. */
+/** Retención de los diseños (paso 4.6, D230): sin venta, se borran pasadas las horas de Ajustes. */
 class LimpiarDisenosTest extends TestCase
 {
     use RefreshDatabase;
@@ -24,28 +26,37 @@ class LimpiarDisenosTest extends TestCase
         Storage::fake(GuardarDiseno::DISCO);
     }
 
-    public function test_borra_los_de_visitantes_pasados_los_dias_de_ajustes_y_conserva_el_resto(): void
+    /** D230: sin venta, de cualquiera (también con cuenta), se borran a las 72 h; en un carrito usado hace poco, esperan. */
+    public function test_borra_los_que_no_se_venden_a_las_72_horas_y_conserva_los_que_estan_en_uso(): void
     {
-        Ajuste::guardar('disenos.dias_sin_pedido', 30);
-        $caducado = $this->diseno(hace: 31);
-        $reciente = $this->diseno(hace: 29);
-        $deCliente = $this->diseno(hace: 400, cliente: Cliente::factory()->create()->id);
+        Ajuste::guardar('disenos.horas_sin_venta', 72);
+        $caducado = $this->diseno(horas: 73);
+        $reciente = $this->diseno(horas: 71);
+        $deCliente = $this->diseno(horas: 400, cliente: Cliente::factory()->create()->id);
+        $enCarrito = $this->diseno(horas: 100);
+        $linea = Carrito::create()->lineas()->create(['tipo' => 'prenda', 'tallas' => []]);
+        $linea->impresiones()->create(['diseno_id' => $enCarrito->id, 'zona_impresion_id' => ZonaImpresion::factory()->create()->id, 'ancho_mm' => 100, 'alto_mm' => 100, 'desde_cuello_mm' => 80, 'desde_centro_mm' => 0]);
 
-        $this->artisan('disenos:limpiar')->expectsOutputToContain('Diseños borrados: 1.')->assertSuccessful();
+        $this->artisan('disenos:limpiar')->expectsOutputToContain('Diseños borrados: 2.')->assertSuccessful();
 
         $this->assertModelMissing($caducado);
         $this->assertFalse(Storage::disk('disenos')->exists($caducado->ruta));
         $this->assertFalse(Storage::disk('disenos')->exists($caducado->miniatura));
+        $this->assertModelMissing($deCliente); // también de «Mis diseños»
         $this->assertModelExists($reciente);
-        $this->assertModelExists($deCliente);
-        $this->assertTrue(Storage::disk('disenos')->exists($deCliente->ruta));
+        $this->assertModelExists($enCarrito); // el carrito se acaba de usar
         $this->assertDatabaseHas('activity_log', ['log_name' => 'disenos', 'description' => 'Limpieza de diseños']);
+
+        // Con el carrito abandonado más allá del plazo, también se borra.
+        Carrito::query()->update(['updated_at' => now()->subHours(80)]);
+        (new LimpiarDisenos)();
+        $this->assertModelMissing($enCarrito);
     }
 
-    public function test_los_dias_salen_de_los_ajustes(): void
+    public function test_las_horas_salen_de_los_ajustes(): void
     {
-        Ajuste::guardar('disenos.dias_sin_pedido', 7);
-        $diseno = $this->diseno(hace: 8);
+        Ajuste::guardar('disenos.horas_sin_venta', 5);
+        $diseno = $this->diseno(horas: 6);
 
         (new LimpiarDisenos)();
 
@@ -54,7 +65,7 @@ class LimpiarDisenosTest extends TestCase
 
     public function test_borra_los_archivos_huerfanos_de_mas_de_un_dia_y_no_los_de_una_subida_en_curso(): void
     {
-        $diseno = $this->diseno(hace: 1);
+        $diseno = $this->diseno(horas: 1);
         $disco = Storage::disk('disenos');
         $disco->put('2026/11/viejo-huerfano.png', 'x');
         touch($disco->path('2026/11/viejo-huerfano.png'), now()->subDays(2)->getTimestamp());
@@ -76,19 +87,19 @@ class LimpiarDisenosTest extends TestCase
 
     public function test_sin_nada_que_borrar_no_ensucia_el_registro_de_actividad(): void
     {
-        $this->diseno(hace: 1);
+        $this->diseno(horas: 1);
 
         (new LimpiarDisenos)();
 
         $this->assertDatabaseMissing('activity_log', ['description' => 'Limpieza de diseños']);
     }
 
-    public function test_se_ejecuta_cada_noche(): void
+    public function test_se_ejecuta_cada_hora_y_la_de_los_pedidos_cada_noche(): void
     {
-        $tarea = collect(app(Schedule::class)->events())->first(fn ($e) => str_contains($e->command ?? '', 'disenos:limpiar'));
+        $tareas = collect(app(Schedule::class)->events());
 
-        $this->assertNotNull($tarea);
-        $this->assertSame('40 3 * * *', $tarea->expression);
+        $this->assertSame('40 * * * *', $tareas->first(fn ($e) => str_contains($e->command ?? '', 'disenos:limpiar'))?->expression);
+        $this->assertSame('50 3 * * *', $tareas->first(fn ($e) => str_contains($e->command ?? '', 'pedidos:limpiar-archivos'))?->expression);
     }
 
     public function test_las_copias_de_seguridad_incluyen_los_disenos(): void
@@ -98,7 +109,7 @@ class LimpiarDisenosTest extends TestCase
         $this->assertTrue(collect($incluidas)->contains(fn ($ruta) => str_starts_with(config('filesystems.disks.disenos.root'), $ruta)));
     }
 
-    private function diseno(int $hace, ?int $cliente = null): Diseno
+    private function diseno(int $horas, ?int $cliente = null): Diseno
     {
         $uuid = (string) Str::uuid();
         $ruta = "2026/11/{$uuid}.png";
@@ -112,7 +123,7 @@ class LimpiarDisenosTest extends TestCase
             'ancho_px' => 600, 'alto_px' => 600, 'util_x' => 0, 'util_y' => 0, 'util_ancho_px' => 600, 'util_alto_px' => 600,
             'fondo' => 'transparente', 'profundidad_bits' => 8, 'derechos_declarados_en' => now(), 'derechos_texto' => 'Declaro…',
         ]);
-        $diseno->forceFill(['created_at' => now()->subDays($hace)])->saveQuietly();
+        $diseno->forceFill(['created_at' => now()->subHours($horas)])->saveQuietly();
 
         return $diseno;
     }

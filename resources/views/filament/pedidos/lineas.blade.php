@@ -32,6 +32,8 @@
                             {{ $impresion->nombre_original }}
                             @if ($impresion->archivo)
                                 · <a href="{{ route('backend.pedidos.original', ['pedido' => $pedido->uuid, 'impresion' => $impresion->id]) }}" style="text-decoration: underline;">descargar original</a>
+                            @elseif ($pedido->archivos_borrados_en)
+                                · <span style="opacity: .7;">original borrado el {{ $pedido->archivos_borrados_en->format('d/m/Y') }} (D230)</span>
                             @endif
                         @endif
                         · {{ $cm($impresion->ancho_mm) }} × {{ $cm($impresion->alto_mm) }} cm, a {{ $cm($impresion->desde_cuello_mm) }} cm del cuello

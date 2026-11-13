@@ -78,9 +78,15 @@ Schedule::command('facturas:emitir-pendientes')
     ->dailyAt('06:15')
     ->withoutOverlapping();
 
+// D230: los diseños sin venta se borran a las 72 h (cada hora) y los archivos de pedidos a los 90 días del envío.
 Schedule::command('disenos:limpiar')
-    ->description('Borrar diseños sin pedido de visitantes sin cuenta y archivos huérfanos')
-    ->dailyAt('03:40')
+    ->description('Borrar diseños sin venta (72 h por defecto) y archivos huérfanos')
+    ->hourlyAt(40)
+    ->withoutOverlapping();
+
+Schedule::command('pedidos:limpiar-archivos')
+    ->description('Borrar los archivos de impresión de pedidos enviados hace más de 90 días (por defecto)')
+    ->dailyAt('03:50')
     ->withoutOverlapping();
 
 // Copias de seguridad (paso 1.6): limpieza según la retención, copia diaria

@@ -38,7 +38,8 @@ El equipo de producción solo ve qué imprimir, sin tus datos personales. Nunca 
 ## 4. Cuánto tiempo los guardamos
 
 - **Pedidos y facturas**: los plazos que marca la ley mercantil y fiscal.
-- **Diseños sin pedido**: se borran solos pasado el plazo indicado al subirlos.
+- **Diseños sin pedido**: se borran solos a las {{ (int) \App\Models\Ajuste::obtener('disenos.horas_sin_venta') }} horas de subirlos o de su último uso en el carrito, también los guardados en tu cuenta.
+- **Archivos de impresión de un pedido**: se guardan {{ (int) \App\Models\Ajuste::obtener('pedidos.dias_archivos') }} días hábiles desde el envío y después se borran; el pedido, sus maquetas y la factura se conservan.
 - **Fotos de incidencias e IP del pedido**: {!! $f(null, 'plazo de conservación de las fotos de incidencias y de la IP (lo fija la asesoría)') !!}.
 - **Cuenta**: mientras la mantengas. Si pides borrarla, se borra; los pedidos y facturas se conservan lo que exige la ley.
 
