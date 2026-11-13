@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Dominio\Clientes\TipoCliente;
 use App\Dominio\Pedidos\EstadoPedido;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -41,6 +42,7 @@ use Illuminate\Support\Facades\Storage;
  * @property array<string, mixed> $desglose
  * @property ?Carbon $fecha_estimada_entrega
  * @property ?string $transportista
+ * @property ?CarbonInterface $archivos_borrados_en archivos de impresión borrados (D230)
  * @property ?string $url_seguimiento enlace de seguimiento del transportista (D226)
  * @property ?string $numero_seguimiento
  * @property ?Carbon $cancelacion_solicitada_en
@@ -124,6 +126,7 @@ class Pedido extends Model
             'direccion_facturacion' => 'array',
             'desglose' => 'array',
             'correo_confirmado_en' => 'datetime',
+            'archivos_borrados_en' => 'datetime',
             'condiciones_aceptadas_en' => 'datetime',
             'fecha_estimada_entrega' => 'date',
             'cancelacion_solicitada_en' => 'datetime',

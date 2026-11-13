@@ -74,4 +74,9 @@ return [
     'cancelar_no_puede' => 'Este pedido ya no se puede cancelar desde aquí. Escríbenos y lo vemos.',
     'cancelacion_pedida' => 'Pediste cancelar este pedido el :fecha. Lo estamos revisando.',
     'cancelar_cancelado_devolucion' => 'Tu pedido está cancelado. Te devolvemos el dinero en la misma tarjeta o Bizum; puede tardar unos días en verse.',
+    // D230: custodia de los diseños.
+    'custodia_titulo' => 'Custodia de tus diseños.',
+    'custodia' => 'Guardamos los archivos de impresión de tu pedido durante :dias días hábiles desde su envío. Pasado ese plazo se borran de nuestra base de datos sin posibilidad de recuperación, y por causas técnicas podemos no avisar del borrado. Conserva siempre tú una copia de todos tus diseños.',
+    'custodia_hasta' => 'Los de este pedido se guardan hasta el :fecha.',
+    'custodia_borrados' => 'Los de este pedido se borraron el :fecha: para repetirlo tendrás que volver a subir tus diseños.',
 ];

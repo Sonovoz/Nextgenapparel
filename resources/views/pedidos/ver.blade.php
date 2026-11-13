@@ -204,6 +204,16 @@
                             <button type="submit" class="boton">{{ __('pedidos.repetir') }}</button>
                             <p class="claro">{{ __('pedidos.repetir_nota') }}</p>
                         </form>
+                        {{-- D230: custodia de los diseños (días hábiles desde el envío). --}}
+                        <p class="aviso-custodia">
+                            <strong>{{ __('pedidos.custodia_titulo') }}</strong>
+                            {{ __('pedidos.custodia', ['dias' => \App\Dominio\Pedidos\LimpiarArchivosPedidos::dias()]) }}
+                            @if ($pedido->archivos_borrados_en)
+                                {{ __('pedidos.custodia_borrados', ['fecha' => $pedido->archivos_borrados_en->locale(app()->getLocale())->isoFormat('LL')]) }}
+                            @elseif (in_array($pedido->estado, [E::Enviado, E::Entregado], true))
+                                {{ __('pedidos.custodia_hasta', ['fecha' => \App\Dominio\Pedidos\LimpiarArchivosPedidos::fechaBorrado($pedido)->locale(app()->getLocale())->isoFormat('LL')]) }}
+                            @endif
+                        </p>
                         @if ($puedeCancelar)
                             @php $sinPagar = $pedido->estado === E::PendientePago; @endphp
                             <details class="pedido-cancelar">

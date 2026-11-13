@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 13/11 | **Retención de archivos**: diseños sin venta a las 72 h, originales de pedidos a los 90 días hábiles del envío; aviso de custodia en pedido, cierre, correos y condiciones. | `retencion-archivos` | D230 |
 | 13/11 | **Tramos de envío en kilos**: el formulario de la zona pide los tramos en kg (admite decimales) y avisa de qué pasa sin «kilo extra». | `envio-tramos-kg` | — |
 | 13/11 | **Asistente de envíos con IA**: «Crear con IA» pasa a limpio la tarifa del transportista; vista previa con el cálculo real; se crea al confirmar. | `ia-envios` | D228 |
 | 13/11 | **Clave de IA en Ajustes → IA**, cifrada; el `.env` sigue mandando si la tiene. | `ia-clave-backend` | D227 |

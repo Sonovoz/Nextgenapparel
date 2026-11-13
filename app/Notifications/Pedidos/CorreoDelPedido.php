@@ -5,6 +5,7 @@ namespace App\Notifications\Pedidos;
 use App\Dominio\Facturacion\PdfFactura;
 use App\Dominio\Pedidos\CorreosPedido;
 use App\Dominio\Pedidos\EstadoPedido;
+use App\Dominio\Pedidos\LimpiarArchivosPedidos;
 use App\Http\Controllers\PedidoController;
 use App\Models\Ajuste;
 use App\Models\Factura;
@@ -58,8 +59,13 @@ class CorreoDelPedido extends Notification implements ShouldQueue
             $correo->line('«'.trim($this->nota).'»');
         }
 
-        return $correo->action(trans('correos.ver_pedido', [], $idioma), PedidoController::enlacePrivado($pedido))
-            ->salutation(trans('cuenta.correo_despedida', ['tienda' => $tienda], $idioma));
+        $correo->action(trans('correos.ver_pedido', [], $idioma), PedidoController::enlacePrivado($pedido));
+        // D230: al pagar y al enviar se recuerda la custodia de los diseños (días hábiles desde el envío).
+        if ($this->tipo === 'estado' && in_array($this->estado, [EstadoPedido::Pagado, EstadoPedido::Enviado], true)) {
+            $correo->line(trans('pedidos.custodia_titulo', [], $idioma).' '.trans('pedidos.custodia', ['dias' => LimpiarArchivosPedidos::dias()], $idioma));
+        }
+
+        return $correo->salutation(trans('cuenta.correo_despedida', ['tienda' => $tienda], $idioma));
     }
 
     /** La factura o la rectificativa, con su PDF adjunto (D175). */

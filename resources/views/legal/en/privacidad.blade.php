@@ -38,7 +38,8 @@ The production team only sees what to print, without your personal data. We neve
 ## 4. How long we keep it
 
 - **Orders and invoices**: the periods required by commercial and tax law.
-- **Designs without an order**: deleted automatically after the period shown when you upload them.
+- **Designs without an order**: deleted automatically {{ (int) \App\Models\Ajuste::obtener('disenos.horas_sin_venta') }} hours after upload or after their last use in the cart, including those saved in your account.
+- **Print files of an order**: kept for {{ (int) \App\Models\Ajuste::obtener('pedidos.dias_archivos') }} working days from shipping and then deleted; the order, its mock-ups and the invoice are kept.
 - **Issue photos and the order IP address**: {!! $f(null, 'plazo de conservación de las fotos de incidencias y de la IP (lo fija la asesoría)') !!}.
 - **Account**: while you keep it. If you ask us to delete it, we do; orders and invoices are kept as long as the law requires.
 

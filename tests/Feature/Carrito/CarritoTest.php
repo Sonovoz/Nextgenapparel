@@ -436,7 +436,7 @@ class CarritoTest extends TestCase
             $d->forceFill(['created_at' => now()->subDays(60)])->saveQuietly(); // más que los días de diseños sin pedido
         }
         Carrito::whereKey($viejo->id)->update(['updated_at' => now()->subDays(11)]);
-        Carrito::whereKey($reciente->id)->update(['updated_at' => now()->subDays(9)]);
+        Carrito::whereKey($reciente->id)->update(['updated_at' => now()->subDays(2)]); // dentro de las 72 h sin venta (D230)
 
         $this->assertSame(1, app(LimpiarCarritos::class)());
         app(LimpiarDisenos::class)();
@@ -444,7 +444,7 @@ class CarritoTest extends TestCase
         $this->assertModelMissing($viejo);
         $this->assertModelExists($reciente);
         $this->assertModelMissing($disenoViejo);
-        $this->assertModelExists($disenoReciente); // está en un carrito vivo
+        $this->assertModelExists($disenoReciente); // está en un carrito usado hace menos de 72 h
         $this->artisan('carritos:limpiar')->expectsOutputToContain('Carritos borrados: 0.')->assertSuccessful();
     }
 

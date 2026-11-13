@@ -12,6 +12,8 @@ return [
     'faltan_disenos_pack' => 'Put your design on at least one of the areas included in the pack.',
     'demasiados_disenos_pack' => 'This pack allows fewer different designs: remove one.',
     'diseno_no_disponible' => 'One of the designs is no longer available. Upload it again or choose another one.',
+    // D230
+    'archivos_caducados' => 'More than :dias days have passed since shipping and we no longer keep this order\'s print files. Upload your design again and we will prepare it the same way.',
     'texto_no_valido' => 'Please check the text: 1 to 60 characters, with one of the configurator fonts and inks.',
     'medida_no_valida' => 'The size or position of the design does not fit the area. Please place it again.',
     'reparto_pack_no_valido' => 'Please check the colours and sizes of the pack.',

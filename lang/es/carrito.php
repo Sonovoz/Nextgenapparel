@@ -12,6 +12,8 @@ return [
     'faltan_disenos_pack' => 'Pon tu diseño en al menos una de las zonas que incluye el pack.',
     'demasiados_disenos_pack' => 'Este pack admite menos diseños distintos: quita alguno.',
     'diseno_no_disponible' => 'Uno de los diseños ya no está disponible. Vuelve a subirlo o elige otro.',
+    // D230
+    'archivos_caducados' => 'Han pasado más de :dias días desde el envío y ya no guardamos los archivos de impresión de este pedido. Sube de nuevo tu diseño y lo preparamos igual.',
     'texto_no_valido' => 'Revisa el texto: entre 1 y 60 caracteres, con una de las fuentes y tintas del configurador.',
     'medida_no_valida' => 'El tamaño o la posición del diseño no cabe en la zona. Vuelve a colocarlo.',
     'reparto_pack_no_valido' => 'Revisa los colores y las tallas del pack.',

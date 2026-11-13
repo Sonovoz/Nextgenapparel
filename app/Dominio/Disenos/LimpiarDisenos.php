@@ -10,11 +10,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Retención de los diseños (paso 4.6, minimización de datos del RGPD):
+ * Retención de los diseños (paso 4.6, minimización de datos del RGPD; D230):
  *
- * - Los de visitantes sin cuenta se borran, con sus archivos, pasados los días de
- *   Ajustes → General («Guardar sin pedido»). Los de clientes con cuenta se conservan
- *   (su retención se decide en la fase 5).
+ * - Sin venta, de cualquiera (con cuenta o sin ella), se borran con sus archivos pasadas las
+ *   horas de Ajustes → General (72 por defecto) desde que se subieron. Si están en un carrito
+ *   que se ha usado dentro de ese plazo, esperan: el cliente puede estar pagando.
+ * - Los que han llegado a un pedido se quedan en la biblioteca mientras algún pedido suyo
+ *   conserve sus archivos (90 días desde el envío, LimpiarArchivosPedidos).
  * - Los archivos sin fila de más de un día también: quedan si un proceso muere a mitad
  *   de una subida (revisión N3, D148).
  *
@@ -68,11 +70,18 @@ final class LimpiarDisenos
     /** @return Builder<Diseno> */
     public function disenosCaducados()
     {
-        $dias = max(1, (int) Ajuste::obtener('disenos.dias_sin_pedido'));
+        $limite = now()->subHours(max(1, (int) Ajuste::obtener('disenos.horas_sin_venta')));
 
-        // Los que están en un carrito se quedan mientras el carrito exista (su plazo es aparte).
-        return Diseno::whereNull('cliente_id')->where('created_at', '<', now()->subDays($dias))
-            ->whereNotExists(fn ($q) => $q->select(DB::raw(1))->from('impresiones_carrito')->whereColumn('impresiones_carrito.diseno_id', 'disenos.id'))
-            ->whereNotExists(fn ($q) => $q->select(DB::raw(1))->from('impresiones_pedido')->whereColumn('impresiones_pedido.diseno_id', 'disenos.id'));
+        return Diseno::where('created_at', '<', $limite)
+            // En un carrito usado dentro del plazo: puede estar a punto de pagarse.
+            ->whereNotExists(fn ($q) => $q->select(DB::raw(1))->from('impresiones_carrito')
+                ->join('lineas_carrito', 'lineas_carrito.id', '=', 'impresiones_carrito.linea_carrito_id')
+                ->join('carritos', 'carritos.id', '=', 'lineas_carrito.carrito_id')
+                ->whereColumn('impresiones_carrito.diseno_id', 'disenos.id')->where('carritos.updated_at', '>=', $limite))
+            // Vendido: mientras algún pedido suyo conserve los archivos de impresión.
+            ->whereNotExists(fn ($q) => $q->select(DB::raw(1))->from('impresiones_pedido')
+                ->join('lineas_pedido', 'lineas_pedido.id', '=', 'impresiones_pedido.linea_pedido_id')
+                ->join('pedidos', 'pedidos.id', '=', 'lineas_pedido.pedido_id')
+                ->whereColumn('impresiones_pedido.diseno_id', 'disenos.id')->whereNull('pedidos.archivos_borrados_en'));
     }
 }

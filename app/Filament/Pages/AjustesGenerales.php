@@ -61,7 +61,8 @@ class AjustesGenerales extends Page implements HasSchemas
             'correo_contacto' => Ajuste::obtener('tienda.correo_contacto'),
             ...Calidad::umbrales(),
             ...AnalizadorPng::limites(),
-            'dias_sin_pedido' => (int) Ajuste::obtener('disenos.dias_sin_pedido'),
+            'horas_sin_venta' => (int) Ajuste::obtener('disenos.horas_sin_venta'),
+            'dias_archivos' => (int) Ajuste::obtener('pedidos.dias_archivos'),
             'foto_max_px' => OptimizarFoto::limites()['max_px'],
             'foto_calidad' => OptimizarFoto::limites()['calidad'],
             'recargo_lo_indica' => Ajuste::obtener('clientes.recargo_lo_indica'),
@@ -117,7 +118,11 @@ class AjustesGenerales extends Page implements HasSchemas
                     TextInput::make('min_px')->label('Lado menor, al menos')->integer()->minValue(50)->maxValue(2000)->suffix('px')->required(),
                     Toggle::make('exigir_ppp')->label('Exigir que el PNG indique su resolución (ppp)')->inline(false)
                         ->helperText('Si el archivo no la declara, no se admite (D206).'),
-                    TextInput::make('dias_sin_pedido')->label('Guardar sin pedido')->integer()->minValue(1)->maxValue(365)->suffix('días')->required(),
+                    // D230: retención de los archivos.
+                    TextInput::make('horas_sin_venta')->label('Guardar los diseños sin venta')->integer()->minValue(1)->maxValue(8760)->suffix('horas')->required()
+                        ->helperText('Desde que se suben o se usan por última vez en un carrito. Después se borran solos (también de «Mis diseños»).'),
+                    TextInput::make('dias_archivos')->label('Guardar los archivos de impresión de los pedidos')->integer()->minValue(7)->maxValue(3650)->suffix('días')->required()
+                        ->helperText('Desde el envío (o desde el pedido si se cancela). El pedido, sus maquetas y la factura se conservan siempre.'),
                     TextInput::make('subidas_hora')->label('Subidas por hora y conexión')->integer()->minValue(5)->maxValue(1000)->required()
                         ->helperText('Frena el abuso; quien prueba varias versiones de su logo no llega.'),
                     TextInput::make('max_dia')->label('Diseños nuevos por visitante y día')->integer()->minValue(5)->maxValue(1000)->required(),
@@ -204,11 +209,16 @@ class AjustesGenerales extends Page implements HasSchemas
                     Actividad::apuntar('ajustes', 'Umbrales de calidad cambiados', propiedades: ['old' => $umbralesAnteriores, 'attributes' => $umbralesNuevos]);
                 }
 
-                $archivosAnteriores = [...AnalizadorPng::limites(), ...collect(['dias_sin_pedido', 'subidas_hora', 'max_dia'])->mapWithKeys(fn ($c) => [$c => (int) Ajuste::obtener('disenos.'.$c)])->all()];
+                $archivosAnteriores = [...AnalizadorPng::limites(), ...collect(['horas_sin_venta', 'subidas_hora', 'max_dia'])->mapWithKeys(fn ($c) => [$c => (int) Ajuste::obtener('disenos.'.$c)])->all()];
                 $archivosNuevos = [];
                 foreach (array_keys($archivosAnteriores) as $clave) {
                     $archivosNuevos[$clave] = (int) $datos[$clave];
                     Ajuste::guardar('disenos.'.$clave, $archivosNuevos[$clave]);
+                }
+                $diasArchivos = (int) Ajuste::obtener('pedidos.dias_archivos');
+                Ajuste::guardar('pedidos.dias_archivos', (int) $datos['dias_archivos']);
+                if ($diasArchivos !== (int) $datos['dias_archivos']) {
+                    Actividad::apuntar('ajustes', 'Días que se guardan los archivos de los pedidos cambiados', propiedades: ['old' => $diasArchivos, 'attributes' => (int) $datos['dias_archivos']]);
                 }
                 if ($archivosAnteriores !== $archivosNuevos) {
                     Actividad::apuntar('ajustes', 'Límites de los archivos de diseño cambiados', propiedades: ['old' => $archivosAnteriores, 'attributes' => $archivosNuevos]);

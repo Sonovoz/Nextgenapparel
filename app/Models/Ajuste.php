@@ -30,7 +30,10 @@ class Ajuste extends Model
         'disenos.min_px' => 300,
         // D206: no se admite un PNG que no declare su resolución (ppp, fragmento pHYs).
         'disenos.exigir_ppp' => 1,
-        'disenos.dias_sin_pedido' => 30,
+        // D230: diseños sin venta, horas desde que se subieron o se usaron en un carrito por última vez.
+        'disenos.horas_sin_venta' => 72,
+        // D230: días que se guardan los archivos de impresión de un pedido desde su envío (o desde el pedido si no se envía).
+        'pedidos.dias_archivos' => 90,
         // Fotos del catálogo (D210): al subirlas se pasan a WebP con este lado mayor y esta calidad (1-100).
         'catalogo.foto_max_px' => 2000,
         'catalogo.foto_calidad' => 82,

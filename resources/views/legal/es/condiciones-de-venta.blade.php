@@ -55,6 +55,10 @@ Las prendas tienen la **garantía legal de 3 años** por falta de conformidad. S
 - Errores en el propio diseño (textos, ortografía, colores) o en las tallas y cantidades que elegiste.
 - El desgaste por el uso o por no seguir las instrucciones de lavado y cuidado de la prenda.
 
-## 9. Atención al cliente y legislación
+## 9. Custodia de los diseños
+
+Guardamos en custodia los archivos de impresión de cada pedido durante **{{ (int) \App\Models\Ajuste::obtener('pedidos.dias_archivos') }} días hábiles** desde su envío (si el pedido no llega a enviarse, desde la fecha del pedido). Pasado ese plazo se borran de nuestra base de datos **sin posibilidad de recuperación**. Nos reservamos el derecho a no comunicar estos borrados cuando se hagan por causas técnicas. **Tú eres responsable de conservar una copia de todos tus diseños**; para repetir un pedido después de ese plazo tendrás que volver a subirlos. El pedido, sus maquetas y la factura se conservan.
+
+## 10. Atención al cliente y legislación
 
 Puedes escribirnos a {!! $f($e['correo'], 'correo de contacto') !!}. Estas condiciones se rigen por la legislación española; el consumidor puede acudir a los juzgados de su domicilio.

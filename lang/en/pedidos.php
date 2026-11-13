@@ -73,4 +73,9 @@ return [
     'cancelar_no_puede' => 'This order can no longer be cancelled here. Write to us and we will look into it.',
     'cancelacion_pedida' => 'You asked to cancel this order on :fecha. We are reviewing it.',
     'cancelar_cancelado_devolucion' => 'Your order has been cancelled. We are refunding you to the same card or Bizum; it may take a few days to show.',
+    // D230: custody of designs.
+    'custodia_titulo' => 'Custody of your designs.',
+    'custodia' => 'We keep your order\'s print files for :dias working days from shipping. After that period they are deleted from our database with no possibility of recovery, and for technical reasons we may not notify the deletion. Always keep your own copy of all your designs.',
+    'custodia_hasta' => 'This order\'s files are kept until :fecha.',
+    'custodia_borrados' => 'This order\'s files were deleted on :fecha: to repeat it you will need to upload your designs again.',
 ];
