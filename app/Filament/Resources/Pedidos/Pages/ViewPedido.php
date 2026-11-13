@@ -8,6 +8,8 @@ use App\Dominio\Pedidos\CorreoPedido;
 use App\Dominio\Pedidos\EstadoPedido;
 use App\Filament\Resources\Pedidos\PedidoResource;
 use App\Models\Pedido;
+use App\Models\Transportista;
+use App\Models\ZonaEnvio;
 use App\Notifications\Pedidos\CorreoDelPedido;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -41,8 +43,14 @@ class ViewPedido extends ViewRecord
                 ->schema([
                     Select::make('estado')->label('Nuevo estado')->required()->native(false)->live()
                         ->options(collect($pedido->estado->siguientes())->mapWithKeys(fn (EstadoPedido $e) => [$e->value => $e->etiqueta()])->all()),
-                    TextInput::make('transportista')->label('Transportista')->maxLength(80)
-                        ->visible(fn (Get $get) => $get('estado') === EstadoPedido::Enviado->value)->required(fn (Get $get) => $get('estado') === EstadoPedido::Enviado->value),
+                    // D226: con transportistas dados de alta, se elige de la lista (propone el de la zona del pedido).
+                    Transportista::where('activo', true)->exists()
+                        ? Select::make('transportista')->label('Transportista')->native(false)
+                            ->options(fn () => Transportista::where('activo', true)->orderBy('nombre')->pluck('nombre', 'nombre')->all())
+                            ->default(fn () => ZonaEnvio::paraDestino((string) ($pedido->direccion_envio['pais'] ?? 'ES'), (string) ($pedido->direccion_envio['codigo_postal'] ?? ''))?->transportista?->nombre)
+                            ->visible(fn (Get $get) => $get('estado') === EstadoPedido::Enviado->value)->required(fn (Get $get) => $get('estado') === EstadoPedido::Enviado->value)
+                        : TextInput::make('transportista')->label('Transportista')->maxLength(80)
+                            ->visible(fn (Get $get) => $get('estado') === EstadoPedido::Enviado->value)->required(fn (Get $get) => $get('estado') === EstadoPedido::Enviado->value),
                     TextInput::make('numero_seguimiento')->label('Número de seguimiento')->maxLength(80)
                         ->visible(fn (Get $get) => $get('estado') === EstadoPedido::Enviado->value)->required(fn (Get $get) => $get('estado') === EstadoPedido::Enviado->value),
                     Textarea::make('nota')->label('Nota para el historial')->maxLength(500),
