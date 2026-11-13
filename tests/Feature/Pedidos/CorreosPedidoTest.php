@@ -140,6 +140,11 @@ class CorreosPedidoTest extends TestCase
         $this->actingAs($this->usuarioConRol(Rol::Administrador));
         Livewire::test(AjustesCorreos::class)->callAction('prueba', data: ['para' => 'equipo@nextgenapparel.es'])->assertNotified('Correo de prueba enviado a equipo@nextgenapparel.es');
         Notification::assertSentOnDemand(CorreoDePrueba::class);
+
+        // Con MAIL_MAILER=log no dice «enviado»: avisa de que se ha escrito en el log (pruebas en local).
+        config()->set('mail.default', 'log');
+        Livewire::test(AjustesCorreos::class)->callAction('prueba', data: ['para' => 'equipo@nextgenapparel.es'])->assertNotified('El correo no se ha enviado');
+        Notification::assertSentOnDemandTimes(CorreoDePrueba::class, 1);
     }
 
     /** D234: con el .env en «log», el correo de prueba no dice «enviado»; con un servidor en el panel, sale por SMTP. */
