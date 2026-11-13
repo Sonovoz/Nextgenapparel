@@ -82,7 +82,17 @@ final class ComprobarLinea
             $extra = $extra === null ? $suyas : array_values(array_intersect($extra, $suyas));
         }
 
-        return $this->impresiones($impresiones, array_values(array_unique([...$incluidas, ...($extra ?? [])])), obligatorias: $incluidas);
+        // D224: el cliente elige en qué zonas incluidas va cada diseño; al menos una, y no más diseños de los que permite el pack.
+        $problemas = $this->impresiones($impresiones, array_values(array_unique([...$incluidas, ...($extra ?? [])])), obligatorias: []);
+        if ($impresiones !== [] && array_intersect($incluidas, array_map(fn (Impresion $i) => $i->zonaId, $impresiones)) === []) {
+            $problemas[] = 'faltan_disenos_pack';
+        }
+        $distintos = array_unique(array_map(fn (Impresion $i) => $i->esTexto() ? 'texto:'.$i->texto : 'diseno:'.$i->disenoId, $impresiones));
+        if (count($distintos) > max(1, $pack->max_disenos)) {
+            $problemas[] = 'demasiados_disenos_pack';
+        }
+
+        return array_values(array_unique($problemas));
     }
 
     /** @return list<string> */

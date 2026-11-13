@@ -1302,3 +1302,12 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .modos-vacio { margin-top: 28px; }
 /* D223 */
 .pack-zonas-prenda { margin: 2px 0 0; font-size: 13px; color: var(--neon); }
+/* D224: dónde va cada diseño. */
+.pack-zonas { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.pack-zona { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--linea-fuerte); background: var(--fondo-suave); cursor: pointer; font-weight: 500; }
+.pack-zona:has(input:checked), .pack-zona:has(select option:checked:not([value="0"])) { border-color: var(--azul); }
+.pack-zona input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--azul); }
+.pack-zona select { margin-left: auto; width: auto; min-height: 40px; font-size: 14px; }
+.pack-zona-mini { width: 40px; height: 40px; flex: none; border-radius: 8px; background: #2a2b38 center / contain no-repeat; border: 1px solid var(--linea-fuerte); }
+.pack-zona-mini.vacia { background-image: none; opacity: .5; }
+.pack-diseno .pack-check:not(:empty) { font-weight: 700; }

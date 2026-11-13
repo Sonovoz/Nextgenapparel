@@ -10,6 +10,7 @@ use App\Models\Diseno;
 use App\Models\Familia;
 use App\Models\Foto;
 use App\Models\FotoZona;
+use App\Models\LineaCarrito;
 use App\Models\Pack;
 use App\Models\Prenda;
 use App\Models\Talla;
@@ -96,6 +97,38 @@ class PackTest extends TestCase
         $this->get('/es/packs/pack-joven')->assertOk()->assertSee('Así quedará tu colección')
             ->assertSee('left: 37.7%; top: 22.6%; width: 24.6%; height: 27.9%;', false)
             ->assertSee(route('disenos.miniatura', ['diseno' => $diseno->uuid]), false);
+    }
+
+    /** D224: el pack admite hasta N diseños y el cliente elige en qué zonas incluidas va cada uno (o ninguno). */
+    public function test_con_dos_disenos_cada_zona_lleva_el_suyo_y_se_pueden_dejar_zonas_sin_imprimir(): void
+    {
+        $espalda = ZonaImpresion::factory()->create(['nombre' => ['es' => 'Espalda'], 'ancho_max_mm' => 300, 'alto_max_mm' => 400, 'desde_cuello_mm' => 100, 'desde_centro_mm' => 0]);
+        $lineaPack = $this->pack->lineas()->sole();
+        $lineaPack->prenda->zonas()->attach($espalda->id, ['precio' => 350, 'coste' => 140]);
+        $this->pack->zonas()->attach($espalda->id);
+        $this->pack->update(['max_disenos' => 2]);
+        $uno = $this->diseno([]);
+        $dos = Diseno::forceCreate([...$uno->only(['propietario', 'nombre_original', 'ruta', 'miniatura', 'bytes', 'ancho_px', 'alto_px', 'util_x', 'util_y', 'util_ancho_px', 'util_alto_px', 'fondo', 'profundidad_bits', 'derechos_declarados_en', 'derechos_texto']),
+            'uuid' => (string) Str::uuid(), 'sha256' => hash('sha256', 'dos')]);
+        $reparto = [$lineaPack->id => ['color' => (string) $this->negro->id, 'tallas' => [$this->tallas['L'] => '4', $this->tallas['XL'] => '6']]];
+
+        $this->get('/es/packs/pack-joven')->assertOk()->assertSee('Tus diseños (hasta 2)')->assertSee('Diseño 2')->assertSee('Sin imprimir');
+
+        // Diseño 1 en el frontal y Diseño 2 en la espalda.
+        $this->post('/es/packs/pack-joven', ['disenos' => [$uno->uuid, $dos->uuid], 'colocacion' => [$this->frontal->id => '1', $espalda->id => '2'], 'elecciones' => $reparto])
+            ->assertRedirect('/es/carrito')->assertSessionHasNoErrors();
+        $impresiones = LineaCarrito::sole()->impresiones()->pluck('diseno_id', 'zona_impresion_id')->all();
+        $this->assertEquals([$this->frontal->id => $uno->id, $espalda->id => $dos->id], $impresiones);
+
+        // Solo el frontal, aunque la espalda esté incluida.
+        $this->post('/es/packs/pack-joven', ['disenos' => [$uno->uuid], 'colocacion' => [$this->frontal->id => '1', $espalda->id => '0'], 'elecciones' => $reparto])->assertSessionHasNoErrors();
+        $this->assertSame([$this->frontal->id], LineaCarrito::latest('id')->firstOrFail()->impresiones()->pluck('zona_impresion_id')->all());
+
+        // Ninguna zona, un Diseño 2 sin elegir o más diseños de los permitidos: no se añade.
+        $this->post('/es/packs/pack-joven', ['disenos' => [$uno->uuid], 'colocacion' => [$this->frontal->id => '0', $espalda->id => '0'], 'elecciones' => $reparto])->assertSessionHasErrors('colocacion');
+        $this->post('/es/packs/pack-joven', ['disenos' => [$uno->uuid], 'colocacion' => [$espalda->id => '2'], 'elecciones' => $reparto])->assertSessionHasErrors('colocacion');
+        $this->post('/es/packs/pack-joven', ['disenos' => [$uno->uuid, $dos->uuid, $uno->uuid], 'colocacion' => [$this->frontal->id => '1'], 'elecciones' => $reparto])->assertSessionHasErrors('disenos');
+        $this->assertSame(2, LineaCarrito::count());
     }
 
     public function test_un_reparto_incompleto_o_un_diseno_ajeno_no_se_anaden(): void
