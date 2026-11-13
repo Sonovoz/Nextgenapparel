@@ -3,6 +3,7 @@
 namespace App\Dominio\Disenos;
 
 use App\Dominio\Sistema\Actividad\Actividad;
+use App\Dominio\Sistema\Salud\Latido;
 use App\Models\Ajuste;
 use App\Models\Diseno;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,12 +26,16 @@ use Illuminate\Support\Facades\Storage;
  */
 final class LimpiarDisenos
 {
-    /** @return array{disenos: int, huerfanos: int} */
-    public function __invoke(): array
+    /**
+     * @param  bool  $tambienRecientes  D231: «Borrar archivos sin venta» del backend: también los de menos de las horas
+     *                                  de Ajustes, salvo los que están en un carrito usado dentro de ese plazo.
+     * @return array{disenos: int, huerfanos: int}
+     */
+    public function __invoke(bool $tambienRecientes = false): array
     {
         $resultado = ['disenos' => 0, 'huerfanos' => 0];
 
-        $this->disenosCaducados()->chunkById(200, function ($disenos) use (&$resultado): void {
+        $this->disenosCaducados($tambienRecientes)->chunkById(200, function ($disenos) use (&$resultado): void {
             foreach ($disenos as $diseno) {
                 $diseno->delete(); // borra también sus archivos (Diseno::booted)
                 $resultado['disenos']++;
@@ -64,15 +69,17 @@ final class LimpiarDisenos
             ]);
         }
 
+        Latido::registrar(Latido::LIMPIEZA_DISENOS);
+
         return $resultado;
     }
 
     /** @return Builder<Diseno> */
-    public function disenosCaducados()
+    public function disenosCaducados(bool $tambienRecientes = false)
     {
         $limite = now()->subHours(max(1, (int) Ajuste::obtener('disenos.horas_sin_venta')));
 
-        return Diseno::where('created_at', '<', $limite)
+        return Diseno::where('created_at', '<', $tambienRecientes ? now() : $limite)
             // En un carrito usado dentro del plazo: puede estar a punto de pagarse.
             ->whereNotExists(fn ($q) => $q->select(DB::raw(1))->from('impresiones_carrito')
                 ->join('lineas_carrito', 'lineas_carrito.id', '=', 'impresiones_carrito.linea_carrito_id')

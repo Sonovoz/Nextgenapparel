@@ -2,6 +2,7 @@
 
 namespace App\Dominio\Sistema\Salud;
 
+use App\Dominio\Sistema\Salud\Comprobaciones\Almacenamiento;
 use App\Dominio\Sistema\Salud\Comprobaciones\BaseDeDatos;
 use App\Dominio\Sistema\Salud\Comprobaciones\Cache;
 use App\Dominio\Sistema\Salud\Comprobaciones\Colas;
@@ -12,6 +13,7 @@ use App\Dominio\Sistema\Salud\Comprobaciones\Correo;
 use App\Dominio\Sistema\Salud\Comprobaciones\ErroresCriticos;
 use App\Dominio\Sistema\Salud\Comprobaciones\EspacioDisco;
 use App\Dominio\Sistema\Salud\Comprobaciones\Imagenes;
+use App\Dominio\Sistema\Salud\Comprobaciones\Limpieza;
 use App\Dominio\Sistema\Salud\Comprobaciones\TareasProgramadas;
 use App\Notifications\AlertaSalud;
 use Carbon\CarbonImmutable;
@@ -37,6 +39,8 @@ class ComprobarSalud
             Colas::class,
             Correo::class,
             EspacioDisco::class,
+            Almacenamiento::class, // D231
+            Limpieza::class,       // D231
             Imagenes::class,
             CopiasSeguridad::class,
             ErroresCriticos::class,

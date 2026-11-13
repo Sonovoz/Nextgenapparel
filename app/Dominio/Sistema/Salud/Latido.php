@@ -16,6 +16,11 @@ class Latido
 
     public const COLAS = 'colas';
 
+    /** D231: cada limpieza deja su latido para que la salud del sistema sepa que está al día. */
+    public const LIMPIEZA_DISENOS = 'limpieza-disenos';
+
+    public const LIMPIEZA_PEDIDOS = 'limpieza-pedidos';
+
     public static function registrar(string $proceso): void
     {
         $carpeta = self::carpeta();

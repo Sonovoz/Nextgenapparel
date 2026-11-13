@@ -3,6 +3,7 @@
 namespace App\Dominio\Pedidos;
 
 use App\Dominio\Sistema\Actividad\Actividad;
+use App\Dominio\Sistema\Salud\Latido;
 use App\Models\Ajuste;
 use App\Models\ImpresionPedido;
 use App\Models\Pedido;
@@ -47,6 +48,7 @@ final class LimpiarArchivosPedidos
             }
         });
 
+        Latido::registrar(Latido::LIMPIEZA_PEDIDOS);
         if ($resultado['pedidos'] > 0) {
             Actividad::apuntar('pedidos', 'Archivos de impresión de pedidos antiguos borrados', propiedades: [
                 'pedidos' => $resultado['pedidos'], 'archivos' => $resultado['archivos'],
