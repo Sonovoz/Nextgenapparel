@@ -1300,3 +1300,5 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .modos-texto { margin: 14px 0 0; color: var(--tinta-suave); font-size: 15px; }
 .carrusel .pack[hidden] { display: none; }
 .modos-vacio { margin-top: 28px; }
+/* D223 */
+.pack-zonas-prenda { margin: 2px 0 0; font-size: 13px; color: var(--neon); }

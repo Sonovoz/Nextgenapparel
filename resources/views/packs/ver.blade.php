@@ -23,7 +23,7 @@
                     @if ($pack->descripcion)<p class="claro">{{ $pack->descripcion }}</p>@endif
                     <ul class="pack-chips">
                         @foreach ($lineas as $l)<li>{{ $l['linea']->unidades }} × {{ $l['linea']->prenda->nombre }}</li>@endforeach
-                        <li>{{ __('packs.impresion') }}: {{ $pack->zonas->pluck('nombre')->implode(', ') }}</li>
+                        <li>{{ __('packs.impresion') }}: {{ $pack->zonas->pluck('nombre')->implode(', ') }}@if ($lineas->contains(fn ($l) => ! $l['todas'])) {{ __('packs.segun_prenda') }}@endif</li>
                     </ul>
                 </div>
             </header>
@@ -87,6 +87,7 @@
                                     <div>
                                         <h3>{{ $l['linea']->prenda->nombre }}</h3>
                                         <p class="claro">{{ trans_choice('packs.prendas', $unidades, ['n' => $unidades]) }} · <span data-nombre-color>{{ $actual['nombre'] ?? '' }}</span></p>
+                                        @if ($l['zonas'])<p class="pack-zonas-prenda">{{ __('packs.impresion') }}: {{ $l['zonas'] }}</p>@endif
                                     </div>
                                 </div>
 

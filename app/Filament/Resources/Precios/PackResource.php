@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Precios;
 
 use App\Dominio\Catalogo\ModoCliente;
+use App\Dominio\Catalogo\ZonasPack;
 use App\Dominio\Precios\Impuestos;
 use App\Dominio\Precios\Iva;
 use App\Dominio\Precios\RepartoPack;
@@ -39,6 +40,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 use UnitEnum;
 
 /** Productos → Packs: ofertas cerradas con precio fijo (ficha § 6 bis). */
@@ -59,6 +61,20 @@ class PackResource extends RecursoPrecios
     protected static ?string $pluralModelLabel = 'packs';
 
     protected static ?string $slug = 'packs';
+
+    /** D223: «Polo: frontal, espalda (sin Pecho) · Camiseta: frontal, espalda, Pecho». */
+    private static function resumenZonas(Get $get): HtmlString
+    {
+        $zonas = array_map('intval', $get('zonas') ?? []);
+        $prendas = collect($get('lineas') ?? [])->pluck('prenda_id')->filter()->map(fn ($id) => (int) $id)->values()->all();
+        if ($zonas === [] || $prendas === []) {
+            return new HtmlString('Cada prenda se imprime en las zonas que ofrece; otras zonas se cobran aparte con la tarifa de cada prenda.');
+        }
+        $filas = array_map(fn (array $r) => '<strong>'.e($r['prenda']).'</strong>: '.e($r['si'] === [] ? 'ninguna' : implode(', ', $r['si']))
+            .($r['no'] !== [] ? ' <span style="opacity:.7">(sin '.e(implode(', ', $r['no'])).')</span>' : ''), ZonasPack::resumen($zonas, $prendas));
+
+        return new HtmlString('Se imprime en: '.implode(' · ', $filas).'<br>Otras zonas se cobran aparte con la tarifa de cada prenda.');
+    }
 
     private static function esFijo(Get $get, string $ruta = 'reparto'): bool
     {
@@ -104,15 +120,14 @@ class PackResource extends RecursoPrecios
                     ->options([0 => 'IVA incluido', 1 => 'Neto + IVA'])
                     ->formatStateUsing(fn ($state) => (int) (bool) $state)->dehydrateStateUsing(fn ($state) => (bool) $state)
                     ->helperText('«Neto + IVA» enseña «300,00 € + IVA» y, debajo, el precio final con IVA (obligatorio para consumidores).'),
-                Select::make('zonas')->label('Impresión incluida')->relationship('zonas', 'id')->multiple()->preload()->required()
+                // D223: cada prenda se imprime solo en las zonas del pack que ofrece; aquí se ve el reparto.
+                Select::make('zonas')->label('Impresión incluida')->relationship('zonas', 'id')->multiple()->preload()->required()->live()
                     ->getOptionLabelFromRecordUsing(fn (ZonaImpresion $record) => $record->nombre)
-                    ->helperText('Otras zonas se cobran aparte con la tarifa de cada prenda.')
+                    ->helperText(fn (Get $get) => self::resumenZonas($get))
                     ->rule(fn (Get $get) => function (string $atributo, $valor, Closure $fallo) use ($get): void {
                         foreach ($get('lineas') ?? [] as $linea) {
-                            $prenda = Prenda::find($linea['prenda_id'] ?? null);
-                            $ofrecidas = $prenda?->zonas()->where('zonas_impresion.activa', true)->pluck('zonas_impresion.id')->all() ?? [];
-                            if ($prenda && array_diff(array_map('intval', $valor ?? []), $ofrecidas) !== []) {
-                                $fallo("{$prenda->nombre} no ofrece todas esas zonas.");
+                            if (filled($linea['prenda_id'] ?? null) && ZonasPack::dePrenda(array_map('intval', $valor ?? []), (int) $linea['prenda_id']) === []) {
+                                $fallo((Prenda::find($linea['prenda_id'])->nombre ?? 'Una prenda').' no ofrece ninguna de estas zonas: no llevaría nada impreso.');
 
                                 return;
                             }

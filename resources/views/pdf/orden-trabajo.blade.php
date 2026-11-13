@@ -52,6 +52,15 @@
                 @endforeach
             </tbody>
         </table>
+        @if ($linea->tipo === 'pack' && is_array($linea->elecciones))
+            {{-- D223: en un pack, cada prenda lleva solo las zonas que ofrece. --}}
+            @php $nombresZona = $linea->impresiones->mapWithKeys(fn ($i) => [$i->zona_impresion_id => $i->zonaEn('es')]); @endphp
+            <p class="tenue">Zonas por prenda:
+                @foreach ($linea->elecciones as $e)
+                    <strong>{{ \App\Models\Prenda::find($e['prenda'] ?? 0)?->nombre ?? 'Prenda' }}</strong>: {{ isset($e['zonas']) ? collect($e['zonas'])->map(fn ($z) => $nombresZona[$z] ?? '?')->implode(', ') : 'todas' }}@if (! $loop->last) · @endif
+                @endforeach
+            </p>
+        @endif
     </div>
 @endforeach
 </body>

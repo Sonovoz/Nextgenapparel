@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 13/11 | **Zonas del pack por prenda**: cada prenda lleva las zonas que ofrece, sin error; reparto visible en backend, página del pack y orden de trabajo. | `pack-zonas-por-prenda` | D223 |
 | 13/11 | **Maqueta viva del pack**: la prenda con el diseño elegido, en su color, en el resumen (escritorio) y en el paso 1 (móvil). | `pack-maqueta-viva` | D222 |
 | 13/11 | **Modos fundidos con los packs** en la portada: filtro por modo encima del carrusel; fuera la sección «Elige tu modo». | `portada-modos-packs` | D221 |
 | 13/11 | **Lienzo del pack**: pasos numerados, subir diseño en el mismo sitio, nombre de la colección (carrito → pedido), muestras de color, contador de tallas y resumen fijo; botón al asistente IA. | `pack-lienzo` | D220 |

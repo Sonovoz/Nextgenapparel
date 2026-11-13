@@ -53,4 +53,6 @@ return [
     'maqueta_titulo' => 'This is how your collection will look',
     'maqueta_nota' => 'Preview with your design on each pack zone. Your order shows the exact mock-up and print quality.',
     'maqueta_sin_diseno' => 'Choose or upload your design and you will see it here, on your garments.',
+    // D223: each pack garment gets the zones it offers.
+    'segun_prenda' => '(depending on the garment)',
 ];

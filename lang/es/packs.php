@@ -53,4 +53,6 @@ return [
     'maqueta_titulo' => 'Así quedará tu colección',
     'maqueta_nota' => 'Vista previa con tu diseño en cada zona del pack. En tu pedido verás la maqueta exacta y la calidad de impresión.',
     'maqueta_sin_diseno' => 'Elige o sube tu diseño y lo verás aquí, puesto en tus prendas.',
+    // D223: cada prenda del pack lleva las zonas que ofrece.
+    'segun_prenda' => '(según la prenda)',
 ];
