@@ -175,4 +175,9 @@ return [
     'anadido_otra_ayuda' => 'Your design is already placed: just check it and choose sizes and colours. What you added stays in your order.',
     'anadido_ver_pedido' => 'View my order and pay',
     'anadido_desde' => 'from',
+    // D214: aviso de error claro
+    'aviso_titulo' => 'There is a problem',
+    'aviso_archivo' => 'We cannot use this file',
+    'aviso_otro' => 'Choose another file',
+    'aviso_cerrar' => 'Close',
 ];

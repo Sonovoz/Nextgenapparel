@@ -175,4 +175,9 @@ return [
     'anadido_otra_ayuda' => 'Tu diseño ya va colocado: solo revisa, elige tallas y colores. Lo que has añadido sigue en tu pedido.',
     'anadido_ver_pedido' => 'Ver mi pedido y pagar',
     'anadido_desde' => 'desde',
+    // D214: aviso de error claro
+    'aviso_titulo' => 'Hay un problema',
+    'aviso_archivo' => 'No podemos usar este archivo',
+    'aviso_otro' => 'Elegir otro archivo',
+    'aviso_cerrar' => 'Cerrar',
 ];

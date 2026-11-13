@@ -26,6 +26,8 @@
         'solapa' => __('tienda.solapa'),
         'listo_varios' => __('tienda.listo_varios'),
         'pestana_logo' => __('tienda.pestana_logo'),
+        'aviso_archivo' => __('tienda.aviso_archivo'),
+        'aviso_otro' => __('tienda.aviso_otro'),
         'procesando_diseno' => __('tienda.procesando_diseno'),
         'procesando_diseno_detalle' => __('tienda.procesando_diseno_detalle'),
         'procesando_pedido' => __('tienda.procesando_pedido'),
