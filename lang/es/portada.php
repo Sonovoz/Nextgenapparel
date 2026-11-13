@@ -39,7 +39,7 @@ return [
     'soltar_privacidad' => 'Tu archivo no sale de tu dispositivo.',
     'soltar_error' => 'Solo aceptamos diseños en PNG. Expórtalo como PNG (mejor con fondo transparente) y vuelve a probar.',
     'packs_etiqueta' => 'Bundles',
-    'packs_titulo' => 'Packs listos para jugar',
+    'packs_titulo' => 'Packs que se ajustan a tu presupuesto',
     'packs_texto' => 'Prendas, tallas e impresión incluidas a precio cerrado. Tú solo subes tu diseño.',
     'pack_prendas' => ':n prendas',
     'pack_iva' => 'IVA incluido',
