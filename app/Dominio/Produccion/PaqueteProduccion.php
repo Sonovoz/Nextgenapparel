@@ -8,9 +8,10 @@ use RuntimeException;
 use ZipArchive;
 
 /**
- * Paquete ZIP de producción de un pedido (paso 6.5b, ficha § 8): los originales de los
- * diseños con su nombre de taller (PED-0042_L1_frontal.png), las maquetas de cada cara y la
- * orden de trabajo en PDF. Se crea al pedirlo en un archivo temporal.
+ * Paquete ZIP de producción de un pedido (paso 6.5b, ficha § 8): en «disenos/» cada diseño a tamaño real, recortado
+ * y con la resolución que lo hace medir los cm del pedido (PED-0042_L1_frontal_25x12cm.png, D238); en «originales/»
+ * el archivo tal como lo subió el cliente; las maquetas de cada cara y la orden de trabajo en PDF. Se crea al pedirlo
+ * en un archivo temporal.
  */
 final class PaqueteProduccion
 {
@@ -27,7 +28,11 @@ final class PaqueteProduccion
         foreach ($pedido->lineas->values() as $i => $linea) {
             foreach ($linea->impresiones as $impresion) {
                 if ($impresion->archivo !== null && $disco->exists($impresion->archivo)) {
-                    $zip->addFromString('disenos/'.OrdenTrabajo::nombreArchivo($pedido, $i + 1, $impresion), $disco->get($impresion->archivo));
+                    $real = ArchivoTamanoReal::png($impresion);
+                    if ($real !== null) {
+                        $zip->addFromString('disenos/'.ArchivoTamanoReal::nombre($pedido, $i + 1, $impresion), $real);
+                    }
+                    $zip->addFromString('originales/'.OrdenTrabajo::nombreArchivo($pedido, $i + 1, $impresion), (string) $disco->get($impresion->archivo));
                 }
             }
             foreach ($linea->maquetas as $maqueta) {

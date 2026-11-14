@@ -44,7 +44,7 @@
                     <tr>
                         <td style="width: 5mm;"><span class="casilla"></span></td>
                         <td>{{ $impresion->zonaEn('es') }}</td>
-                        <td>@if ($impresion->texto !== null)Texto «{{ $impresion->texto }}» · {{ $fuentes[$impresion->fuente ?? 0] ?? '—' }} · tinta {{ $impresion->tinta }}@else{{ OrdenTrabajo::nombreArchivo($pedido, $i + 1, $impresion) }}@endif</td>
+                        <td>@if ($impresion->texto !== null)Texto «{{ $impresion->texto }}» · {{ $fuentes[$impresion->fuente ?? 0] ?? '—' }} · tinta {{ $impresion->tinta }}@else{{ \App\Dominio\Produccion\ArchivoTamanoReal::nombre($pedido, $i + 1, $impresion) }}<br><span class="tenue">en «disenos/», ya a tamaño real</span>@endif</td>
                         <td>{{ $cm($impresion->ancho_mm) }} × {{ $cm($impresion->alto_mm) }} cm</td>
                         <td>{{ $cm($impresion->desde_cuello_mm) }} cm bajo el cuello · {{ $impresion->desde_centro_mm === 0 ? 'centrado' : $cm(abs($impresion->desde_centro_mm)).' cm a la '.($impresion->desde_centro_mm < 0 ? 'izquierda' : 'derecha').' de quien la lleva' }}</td>
                         <td>{{ $impresion->ppp ? $impresion->ppp.' ppp ('.$impresion->nivel_calidad.')' : '—' }}@if ($impresion->ppp_archivo)<br><span class="tenue">archivo: {{ $impresion->ppp_archivo }} ppp</span>@endif</td>

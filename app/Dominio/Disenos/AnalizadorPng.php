@@ -157,7 +157,7 @@ class AnalizadorPng
         return str_replace('.', ',', rtrim(rtrim(number_format($px / $ppp * 2.54, 1, '.', ''), '0'), '.'));
     }
 
-    private static function limitarRecursos(): void
+    public static function limitarRecursos(): void
     {
         // Sin límite de tiempo: el «time» de ImageMagick cuenta desde que arranca el proceso,
         // no desde cada operación; en PHP-FPM (procesos largos) acabaría rechazando todas las imágenes.
