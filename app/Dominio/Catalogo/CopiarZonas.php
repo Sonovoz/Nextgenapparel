@@ -72,7 +72,7 @@ final class CopiarZonas
         return false;
     }
 
-    private static function copiar(Foto $origen, Foto $destino): void
+    public static function copiar(Foto $origen, Foto $destino): void
     {
         foreach (FotoZona::where('foto_id', $origen->getKey())->get() as $zona) {
             FotoZona::updateOrCreate(

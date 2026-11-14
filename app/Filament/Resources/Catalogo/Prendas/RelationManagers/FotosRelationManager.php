@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Catalogo\Prendas\RelationManagers;
 use App\Dominio\Catalogo\Cara;
 use App\Dominio\Catalogo\CopiarZonas;
 use App\Dominio\Catalogo\IgualarEncuadre;
+use App\Dominio\Catalogo\TenirFoto;
 use App\Dominio\Catalogo\TipoFoto;
 use App\Dominio\Catalogo\ZonasPorDefecto;
 use App\Dominio\Sistema\Actividad\Actividad;
@@ -18,7 +19,9 @@ use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -36,6 +39,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rules\Unique;
 
 /**
@@ -194,6 +198,40 @@ class FotosRelationManager extends RelationManager
                         $aviso->send();
                     })
                     ->visible(fn () => Foto::where('prenda_id', $this->getOwnerRecord()->getKey())->where('tipo', TipoFoto::Maqueta->value)->count() > 1),
+                // D251: maquetas de otros colores tiñendo la del blanco (sin subir fotos).
+                Action::make('tenir')->label('Crear colores desde la blanca')->icon(Heroicon::OutlinedSwatch)->color('gray')
+                    ->modalHeading('Crear colores desde la foto blanca')
+                    ->modalDescription('Se tiñe la maqueta blanca (delantera y trasera) con el color de la ficha de cada color. La prenda queda idéntica y toma las zonas de impresión del blanco. Las fotos reales que ya tengas no se tocan. Necesita la foto blanca con fondo transparente.')
+                    ->modalSubmitActionLabel('Crear las fotos')
+                    ->schema([
+                        CheckboxList::make('colores')->label('Colores')->required()->columns(3)->live()
+                            ->options(fn () => self::coloresParaTenir($this->getOwnerRecord()))
+                            ->descriptions(fn () => self::fotosReales($this->getOwnerRecord()))
+                            ->disableOptionWhen(fn (string $value) => array_key_exists((int) $value, self::fotosReales($this->getOwnerRecord()))),
+                        Placeholder::make('vista')->label('Vista previa (delantera)')
+                            ->content(fn (Get $get) => self::vistaTenida($this->getOwnerRecord(), array_map('intval', (array) $get('colores')))),
+                    ])
+                    ->action(function (array $data): void {
+                        $prenda = $this->getOwnerRecord();
+                        if (! $prenda instanceof Prenda) {
+                            return;
+                        }
+                        $r = TenirFoto::colores($prenda, array_map('intval', (array) ($data['colores'] ?? [])));
+                        Actividad::apuntar('catalogo', 'Colores creados desde la foto blanca', $prenda, ['creadas' => $r['creadas'], 'rehechas' => $r['rehechas']]);
+                        $hechas = $r['creadas'] + $r['rehechas'];
+                        $avisos = array_filter([
+                            $r['con_foto_real'] ? 'Con foto real (no se tocan): '.implode(', ', $r['con_foto_real']).'.' : null,
+                            $r['sin_base'] ? 'Sin maqueta blanca en: '.implode(', ', $r['sin_base']).'.' : null,
+                            $r['sin_transparencia'] ? 'La foto blanca no tiene fondo transparente en: '.implode(', ', $r['sin_transparencia']).'.' : null,
+                        ]);
+                        $aviso = Notification::make()->{$avisos === [] ? 'success' : 'warning'}()
+                            ->title($hechas === 1 ? '1 foto creada' : $hechas.' fotos creadas')->body(implode(' ', $avisos) ?: null);
+                        if ($avisos !== []) {
+                            $aviso->persistent();
+                        }
+                        $aviso->send();
+                    })
+                    ->visible(fn () => $this->getOwnerRecord() instanceof Prenda && TenirFoto::base($this->getOwnerRecord(), Cara::Delantera) !== null),
                 CreateAction::make()->label('Subir foto')
                     ->mutateDataUsing(fn (array $data) => CamposTraducibles::limpiar($data, ['texto_alternativo']))
                     ->after(fn (Foto $record) => app(ZonasPorDefecto::class)($record)),
@@ -216,5 +254,47 @@ class FotosRelationManager extends RelationManager
                     }),
                 DeleteAction::make(),
             ]);
+    }
+
+    /**
+     * D251: los colores de la prenda (de sus variantes) que no son el de la foto blanca.
+     *
+     * @return array<int, string>
+     */
+    public static function coloresParaTenir(Model $prenda): array
+    {
+        if (! $prenda instanceof Prenda) {
+            return [];
+        }
+        $base = TenirFoto::base($prenda, Cara::Delantera);
+
+        return Color::whereIn('id', $prenda->variantes()->pluck('color_id')->unique())->whereKeyNot((int) $base?->color_id)
+            ->orderBy('orden')->get()->mapWithKeys(fn ($c) => [$c->getKey() => (string) $c->getTranslation('nombre', 'es')])->all();
+    }
+
+    /** @return array<int, string> colores que ya tienen una foto real (no se tiñen) */
+    public static function fotosReales(Model $prenda): array
+    {
+        return Foto::where('prenda_id', $prenda->getKey())->where('tipo', TipoFoto::Maqueta->value)->whereNull('tenida_desde_id')
+            ->whereNotNull('color_id')->pluck('color_id')->unique()->mapWithKeys(fn ($id) => [(int) $id => 'Ya tiene foto real'])->all();
+    }
+
+    /** @param  list<int>  $colores */
+    public static function vistaTenida(Model $prenda, array $colores): HtmlString
+    {
+        $base = $prenda instanceof Prenda ? TenirFoto::base($prenda, Cara::Delantera) : null;
+        if ($base === null || $colores === []) {
+            return new HtmlString('<span style="opacity:.7">Marca uno o más colores para verlos.</span>');
+        }
+        if (! TenirFoto::transparente($base)) {
+            return new HtmlString('<span style="color:#d97706">La foto blanca no tiene fondo transparente: súbela en PNG con el fondo transparente para poder teñirla.</span>');
+        }
+        $html = Color::whereIn('id', array_slice($colores, 0, 8))->get()->map(function ($c) use ($base) {
+            $img = 'data:image/webp;base64,'.base64_encode(TenirFoto::imagen($base, (string) $c->codigo_hex, 220));
+
+            return '<figure style="margin:0;text-align:center"><img src="'.$img.'" alt="" style="width:120px;border-radius:10px;background:#f1f1f3"><figcaption style="font-size:12px;margin-top:4px">'.e((string) $c->getTranslation('nombre', 'es')).'</figcaption></figure>';
+        })->implode('');
+
+        return new HtmlString('<div style="display:flex;flex-wrap:wrap;gap:12px">'.$html.'</div>');
     }
 }
