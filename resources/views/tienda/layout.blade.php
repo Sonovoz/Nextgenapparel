@@ -87,6 +87,7 @@
                     <li><a href="{{ $portada }}#pasos">{{ __('portada.nav_como') }}</a></li>
                     <li><a href="{{ $portada }}#calidad">{{ __('portada.nav_calidad') }}</a></li>
                     <li><a href="{{ $urlNosotros }}" @if ($enNosotros) aria-current="page" @endif>{{ __('portada.nav_nosotros') }}</a></li>
+                    <li><a href="{{ route('guia-imagen', ['guia' => __('guia_imagen.ruta')]) }}" @if (request()->routeIs('guia-imagen')) aria-current="page" @endif>{{ __('guia_imagen.titulo_corto') }}</a></li>
                 </ul>
             </nav>
 
@@ -129,6 +130,7 @@
                 <li><a href="{{ $portada }}#pasos">{{ __('portada.nav_como') }}</a></li>
                 <li><a href="{{ $portada }}#calidad">{{ __('portada.nav_calidad') }}</a></li>
                 <li><a href="{{ $urlNosotros }}" @if ($enNosotros) aria-current="page" @endif>{{ __('portada.nav_nosotros') }}</a></li>
+                    <li><a href="{{ route('guia-imagen', ['guia' => __('guia_imagen.ruta')]) }}" @if (request()->routeIs('guia-imagen')) aria-current="page" @endif>{{ __('guia_imagen.titulo_corto') }}</a></li>
                 <li><a href="{{ $urlCuenta }}">{{ $textoCuenta }}</a></li>
             </ul>
         </nav>

@@ -296,6 +296,10 @@ class TiendaTest extends TestCase
         $this->assertStringContainsString('Tu imagen sale nítida hasta', $html);
         // D245: cada zona dice su tamaño máximo en cm.
         $this->assertSame(':zona · máx. :medida', $textos['zona_maximo'] ?? null);
+        // D250: la posición del diseño en cm y los botones con nombres claros.
+        $this->assertStringContainsString('id="posicion-diseno"', $html);
+        $this->assertSame('Se imprime a :cuello cm del cuello · :lado', $textos['posicion'] ?? null);
+        $this->assertStringContainsString('Lo más arriba de la zona', $html);
         // D248: la barra orienta, no «arregla»: archivo mejor como solución, reducir como alternativa y el tamaño que quería.
         $this->assertStringContainsString('id="calidad-subir"', $html);
         $this->assertStringContainsString('id="limite-nitido"', $html);

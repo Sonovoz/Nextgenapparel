@@ -31,6 +31,10 @@
         'guia_buena' => __('tienda.guia_buena'),
         'zona_maximo' => __('tienda.zona_maximo'),
         'zona_maximo_corto' => __('tienda.zona_maximo_corto'),
+        'posicion' => __('tienda.posicion'),
+        'posicion_centrado' => __('tienda.posicion_centrado'),
+        'posicion_izquierda' => __('tienda.posicion_izquierda'),
+        'posicion_derecha' => __('tienda.posicion_derecha'),
         'calidad_a_correcta' => __('tienda.calidad_a_correcta'),
         'calidad_a_buena' => __('tienda.calidad_a_buena'),
         'calidad_a_justa' => __('tienda.calidad_a_justa'),
@@ -169,6 +173,8 @@
         .fila-tamano input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 2px solid #0B0B10; box-shadow: 0 2px 8px rgba(0,0,0,.45); }
         .fila-tamano input[type=range]::-moz-range-track { background: transparent; }
         .limite-nitido { margin: -4px 0 0; font-size: 12px; color: #A7A2B5; }
+        .posicion-diseno { margin: 0; font-size: 13px; color: #C9C5D6; }
+        .posicion-diseno:empty { display: none; }
         .limite-nitido:empty { display: none; }
         .limite-nitido.nunca { color: #FF9C8C; }
         .diseno-fantasma { position: absolute; z-index: 3; border: 1.5px dashed rgba(255,255,255,.7); border-radius: 2px; pointer-events: none; }
@@ -237,6 +243,7 @@
         .tu-marca-estado { font-size: 15px; animation: aparecer .5s ease both; }
         .tu-marca-error { color: #FFB4A9; font-size: 14px; }
         .acciones-marca { display: flex; flex-wrap: wrap; gap: 8px; }
+        .acciones-marca[hidden] { display: none; }
         .boton-claro { min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: #fff; color: #0B0B10; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
         .boton-texto { min-height: 48px; padding: 0 12px; border: 0; background: transparent; color: #C9C7C0; font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
         .coleccion { margin-top: 72px; }
@@ -401,6 +408,11 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
                     {{ __('tienda.lupa') }}
                 </button>
+                {{-- Quitar el diseño y empezar de nuevo, debajo de la prenda (petición del cliente). --}}
+                <div class="acciones-marca" id="tu-marca-acciones" hidden>
+                    <button type="button" class="accion-borrar" id="quitar-diseno" aria-label="{{ __('tienda.quitar_diseno') }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg><span id="quitar-texto">{{ __('tienda.quitar_diseno') }}</span></button>
+                    <button type="button" class="accion-reiniciar" id="empezar-de-nuevo" aria-label="{{ __('tienda.empezar_de_nuevo') }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M20 10A8 8 0 0 0 6.3 6.3L4 10m16 4-2.3 3.7A8 8 0 0 1 4 14"/></svg><span id="empezar-texto">{{ __('tienda.empezar_de_nuevo') }}</span></button>
+                </div>
                 <div class="pieles" id="pieles" aria-label="{{ __('tienda.coleccion_titulo') }}">
                     <p class="pieles-titulo"><span>{{ __('tienda.coleccion_titulo') }}</span> <span id="coleccion-texto"></span></p>
                     <div class="pieles-lista" id="pieles-lista"></div>

@@ -43,7 +43,8 @@ class GuiaImagenTest extends TestCase
 
     public function test_esta_en_el_pie_en_el_sitemap_y_la_otra_url_redirige(): void
     {
-        $this->get('/es')->assertSee('href="'.url('/es/prepara-tu-imagen').'"', false);
+        // En el menú de arriba y en el pie.
+        $this->assertSame(3, substr_count($this->get('/es')->getContent(), 'href="'.url('/es/prepara-tu-imagen').'"'));
         $this->get('/sitemap-es.xml')->assertOk()->assertSee('<loc>'.url('/es/prepara-tu-imagen').'</loc>', false);
         $this->get('/es/prepare-your-image')->assertRedirect('/es/prepara-tu-imagen')->assertStatus(301);
     }

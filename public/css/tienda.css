@@ -313,7 +313,7 @@ body.estudio-abierto { overflow: hidden; }
 .estudio-cerrar:hover { background: #fff; color: #0B0B10; }
 
 /* Escenario: foco de luz sobre la prenda, como el personaje en su pedestal. */
-.estudio.activo .estudio-escena { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; background: radial-gradient(60% 55% at 50% 42%, #2C2E3F 0%, #15151D 55%, #0B0B10 100%); overflow: hidden; }
+.estudio.activo .estudio-escena { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto auto; min-height: 0; background: radial-gradient(60% 55% at 50% 42%, #2C2E3F 0%, #15151D 55%, #0B0B10 100%); overflow: hidden; }
 .estudio.activo .estudio-escena::after { content: ""; position: absolute; left: 50%; bottom: 96px; width: min(60%, 420px); height: 34px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(0, 0, 0, .55), transparent); pointer-events: none; }
 .estudio.activo .marco-visor { min-height: 0; display: flex; align-items: center; justify-content: center; padding: 8px 52px 0; }
 .estudio.activo .visor { height: 100%; width: auto; max-width: 100%; aspect-ratio: 5 / 6; background: transparent; border-radius: 0; }
@@ -1497,3 +1497,15 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .calidad .calidad-guia { display: none; color: #B9C4FF; font-size: 13px; text-decoration: underline; }
 .calidad[data-nivel="justa"] .calidad-guia, .calidad[data-nivel="baja"] .calidad-guia { display: inline-block; }
 .final .caminos.guia-final { grid-template-columns: minmax(0, 420px); justify-content: center; }
+/* Quitar el diseño / Empezar de nuevo: debajo de la prenda, centrados y discretos. */
+.estudio.activo .estudio-escena > .acciones-marca:not([hidden]) { position: relative; z-index: 3; display: flex; justify-content: center; gap: 10px; padding: 6px 12px 0; }
+.estudio.activo .estudio-escena > .acciones-marca .accion-borrar, .estudio.activo .estudio-escena > .acciones-marca .accion-reiniciar { min-height: 38px; padding: 0 14px; font-size: 11px; background: rgba(11, 11, 16, .55); }
+.estudio:not(.activo) .estudio-escena > .acciones-marca { display: none; }
+@media (max-width: 1023px) {
+    /* Móvil: la escena es pequeña; solo los iconos, en una fila, y la guía sin botones (están en el panel de abajo). */
+    .estudio.activo .estudio-escena > .acciones-marca:not([hidden]) { position: absolute; right: 10px; top: 52px; padding: 0; flex-direction: column; gap: 8px; }
+    .estudio.activo .estudio-escena > .acciones-marca .accion-borrar, .estudio.activo .estudio-escena > .acciones-marca .accion-reiniciar { width: 40px; min-height: 40px; padding: 0; border-radius: 50%; }
+    .estudio.activo .estudio-escena > .acciones-marca span { display: none; }
+    .estudio.activo .guia-impresion .guia-enlace-guia, .estudio.activo .guia-impresion .guia-reduce, .estudio.activo .guia-impresion .guia-ia { display: none !important; }
+}
+

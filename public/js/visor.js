@@ -1190,6 +1190,13 @@
         // D229: el tamaño real de impresión, grande, y el máximo de la zona.
         document.getElementById('medida-diseno').textContent = cm(anchoMm) + ' × ' + cm(altoMm) + ' cm';
         document.getElementById('medida-zona').textContent = texto('medida_zona', { medida: cm(zona.ancho_mm) + ' × ' + cm(zona.alto_mm) + ' cm' });
+        // D250: dónde se imprime, en cm: desde el cuello y respecto al centro de la zona (como se mira la prenda).
+        var posicion = document.getElementById('posicion-diseno');
+        if (posicion) {
+            var desvio = Math.round(g.x + g.w / 2 - zona.ancho_mm / 2);
+            var lado = Math.abs(desvio) < 3 ? textos.posicion_centrado : texto(desvio < 0 ? 'posicion_izquierda' : 'posicion_derecha', { cm: cm(Math.abs(desvio)) });
+            posicion.textContent = zona.cuello_mm !== undefined && zona.cuello_mm !== null ? texto('posicion', { cuello: cm(zona.cuello_mm + g.y), lado: lado }) : '';
+        }
 
         var t = calidad.textos;
         var etiqueta = document.getElementById('calidad-etiqueta');
