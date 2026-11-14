@@ -119,8 +119,15 @@
         .visor { position: relative; background: radial-gradient(90% 70% at 50% 40%, #1C1E2C 0%, var(--fondo-suave) 75%); border-radius: 4px; aspect-ratio: 5 / 6; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: box-shadow .25s ease; }
         .visor.soltando { box-shadow: inset 0 0 0 2px var(--tinta); }
         .visor-lienzo { position: relative; width: 86%; aspect-ratio: 5 / 6; transform: perspective(1400px) rotateY(0deg); transition: transform .19s ease-in; touch-action: pan-y; }
-        .visor-lienzo.girando { transform: perspective(1400px) rotateY(90deg); }
-        .visor-lienzo.volviendo { transform: perspective(1400px) rotateY(-90deg); transition: none; }
+        /* Girar la prenda: las dos caras se cruzan (la que sale y la que entra) sin ponerse de canto, con un destello de luz. */
+        .capa.gira-sale { animation: gira-sale .52s cubic-bezier(.45, 0, .2, 1) forwards; pointer-events: none; }
+        .capa.gira-entra { animation: gira-entra .52s cubic-bezier(.2, .7, .2, 1) both; }
+        @keyframes gira-sale { to { opacity: 0; transform: perspective(1400px) rotateY(calc(var(--sentido, 1) * -58deg)) scale(.9); filter: blur(1.5px); } }
+        @keyframes gira-entra { from { opacity: 0; transform: perspective(1400px) rotateY(calc(var(--sentido, 1) * 58deg)) scale(.9); filter: blur(1.5px); } to { opacity: 1; transform: none; filter: none; } }
+        .visor-lienzo::after { content: ''; position: absolute; inset: -6% -30%; pointer-events: none; opacity: 0; mix-blend-mode: soft-light;
+            background: linear-gradient(100deg, transparent 38%, rgba(255, 255, 255, .9) 50%, transparent 62%); transform: translateX(-60%); }
+        .visor-lienzo.destello::after { animation: destello-giro .56s ease-out; }
+        @keyframes destello-giro { 0% { opacity: 0; transform: translateX(-60%); } 35% { opacity: 1; } 100% { opacity: 0; transform: translateX(60%); } }
         .visor-lienzo img { width: 100%; height: auto; user-select: none; }
         .capa { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; transition: opacity .35s ease; }
         .capa.entrando { opacity: 0; }
