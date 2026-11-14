@@ -361,6 +361,7 @@
                         <p id="guia-ia-zona-texto"></p>
                         <button type="button" class="guia-boton" id="guia-ia-zona" hidden></button>
                     </div>
+                    <a class="guia-enlace-guia" href="{{ route('guia-imagen', ['guia' => __('guia_imagen.ruta')]) }}" target="_blank" rel="noopener">{{ __('guia_imagen.enlace_guia') }} ↗</a>
                     {{-- D248: la solución es un archivo mejor; reducir es la alternativa, en segundo plano. --}}
                     <p class="guia-deseado" id="guia-deseado"></p>
                     <p class="guia-reduce" id="guia-reduce" hidden><button type="button" class="guia-boton" id="guia-subir">{{ __('tienda.subir_mas_grande') }}</button> <button type="button" class="guia-enlace" id="guia-ajustar"></button></p>
