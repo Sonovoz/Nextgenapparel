@@ -108,6 +108,8 @@
             <button type="button" class="boton-pildora borde" id="centrar-diseno">{{ __('tienda.centrar') }}</button>
             <button type="button" class="boton-pildora borde" id="arriba-diseno">{{ __('tienda.subir') }}</button>
         </div>
+        {{-- D250: dónde se imprime, en cm desde el cuello y respecto al centro. --}}
+        <p class="posicion-diseno" id="posicion-diseno" aria-live="polite"></p>
     </div>
     </div>
 
@@ -152,10 +154,6 @@
     <p class="tu-marca-error" id="tu-marca-error" role="alert" hidden></p>
     <p class="tu-marca-estado" id="tu-marca-estado" aria-live="polite"></p>
 
-    <div class="acciones-marca" id="tu-marca-acciones" hidden>
-        <button type="button" class="accion-borrar" id="quitar-diseno"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg><span id="quitar-texto">{{ __('tienda.quitar_diseno') }}</span></button>
-        <button type="button" class="accion-reiniciar" id="empezar-de-nuevo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M20 10A8 8 0 0 0 6.3 6.3L4 10m16 4-2.3 3.7A8 8 0 0 1 4 14"/></svg><span id="empezar-texto">{{ __('tienda.empezar_de_nuevo') }}</span></button>
-    </div>
 
     <p class="claro" style="font-size: 13px;">{{ __('tienda.privacidad', ['horas' => (int) \App\Models\Ajuste::obtener('disenos.horas_sin_venta')]) }}</p>
     {{-- Tarjeta de decisión: tus diseños con lo que suman y «¿otro diseño o seguimos?»; en el escritorio, fija abajo. --}}
