@@ -36,7 +36,7 @@ final class OrdenTrabajo
     }
 
     /** La maqueta como JPEG embebido: dompdf no lee WebP en todos los servidores ni archivos remotos. */
-    private static function imagen(string $ruta): ?string
+    public static function imagen(string $ruta): ?string
     {
         try {
             $imagen = new Imagick;

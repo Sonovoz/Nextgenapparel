@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Dominio\Facturacion\PdfFactura;
+use App\Dominio\Pedidos\ManifiestoPedido;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Factura;
 use App\Models\FotoIncidencia;
@@ -39,6 +40,15 @@ class ArchivoPedidoController
             'Content-Type' => 'image/png',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    /** D241: ZIP con los diseños sin modificar, las maquetas y el PDF del manifiesto (con los datos del cliente). */
+    public function manifiesto(Pedido $pedido): Response
+    {
+        $this->comprobarAcceso($pedido);
+        Actividad::apuntar('pedidos', 'Manifiesto del pedido descargado', $pedido);
+
+        return response()->download(ManifiestoPedido::zip($pedido), $pedido->numero.'_manifiesto.zip', ['Content-Type' => 'application/zip'])->deleteFileAfterSend();
     }
 
     public function factura(Pedido $pedido, Factura $factura): Response
