@@ -107,6 +107,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Subidas de diseños: un límite por IP frena el abuso sin molestar a quien prueba varias versiones.
         RateLimiter::for('disenos', fn (Request $request) => Limit::perHour(max(1, (int) Ajuste::obtener('disenos.subidas_hora')))->by($request->ip()));
+        // D246: consejos de la IA sobre diseños, por visitante y día (cada diseño se analiza una vez; esto frena abusos).
+        RateLimiter::for('disenos-consejo', fn (Request $request) => Limit::perDay(max(1, (int) Ajuste::obtener('ia.consejos_dia')))->by($request->ip()));
 
         // Cada limitador lleva su propio contador: con «throttle:6,1» sin nombre todas las rutas
         // comparten el de la IP y quien se registra, entra y pide otra contraseña se quedaba bloqueado.
