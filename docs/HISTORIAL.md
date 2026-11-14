@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 14/11 | **Ajustar sin engañar**: «Subir una versión más grande» como solución, reducir como alternativa, barra verde/roja según nitidez, aviso y contorno del tamaño que querías y calidad siempre con su tamaño. | `ajustar-honesto` | D248 |
 | 14/11 | **Tamaño máximo de cada zona**: «Frontal · máx. 28 × 38 cm» sobre la prenda y «Máx.» en las tarjetas de zona. | `zonas-medida` | D245 |
 | 14/11 | **Maquetas sin deformar**: el diseño conserva su proporción aunque la zona dibujada en la foto tenga otra; «Rehacer maquetas» en la ficha del pedido. | `maqueta-proporcion` | D244 |
 | 14/11 | **Portada: suelo de la cabecera** sin el parpadeo de líneas: rejilla quieta y tenue y, en el borde del escenario, una línea de luz que respira con un reflejo que la recorre despacio. | `portada-suelo` | — |

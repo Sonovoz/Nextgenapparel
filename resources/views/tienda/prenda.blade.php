@@ -31,6 +31,15 @@
         'guia_buena' => __('tienda.guia_buena'),
         'zona_maximo' => __('tienda.zona_maximo'),
         'zona_maximo_corto' => __('tienda.zona_maximo_corto'),
+        'calidad_a_correcta' => __('tienda.calidad_a_correcta'),
+        'calidad_a_buena' => __('tienda.calidad_a_buena'),
+        'calidad_a_justa' => __('tienda.calidad_a_justa'),
+        'calidad_a_baja' => __('tienda.calidad_a_baja'),
+        'reducir_secundario' => __('tienda.reducir_secundario'),
+        'guia_reducido' => __('tienda.guia_reducido'),
+        'nitido_hasta' => __('tienda.nitido_hasta'),
+        'nitido_nunca' => __('tienda.nitido_nunca'),
+        'deseado_fantasma' => __('tienda.deseado_fantasma'),
         'guia_pequeno_corto' => __('tienda.guia_pequeno_corto'),
         'guia_justo_corto' => __('tienda.guia_justo_corto'),
         'medida_zona' => __('tienda.medida_zona'),
@@ -150,7 +159,19 @@
         .ajustador { display: flex; flex-direction: column; gap: 14px; padding-top: 4px; border-top: 1px solid rgba(255,255,255,.14); }
         .ajustador h3, .ajustador .ajustador-titulo { margin: 12px 0 0; font-size: 15px; font-weight: 500; font-family: var(--sans); text-transform: none; letter-spacing: 0; }
         .fila-tamano { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        .fila-tamano input[type=range] { flex: 1 1 180px; accent-color: #fff; min-height: 32px; }
+        /* D248: la barra enseña hasta dónde sale nítido (verde) y desde dónde no (rojo). */
+        .fila-tamano input[type=range] { flex: 1 1 180px; min-height: 32px; -webkit-appearance: none; appearance: none; cursor: pointer;
+            background: linear-gradient(90deg, #3DBE7A 0 var(--nitido, 100%), #F0624D var(--nitido, 100%) 100%) center / 100% 6px no-repeat; border-radius: 99px; }
+        .fila-tamano input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid #0B0B10; box-shadow: 0 2px 8px rgba(0,0,0,.45); }
+        .fila-tamano input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 2px solid #0B0B10; box-shadow: 0 2px 8px rgba(0,0,0,.45); }
+        .fila-tamano input[type=range]::-moz-range-track { background: transparent; }
+        .limite-nitido { margin: -4px 0 0; font-size: 12px; color: #A7A2B5; }
+        .limite-nitido:empty { display: none; }
+        .limite-nitido.nunca { color: #FF9C8C; }
+        .diseno-fantasma { position: absolute; z-index: 3; border: 1.5px dashed rgba(255,255,255,.7); border-radius: 2px; pointer-events: none; }
+        .diseno-fantasma span { position: absolute; left: 0; bottom: 100%; margin-bottom: 4px; padding: 2px 8px; border-radius: 99px; background: rgba(11,11,16,.75); color: #fff; font-size: 11px; white-space: nowrap; }
+        .calidad .calidad-subir { align-self: flex-start; margin-top: 6px; padding: 10px 16px; border-radius: 99px; border: 1px solid #fff; background: #fff; color: #111; font-weight: 600; cursor: pointer; }
+        .calidad .calidad-subir[hidden] { display: none; }
         .fila-tamano output { font-size: 14px; min-width: 150px; }
         .calidad { border-radius: 4px; padding: 14px 16px; background: rgba(255,255,255,.06); border-left: 4px solid #8F8D87; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
         .calidad[data-nivel="correcta"] { border-left-color: #3DBE7A; }
@@ -169,8 +190,9 @@
         .fila-tamano-extremo { font-size: 12px; color: #A9A6BA; white-space: nowrap; }
         .calidad[data-nivel="justa"] #calidad-mensaje, .calidad[data-nivel="baja"] #calidad-mensaje { font-weight: 600; font-size: 15px; }
         .calidad[data-nivel="baja"] #calidad-mensaje::before, .calidad[data-nivel="justa"] #calidad-mensaje::before { content: "⚠ "; }
-        .calidad .calidad-ajustar { align-self: flex-start; margin-top: 6px; padding: 10px 16px; border-radius: 99px; border: 1px solid #fff; background: #fff; color: #111; font-weight: 600; cursor: pointer; }
-        .calidad .calidad-ajustar:hover { background: #E8E6F2; }
+        /* D248: reducir es la alternativa, no la solución: enlace discreto bajo «Subir una versión más grande». */
+        .calidad .calidad-ajustar { align-self: flex-start; margin-top: 2px; padding: 4px 0; border: 0; background: none; color: #C9C5D6; font-size: 13px; text-decoration: underline; cursor: pointer; }
+        .calidad .calidad-ajustar:hover { color: #fff; }
         .calidad .calidad-ajustar[hidden] { display: none; }
         .aviso-pixelado { position: absolute; z-index: 6; left: 50%; top: 64px; transform: translateX(-50%); margin: 0; padding: 8px 14px; border-radius: 99px; font-size: 13px; font-weight: 600; white-space: nowrap; color: #fff; background: rgba(240,98,77,.95); box-shadow: 0 6px 20px rgba(0,0,0,.35); pointer-events: none; }
         .medidas-cursor { position: absolute; z-index: 7; margin: 0; padding: 7px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; white-space: nowrap; color: #fff; background: rgba(12,13,20,.92); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 8px 24px rgba(0,0,0,.4); pointer-events: none; }
@@ -329,7 +351,9 @@
                     <p class="guia-estado" id="guia-estado"></p>
                     <p class="guia-consejo" id="guia-consejo"></p>
                     <p class="guia-corto" id="guia-corto"></p>
-                    <p class="guia-reduce" id="guia-reduce" hidden>{{ __('tienda.guia_o_reduce') }} <button type="button" class="guia-boton" id="guia-ajustar"></button></p>
+                    {{-- D248: la solución es un archivo mejor; reducir es la alternativa, en segundo plano. --}}
+                    <p class="guia-deseado" id="guia-deseado"></p>
+                    <p class="guia-reduce" id="guia-reduce" hidden><button type="button" class="guia-boton" id="guia-subir">{{ __('tienda.subir_mas_grande') }}</button> <button type="button" class="guia-enlace" id="guia-ajustar"></button></p>
                 </aside>
                 <div class="visor" id="visor" data-llevar='@json($llevar)' data-otras='@json($otras)' data-subida="{{ route('disenos.subir') }}" data-biblioteca="{{ route('disenos.lista') }}" data-borrar="{{ route('disenos.borrar', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-prenda="{{ $prenda->id }}" data-anadir="{{ \App\Http\Controllers\CarritoController::url('anadir') }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
                     <div class="visor-controles">
