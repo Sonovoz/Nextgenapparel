@@ -1413,3 +1413,78 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
     .estudio.activo .marco-visor:has(.guia-impresion:not([hidden])) .aviso-pixelado { display: block; }
     .estudio.activo .marco-visor:has(.guia-impresion:not([hidden])) .aviso-pixelado[hidden] { display: none; }
 }
+
+/* D249: guía «Prepara tu imagen para imprimir». */
+.guia-hero { padding: 40px 0 0; }
+.guia-hero-rejilla { display: grid; gap: 40px; align-items: center; }
+.guia-hero h1 { font-size: clamp(38px, 7vw, 84px); }
+.guia-acciones { display: flex; flex-wrap: wrap; gap: 12px; margin: 28px 0 0; }
+.guia-demo { display: grid; grid-template-columns: 1fr 1.4fr; gap: 18px; align-items: end; }
+.guia-demo figure { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.guia-demo figcaption { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--tinta-suave); }
+.guia-demo figcaption strong { color: var(--tinta); font-size: 14px; }
+.guia-movil-pantalla { aspect-ratio: 9 / 16; padding: 14px 8px; border-radius: 26px; border: 1px solid var(--linea-fuerte); background: #0B0B10; display: flex; align-items: center; }
+.guia-movil-pantalla img { width: 100%; border-radius: 10px; }
+.guia-tela img { width: 100%; aspect-ratio: 1; border-radius: 18px; image-rendering: pixelated; border: 1px solid var(--linea-fuerte); }
+.guia-dos { display: grid; gap: 40px; align-items: start; }
+.guia-regla { margin: 22px 0 0; padding: 14px 18px; border-radius: 14px; border: 1px solid rgba(142, 160, 255, .35); background: rgba(45, 75, 255, .1); color: var(--tinta); font-size: 16px; max-width: 64ch; }
+.guia-tabla { padding: 22px; border-radius: 18px; border: 1px solid var(--linea-fuerte); background: var(--papel, rgba(255, 255, 255, .03)); }
+.guia-tabla h3 { margin: 0 0 12px; font-size: 18px; }
+.guia-tabla table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.guia-tabla th { text-align: left; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--tinta-suave); font-weight: 500; padding: 0 0 10px; }
+.guia-tabla td { padding: 12px 0; border-top: 1px solid var(--linea); vertical-align: top; }
+.guia-tabla td strong { display: block; font-size: 18px; }
+.guia-tabla td small { color: var(--tinta-suave); font-size: 12px; }
+.guia-tabla td + td { text-align: right; font-weight: 600; white-space: nowrap; }
+.guia-tabla p { margin: 14px 0 0; font-size: 13px; color: var(--tinta-suave); }
+.guia-comparar { margin-top: 32px; display: grid; gap: 18px; grid-template-columns: 1fr 1fr; max-width: 760px; }
+.guia-camiseta { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.guia-camiseta figcaption { font-size: 14px; color: var(--tinta-suave); }
+.guia-camiseta figcaption strong { display: block; color: var(--tinta); font-size: 15px; margin-bottom: 2px; }
+.guia-prenda { aspect-ratio: 1; border-radius: 18px; background: #1F2A44; display: flex; align-items: center; justify-content: center; border: 1px solid var(--linea-fuerte); }
+.guia-recuadro { width: 56%; display: block; }
+.guia-recuadro img { width: 100%; display: block; }
+.guia-ojo { margin: 22px 0 0; padding: 14px 18px; border-radius: 14px; border: 1px solid rgba(242, 179, 61, .4); background: rgba(242, 179, 61, .1); max-width: 70ch; font-size: 15px; }
+.guia-tarjetas { list-style: none; margin: 32px 0 0; padding: 0; display: grid; gap: 14px; grid-template-columns: 1fr; }
+.guia-tarjetas li { padding: 20px; border-radius: 16px; border: 1px solid var(--linea-fuerte); background: rgba(255, 255, 255, .03); display: flex; flex-direction: column; gap: 6px; }
+.guia-tarjetas h3 { margin: 0; font-size: 18px; }
+.guia-tarjetas p { margin: 0; color: var(--tinta-suave); font-size: 15px; }
+.guia-tarjetas a { margin-top: auto; padding-top: 8px; color: var(--neon); font-size: 14px; }
+.guia-numero { font-size: 12px; letter-spacing: .2em; color: var(--neon); }
+.guia-pasos { list-style: none; margin: 32px 0 0; padding: 0; display: grid; gap: 14px; }
+.guia-pasos li { display: grid; grid-template-columns: 48px 1fr; gap: 16px; align-items: start; padding: 18px 20px; border-radius: 16px; border: 1px solid var(--linea-fuerte); }
+.guia-pasos .guia-numero { width: 40px; height: 40px; border-radius: 50%; background: var(--azul); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px; letter-spacing: 0; font-weight: 600; }
+.guia-pasos h3 { margin: 6px 0 4px; font-size: 18px; }
+.guia-pasos p { margin: 0; color: var(--tinta-suave); }
+.guia-nota { margin: 16px 0 0; font-size: 13px; color: var(--tinta-suave); }
+.guia-ia-panel { margin-top: 28px; padding: 22px; border-radius: 18px; border: 1px solid rgba(142, 160, 255, .35); background: linear-gradient(135deg, rgba(45, 75, 255, .12), rgba(45, 75, 255, .03)); }
+.guia-cm { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; color: var(--tinta-suave); }
+.guia-cm input { width: 90px; min-height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--linea-fuerte); background: rgba(0, 0, 0, .25); color: var(--tinta); font: 600 18px var(--sans); }
+.guia-cm b { color: var(--tinta); }
+.guia-prompts { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 14px; grid-template-columns: 1fr; }
+.guia-prompts li { padding: 16px; border-radius: 14px; background: rgba(0, 0, 0, .28); border: 1px solid var(--linea); display: flex; flex-direction: column; gap: 10px; }
+.guia-prompts h3 { margin: 0; font-size: 16px; }
+.guia-prompt { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13.5px; line-height: 1.55; color: var(--tinta); white-space: pre-wrap; }
+.guia-copiar { align-self: flex-start; min-height: 40px; padding: 0 18px; border-radius: 99px; border: 1px solid var(--tinta); background: transparent; color: var(--tinta); font: 500 13px var(--sans); letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
+.guia-copiar:hover { background: var(--tinta); color: var(--fondo); }
+.guia-lista { list-style: none; margin: 28px auto 0; padding: 0; display: grid; gap: 10px; max-width: 560px; text-align: left; }
+.guia-lista li { position: relative; padding: 12px 16px 12px 46px; border-radius: 12px; border: 1px solid var(--linea-fuerte); }
+.guia-lista li::before { content: "✓"; position: absolute; left: 16px; top: 11px; color: #4BE38E; font-weight: 700; }
+@media (min-width: 768px) {
+    .guia-tarjetas { grid-template-columns: repeat(2, 1fr); }
+    .guia-tarjetas.tres { grid-template-columns: repeat(3, 1fr); }
+    .guia-tarjetas.cuatro { grid-template-columns: repeat(4, 1fr); }
+    .guia-prompts { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+    .guia-hero { padding: 64px 0 0; }
+    .guia-hero-rejilla { grid-template-columns: 1.15fr 1fr; gap: 64px; }
+    .guia-dos { grid-template-columns: 1.1fr 1fr; gap: 64px; }
+    .guia-tarjetas:not(.tres):not(.cuatro) { grid-template-columns: repeat(3, 1fr); }
+}
+/* Enlace a la guía desde el configurador: solo cuando la calidad no llega. */
+.guia-enlace-guia { display: none; color: #B9C4FF; font-size: 12.5px; text-decoration: underline; }
+.guia-impresion[data-nivel="justa"] .guia-enlace-guia, .guia-impresion[data-nivel="baja"] .guia-enlace-guia { display: inline-block; }
+.calidad .calidad-guia { display: none; color: #B9C4FF; font-size: 13px; text-decoration: underline; }
+.calidad[data-nivel="justa"] .calidad-guia, .calidad[data-nivel="baja"] .calidad-guia { display: inline-block; }
+.final .caminos.guia-final { grid-template-columns: minmax(0, 420px); justify-content: center; }

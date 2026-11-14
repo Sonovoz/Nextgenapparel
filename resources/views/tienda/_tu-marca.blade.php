@@ -119,6 +119,7 @@
         <p class="calidad-objetivo" id="calidad-objetivo"></p>
         <p class="claro" id="calidad-archivo"></p>
         <p class="claro" id="calidad-consejo"></p>
+        <a class="calidad-guia" href="{{ route('guia-imagen', ['guia' => __('guia_imagen.ruta')]) }}" target="_blank" rel="noopener">{{ __('guia_imagen.enlace_guia') }} ↗</a>
         {{-- D229: si se va a ver pixelado, un botón lo deja al mayor tamaño que se imprime nítido. --}}
         <button type="button" class="boton-pildora calidad-ajustar" id="calidad-ajustar" hidden></button>
         <p id="calidad-fondo"></p>

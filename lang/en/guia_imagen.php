@@ -1,0 +1,104 @@
+<?php
+
+// D249: "Prepare your image for printing" guide, for people who know nothing about design (not even what a PNG is).
+return [
+    'ruta' => 'prepare-your-image',
+    'titulo_pagina' => 'Prepare your image for printing · Easy guide · Nextgenapparel',
+    'titulo_corto' => 'Prepare your image',
+    'descripcion' => 'What looks good on your phone may print blurry on a T-shirt. We explain, without jargon, how to prepare your image for printing: size in cm, PNG, transparent background, free tools and AI prompts.',
+
+    'etiqueta' => 'Easy guide to printing well',
+    'titular' => 'What looks good on your phone may not work for printing',
+    'entradilla' => 'A phone screen is small and hides a lot. A T-shirt does not: your design will be seen at 25 cm, in daylight and up close. Here is, step by step and without jargon, how to make it print sharp.',
+    'ir_consejos' => 'See how to improve it',
+    'ir_comprobar' => 'Check my image',
+    'demo_movil' => 'On your phone',
+    'demo_movil_texto' => 'Small, it looks perfect.',
+    'demo_camiseta' => 'The same image, on the T-shirt at 25 cm',
+    'demo_camiseta_texto' => 'Big, you can see the little squares.',
+
+    'porque_etiqueta' => 'Why does it happen?',
+    'porque_titulo' => 'An image is made of tiny dots',
+    'porque_texto' => 'Every photo or drawing on a computer is made of tiny coloured dots called pixels. On a phone screen they are so small you cannot see them. When printed, each dot takes up a bit of fabric: if the image has few dots and you print it big, they show and it looks blurry or jagged.',
+    'porque_regla' => 'The simple rule: to print sharp you need about :por_cm dots per centimetre of T-shirt (:ppp ppi).',
+    'tabla_titulo' => 'How many dots your image needs',
+    'tabla_tamano' => 'If you want to print it at…',
+    'tabla_puntos' => 'your image needs at least this width…',
+    'tabla_ejemplo' => ':nombre',
+    'tabla_ejemplos' => ['A small logo on the chest', 'A medium logo', 'A design on the front', 'A big design on the back'],
+    'tabla_nota' => 'No need to do the maths: when you upload your image in our configurator we tell you right away, in cm, up to what size it prints sharp.',
+
+    'png_etiqueta' => 'What is a PNG?',
+    'png_titulo' => 'PNG: the file type we ask for',
+    'png_texto' => 'Just like a document can be Word or PDF, an image can be JPG, PNG and others. You can tell by the end of its name: "logo.png" or "photo.jpg". We ask for PNG because it can have a transparent background: whatever surrounds your design is not printed.',
+    'png_jpg' => 'With JPG',
+    'png_jpg_texto' => 'It always has a background, usually white: on a coloured T-shirt a white box is printed around your design.',
+    'png_png' => 'With a transparent PNG',
+    'png_png_texto' => 'Only your design is printed, straight onto the fabric, whatever its colour.',
+    'png_ojo' => 'Careful: renaming "photo.jpg" to "photo.png" does not convert it. You need to open it in a program and save ("export") it as PNG, for example in Photopea: File → Export as → PNG.',
+
+    'medir_etiqueta' => 'Check it yourself',
+    'medir_titulo' => 'How to know how many dots your image has',
+    'medir' => [
+        ['Windows', 'Right-click the file → Properties → Details tab → "Dimensions" (for example, 1200 × 800).'],
+        ['Mac', 'Open it with Preview → Tools menu → Show Inspector.'],
+        ['iPhone', 'In the Photos app, open the image and swipe up (or tap the "i").'],
+        ['Android', 'In Google Photos, open the image → the three dots → Details.'],
+    ],
+    'medir_facil' => 'Or the easiest way: upload it in our configurator and we tell you right away up to how many cm it prints sharp.',
+
+    'errores_etiqueta' => 'What we see most',
+    'errores_titulo' => 'Five common mistakes',
+    'errores' => [
+        ['Screenshots', 'A screenshot of a website or social network has very few dots. Look for the original file.'],
+        ['Images from WhatsApp or Google', 'They get compressed when sent or posted and lose quality. Ask for it to be sent as a document or find the original.'],
+        ['Enlarging it in the program', 'Stretching a small image does not add detail: it is just as blurry, only bigger. To enlarge it properly you need AI (see below).'],
+        ['White background', 'If your image has a white background, a white box gets printed. Remove it and save it as PNG.'],
+        ['Details that are too thin', 'Lines thinner than 1 mm and letters shorter than 5 mm get lost on fabric. Make them thicker or bigger.'],
+    ],
+
+    'pasos_etiqueta' => 'Step by step',
+    'pasos_titulo' => 'How to improve your image',
+    'pasos' => [
+        ['Find the original', 'If it is a logo, ask whoever designed it for the source file (AI, SVG, PDF or EPS). From that file you can get a PNG at any size, always sharp.'],
+        ['If you only have a small image, enlarge it with AI', 'Programs like Upscayl (free) or your AI assistant can enlarge it filling in the detail. Always check the design has not changed.'],
+        ['Remove the background', 'With Adobe Express or Photopea, in a couple of clicks. Check the edges of the design are clean.'],
+        ['Save it as PNG, at print size', 'Prepare it at the centimetres you will print it at and at :ppp ppi, and export it as PNG with a transparent background.'],
+    ],
+
+    'herramientas_etiqueta' => 'Free resources',
+    'herramientas_titulo' => 'Free tools that can help',
+    'herramientas' => [
+        ['Photopea', 'https://www.photopea.com', 'Like Photoshop, but in your browser and free. To save as PNG, resize and remove backgrounds.'],
+        ['Canva', 'https://www.canva.com', 'To create a design from scratch, choosing the size in cm. Download as PNG (transparent background is in the paid version).'],
+        ['Adobe Express', 'https://www.adobe.com/express/feature/image/remove-background', 'Removes the background of an image in seconds, for free.'],
+        ['Upscayl', 'https://upscayl.org', 'Free program to enlarge images with AI on your computer (Windows, Mac and Linux).'],
+        ['GIMP', 'https://www.gimp.org', 'A complete, free image editor for your computer.'],
+        ['Inkscape', 'https://inkscape.org', 'For logos and vector drawings: exports PNG at any size without losing quality.'],
+    ],
+    'herramientas_nota' => 'We are not related to these tools and their terms may change.',
+    'abrir' => 'Open :nombre',
+
+    'ia_etiqueta' => 'With your AI assistant',
+    'ia_titulo' => 'Prompts to ask the AI',
+    'ia_texto' => 'If you use ChatGPT, Gemini, Copilot or another AI that works with images, attach your image and copy one of these texts. Tell us how many cm wide you want to print it and we fill them in for you.',
+    'ia_cm' => 'Print width',
+    'ia_copiar' => 'Copy',
+    'ia_copiado' => 'Copied',
+    'ia_prompts' => [
+        ['Improve and enlarge', 'I am attaching an image. I need to print it on a T-shirt :cm cm wide. Remake it at :px pixels wide (:ppp ppi at that size), with sharp edges, without changing the design or the colours, with a transparent background and in PNG format.'],
+        ['Remove the background', 'Remove the background of this image and make it transparent, without touching the design or its edges. Give it to me in PNG format, the same size or bigger.'],
+        ['Redraw a logo', 'Redraw this logo with clean lines and flat colours, identical to the original, without adding or removing anything. Make it :px pixels wide, with a transparent background, in PNG (and if you can, also in SVG).'],
+        ['Create a design from scratch', 'Create an illustration to print on a T-shirt :cm cm wide: [describe your idea here]. Flat, high-contrast colours, no very soft gradients or small letters, transparent background, :px pixels wide and in PNG format.'],
+    ],
+    'ia_nota' => 'Some AIs return images smaller than requested or without a transparent background: if so, enlarge it with Upscayl and remove the background with Adobe Express. Always check the result and only use images you have the right to use.',
+
+    'lista_etiqueta' => 'Before you upload it',
+    'lista_titulo' => 'Your quick checklist',
+    'lista' => ['It is a PNG.', 'The background is transparent.', 'It prints sharp at the size you want (our configurator tells you).', 'No lines thinner than 1 mm or letters shorter than 5 mm.', 'It is yours or you have permission to use it.'],
+    'final_titulo' => 'Upload it and we tell you right away if it is ready',
+    'final_texto' => 'Our configurator measures your image and tells you, in cm, up to what size it prints sharp and where it looks best.',
+    'final_boton' => 'Create my collection',
+
+    'enlace_guia' => 'How to improve your image? Easy guide',
+];

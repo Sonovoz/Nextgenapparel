@@ -58,6 +58,26 @@ class TiendaController
         ]);
     }
 
+    /** D249: guía «Prepara tu imagen para imprimir», para quien no sabe de diseño. */
+    public function guiaImagen(string $idioma, string $guia): View|RedirectResponse
+    {
+        $alternos = $this->alternos(fn ($i) => route('guia-imagen', ['idioma' => $i, 'guia' => trans('guia_imagen.ruta', [], $i)]));
+        if ($guia !== trans('guia_imagen.ruta', [], $idioma)) {
+            return redirect($alternos[$idioma], 301);
+        }
+
+        return view('guia-imagen', [
+            'alternos' => $alternos,
+            'seo' => [
+                'imagen' => asset('img/guia/dragon-nitido.webp'),
+                'esquemas' => [DatosEstructurados::migas([
+                    __('tienda.inicio') => route('portada'),
+                    __('guia_imagen.titulo_corto') => $alternos[$idioma],
+                ])],
+            ],
+        ]);
+    }
+
     public function familia(string $idioma, string $familia): View
     {
         $familia = Escaparate::familia($familia, $idioma);

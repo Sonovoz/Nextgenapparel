@@ -329,6 +329,7 @@
                     <p class="guia-estado" id="guia-estado"></p>
                     <p class="guia-consejo" id="guia-consejo"></p>
                     <p class="guia-corto" id="guia-corto"></p>
+                    <a class="guia-enlace-guia" href="{{ route('guia-imagen', ['guia' => __('guia_imagen.ruta')]) }}" target="_blank" rel="noopener">{{ __('guia_imagen.enlace_guia') }} ↗</a>
                     <p class="guia-reduce" id="guia-reduce" hidden>{{ __('tienda.guia_o_reduce') }} <button type="button" class="guia-boton" id="guia-ajustar"></button></p>
                 </aside>
                 <div class="visor" id="visor" data-llevar='@json($llevar)' data-otras='@json($otras)' data-subida="{{ route('disenos.subir') }}" data-biblioteca="{{ route('disenos.lista') }}" data-borrar="{{ route('disenos.borrar', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-prenda="{{ $prenda->id }}" data-anadir="{{ \App\Http\Controllers\CarritoController::url('anadir') }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>

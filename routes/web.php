@@ -226,6 +226,12 @@ Route::prefix('{idioma}')
         // Textos legales (paso 8.1): /es/legal/privacidad…; antes de las familias.
         Route::get('/legal/{pagina}', [LegalController::class, 'ver'])->name('legal')->whereIn('pagina', array_column(PaginaLegal::cases(), 'value'));
 
+        // Guía para preparar la imagen (D249): /es/prepara-tu-imagen y /en/prepare-your-image; antes de las familias.
+        // {guia}, no {pagina}: dos rutas con la misma URI se pisan (la de «Sobre nosotros» usa {pagina}).
+        Route::get('/{guia}', [TiendaController::class, 'guiaImagen'])
+            ->where('guia', implode('|', array_map(fn ($i) => trans('guia_imagen.ruta', [], $i), array_keys(config('idiomas.disponibles')))))
+            ->name('guia-imagen');
+
         // Sobre nosotros (D145): /es/sobre-nosotros y /en/about-us; antes de las familias.
         Route::get('/{pagina}', [TiendaController::class, 'nosotros'])
             ->where('pagina', implode('|', array_map(fn ($i) => trans('portada.ruta_nosotros', [], $i), array_keys(config('idiomas.disponibles')))))

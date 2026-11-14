@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 14/11 | **Guía «Prepara tu imagen»**: página fácil (es/en) con el porqué, el PNG, errores, paso a paso, herramientas gratis y prompts para la IA; en el pie y en el configurador. | `guia-imagen` | D249 |
 | 14/11 | **Fotos idénticas en tamaño**: al igualar al blanco, la prenda se mide sin sombras ni halos, así todos los colores quedan del mismo tamaño. | `fotos-silueta` | D247 |
 | 14/11 | **Tamaño máximo de cada zona**: «Frontal · máx. 28 × 38 cm» sobre la prenda y «Máx.» en las tarjetas de zona. | `zonas-medida` | D245 |
 | 14/11 | **Maquetas sin deformar**: el diseño conserva su proporción aunque la zona dibujada en la foto tenga otra; «Rehacer maquetas» en la ficha del pedido. | `maqueta-proporcion` | D244 |
