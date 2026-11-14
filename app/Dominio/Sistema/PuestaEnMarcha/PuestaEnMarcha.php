@@ -63,7 +63,7 @@ final class PuestaEnMarcha
             new Paso('Correo de alertas', 'ALERTAS_EMAIL en el .env del servidor: ahí llegan los errores y los avisos de salud.', null,
                 filled(config('errores.correo_alertas'))),
             new Paso('Verificación en dos pasos del equipo', $sinDosPasos === 0 ? 'Todo el equipo la tiene.' : "Faltan {$sinDosPasos} personas: cada una la activa en su perfil.", UserResource::class,
-                $equipo->isNotEmpty() && $sinDosPasos === 0),
+                $equipo->isNotEmpty() && $sinDosPasos === 0, opcional: ! config('seguridad.dos_pasos_obligatorios')), // desactivada por ahora (D197)
             new Paso('Datos fiscales', 'Razón social, NIF y dirección del emisor de las facturas.', AjustesFacturacion::class,
                 filled($emisor['razon_social'] ?? null) && filled($emisor['nif'] ?? null) && filled($emisor['direccion'] ?? null)),
             new Paso('Textos legales revisados', $sinRevisar === 0 ? 'Revisados por la asesoría en todos los idiomas.' : "Quedan {$sinRevisar} textos (página e idioma) sin la revisión de la asesoría.", AjustesLegales::class,
