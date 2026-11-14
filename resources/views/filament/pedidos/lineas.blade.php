@@ -41,6 +41,36 @@
                         @if ($impresion->ppp) · {{ $impresion->ppp }} ppp ({{ $impresion->nivel_calidad }}) @endif
                     </span>
                 @endforeach
+                {{-- D241: referencias de impresión de cada zona, en tabla. --}}
+                @if ($linea->impresiones->isNotEmpty())
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px;">
+                        <thead><tr style="text-align: left; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; opacity: .6;">
+                            <th style="padding: 6px 8px 6px 0;">Zona</th><th style="padding: 6px 8px;">Diseño</th><th style="padding: 6px 8px;">Medida</th><th style="padding: 6px 8px;">Posición</th><th style="padding: 6px 8px;">Calidad</th>
+                        </tr></thead>
+                        <tbody>
+                            @foreach ($linea->impresiones as $impresion)
+                                <tr style="border-top: 1px solid rgba(127,127,127,.18);">
+                                    <td style="padding: 8px 8px 8px 0;"><strong>{{ $impresion->zonaEn('es') }}</strong></td>
+                                    <td style="padding: 8px;">
+                                        @if ($impresion->texto !== null)
+                                            Texto «{{ $impresion->texto }}» (letra {{ $impresion->fuente + 1 }}, tinta {{ $impresion->tinta }})
+                                        @else
+                                            {{ $impresion->nombre_original }}
+                                            @if ($impresion->archivo)
+                                                · <a href="{{ route('backend.pedidos.original', ['pedido' => $pedido->uuid, 'impresion' => $impresion->id]) }}" style="text-decoration: underline;">descargar original</a>
+                                            @elseif ($pedido->archivos_borrados_en)
+                                                · <span style="opacity: .7;">original borrado el {{ $pedido->archivos_borrados_en->format('d/m/Y') }} (D230)</span>
+                                            @endif
+                                        @endif
+                                    </td>
+                                    <td style="padding: 8px; white-space: nowrap;"><strong>{{ $cm($impresion->ancho_mm) }} × {{ $cm($impresion->alto_mm) }} cm</strong></td>
+                                    <td style="padding: 8px;">{{ $cm($impresion->desde_cuello_mm) }} cm bajo el cuello · {{ $impresion->desde_centro_mm === 0 ? 'centrado' : $cm(abs($impresion->desde_centro_mm)).' cm a la '.($impresion->desde_centro_mm < 0 ? 'izquierda' : 'derecha') }}</td>
+                                    <td style="padding: 8px; white-space: nowrap;">@if ($impresion->ppp){{ $impresion->ppp }} ppp ({{ $impresion->nivel_calidad }})@else — @endif</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
                 <span>{{ Formato::euros($linea->neto, 'es') }} sin IVA @if ($linea->descuento + $linea->cupon > 0)(descuentos −{{ Formato::euros($linea->descuento + $linea->cupon, 'es') }})@endif</span>
             </div>
         </div>
