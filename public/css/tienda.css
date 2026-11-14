@@ -531,13 +531,21 @@ body.estudio-abierto { overflow: hidden; }
 .arena-halo.dos { width: 45vmax; height: 45vmax; right: -10%; bottom: -20%; background: radial-gradient(closest-side, rgba(214, 120, 70, .22), transparent); animation: halo-b 22s ease-in-out infinite alternate; }
 @keyframes halo-a { to { transform: translate3d(-12%, 10%, 0) scale(1.1); } }
 @keyframes halo-b { to { transform: translate3d(-14%, -8%, 0) scale(.92); } }
-/* Suelo de rejilla luminosa que avanza hacia ti */
+/* Suelo (D244): rejilla quieta y tenue que se funde antes de que sus líneas se amontonen (moverla o dejarla llegar
+   al horizonte creaba un parpadeo de líneas, efecto moiré). La vida la pone el borde del escenario: una línea de luz
+   que respira y un reflejo que la recorre despacio. */
 .arena-suelo { position: absolute; left: -50%; right: -50%; bottom: -2px; height: 46%;
-    background-image: linear-gradient(rgba(142, 160, 255, .35) 1px, transparent 1px), linear-gradient(90deg, rgba(142, 160, 255, .35) 1px, transparent 1px);
-    background-size: 64px 64px; transform: perspective(520px) rotateX(64deg); transform-origin: 50% 100%;
-    -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 85%); mask-image: linear-gradient(to top, #000 10%, transparent 85%);
-    animation: suelo 3.2s linear infinite; }
-@keyframes suelo { to { background-position: 0 64px; } }
+    background-image: linear-gradient(rgba(142, 160, 255, .16) 1px, transparent 1px), linear-gradient(90deg, rgba(142, 160, 255, .16) 1px, transparent 1px);
+    background-size: 96px 96px; background-position: 50% 100%; transform: perspective(620px) rotateX(62deg); transform-origin: 50% 100%;
+    -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .55) 30%, transparent 62%); mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .55) 30%, transparent 62%); }
+.arena-horizonte { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(142, 160, 255, .55) 30%, rgba(200, 210, 255, .8) 50%, rgba(142, 160, 255, .55) 70%, transparent);
+    box-shadow: 0 0 18px 2px rgba(80, 110, 255, .45); opacity: .55; animation: horizonte 7s ease-in-out infinite alternate; }
+.arena-horizonte::after { content: ""; position: absolute; top: -60px; left: 0; width: 34%; height: 120px;
+    background: radial-gradient(closest-side, rgba(170, 186, 255, .22), transparent); filter: blur(6px);
+    animation: reflejo 14s ease-in-out infinite alternate; }
+@keyframes horizonte { from { opacity: .35; } to { opacity: .75; } }
+@keyframes reflejo { from { transform: translateX(-10%); } to { transform: translateX(205%); } }
 /* Ondas de luz: tres cintas de líneas finas que se desplazan en bucle (el SVG mide el doble y avanza la mitad) */
 .arena-ondas { position: absolute; left: 0; right: 0; top: 34%; height: 44%; overflow: hidden;
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); }
@@ -621,7 +629,7 @@ body.estudio-abierto { overflow: hidden; }
     .escenario { height: min(78vh, 640px); }
 }
 @media (prefers-reduced-motion: reduce) {
-    .arena-halo, .arena-suelo, .onda, .vivo, .giro, .sombra, .atributos .barra i { animation: none !important; }
+    .arena-halo, .arena-suelo, .arena-horizonte, .arena-horizonte::after, .onda, .vivo, .giro, .sombra, .atributos .barra i { animation: none !important; }
 }
 
 /* ── Ambiente de consola en las secciones (D139) ── */
