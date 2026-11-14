@@ -136,24 +136,55 @@ final class IgualarEncuadre
     }
 
     /**
-     * La caja de la prenda [x, y, ancho, alto]: lo que queda al recortar el fondo (transparente o del color de la
-     * esquina). Null si no se distingue (ocupa casi toda la foto o casi nada).
+     * La caja de la prenda [x, y, ancho, alto]. Con transparencia, la de lo que es casi opaco (más del 50 %): así no
+     * cuentan las sombras suaves ni los halos, que cambian de una foto a otra y hacían que una prenda pareciera más
+     * pequeña y se agrandara (D247). Sin transparencia, lo que queda al recortar el color de la esquina. Null si no se
+     * distingue (ocupa casi toda la foto o casi nada).
      *
      * @return ?array{0: int, 1: int, 2: int, 3: int}
      */
     public static function caja(Imagick $imagen): ?array
     {
-        $copia = clone $imagen;
-        try {
-            $copia->trimImage(self::FUZZ * Imagick::getQuantum());
-            $pagina = $copia->getImagePage();
-            $caja = [(int) $pagina['x'], (int) $pagina['y'], $copia->getImageWidth(), $copia->getImageHeight()];
-        } finally {
-            $copia->clear();
+        $caja = $imagen->getImageAlphaChannel() ? self::cajaOpaca($imagen) : null;
+        if ($caja === null) {
+            $copia = clone $imagen;
+            try {
+                $copia->trimImage(self::FUZZ * Imagick::getQuantum());
+                $pagina = $copia->getImagePage();
+                $caja = [(int) $pagina['x'], (int) $pagina['y'], $copia->getImageWidth(), $copia->getImageHeight()];
+            } finally {
+                $copia->clear();
+            }
         }
+
+        return self::razonable($caja, $imagen) ? $caja : null;
+    }
+
+    /** @return ?array{0: int, 1: int, 2: int, 3: int} */
+    private static function cajaOpaca(Imagick $imagen): ?array
+    {
+        // Máscara de alfa en gris (opaco = blanco; EXTRACT da lo mismo en ImageMagick 6 y 7), en blanco y negro al 50 %.
+        $mascara = clone $imagen;
+        try {
+            $mascara->setImageAlphaChannel(Imagick::ALPHACHANNEL_EXTRACT);
+            $mascara->thresholdImage(0.5 * Imagick::getQuantum());
+            $mascara->borderImage('black', 1, 1); // un borde negro: el recorte quita solo lo transparente
+            $mascara->trimImage(0);
+            $pagina = $mascara->getImagePage();
+            $caja = [(int) $pagina['x'] - 1, (int) $pagina['y'] - 1, $mascara->getImageWidth(), $mascara->getImageHeight()];
+        } finally {
+            $mascara->clear();
+        }
+
+        return self::razonable($caja, $imagen) ? $caja : null;
+    }
+
+    /** @param  array{0: int, 1: int, 2: int, 3: int}  $caja */
+    private static function razonable(array $caja, Imagick $imagen): bool
+    {
         $fraccion = ($caja[2] * $caja[3]) / max(1, $imagen->getImageWidth() * $imagen->getImageHeight());
 
-        return $fraccion < 0.03 || $fraccion > 0.97 ? null : $caja;
+        return $fraccion >= 0.03 && $fraccion <= 0.97;
     }
 
     /** @param  array{0: int, 1: int, 2: int, 3: int}  $a  @param  array{0: int, 1: int, 2: int, 3: int}  $b */

@@ -40,6 +40,9 @@
         'nitido_hasta' => __('tienda.nitido_hasta'),
         'nitido_nunca' => __('tienda.nitido_nunca'),
         'deseado_fantasma' => __('tienda.deseado_fantasma'),
+        'guia_ia_recomienda' => __('tienda.guia_ia_recomienda'),
+        'guia_ia_acierto' => __('tienda.guia_ia_acierto'),
+        'guia_ia_poner' => __('tienda.guia_ia_poner'),
         'guia_pequeno_corto' => __('tienda.guia_pequeno_corto'),
         'guia_justo_corto' => __('tienda.guia_justo_corto'),
         'medida_zona' => __('tienda.medida_zona'),
@@ -351,11 +354,18 @@
                     <p class="guia-estado" id="guia-estado"></p>
                     <p class="guia-consejo" id="guia-consejo"></p>
                     <p class="guia-corto" id="guia-corto"></p>
+                    {{-- D246: consejo de la IA sobre este diseño (zona recomendada y su calidad, con las cifras de la tienda). --}}
+                    <div class="guia-ia" id="guia-ia" hidden>
+                        <p class="guia-ia-titulo">{{ __('tienda.guia_ia') }}</p>
+                        <p id="guia-ia-consejo"></p>
+                        <p id="guia-ia-zona-texto"></p>
+                        <button type="button" class="guia-boton" id="guia-ia-zona" hidden></button>
+                    </div>
                     {{-- D248: la solución es un archivo mejor; reducir es la alternativa, en segundo plano. --}}
                     <p class="guia-deseado" id="guia-deseado"></p>
                     <p class="guia-reduce" id="guia-reduce" hidden><button type="button" class="guia-boton" id="guia-subir">{{ __('tienda.subir_mas_grande') }}</button> <button type="button" class="guia-enlace" id="guia-ajustar"></button></p>
                 </aside>
-                <div class="visor" id="visor" data-llevar='@json($llevar)' data-otras='@json($otras)' data-subida="{{ route('disenos.subir') }}" data-biblioteca="{{ route('disenos.lista') }}" data-borrar="{{ route('disenos.borrar', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-prenda="{{ $prenda->id }}" data-anadir="{{ \App\Http\Controllers\CarritoController::url('anadir') }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
+                <div class="visor" id="visor" data-llevar='@json($llevar)' data-otras='@json($otras)' data-subida="{{ route('disenos.subir') }}" data-biblioteca="{{ route('disenos.lista') }}" data-borrar="{{ route('disenos.borrar', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-prenda="{{ $prenda->id }}" data-consejo="{{ route('disenos.consejo', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-anadir="{{ \App\Http\Controllers\CarritoController::url('anadir') }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
                     <div class="visor-controles">
                         <div class="segmento" role="group" aria-label="{{ __('tienda.delantera') }} / {{ __('tienda.trasera') }}">
                             <button type="button" class="boton-pildora" data-cara="delantera" aria-pressed="true">{{ __('tienda.delantera') }}</button>

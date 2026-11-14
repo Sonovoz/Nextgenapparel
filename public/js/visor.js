@@ -1284,12 +1284,65 @@
         document.getElementById('guia-consejo').textContent = n === null ? texto('guia_antes', { medida: medida, ppp: u })
             : (mensajeFijo || (consejos[n] && conPixeles ? texto(consejos[n], { medida: medida, maximo: maximo }) : t['mensaje_' + n]));
         document.getElementById('guia-corto').textContent = n === 'baja' ? textos.guia_pequeno_corto : (n === 'justa' ? textos.guia_justo_corto : '');
+        consejoIa(n === null ? null : zona, conPixeles);
         var reduce = document.getElementById('guia-reduce');
         reduce.hidden = !(n === 'justa' || n === 'baja') || !conPixeles;
         var enlaceReducir = document.getElementById('guia-ajustar');
         enlaceReducir.hidden = !nitida;
         if (nitida) enlaceReducir.textContent = texto('reducir_secundario', { medida: cm(nitida.anchoMm) + ' cm' });
     }
+    /* D246: consejo de la IA sobre el diseño (una vez por diseño): la zona donde queda mejor y su calidad en cada zona,
+       con las cifras que calcula la tienda. Sin IA, el servidor responde 204 y la guía sigue igual. */
+    var consejosIa = {}, pidiendoIa = {};
+    function pedirConsejo(uuid) {
+        var visorEl = document.getElementById('visor');
+        var url = visorEl && visorEl.dataset.consejo;
+        if (!url || !uuid || consejosIa[uuid] !== undefined || pidiendoIa[uuid]) return;
+        pidiendoIa[uuid] = true;
+        var token = document.querySelector('meta[name="csrf-token"]');
+        fetch(url.replace('00000000-0000-0000-0000-000000000000', uuid), {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'X-CSRF-TOKEN': token ? token.content : '', 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ prenda: Number(visorEl.dataset.prenda) })
+        }).then(function (r) { return r.status === 200 ? r.json() : null; })
+            .then(function (c) { consejosIa[uuid] = c; delete pidiendoIa[uuid]; actualizarAjustador(); })
+            .catch(function () { consejosIa[uuid] = null; delete pidiendoIa[uuid]; });
+    }
+    function consejoIa(zona, conPixeles) {
+        var bloque = document.getElementById('guia-ia');
+        if (!bloque) return;
+        var uuid = conPixeles ? estado.uuid : null;
+        if (uuid && consejosIa[uuid] === undefined) pedirConsejo(uuid);
+        var ia = uuid ? consejosIa[uuid] : null;
+        var boton = document.getElementById('guia-ia-zona');
+        boton.hidden = true;
+        if (!ia || !zona) { bloque.hidden = true; return; }
+        var propio = ia.consejos && ia.consejos[zona.id] ? ia.consejos[zona.id] : '';
+        var linea = '';
+        if (ia.zona && ia.zona !== zona.id && ia.zona_nombre) {
+            linea = texto('guia_ia_recomienda', { zona: ia.zona_nombre, motivo: ia.motivo || '' });
+            var destino = zonas.filter(function (z) { return z.id === ia.zona; })[0];
+            var ahora = zonas.filter(function (z) { return z.id === zona.id; })[0];
+            // Solo se ofrece mover a una zona que se pisa con esta (pecho y frontal) y está libre, como al pulsar su tarjeta.
+            if (destino && ahora && solapan(destino, ahora) && !disenoValido(estado.disenos[destino.id])) {
+                boton.hidden = false;
+                boton.dataset.zona = destino.id;
+                boton.textContent = texto('guia_ia_poner', { zona: ia.zona_nombre });
+            }
+        } else if (ia.zona === zona.id && ia.motivo) {
+            linea = texto('guia_ia_acierto', { motivo: ia.motivo });
+        }
+        document.getElementById('guia-ia-consejo').textContent = propio;
+        document.getElementById('guia-ia-zona-texto').textContent = linea;
+        // Con el consejo de la IA para esta zona, el genérico sobra.
+        if (propio) document.getElementById('guia-consejo').textContent = '';
+        bloque.hidden = !propio && !linea;
+    }
+    var botonIa = document.getElementById('guia-ia-zona');
+    if (botonIa) botonIa.addEventListener('click', function () {
+        var tarjeta = document.querySelector('#zonas-diseno [data-zona="' + botonIa.dataset.zona + '"]');
+        if (tarjeta) tarjeta.click();
+    });
     var guiaBoton = document.getElementById('guia-ajustar');
     if (guiaBoton) guiaBoton.addEventListener('click', function () { dejarNitido(); });
 
