@@ -22,6 +22,14 @@
         'ficha_objetivo' => __('tienda.ficha_objetivo'),
         'ficha_archivo' => __('tienda.ficha_archivo'),
         'ficha_declara' => __('tienda.ficha_declara'),
+        'guia_se_imprime' => __('tienda.guia_se_imprime'),
+        'guia_maximo_zona' => __('tienda.guia_maximo_zona'),
+        'guia_sin_subir' => __('tienda.guia_sin_subir'),
+        'guia_antes' => __('tienda.guia_antes'),
+        'guia_pequeno' => __('tienda.guia_pequeno'),
+        'guia_justo' => __('tienda.guia_justo'),
+        'guia_pequeno_corto' => __('tienda.guia_pequeno_corto'),
+        'guia_justo_corto' => __('tienda.guia_justo_corto'),
         'medida_zona' => __('tienda.medida_zona'),
         'ajustar_nitido' => __('tienda.ajustar_nitido'),
         'pixelado_lienzo' => __('tienda.pixelado_lienzo'),
@@ -307,6 +315,19 @@
                 <div class="estudio-escena">
                 <button type="button" class="girar anterior" data-girar aria-label="{{ __('tienda.atajo_girar') }}">‹</button>
                 <div class="marco-visor">
+                {{-- D237: guía de impresión al lado de la prenda: tamaño en cm, píxeles necesarios y los de su imagen. --}}
+                <aside class="guia-impresion" id="guia-impresion" data-nivel="" aria-live="polite" hidden>
+                    <p class="guia-titulo">{{ __('tienda.guia_titulo') }} · <span id="guia-zona"></span></p>
+                    <p class="guia-medida"><small id="guia-medida-etiqueta"></small><strong id="guia-medida"></strong></p>
+                    <dl class="guia-datos">
+                        <div><dt>{{ __('tienda.guia_necesitas') }}</dt><dd id="guia-necesitas"></dd></div>
+                        <div class="guia-tuya"><dt>{{ __('tienda.guia_tienes') }}</dt><dd id="guia-tienes"></dd></div>
+                    </dl>
+                    <p class="guia-estado" id="guia-estado"></p>
+                    <p class="guia-consejo" id="guia-consejo"></p>
+                    <p class="guia-corto" id="guia-corto"></p>
+                    <p class="guia-reduce" id="guia-reduce" hidden>{{ __('tienda.guia_o_reduce') }} <button type="button" class="guia-boton" id="guia-ajustar"></button></p>
+                </aside>
                 <div class="visor" id="visor" data-llevar='@json($llevar)' data-otras='@json($otras)' data-subida="{{ route('disenos.subir') }}" data-biblioteca="{{ route('disenos.lista') }}" data-borrar="{{ route('disenos.borrar', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-prenda="{{ $prenda->id }}" data-anadir="{{ \App\Http\Controllers\CarritoController::url('anadir') }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
                     <div class="visor-controles">
                         <div class="segmento" role="group" aria-label="{{ __('tienda.delantera') }} / {{ __('tienda.trasera') }}">

@@ -196,4 +196,17 @@ return [
     'ficha_objetivo' => 'Vas a imprimir en :zona a :medida. Para un resultado óptimo, tu imagen debe tener al menos :px (:ppp ppp a ese tamaño).',
     'ficha_archivo' => 'Tu imagen: :px.',
     'ficha_declara' => 'Dice :ppp ppp, así que tu programa la pensaba para :medida; da igual: lo que cuenta son sus píxeles y el tamaño al que la imprimimos.',
+    // D237: guía de impresión junto a la prenda.
+    'guia_titulo' => 'Guía de impresión',
+    'guia_se_imprime' => 'Se imprime a',
+    'guia_maximo_zona' => 'Tamaño máximo de la zona',
+    'guia_necesitas' => 'Para que salga óptimo',
+    'guia_tienes' => 'Tu imagen',
+    'guia_sin_subir' => 'Aún sin subir',
+    'guia_antes' => 'Prepara un PNG de al menos :px (:ppp ppp a este tamaño), mejor con fondo transparente.',
+    'guia_pequeno' => 'Haz más grande tu diseño en tu programa de edición: es muy pequeño para imprimir a este tamaño. Expórtalo de nuevo a al menos :px.',
+    'guia_justo' => 'Tu diseño se queda algo corto para este tamaño. Si puedes, expórtalo de nuevo más grande en tu programa de edición: al menos :px.',
+    'guia_pequeno_corto' => 'Haz más grande tu diseño en tu programa de edición: es muy pequeño para imprimir.',
+    'guia_justo_corto' => 'Tu diseño se queda algo corto: si puedes, hazlo más grande en tu programa de edición.',
+    'guia_o_reduce' => 'O redúcelo aquí:',
 ];
