@@ -101,4 +101,5 @@ return [
     'final_boton' => 'Create my collection',
 
     'enlace_guia' => 'How to improve your image? Easy guide',
+    'enlace_soltar' => 'Not sure what a PNG is or how to prepare your image? Easy guide',
 ];

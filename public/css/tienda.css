@@ -1493,7 +1493,7 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 }
 /* Enlace a la guía desde el configurador: solo cuando la calidad no llega. */
 .guia-enlace-guia { display: none; color: #B9C4FF; font-size: 12.5px; text-decoration: underline; }
-.guia-impresion[data-nivel="justa"] .guia-enlace-guia, .guia-impresion[data-nivel="baja"] .guia-enlace-guia { display: inline-block; }
+.guia-impresion[data-nivel=""] .guia-enlace-guia, .guia-impresion[data-nivel="justa"] .guia-enlace-guia, .guia-impresion[data-nivel="baja"] .guia-enlace-guia { display: inline-block; }
 .calidad .calidad-guia { display: none; color: #B9C4FF; font-size: 13px; text-decoration: underline; }
 .calidad[data-nivel="justa"] .calidad-guia, .calidad[data-nivel="baja"] .calidad-guia { display: inline-block; }
 .final .caminos.guia-final { grid-template-columns: minmax(0, 420px); justify-content: center; }
@@ -1508,4 +1508,5 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
     .estudio.activo .estudio-escena > .acciones-marca span { display: none; }
     .estudio.activo .guia-impresion .guia-enlace-guia, .estudio.activo .guia-impresion .guia-reduce, .estudio.activo .guia-impresion .guia-ia { display: none !important; }
 }
-
+.enlace-guia-soltar { display: inline-block; margin-top: 8px; color: #B9C4FF; font-size: 13px; text-decoration: underline; }
+.enlace-guia-soltar:hover { color: #fff; }
