@@ -32,3 +32,4 @@ Thumbs.db
 # Docker: archivos de entorno con contraseñas
 /docker/env/*.env
 /docker/caddy/.env
+/storage/framework/latidos
