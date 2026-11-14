@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 14/11 | **Orden de los pedidos**: primero lo que hay que preparar y al final lo enviado y entregado. | `pedidos-orden` | D243 |
 | 14/11 | **Guía de impresión en cm**: sin píxeles para el cliente; «Prepara tu diseño a 9 × 9 cm · 300 ppp» y «Tu imagen sale nítida hasta 3,1 × 3,1 cm». | `guia-en-cm` | D242 |
 | 14/11 | **Pedidos**: aviso de pedidos nuevos pagados arriba del panel; listado a todo el ancho con pestañas Pagados / Pendientes de pago / Cancelados. | `pedidos-pestanas` | D240 |
 | 14/11 | **Manifiesto de pedido**: ficha con prendas × color × talla y referencias de impresión; descarga ZIP con diseños sin modificar, maquetas y PDF con cliente y manifiesto. | `manifiesto-pedido` | D241 |

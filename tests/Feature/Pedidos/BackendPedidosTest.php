@@ -79,7 +79,13 @@ class BackendPedidosTest extends TestCase
         $enviado = Pedido::factory()->create(['estado' => E::Enviado, 'numero' => 'PED-0045']);
         $this->actingAs($this->usuarioConRol(Rol::GestorTienda));
 
+        $entregado = Pedido::factory()->create(['estado' => E::Entregado, 'numero' => 'PED-0047']);
+        $enProduccion = Pedido::factory()->create(['estado' => E::EnProduccion, 'numero' => 'PED-0048']);
+        $nuevo = Pedido::factory()->create(['estado' => E::Pagado, 'numero' => 'PED-0049']);
+
+        // D243: primero lo que hay que preparar (pagados, del más nuevo al más antiguo, y en producción); al final, lo enviado y entregado.
         Livewire::test(ListPedidos::class)->assertSet('activeTab', 'pagados')
+            ->assertCanSeeTableRecords([$nuevo, $this->pedido, $enProduccion, $enviado, $entregado], inOrder: true)
             ->assertCanSeeTableRecords([$this->pedido, $enviado])->assertCanNotSeeTableRecords([$pendiente, $cancelado])
             ->set('activeTab', 'pendientes')->assertCanSeeTableRecords([$pendiente])->assertCanNotSeeTableRecords([$this->pedido, $cancelado])
             ->set('activeTab', 'cancelados')->assertCanSeeTableRecords([$cancelado])->assertCanNotSeeTableRecords([$this->pedido, $pendiente]);
