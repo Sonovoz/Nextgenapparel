@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Dominio\Facturacion\PdfFactura;
-use App\Dominio\Produccion\ArchivoTamanoReal;
 use App\Dominio\Pedidos\ManifiestoPedido;
+use App\Dominio\Produccion\ArchivoTamanoReal;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Factura;
 use App\Models\FotoIncidencia;
@@ -60,6 +60,8 @@ class ArchivoPedidoController
             'Content-Disposition' => 'attachment; filename="'.ArchivoTamanoReal::nombre($pedido, (int) $numero + 1, $impresion).'"',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
     /** D241: ZIP con los diseños sin modificar, las maquetas y el PDF del manifiesto (con los datos del cliente). */
     public function manifiesto(Pedido $pedido): Response
     {

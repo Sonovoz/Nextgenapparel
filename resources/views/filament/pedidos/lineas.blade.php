@@ -23,24 +23,6 @@
                     @if ($linea->tallas){{ collect($linea->tallas)->map(fn ($t) => $t['nombre'].' × '.$t['unidades'])->join(' · ') }} · @endif
                     {{ $linea->unidades }} {{ $linea->unidades === 1 ? 'prenda' : 'prendas' }}
                 </span>
-                @foreach ($linea->impresiones as $impresion)
-                    <span>
-                        <strong>{{ $impresion->zonaEn('es') }}</strong>:
-                        @if ($impresion->texto !== null)
-                            texto «{{ $impresion->texto }}» (letra {{ $impresion->fuente + 1 }}, tinta {{ $impresion->tinta }})
-                        @else
-                            {{ $impresion->nombre_original }}
-                            @if ($impresion->archivo)
-                                · <a href="{{ route('backend.pedidos.original', ['pedido' => $pedido->uuid, 'impresion' => $impresion->id]) }}" style="text-decoration: underline;">descargar original</a>
-                                · <a href="{{ route('backend.pedidos.tamano-real', ['pedido' => $pedido->uuid, 'impresion' => $impresion->id]) }}" style="text-decoration: underline;">descargar a tamaño real ({{ \App\Dominio\Produccion\ArchivoTamanoReal::medida($impresion) }})</a>
-                            @elseif ($pedido->archivos_borrados_en)
-                                · <span style="opacity: .7;">original borrado el {{ $pedido->archivos_borrados_en->format('d/m/Y') }} (D230)</span>
-                            @endif
-                        @endif
-                        · {{ $cm($impresion->ancho_mm) }} × {{ $cm($impresion->alto_mm) }} cm, a {{ $cm($impresion->desde_cuello_mm) }} cm del cuello
-                        @if ($impresion->ppp) · {{ $impresion->ppp }} ppp ({{ $impresion->nivel_calidad }}) @endif
-                    </span>
-                @endforeach
                 {{-- D241: referencias de impresión de cada zona, en tabla. --}}
                 @if ($linea->impresiones->isNotEmpty())
                     <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px;">
@@ -58,6 +40,7 @@
                                             {{ $impresion->nombre_original }}
                                             @if ($impresion->archivo)
                                                 · <a href="{{ route('backend.pedidos.original', ['pedido' => $pedido->uuid, 'impresion' => $impresion->id]) }}" style="text-decoration: underline;">descargar original</a>
+                                                · <a href="{{ route('backend.pedidos.tamano-real', ['pedido' => $pedido->uuid, 'impresion' => $impresion->id]) }}" style="text-decoration: underline;">descargar a tamaño real ({{ \App\Dominio\Produccion\ArchivoTamanoReal::medida($impresion) }})</a>
                                             @elseif ($pedido->archivos_borrados_en)
                                                 · <span style="opacity: .7;">original borrado el {{ $pedido->archivos_borrados_en->format('d/m/Y') }} (D230)</span>
                                             @endif
