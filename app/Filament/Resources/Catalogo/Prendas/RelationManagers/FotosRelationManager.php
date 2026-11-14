@@ -4,13 +4,17 @@ namespace App\Filament\Resources\Catalogo\Prendas\RelationManagers;
 
 use App\Dominio\Catalogo\Cara;
 use App\Dominio\Catalogo\CopiarZonas;
+use App\Dominio\Catalogo\IgualarEncuadre;
 use App\Dominio\Catalogo\TipoFoto;
 use App\Dominio\Catalogo\ZonasPorDefecto;
+use App\Dominio\Sistema\Actividad\Actividad;
 use App\Filament\Concerns\CamposTraducibles;
 use App\Models\Color;
 use App\Models\Foto;
+use App\Models\Prenda;
 use App\Models\ZonaImpresion;
 use Closure;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -26,6 +30,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -117,7 +122,7 @@ class FotosRelationManager extends RelationManager
                         }
                     }
                 })
-                ->helperText('PNG, JPG o WebP de hasta 5 MB. Al guardar se pasa a WebP y se reduce al tamaño de Ajustes → General, sin perder la transparencia. Maqueta: proporción 5:6 (por ejemplo, 1000 × 1200 px), mejor con fondo transparente y la prenda centrada.'),
+                ->helperText('PNG, JPG o WebP de hasta 5 MB. Al guardar se pasa a WebP y se reduce al tamaño de Ajustes → General, sin perder la transparencia. Maqueta: proporción 5:6 (por ejemplo, 1000 × 1200 px), mejor con fondo transparente y la prenda centrada. La maqueta de cada color se iguala sola al tamaño y encuadre de la del blanco (D239).'),
             CamposTraducibles::texto('texto_alternativo', 'Texto alternativo'),
             TextInput::make('orden')->label('Orden')->numeric()->integer()->minValue(0)->default(0),
 
@@ -169,6 +174,26 @@ class FotosRelationManager extends RelationManager
                 TextColumn::make('zonas_count')->label('Zonas marcadas')->counts('zonas'),
             ])
             ->headerActions([
+                // D239: todas las maquetas con la prenda al tamaño y encuadre de la del blanco.
+                Action::make('igualar')->label('Igualar tamaño al blanco')->icon(Heroicon::OutlinedArrowsPointingIn)->color('gray')
+                    ->requiresConfirmation()
+                    ->modalDescription('Las maquetas de los demás colores se rehacen con la prenda al mismo tamaño y en el mismo sitio que en la del blanco (de cada cara), y toman sus zonas de impresión. Funciona con fondo transparente o liso.')
+                    ->action(function (): void {
+                        $prenda = $this->getOwnerRecord();
+                        if (! $prenda instanceof Prenda) {
+                            return;
+                        }
+                        $r = IgualarEncuadre::prenda($prenda);
+                        Actividad::apuntar('catalogo', 'Fotos igualadas al blanco', $prenda, ['igualadas' => $r['igualadas']]);
+                        $aviso = Notification::make()->{$r['fallidas'] === [] ? 'success' : 'warning'}()
+                            ->title($r['igualadas'] === 1 ? '1 foto igualada al blanco' : $r['igualadas'].' fotos igualadas al blanco')
+                            ->body(trim(($r['iguales'] ? $r['iguales'].' ya estaban iguales. ' : '').($r['fallidas'] ? 'Sin igualar: '.implode('; ', $r['fallidas']).'.' : '')) ?: null);
+                        if ($r['fallidas'] !== []) {
+                            $aviso->persistent();
+                        }
+                        $aviso->send();
+                    })
+                    ->visible(fn () => Foto::where('prenda_id', $this->getOwnerRecord()->getKey())->where('tipo', TipoFoto::Maqueta->value)->count() > 1),
                 CreateAction::make()->label('Subir foto')
                     ->mutateDataUsing(fn (array $data) => CamposTraducibles::limpiar($data, ['texto_alternativo']))
                     ->after(fn (Foto $record) => app(ZonasPorDefecto::class)($record)),
