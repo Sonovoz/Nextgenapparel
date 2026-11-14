@@ -1348,3 +1348,60 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 @media (prefers-reduced-motion: reduce) {
     .boton-siguiente.vivo, .boton-siguiente.vivo::after, .boton-siguiente .flecha-viva { animation: none !important; }
 }
+
+/* D237: guía de impresión al lado de la prenda (en el móvil, una franja compacta al pie de la prenda). */
+.guia-impresion { display: none; }
+.estudio.activo .guia-impresion:not([hidden]) { display: flex; flex-direction: column; gap: 6px; position: absolute; left: 10px; right: 10px; bottom: 6px; z-index: 5; padding: 10px 12px; border-radius: 14px; background: rgba(18, 18, 26, .92); border: 1px solid rgba(255, 255, 255, .16); border-left: 4px solid #8EA0FF; box-shadow: 0 10px 30px rgba(0, 0, 0, .45); font-size: 12px; line-height: 1.4; }
+.guia-impresion p { margin: 0; }
+.guia-titulo { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #A7A2B5; }
+.guia-titulo span { color: #fff; }
+.guia-medida { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.guia-medida small { color: #A7A2B5; font-size: 12px; }
+.guia-medida strong { font-size: 20px; font-weight: 600; letter-spacing: .01em; }
+.guia-datos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; }
+.guia-datos div { padding: 6px 8px; border-radius: 10px; background: rgba(255, 255, 255, .06); }
+.guia-datos dt { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #A7A2B5; }
+.guia-datos dd { margin: 2px 0 0; font-size: 14px; font-weight: 600; }
+.guia-estado { font-weight: 600; font-size: 13px; }
+.guia-estado:empty, .guia-consejo:empty { display: none; }
+.guia-reduce { color: #C9C5D6; }
+.guia-boton { margin-top: 4px; display: inline-block; padding: 8px 14px; border-radius: 99px; border: 1px solid #fff; background: #fff; color: #111; font: 600 12px var(--sans); cursor: pointer; }
+.guia-boton:hover { background: #E8E6F2; }
+.guia-impresion[data-nivel="correcta"], .guia-impresion[data-nivel="buena"] { border-left-color: #3DBE7A; }
+.guia-impresion[data-nivel="correcta"] .guia-tuya dd, .guia-impresion[data-nivel="buena"] .guia-tuya dd, .guia-impresion[data-nivel="correcta"] .guia-estado, .guia-impresion[data-nivel="buena"] .guia-estado { color: #7BE3A8; }
+.guia-impresion[data-nivel="justa"] { border-left-color: #F2B33D; }
+.guia-impresion[data-nivel="justa"] .guia-tuya dd, .guia-impresion[data-nivel="justa"] .guia-estado { color: #F7D27E; }
+.guia-impresion[data-nivel="baja"] { border-left-color: #F0624D; background: rgba(48, 16, 14, .94); }
+.guia-impresion[data-nivel="baja"] .guia-tuya { background: rgba(240, 98, 77, .18); }
+.guia-impresion[data-nivel="baja"] .guia-tuya dd, .guia-impresion[data-nivel="baja"] .guia-estado { color: #FF9C8C; }
+.guia-impresion[data-nivel="justa"] .guia-estado::before, .guia-impresion[data-nivel="baja"] .guia-estado::before { content: "⚠ "; }
+.guia-impresion[data-nivel="correcta"] .guia-estado::before, .guia-impresion[data-nivel="buena"] .guia-estado::before { content: "✓ "; }
+.guia-impresion[data-nivel="baja"] .guia-consejo, .guia-impresion[data-nivel="justa"] .guia-consejo { font-size: 13px; font-weight: 500; color: #fff; }
+/* En el móvil la guía ya lo dice: sin la píldora repetida sobre la prenda. */
+.estudio.activo .marco-visor:has(.guia-impresion:not([hidden])) .aviso-pixelado { display: none; }
+/* Móvil: compacta, al pie de la prenda; el consejo en su versión corta. */
+.guia-corto { font-weight: 600; color: #fff; }
+.guia-corto:empty { display: none; }
+@media (max-width: 1023px) {
+    .estudio.activo .guia-impresion .guia-titulo, .estudio.activo .guia-impresion .guia-consejo, .estudio.activo .guia-impresion .guia-estado, .estudio.activo .guia-impresion .guia-reduce > :not(button) { display: none; }
+    .estudio.activo .guia-impresion:not([hidden]) { gap: 4px; padding: 8px 10px; }
+    .estudio.activo .guia-medida strong { font-size: 16px; }
+    .estudio.activo .guia-datos div { padding: 4px 8px; }
+    .estudio.activo .guia-datos dd { font-size: 13px; }
+    .estudio.activo .guia-reduce { font-size: 0; }
+    .estudio.activo .guia-boton { margin-top: 2px; padding: 6px 12px; font-size: 12px; }
+}
+@media (min-width: 1024px) {
+    /* Al lado de la prenda, a la izquierda: se lee sin mover la vista. */
+    .estudio.activo .marco-visor { position: relative; gap: 24px; }
+    .estudio.activo .guia-impresion:not([hidden]) { position: static; flex: 0 0 clamp(230px, 19vw, 290px); align-self: center; gap: 10px; padding: 18px; font-size: 13px; order: -1; }
+    .estudio.activo .guia-medida { flex-direction: column; gap: 2px; }
+    .estudio.activo .guia-medida strong { font-size: 30px; }
+    .estudio.activo .guia-datos { grid-template-columns: 1fr; }
+    .estudio.activo .guia-datos dd { font-size: 16px; }
+    .estudio.activo .guia-estado { font-size: 15px; }
+    .estudio.activo .guia-corto { display: none; }
+    .estudio.activo .guia-impresion[data-nivel="baja"] .guia-consejo, .estudio.activo .guia-impresion[data-nivel="justa"] .guia-consejo { font-size: 14px; }
+    .estudio.activo .marco-visor:has(.guia-impresion:not([hidden])) .aviso-pixelado { display: block; }
+    .estudio.activo .marco-visor:has(.guia-impresion:not([hidden])) .aviso-pixelado[hidden] { display: none; }
+}

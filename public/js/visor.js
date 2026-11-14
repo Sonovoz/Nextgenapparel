@@ -475,6 +475,7 @@
         document.querySelectorAll('.muestra').forEach(function (b) { b.setAttribute('aria-checked', String(Number(b.dataset.color) === estado.color)); });
         document.querySelectorAll('[data-cara]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cara === estado.cara)); });
         document.getElementById('ver-zonas').setAttribute('aria-pressed', String(estado.zonas));
+        if (!hayDiseno()) actualizarGuia(null); // D237: orienta antes de subir el diseño
     }
 
     function cambiarCara(cara) {
@@ -1161,7 +1162,7 @@
         mostrarMejoraIa(null);
         avisoPixelado(null);
         botonNitido.hidden = true;
-        if (!zona) return;
+        if (!zona) { actualizarGuia(null); return; }
 
         var color = colores[estado.color];
         var g = geometriaMm(disenoPara(color), zona);
@@ -1187,6 +1188,7 @@
             mensaje.textContent = estado.modo === 'texto' ? t.texto : t.vectorial;
             document.getElementById('calidad-relleno').style.width = '100%';
             if (estado.logoTipo === 'vectorial' && estado.modo === 'logo') fondo.textContent = t.formato_pedido;
+            actualizarGuia('correcta', anchoMm, altoMm, mensaje.textContent);
             return;
         }
 
@@ -1220,7 +1222,43 @@
         }
         if (estado.logoTipo === 'fondo') fondo.textContent = t.fondo;
         if (estado.logoTipo === 'fondo_blanco') fondo.textContent = t.fondo_blanco;
+        actualizarGuia(n, anchoMm, altoMm, null, (n === 'justa' || n === 'baja') ? nitida : null);
     }
+
+    /* D237: guía de impresión al lado de la prenda. Antes de subir, orienta (tamaño máximo de la zona y píxeles
+       necesarios); con el diseño, compara sus píxeles con los necesarios y, si no llegan, lo dice claro. */
+    function actualizarGuia(n, anchoMm, altoMm, mensajeFijo, nitida) {
+        var guia = document.getElementById('guia-impresion');
+        if (!guia) return;
+        var zona = zonaActual();
+        if (!zona && n === null) {
+            // Antes de elegir zona: orienta con la primera de la cara que se ve.
+            var datosCara = (colores[estado.color] || { caras: {} }).caras[estado.cara];
+            zona = datosCara && datosCara.zonas.length ? datosCara.zonas[0] : null;
+        }
+        if (!zona) { guia.hidden = true; return; }
+        var info = zonas.filter(function (z) { return z.id === zona.id; })[0];
+        var u = calidad.umbrales.correcto, t = calidad.textos;
+        if (n === null) { anchoMm = zona.ancho_mm; altoMm = zona.alto_mm; }
+        var px = Math.ceil(anchoMm / 25.4 * u) + ' × ' + Math.ceil(altoMm / 25.4 * u) + ' px';
+        var conPixeles = n !== null && estado.modo === 'logo' && estado.logoPx && estado.logoTipo !== 'vectorial';
+        guia.hidden = false;
+        guia.dataset.nivel = n || '';
+        document.getElementById('guia-zona').textContent = info ? info.nombre : '';
+        document.getElementById('guia-medida-etiqueta').textContent = n === null ? textos.guia_maximo_zona : textos.guia_se_imprime;
+        document.getElementById('guia-medida').textContent = cm(anchoMm) + ' × ' + cm(altoMm) + ' cm';
+        document.getElementById('guia-necesitas').textContent = px;
+        document.getElementById('guia-tienes').textContent = n === null ? textos.guia_sin_subir : (conPixeles ? estado.logoPx.w + ' × ' + estado.logoPx.h + ' px' : '✓');
+        document.getElementById('guia-estado').textContent = n === null ? '' : t['nivel_' + n];
+        document.getElementById('guia-consejo').textContent = n === null ? texto('guia_antes', { px: px, ppp: u })
+            : (mensajeFijo || (n === 'baja' ? texto('guia_pequeno', { px: px }) : (n === 'justa' ? texto('guia_justo', { px: px }) : t['mensaje_' + n])));
+        document.getElementById('guia-corto').textContent = n === 'baja' ? textos.guia_pequeno_corto : (n === 'justa' ? textos.guia_justo_corto : '');
+        var reduce = document.getElementById('guia-reduce');
+        reduce.hidden = !nitida;
+        if (nitida) document.getElementById('guia-ajustar').textContent = texto('ajustar_nitido', { medida: cm(nitida.anchoMm) + ' cm' });
+    }
+    var guiaBoton = document.getElementById('guia-ajustar');
+    if (guiaBoton) guiaBoton.addEventListener('click', function () { dejarNitido(); });
 
     /* Mejorar el diseño con IA (D143): si la calidad no llega, las instrucciones del
        backend con su tamaño de impresión, para copiarlas en su propia herramienta. */

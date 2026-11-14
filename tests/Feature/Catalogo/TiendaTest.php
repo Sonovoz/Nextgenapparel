@@ -291,6 +291,10 @@ class TiendaTest extends TestCase
         $this->assertStringContainsString(':px (:ppp ppp a ese tamaño)', (string) ($textos['ficha_objetivo'] ?? ''));
         $this->assertStringContainsString('lo que cuenta son sus píxeles', (string) ($textos['ficha_declara'] ?? ''));
         $this->assertStringContainsString('id="calidad-objetivo"', $html);
+        // Guía de impresión al lado de la prenda, que habla claro si el diseño se queda pequeño.
+        $this->assertStringContainsString('id="guia-impresion"', $html);
+        $this->assertStringContainsString('Haz más grande tu diseño en tu programa de edición', (string) ($textos['guia_pequeno'] ?? ''));
+        $this->assertStringContainsString(':px', (string) ($textos['guia_antes'] ?? ''));
     }
 
     public function test_los_textos_de_la_tienda_existen_en_los_dos_idiomas(): void
