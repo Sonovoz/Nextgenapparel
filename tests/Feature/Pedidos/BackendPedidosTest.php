@@ -100,6 +100,11 @@ class BackendPedidosTest extends TestCase
         Pedido::factory()->create(['estado' => E::Pagado, 'numero' => 'PED-0046']);
         $this->get(PedidoResource::getUrl('index'))->assertSee('2 pedidos nuevos pagados')->assertSee('PED-0046, PED-0042');
 
+        // D252: al abrir el pedido, deja de salir en el aviso (sin cambiar su estado).
+        $this->get(PedidoResource::getUrl('view', ['record' => $this->pedido]))->assertOk()->assertDontSee('PED-0046, PED-0042');
+        $this->get(PedidoResource::getUrl('index'))->assertSee('Nuevo pedido pagado: PED-0046');
+        $this->assertSame(E::Pagado, $this->pedido->fresh()->estado);
+
         Pedido::query()->update(['estado' => E::EnProduccion->value]);
         $this->get(PedidoResource::getUrl('index'))->assertDontSee('id="aviso-pedidos-nuevos"', false);
     }

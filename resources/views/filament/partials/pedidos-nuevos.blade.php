@@ -6,7 +6,7 @@
 
     $usuario = auth()->user();
     $nuevos = $usuario !== null && $usuario->can('viewAny', Pedido::class) ? PedidoResource::nuevos() : collect();
-    $total = $nuevos->isEmpty() ? 0 : rescue(fn () => Pedido::where('estado', \App\Dominio\Pedidos\EstadoPedido::Pagado->value)->count(), $nuevos->count(), report: false);
+    $total = $nuevos->isEmpty() ? 0 : rescue(fn () => PedidoResource::sinVer()->count(), $nuevos->count(), report: false);
 @endphp
 @if ($total > 0)
     <style>
@@ -27,10 +27,10 @@
             @if ($total === 1)
                 @php $p = $nuevos->first(); @endphp
                 <strong>Nuevo pedido pagado: {{ $p->numero }}</strong>
-                <span>{{ $p->nombre_fiscal ?: $p->correo }} · {{ Formato::euros($p->total, 'es') }} · {{ $p->created_at?->format('d/m/Y H:i') }}. Prepáralo o cambia su estado para quitar este aviso.</span>
+                <span>{{ $p->nombre_fiscal ?: $p->correo }} · {{ Formato::euros($p->total, 'es') }} · {{ $p->created_at?->format('d/m/Y H:i') }}. El aviso se quita al abrirlo.</span>
             @else
                 <strong>{{ $total }} pedidos nuevos pagados</strong>
-                <span>{{ $nuevos->pluck('numero')->implode(', ') }}{{ $total > $nuevos->count() ? '…' : '' }}. Prepáralos o cambia su estado para quitar este aviso.</span>
+                <span>{{ $nuevos->pluck('numero')->implode(', ') }}{{ $total > $nuevos->count() ? '…' : '' }}. Cada aviso se quita al abrir su pedido.</span>
             @endif
         </div>
         <a class="aviso-pedidos-boton" href="{{ $total === 1 ? PedidoResource::getUrl('view', ['record' => $nuevos->first()]) : PedidoResource::getUrl('index', ['tab' => 'pagados']) }}">{{ $total === 1 ? 'Ver pedido' : 'Ver pedidos pagados' }}</a>

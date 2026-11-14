@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Storage;
  * @property ?string $numero
  * @property ?int $cliente_id
  * @property EstadoPedido $estado
+ * @property ?Carbon $visto_en primera vez que el equipo abrió el pedido (D252)
  * @property string $idioma
  * @property string $correo
  * @property ?Carbon $correo_confirmado_en
@@ -126,6 +127,7 @@ class Pedido extends Model
             'direccion_facturacion' => 'array',
             'desglose' => 'array',
             'correo_confirmado_en' => 'datetime',
+            'visto_en' => 'datetime',
             'archivos_borrados_en' => 'datetime',
             'condiciones_aceptadas_en' => 'datetime',
             'fecha_estimada_entrega' => 'date',

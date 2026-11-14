@@ -70,13 +70,19 @@ class PedidoResource extends Resource
     }
 
     /**
-     * D240: pedidos pagados que nadie ha empezado a preparar (siguen en «Pagado»), para el aviso de arriba del panel.
+     * D240: pedidos pagados que nadie ha abierto todavía (D252), para el aviso de arriba del panel.
      *
      * @return \Illuminate\Support\Collection<int, Pedido>
      */
     public static function nuevos(int $limite = 5): \Illuminate\Support\Collection
     {
-        return rescue(fn () => Pedido::where('estado', EstadoPedido::Pagado->value)->latest('id')->limit($limite)->get(), collect(), report: false);
+        return rescue(fn () => self::sinVer()->latest('id')->limit($limite)->get(), collect(), report: false);
+    }
+
+    /** D252: pagados que el equipo aún no ha abierto. Al abrir la ficha del pedido deja de ser «nuevo». */
+    public static function sinVer(): Builder
+    {
+        return Pedido::where('estado', EstadoPedido::Pagado->value)->whereNull('visto_en');
     }
 
     public static function getNavigationBadgeTooltip(): ?string
