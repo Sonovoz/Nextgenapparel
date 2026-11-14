@@ -28,6 +28,17 @@ class ViewPedido extends ViewRecord
 {
     protected static string $resource = PedidoResource::class;
 
+    /** D252: al abrir un pedido pagado, deja de salir en el aviso de pedidos nuevos (sin tocar nada más del pedido). */
+    public function mount(int|string $record): void
+    {
+        parent::mount($record);
+        $pedido = $this->getRecord();
+        if ($pedido instanceof Pedido && $pedido->visto_en === null) {
+            Pedido::whereKey($pedido->getKey())->update(['visto_en' => now()]);
+            $pedido->visto_en = now();
+        }
+    }
+
     public function getTitle(): string
     {
         return 'Pedido '.$this->getRecord()->numero;

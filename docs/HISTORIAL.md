@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 14/11 | **Aviso de pedido nuevo**: se quita al abrir el pedido (sin cambiar su estado). | `aviso-pedido-visto` | D252 |
 | 14/11 | **Colores desde la blanca**: botón en Fotos que crea las maquetas de otros colores tiñendo la blanca, con vista previa y sus zonas. | `colores-desde-blanca` | D251 |
 | 14/11 | **La guía, a mano en el estudio**: enlace bajo la caja de subida y en la guía de impresión antes de subir (en el estudio no se ve el menú de la web). | `guia-en-estudio` | D249 |
 | 14/11 | **Colocar sin confusión**: botones «Centrar de lado a lado» y «Lo más arriba de la zona» con la posición en cm; quitar/empezar de nuevo bajo la prenda; guía en el menú. | `posicion-clara` | D250 |
