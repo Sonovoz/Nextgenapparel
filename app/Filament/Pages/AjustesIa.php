@@ -54,7 +54,7 @@ class AjustesIa extends Page implements HasSchemas
 
     public function mount(): void
     {
-        $this->form->fill(collect(['activa', 'modelo', 'mensajes_dia', 'mensajes_dia_nuevos', 'limite_mensual', 'precio_entrada', 'precio_salida'])->mapWithKeys(fn ($c) => [$c => Ajuste::obtener('ia.'.$c)])->all());
+        $this->form->fill(collect(['activa', 'modelo', 'mensajes_dia', 'mensajes_dia_nuevos', 'limite_mensual', 'precio_entrada', 'precio_salida', 'consejo_disenos', 'consejos_dia'])->mapWithKeys(fn ($c) => [$c => Ajuste::obtener('ia.'.$c)])->all());
     }
 
     public function form(Schema $schema): Schema
@@ -84,6 +84,10 @@ class AjustesIa extends Page implements HasSchemas
                     TextInput::make('precio_entrada')->label('Precio por millón de tokens de entrada')->suffix('céntimos')->integer()->minValue(0)->required()
                         ->helperText('El de la tarifa de OpenAI para el modelo elegido.'),
                     TextInput::make('precio_salida')->label('Precio por millón de tokens de salida')->suffix('céntimos')->integer()->minValue(0)->required(),
+                    // D246: consejo de la IA al subir un diseño.
+                    Toggle::make('consejo_disenos')->label('Consejo de la IA al subir un diseño (zona recomendada y aviso de calidad)')->columnSpanFull()
+                        ->helperText('La IA mira el diseño (nunca datos del cliente) y, con las medidas que calcula la tienda, dice en qué zona queda mejor y explica su calidad. Necesita un modelo que vea imágenes (gpt-4o-mini sirve). Cada diseño se analiza una vez.'),
+                    TextInput::make('consejos_dia')->label('Consejos al día por visitante')->integer()->minValue(1)->maxValue(500)->required(),
                 ]),
         ]);
     }
@@ -108,7 +112,7 @@ class AjustesIa extends Page implements HasSchemas
                 unset($estado['clave']);
                 $this->data['clave'] = null;
                 foreach ($estado as $clave => $valor) {
-                    Ajuste::guardar('ia.'.$clave, $clave === 'modelo' ? trim((string) $valor) : ($clave === 'activa' ? (bool) $valor : (int) $valor));
+                    Ajuste::guardar('ia.'.$clave, $clave === 'modelo' ? trim((string) $valor) : (in_array($clave, ['activa', 'consejo_disenos'], true) ? (bool) $valor : (int) $valor));
                 }
                 Actividad::apuntar('ajustes', 'Ajustes de IA guardados');
                 Notification::make()->title('Ajustes guardados')->body('Ya se aplican en la tienda.')->success()->send();

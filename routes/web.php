@@ -206,6 +206,7 @@ Route::prefix('{idioma}')
         // Diseños del cliente (fase 4): subida y miniatura, solo para su dueño.
         Route::post('/disenos', [DisenoController::class, 'subir'])->name('disenos.subir')->middleware('throttle:disenos');
         Route::get('/disenos/{diseno}/miniatura', [DisenoController::class, 'miniatura'])->name('disenos.miniatura')->whereUuid('diseno');
+        Route::post('/disenos/{diseno}/consejo', [DisenoController::class, 'consejo'])->name('disenos.consejo')->whereUuid('diseno')->middleware('throttle:disenos-consejo');
         Route::get('/disenos', [DisenoController::class, 'lista'])->name('disenos.lista')->middleware('throttle:disenos-lista');
         Route::delete('/disenos/{diseno}', [DisenoController::class, 'borrar'])->name('disenos.borrar')->whereUuid('diseno')->middleware('throttle:disenos-borrar');
 
