@@ -69,7 +69,7 @@ class AnalizadorPng
         }
         [$ancho, $alto] = $medidas;
         if (max($ancho, $alto) > $limites['max_px']) {
-            throw new DisenoNoValido('enorme', ['px' => $limites['max_px']]);
+            throw new DisenoNoValido('enorme', ['px' => $limites['max_px'], 'cm' => self::cm($limites['max_px']), 'ppp' => Calidad::umbrales()['correcto']]);
         }
 
         self::limitarRecursos();
@@ -93,7 +93,8 @@ class AnalizadorPng
             $fondo ??= $this->fondoOpaco($imagen, $util);
 
             if (min($util[2], $util[3]) < $limites['min_px']) {
-                throw new DisenoNoValido('pequeno', ['px' => $limites['min_px'], 'ancho' => $util[2], 'alto' => $util[3]]);
+                throw new DisenoNoValido('pequeno', ['px' => $limites['min_px'], 'ancho' => $util[2], 'alto' => $util[3],
+                    'cm' => self::cm($limites['min_px']), 'medida' => self::cm($util[2]).' × '.self::cm($util[3]), 'ppp' => Calidad::umbrales()['correcto']]);
             }
 
             $analisis = new AnalisisPng(
@@ -146,6 +147,14 @@ class AnalizadorPng
             'K' => $numero * 1024,
             default => $numero,
         };
+    }
+
+    /** D242: con el cliente se habla en cm: cuánto mide un lado de N píxeles impreso con calidad excelente. */
+    private static function cm(int $px): string
+    {
+        $ppp = max(1, Calidad::umbrales()['correcto']);
+
+        return str_replace('.', ',', rtrim(rtrim(number_format($px / $ppp * 2.54, 1, '.', ''), '0'), '.'));
     }
 
     public static function limitarRecursos(): void

@@ -1207,12 +1207,12 @@
             consejo.textContent = t.consejo_mejorar.replace(':px', Math.ceil(anchoMm / 25.4 * calidad.umbrales.correcto));
         }
         // D237: el objetivo para esta zona (en cm y en píxeles a la calidad excelente) y lo que dice el archivo.
-        var pxObjetivo = Math.ceil(anchoMm / 25.4 * calidad.umbrales.correcto) + ' × ' + Math.ceil(altoMm / 25.4 * calidad.umbrales.correcto) + ' px';
         var infoZona = zonas.filter(function (z) { return z.id === estado.zonaId; })[0];
-        objetivo.textContent = texto('ficha_objetivo', { zona: infoZona ? infoZona.nombre : '', medida: cm(anchoMm) + ' × ' + cm(altoMm) + ' cm', px: pxObjetivo, ppp: calidad.umbrales.correcto });
-        delArchivo.textContent = texto('ficha_archivo', { px: estado.logoPx.w + ' × ' + estado.logoPx.h + ' px' })
+        objetivo.textContent = texto('ficha_objetivo', { zona: infoZona ? infoZona.nombre : '', medida: cm(anchoMm) + ' × ' + cm(altoMm) + ' cm', ppp: calidad.umbrales.correcto });
+        // D242: lo que da de sí su imagen, en cm (hasta dónde sale nítida), no en píxeles.
+        delArchivo.textContent = texto('ficha_archivo', { medida: cm(estado.logoPx.w / calidad.umbrales.correcto * 25.4) + ' × ' + cm(estado.logoPx.h / calidad.umbrales.correcto * 25.4) + ' cm' })
             + (estado.pppArchivo ? ' ' + texto('ficha_declara', { ppp: estado.pppArchivo, medida: cm(estado.logoPx.w / estado.pppArchivo * 25.4) + ' × ' + cm(estado.logoPx.h / estado.pppArchivo * 25.4) + ' cm' }) : '');
-        mostrarMejoraIa(n, cm(anchoMm) + ' × ' + cm(altoMm) + ' cm (' + pxObjetivo + ', ' + calidad.umbrales.correcto + ' ppp)');
+        mostrarMejoraIa(n, cm(anchoMm) + ' × ' + cm(altoMm) + ' cm a ' + calidad.umbrales.correcto + ' ppp');
         // D229: aviso sobre la prenda y botón para dejarlo al mayor tamaño nítido.
         avisoPixelado(n);
         var nitida = escalaNitida(zona, disenoPara(color));
@@ -1240,18 +1240,22 @@
         var info = zonas.filter(function (z) { return z.id === zona.id; })[0];
         var u = calidad.umbrales.correcto, t = calidad.textos;
         if (n === null) { anchoMm = zona.ancho_mm; altoMm = zona.alto_mm; }
-        var px = Math.ceil(anchoMm / 25.4 * u) + ' × ' + Math.ceil(altoMm / 25.4 * u) + ' px';
+        // D242: con el cliente, siempre en cm: el tamaño al que preparar el diseño y hasta cuánto sale nítida su imagen.
+        var medida = cm(anchoMm) + ' × ' + cm(altoMm) + ' cm';
         var conPixeles = n !== null && estado.modo === 'logo' && estado.logoPx && estado.logoTipo !== 'vectorial';
+        var maximo = conPixeles ? cm(estado.logoPx.w / u * 25.4) + ' × ' + cm(estado.logoPx.h / u * 25.4) + ' cm' : '';
         guia.hidden = false;
         guia.dataset.nivel = n || '';
         document.getElementById('guia-zona').textContent = info ? info.nombre : '';
         document.getElementById('guia-medida-etiqueta').textContent = n === null ? textos.guia_maximo_zona : textos.guia_se_imprime;
-        document.getElementById('guia-medida').textContent = cm(anchoMm) + ' × ' + cm(altoMm) + ' cm';
-        document.getElementById('guia-necesitas').textContent = px;
-        document.getElementById('guia-tienes').textContent = n === null ? textos.guia_sin_subir : (conPixeles ? estado.logoPx.w + ' × ' + estado.logoPx.h + ' px' : '✓');
+        document.getElementById('guia-medida').textContent = medida;
+        document.getElementById('guia-necesitas').textContent = medida + ' · ' + u + ' ppp';
+        document.getElementById('guia-tienes').textContent = n === null ? textos.guia_sin_subir : (conPixeles ? maximo : '✓');
+        guia.querySelector('.guia-tuya').hidden = n === null; // antes de subir, solo cómo prepararlo
         document.getElementById('guia-estado').textContent = n === null ? '' : t['nivel_' + n];
-        document.getElementById('guia-consejo').textContent = n === null ? texto('guia_antes', { px: px, ppp: u })
-            : (mensajeFijo || (n === 'baja' ? texto('guia_pequeno', { px: px }) : (n === 'justa' ? texto('guia_justo', { px: px }) : t['mensaje_' + n])));
+        var consejos = { baja: 'guia_pequeno', justa: 'guia_justo', buena: 'guia_buena' };
+        document.getElementById('guia-consejo').textContent = n === null ? texto('guia_antes', { medida: medida, ppp: u })
+            : (mensajeFijo || (consejos[n] && conPixeles ? texto(consejos[n], { medida: medida, maximo: maximo }) : t['mensaje_' + n]));
         document.getElementById('guia-corto').textContent = n === 'baja' ? textos.guia_pequeno_corto : (n === 'justa' ? textos.guia_justo_corto : '');
         var reduce = document.getElementById('guia-reduce');
         reduce.hidden = !nitida;
