@@ -28,6 +28,7 @@
         'guia_antes' => __('tienda.guia_antes'),
         'guia_pequeno' => __('tienda.guia_pequeno'),
         'guia_justo' => __('tienda.guia_justo'),
+        'guia_buena' => __('tienda.guia_buena'),
         'guia_pequeno_corto' => __('tienda.guia_pequeno_corto'),
         'guia_justo_corto' => __('tienda.guia_justo_corto'),
         'medida_zona' => __('tienda.medida_zona'),
