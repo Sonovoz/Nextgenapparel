@@ -69,6 +69,16 @@ class PedidoResource extends Resource
         return $n > 0 ? (string) $n : null;
     }
 
+    /**
+     * D240: pedidos pagados que nadie ha empezado a preparar (siguen en «Pagado»), para el aviso de arriba del panel.
+     *
+     * @return \Illuminate\Support\Collection<int, Pedido>
+     */
+    public static function nuevos(int $limite = 5): \Illuminate\Support\Collection
+    {
+        return rescue(fn () => Pedido::where('estado', EstadoPedido::Pagado->value)->latest('id')->limit($limite)->get(), collect(), report: false);
+    }
+
     public static function getNavigationBadgeTooltip(): ?string
     {
         return 'Pagados, con el diseño por revisar o con una petición de cancelación';
@@ -90,21 +100,20 @@ class PedidoResource extends Resource
                 TextColumn::make('numero')->label('Pedido')->searchable()->weight('bold')
                     ->description(fn (Pedido $r) => $r->nombre_fiscal),
                 TextColumn::make('created_at')->label('Fecha')->dateTime('d/m/Y H:i')->sortable(),
-                TextColumn::make('correo')->label('Correo')->searchable()->toggleable(),
-                TextColumn::make('cliente')->label('Cliente')->badge()
-                    ->state(fn (Pedido $r) => match (true) {
-                        ! $r->correoConfirmado() => 'Correo sin confirmar',
+                // D240: correo y tipo de cliente en una columna, para que la tabla quepa sin desplazarse.
+                TextColumn::make('correo')->label('Cliente')->searchable()->wrap()
+                    ->description(fn (Pedido $r) => match (true) {
+                        ! $r->correoConfirmado() => '⚠ Correo sin confirmar',
                         $r->cliente?->user_id !== null => 'Con cuenta',
                         default => 'Invitado',
-                    })
-                    ->color(fn (string $state) => $state === 'Correo sin confirmar' ? 'warning' : 'gray'),
+                    }),
                 TextColumn::make('destino')->label('Destino')->toggleable()
                     ->state(fn (Pedido $r) => trim(($r->direccion_envio['localidad'] ?? '').' · '.($r->direccion_envio['pais'] ?? ''), ' ·')),
                 TextColumn::make('total')->label('Total')->alignEnd()->sortable()->formatStateUsing(fn (int $state) => Formato::euros($state, 'es')),
                 TextColumn::make('estado')->label('Estado')->badge()
                     ->formatStateUsing(fn (EstadoPedido $state) => $state->etiqueta())->color(fn (EstadoPedido $state) => $state->color())
                     ->description(fn (Pedido $r) => $r->cancelacion_solicitada_en !== null && in_array($r->estado, CancelarPorCliente::CON_PETICION, true) ? 'Pide cancelar' : null),
-                TextColumn::make('fecha_estimada_entrega')->label('Entrega estimada')->date('d/m/Y')->sortable()->placeholder('—'),
+                TextColumn::make('fecha_estimada_entrega')->label('Entrega')->date('d/m/Y')->sortable()->placeholder('—'),
                 IconColumn::make('maquetas')->label('Maquetas')->boolean()->toggleable(isToggledHiddenByDefault: true)
                     ->state(fn (Pedido $r) => $r->lineas()->whereHas('maquetas')->exists()),
             ])
