@@ -211,7 +211,7 @@
     <section class="arena" aria-labelledby="titular">
         <div class="arena-fondo" aria-hidden="true">
             <span class="arena-halo uno"></span><span class="arena-halo dos"></span>
-            <span class="arena-suelo"></span>
+            <span class="arena-suelo"></span><span class="arena-horizonte"></span>
             {{-- Ondas de luz que se mecen despacio, como el fondo de un menú de consola (sin símbolos de ninguna marca). --}}
             <div class="arena-ondas">
                 <svg class="onda onda-a" viewBox="0 0 2880 400" preserveAspectRatio="none" focusable="false"><path d="M0 200 C240 120 480 120 720 200 S1200 280 1440 200 S1920 120 2160 200 S2640 280 2880 200"/><path d="M0 206 C240 121 480 121 720 206 S1200 291 1440 206 S1920 121 2160 206 S2640 291 2880 206"/><path d="M0 212 C240 122 480 122 720 212 S1200 302 1440 212 S1920 122 2160 212 S2640 302 2880 212"/><path d="M0 220 C240 124 480 124 720 220 S1200 316 1440 220 S1920 124 2160 220 S2640 316 2880 220"/></svg>

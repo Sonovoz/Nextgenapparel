@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 14/11 | **Portada: suelo de la cabecera** sin el parpadeo de líneas: rejilla quieta y tenue y, en el borde del escenario, una línea de luz que respira con un reflejo que la recorre despacio. | `portada-suelo` | — |
 | 14/11 | **Corrección**: `storage/framework/.gitignore` vuelve a como estaba (la carpeta de latidos se ignora desde el `.gitignore` principal) para que el «Git Pull» del panel del servidor no se pare por ese archivo. | `gitignore-latidos` | — |
 | 14/11 | **Corrección**: los latidos de las tareas de limpieza (`storage/framework/latidos`) se habían subido al repositorio y bloqueaban el `git pull` del servidor; fuera del repositorio e ignorados. | `quitar-latidos` | — |
 | 14/11 | **Orden de los pedidos**: primero lo que hay que preparar y al final lo enviado y entregado. | `pedidos-orden` | D243 |
