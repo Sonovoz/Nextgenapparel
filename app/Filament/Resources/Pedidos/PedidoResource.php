@@ -157,8 +157,9 @@ class PedidoResource extends Resource
         $euros = fn (?int $state) => Formato::euros((int) $state, 'es');
 
         return $schema->columns(3)->components([
-            Section::make('Artículos')->columnSpan(2)->schema([
-                ViewEntry::make('lineas')->hiddenLabel()->view('filament.pedidos.lineas'),
+            // D241: qué hay que preparar, de un vistazo: prendas × color × talla.
+            Section::make('Manifiesto de prendas')->columnSpan(2)->schema([
+                ViewEntry::make('manifiesto')->hiddenLabel()->view('filament.pedidos.manifiesto'),
             ]),
             Section::make('Estado')->columnSpan(1)->schema([
                 TextEntry::make('estado')->label('Estado')->badge()
@@ -196,6 +197,9 @@ class PedidoResource extends Resource
             ]),
             Section::make('Notas del pedido')->columnSpan(1)->schema([
                 ViewEntry::make('notas')->hiddenLabel()->view('filament.pedidos.notas'),
+            ]),
+            Section::make('Artículos y referencias de impresión')->columnSpanFull()->schema([
+                ViewEntry::make('lineas')->hiddenLabel()->view('filament.pedidos.lineas'),
             ]),
         ]);
     }
