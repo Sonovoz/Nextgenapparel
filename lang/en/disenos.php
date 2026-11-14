@@ -10,7 +10,7 @@ return [
     'mensaje_justa' => "Careful, your design isn't at the quality you're after: it may look slightly blurry or jagged.",
     'mensaje_baja' => "At this size it will look blurry or pixelated. We recommend you don't continue without improving it.",
     'consejo' => 'Up to :medida wide it prints at excellent quality.',
-    'consejo_mejorar' => 'Make it smaller or upload a larger version: for this size you need about :px px wide.',
+    'consejo_mejorar' => 'Make it smaller or upload a bigger version.', // D237: los píxeles necesarios van en la ficha de impresión
     'ppp' => ':ppp dpi at this size',
     'vectorial' => 'Perfect quality at any size.',
     'texto' => 'Text: prints sharp at any size.',

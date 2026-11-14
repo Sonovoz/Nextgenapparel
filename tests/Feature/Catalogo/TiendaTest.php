@@ -287,6 +287,10 @@ class TiendaTest extends TestCase
         $textos = json_decode(html_entity_decode($coincidencia[1] ?? '{}'), true);
         $this->assertStringContainsString('se verá pixelado', (string) ($textos['pixelado_aviso'] ?? ''));
         $this->assertSame('Ajustar el tamaño', $textos['pixelado_ajustar'] ?? null);
+        // D237: ficha de impresión: objetivo de la zona en cm y px, y los ppp que declara el archivo.
+        $this->assertStringContainsString(':px (:ppp ppp a ese tamaño)', (string) ($textos['ficha_objetivo'] ?? ''));
+        $this->assertStringContainsString('lo que cuenta son sus píxeles', (string) ($textos['ficha_declara'] ?? ''));
+        $this->assertStringContainsString('id="calidad-objetivo"', $html);
     }
 
     public function test_los_textos_de_la_tienda_existen_en_los_dos_idiomas(): void
