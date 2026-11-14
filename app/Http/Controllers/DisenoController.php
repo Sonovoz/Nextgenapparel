@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Dominio\Asistente\ConsejoDiseno;
 use App\Dominio\Disenos\AnalizadorPng;
 use App\Dominio\Disenos\DisenoNoValido;
 use App\Dominio\Disenos\Dueno;
 use App\Dominio\Disenos\GuardarDiseno;
 use App\Models\Diseno;
+use App\Models\Prenda;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -60,6 +62,29 @@ class DisenoController
         abort_if($dueno === null, 404);
 
         return $dueno->filtrar(Diseno::query())->where('uuid', $uuid)->firstOrFail();
+    }
+
+    /**
+     * D246: el consejo de la IA para este diseño en esta prenda (zona recomendada y aviso de calidad por zona), solo
+     * para su dueño. Sin IA (apagada, sin clave, sin presupuesto o caída), 204: el configurador sigue igual.
+     */
+    public function consejo(Request $request, ConsejoDiseno $consejo, string $idioma, string $diseno): Response
+    {
+        $diseno = $this->delVisitante($request, $diseno);
+        $prenda = Prenda::find((int) $request->input('prenda'));
+        abort_if($prenda === null, 404);
+        $r = $consejo($diseno, $prenda, $idioma);
+        if ($r === null || ($r['zona'] === null && $r['consejos'] === [])) {
+            return response()->noContent();
+        }
+        $zonas = collect(ConsejoDiseno::medidas($diseno, $prenda, $idioma))->keyBy('id');
+
+        return response()->json([
+            'zona' => $r['zona'],
+            'zona_nombre' => $r['zona'] !== null ? $zonas[$r['zona']]['nombre'] ?? null : null,
+            'motivo' => $r['motivo'],
+            'consejos' => (object) $r['consejos'],
+        ]);
     }
 
     /** Miniatura de un diseño, solo para su dueño. A los demás les responde 404, sin desvelar que existe. */

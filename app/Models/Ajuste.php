@@ -69,6 +69,9 @@ class Ajuste extends Model
         'ia.limite_mensual' => 20,
         'ia.precio_entrada' => 15,
         'ia.precio_salida' => 60,
+        // D246: consejo de la IA al subir un diseño (zona recomendada y aviso de calidad); máximo por visitante y día.
+        'ia.consejo_disenos' => true,
+        'ia.consejos_dia' => 20,
         // v2 (D189): carritos abandonados. Desactivado hasta que el equipo lo active; horas desde el último cambio y cupón opcional.
         'carritos.avisos_activos' => false,
         'carritos.secuencia' => [['horas' => 1, 'cupon' => null], ['horas' => 24, 'cupon' => null], ['horas' => 72, 'cupon' => null]],

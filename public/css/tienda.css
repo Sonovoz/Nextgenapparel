@@ -1385,6 +1385,11 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .guia-impresion[data-nivel="justa"] .guia-estado::before, .guia-impresion[data-nivel="baja"] .guia-estado::before { content: "⚠ "; }
 .guia-impresion[data-nivel="correcta"] .guia-estado::before, .guia-impresion[data-nivel="buena"] .guia-estado::before { content: "✓ "; }
 .guia-impresion[data-nivel="baja"] .guia-consejo, .guia-impresion[data-nivel="justa"] .guia-consejo { font-size: 13px; font-weight: 500; color: #fff; }
+.guia-ia { margin-top: 2px; padding: 10px 12px; border-radius: 10px; background: linear-gradient(135deg, rgba(142, 160, 255, .16), rgba(142, 160, 255, .05)); border: 1px solid rgba(142, 160, 255, .3); display: flex; flex-direction: column; gap: 6px; }
+.guia-ia[hidden] { display: none; }
+.guia-ia p { margin: 0; color: #E4E2EE; }
+.guia-ia p:empty { display: none; }
+.guia-ia .guia-ia-titulo { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: #B9C4FF; }
 /* En el móvil la guía ya lo dice: sin la píldora repetida sobre la prenda. */
 .estudio.activo .marco-visor:has(.guia-impresion:not([hidden])) .aviso-pixelado { display: none; }
 /* Móvil: compacta, al pie de la prenda; el consejo en su versión corta. */
