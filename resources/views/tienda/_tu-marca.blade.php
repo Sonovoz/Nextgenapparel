@@ -115,6 +115,9 @@
         <div class="calidad-cabecera"><strong id="calidad-etiqueta">{{ __('tienda.calidad_sin_diseno') }}</strong><span class="claro" id="calidad-ppp"></span></div>
         <div class="calidad-barra" aria-hidden="true"><span id="calidad-relleno"></span></div>
         <p id="calidad-mensaje"></p>
+        {{-- D237: ficha de impresión: objetivo de la zona en cm y px, y lo que dice el archivo. --}}
+        <p class="calidad-objetivo" id="calidad-objetivo"></p>
+        <p class="claro" id="calidad-archivo"></p>
         <p class="claro" id="calidad-consejo"></p>
         {{-- D229: si se va a ver pixelado, un botón lo deja al mayor tamaño que se imprime nítido. --}}
         <button type="button" class="boton-pildora calidad-ajustar" id="calidad-ajustar" hidden></button>

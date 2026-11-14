@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Dominio\Facturacion\PdfFactura;
+use App\Dominio\Pedidos\ManifiestoPedido;
+use App\Dominio\Produccion\ArchivoTamanoReal;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Factura;
 use App\Models\FotoIncidencia;
@@ -39,6 +41,34 @@ class ArchivoPedidoController
             'Content-Type' => 'image/png',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    /** D238: el diseño recortado y a la medida exacta en cm del pedido, para imprimir sin escalar. */
+    public function tamanoReal(Pedido $pedido, ImpresionPedido $impresion): Response
+    {
+        $this->comprobarAcceso($pedido);
+        $linea = $impresion->linea;
+        abort_unless($linea !== null && $linea->pedido_id === $pedido->id, 404);
+        $png = ArchivoTamanoReal::png($impresion);
+        abort_if($png === null, 404);
+
+        Actividad::apuntar('pedidos', 'Diseño a tamaño real descargado', $pedido);
+        $numero = $pedido->lineas()->pluck('id')->search($linea->id);
+
+        return response($png, 200, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'attachment; filename="'.ArchivoTamanoReal::nombre($pedido, (int) $numero + 1, $impresion).'"',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    /** D241: ZIP con los diseños sin modificar, las maquetas y el PDF del manifiesto (con los datos del cliente). */
+    public function manifiesto(Pedido $pedido): Response
+    {
+        $this->comprobarAcceso($pedido);
+        Actividad::apuntar('pedidos', 'Manifiesto del pedido descargado', $pedido);
+
+        return response()->download(ManifiestoPedido::zip($pedido), $pedido->numero.'_manifiesto.zip', ['Content-Type' => 'application/zip'])->deleteFileAfterSend();
     }
 
     public function factura(Pedido $pedido, Factura $factura): Response

@@ -6,6 +6,14 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 14/11 | **Corrección**: los latidos de las tareas de limpieza (`storage/framework/latidos`) se habían subido al repositorio y bloqueaban el `git pull` del servidor; fuera del repositorio e ignorados. | `quitar-latidos` | — |
+| 14/11 | **Orden de los pedidos**: primero lo que hay que preparar y al final lo enviado y entregado. | `pedidos-orden` | D243 |
+| 14/11 | **Guía de impresión en cm**: sin píxeles para el cliente; «Prepara tu diseño a 9 × 9 cm · 300 ppp» y «Tu imagen sale nítida hasta 3,1 × 3,1 cm». | `guia-en-cm` | D242 |
+| 14/11 | **Pedidos**: aviso de pedidos nuevos pagados arriba del panel; listado a todo el ancho con pestañas Pagados / Pendientes de pago / Cancelados. | `pedidos-pestanas` | D240 |
+| 14/11 | **Manifiesto de pedido**: ficha con prendas × color × talla y referencias de impresión; descarga ZIP con diseños sin modificar, maquetas y PDF con cliente y manifiesto. | `manifiesto-pedido` | D241 |
+| 14/11 | **Fotos del mismo tamaño**: cada maqueta se iguala al tamaño y encuadre de la del blanco, al subirla o con «Igualar tamaño al blanco», y toma sus zonas. | `fotos-mismo-tamano` | D239 |
+| 14/11 | **Archivo a tamaño real**: diseño recortado y con resolución que mide los cm del pedido, en el paquete de producción, la ficha del pedido y la orden de trabajo. | `archivo-tamano-real` | D238 |
+| 14/11 | **Ficha de impresión**: objetivo de cada zona en cm y px a 300 ppp, píxeles y ppp declarados del archivo explicados, y el objetivo pasado a «Mejorar con IA»; guía de impresión al lado de la prenda que orienta antes de subir y habla claro si el diseño es pequeño. | `ficha-impresion` | D237 |
 | 13/11 | **Actualizaciones numeradas**: el backend dice qué actualización tiene instalada (pie y Herramientas → Actualizaciones), contadas desde este historial. | `actualizaciones-numeradas` | D236 |
 | 13/11 | **Registro de correos**: cola, envío, error del SMTP y no enviados, en Herramientas; salud: correos atascados o fallidos. | `registro-correos` | D235 |
 | 13/11 | **Botón «Siguiente» destacado** en el configurador: degradado con brillo, halo que respira y flecha que avanza. | `boton-siguiente-vivo` | — |

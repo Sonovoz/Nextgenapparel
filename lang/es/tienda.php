@@ -192,4 +192,22 @@ return [
     'pixelado_aviso' => ':zona: a :medida tu archivo solo da :ppp ppp y se verá pixelado o borroso. Redúcelo a :nitido para que salga nítido, o sube una versión más grande. Si quieres seguir igualmente, vuelve a pulsar «Añadir a mi pedido».',
     'pixelado_aviso_sin_nitido' => ':zona: a :medida tu archivo solo da :ppp ppp y se verá pixelado o borroso, incluso al tamaño más pequeño. Sube una versión más grande. Si quieres seguir igualmente, vuelve a pulsar «Añadir a mi pedido».',
     'pixelado_ajustar' => 'Ajustar el tamaño',
+    // D237: ficha de impresión.
+    'ficha_objetivo' => 'Vas a imprimir en :zona a :medida. Para un resultado óptimo, prepara tu diseño a ese tamaño a :ppp ppp.',
+    'ficha_archivo' => 'Con su resolución, tu imagen sale nítida hasta :medida.',
+    'ficha_declara' => 'Tu archivo dice :ppp ppp, así que tu programa lo pensaba para :medida; da igual: lo que cuenta es el tamaño al que lo imprimimos.',
+    // D237: guía de impresión junto a la prenda.
+    'guia_titulo' => 'Guía de impresión',
+    'guia_se_imprime' => 'Se imprime a',
+    'guia_maximo_zona' => 'Tamaño máximo de la zona',
+    'guia_necesitas' => 'Prepara tu diseño a',
+    'guia_tienes' => 'Tu imagen sale nítida hasta',
+    'guia_sin_subir' => 'Aún sin subir',
+    'guia_antes' => 'En tu programa de edición, prepara tu diseño a :medida a :ppp ppp, mejor en PNG con fondo transparente.',
+    'guia_pequeno' => 'Haz más grande tu diseño en tu programa de edición: es muy pequeño para imprimir a :medida. Así solo sale nítido hasta :maximo.',
+    'guia_justo' => 'Tu diseño se queda algo corto para :medida: sale nítido hasta :maximo. Si puedes, hazlo más grande en tu programa de edición.',
+    'guia_buena' => 'Se imprimirá bien. Para la máxima nitidez, déjalo en :maximo o hazlo más grande en tu programa de edición.',
+    'guia_pequeno_corto' => 'Haz más grande tu diseño en tu programa de edición: es muy pequeño para imprimir.',
+    'guia_justo_corto' => 'Tu diseño se queda algo corto: si puedes, hazlo más grande en tu programa de edición.',
+    'guia_o_reduce' => 'O redúcelo aquí:',
 ];

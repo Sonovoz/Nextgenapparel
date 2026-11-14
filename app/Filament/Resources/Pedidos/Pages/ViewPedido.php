@@ -38,6 +38,9 @@ class ViewPedido extends ViewRecord
         $pedido = $this->getRecord();
 
         return [
+            // D241: ZIP con los diseños sin modificar y el PDF con el cliente y el manifiesto de prendas.
+            Action::make('manifiesto')->label('Descargar manifiesto de pedido')->icon(Heroicon::OutlinedArrowDownTray)->color('success')
+                ->url(fn () => route('backend.pedidos.manifiesto', ['pedido' => $this->getRecord()->getAttribute('uuid')])),
             Action::make('estado')->label('Cambiar estado')->icon(Heroicon::OutlinedArrowPath)
                 ->visible(fn () => $pedido->estado->siguientes() !== [])
                 ->schema([

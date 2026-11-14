@@ -71,6 +71,39 @@ class BackendPedidosTest extends TestCase
         Livewire::test(ListPedidos::class)->assertCanSeeTableRecords([$this->pedido])->assertSee('Pagado');
     }
 
+    /** D240: los pagados, en la primera pestaña; pendientes de pago y cancelados, aparte. */
+    public function test_el_listado_separa_pagados_pendientes_y_cancelados(): void
+    {
+        $pendiente = Pedido::factory()->create(['estado' => E::PendientePago, 'numero' => 'PED-0043']);
+        $cancelado = Pedido::factory()->create(['estado' => E::Cancelado, 'numero' => 'PED-0044']);
+        $enviado = Pedido::factory()->create(['estado' => E::Enviado, 'numero' => 'PED-0045']);
+        $this->actingAs($this->usuarioConRol(Rol::GestorTienda));
+
+        $entregado = Pedido::factory()->create(['estado' => E::Entregado, 'numero' => 'PED-0047']);
+        $enProduccion = Pedido::factory()->create(['estado' => E::EnProduccion, 'numero' => 'PED-0048']);
+        $nuevo = Pedido::factory()->create(['estado' => E::Pagado, 'numero' => 'PED-0049']);
+
+        // D243: primero lo que hay que preparar (pagados, del más nuevo al más antiguo, y en producción); al final, lo enviado y entregado.
+        Livewire::test(ListPedidos::class)->assertSet('activeTab', 'pagados')
+            ->assertCanSeeTableRecords([$nuevo, $this->pedido, $enProduccion, $enviado, $entregado], inOrder: true)
+            ->assertCanSeeTableRecords([$this->pedido, $enviado])->assertCanNotSeeTableRecords([$pendiente, $cancelado])
+            ->set('activeTab', 'pendientes')->assertCanSeeTableRecords([$pendiente])->assertCanNotSeeTableRecords([$this->pedido, $cancelado])
+            ->set('activeTab', 'cancelados')->assertCanSeeTableRecords([$cancelado])->assertCanNotSeeTableRecords([$this->pedido, $pendiente]);
+    }
+
+    /** D240: aviso arriba del panel mientras haya pedidos pagados sin empezar; Producción no lo ve. */
+    public function test_el_panel_avisa_de_los_pedidos_nuevos_pagados(): void
+    {
+        $this->actingAs($this->usuarioConRol(Rol::GestorTienda));
+        $this->get(PedidoResource::getUrl('index'))->assertOk()->assertSee('Nuevo pedido pagado: PED-0042')->assertSee('Ver pedido');
+
+        Pedido::factory()->create(['estado' => E::Pagado, 'numero' => 'PED-0046']);
+        $this->get(PedidoResource::getUrl('index'))->assertSee('2 pedidos nuevos pagados')->assertSee('PED-0046, PED-0042');
+
+        Pedido::query()->update(['estado' => E::EnProduccion->value]);
+        $this->get(PedidoResource::getUrl('index'))->assertDontSee('id="aviso-pedidos-nuevos"', false);
+    }
+
     public function test_cambiar_el_estado_desde_la_ficha_queda_en_las_notas(): void
     {
         $this->actingAs($quien = $this->usuarioConRol(Rol::GestorTienda));
