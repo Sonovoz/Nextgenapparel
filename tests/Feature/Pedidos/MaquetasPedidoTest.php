@@ -8,6 +8,8 @@ use App\Dominio\Documentos\FotosFactura;
 use App\Dominio\Pedidos\EstadoPedido;
 use App\Dominio\Pedidos\GenerarMaquetas;
 use App\Dominio\Presupuestos\MaquetasPresupuesto;
+use App\Dominio\Sistema\Acceso\Rol;
+use App\Filament\Resources\Pedidos\Pages\ViewPedido;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\PresupuestoController;
 use App\Models\Color;
@@ -21,11 +23,13 @@ use App\Models\Pedido;
 use App\Models\Prenda;
 use App\Models\Presupuesto;
 use App\Models\ZonaImpresion;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Imagick;
 use ImagickPixel;
+use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -117,6 +121,38 @@ class MaquetasPedidoTest extends TestCase
         $this->assertLessThan(0.15, max($g, $b));
         $this->assertSame([0.5, 0.5, 0.5], $this->pixel(250, 260)); // debajo del logo: la tela, sin tocar
         $this->assertSame([0.5, 0.5, 0.5], $this->pixel(180, 190)); // a su lado (el margen transparente no se imprime)
+    }
+
+    /**
+     * D244: el rectángulo de la zona en la foto (200 × 300 px) no tiene la proporción de la zona en mm (280 × 380):
+     * el diseño de 14 × 10 cm conserva su proporción (100 × 71 px), no se estira al alto de la caja (100 × 79 px).
+     */
+    public function test_el_diseno_no_se_deforma_si_la_zona_de_la_foto_tiene_otra_proporcion(): void
+    {
+        $logo = new Imagick;
+        $logo->newImage(1400, 1000, new ImagickPixel('#E00000'));
+        $logo->setImageFormat('png');
+        Storage::disk(Pedido::DISCO)->put("{$this->pedido->uuid}/logo.png", $logo->getImageBlob());
+        $this->impresion(['archivo' => "{$this->pedido->uuid}/logo.png", 'util_x' => 0, 'util_y' => 0, 'util_ancho_px' => 1400, 'util_alto_px' => 1000]);
+
+        app(GenerarMaquetas::class)($this->pedido);
+
+        $this->assertGreaterThan(0.6, $this->pixel(250, 216)[0]);           // aún dentro del diseño
+        $this->assertSame([0.5, 0.5, 0.5], $this->pixel(250, 226));        // antes se estiraba hasta 229
+        $this->assertGreaterThan(0.6, $this->pixel(203, 190)[0]);           // de lado a lado, 100 px
+        $this->assertSame([0.5, 0.5, 0.5], $this->pixel(196, 190));
+    }
+
+    /** D244: desde la ficha del pedido se rehacen sus maquetas. */
+    public function test_la_ficha_del_pedido_rehace_las_maquetas(): void
+    {
+        $this->impresion(['texto' => 'NG', 'fuente' => 0, 'tinta' => 'auto']);
+        Filament::setCurrentPanel('admin');
+        $this->actingAs($this->usuarioConRol(Rol::GestorTienda));
+
+        Livewire::test(ViewPedido::class, ['record' => $this->pedido->getRouteKey()])
+            ->callAction('maquetas')->assertNotified('1 maqueta rehecha');
+        $this->assertSame(1, MaquetaPedido::count());
     }
 
     /** Tinta automática: blanca en una prenda oscura y negra en una clara, como en el visor. */

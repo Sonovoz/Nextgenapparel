@@ -125,7 +125,7 @@ final class GenerarMaquetas
 
                 continue;
             }
-            $r = Maqueta::rectangulo($zona, $rect, $cara, $capa->anchoMm, $capa->altoMm, $capa->desdeCuelloMm, $capa->desdeCentroMm);
+            $r = Maqueta::rectangulo($zona, $rect, $cara, $capa->anchoMm, $capa->altoMm, $capa->desdeCuelloMm, $capa->desdeCentroMm, $ancho / max(1, $alto));
             $x = (int) round($r['left'] / 100 * $ancho);
             $y = (int) round($r['top'] / 100 * $alto);
             $w = max(1, (int) round($r['width'] / 100 * $ancho));

@@ -6,6 +6,7 @@ use App\Dominio\Pedidos\CambiarEstado;
 use App\Dominio\Pedidos\CambioNoValido;
 use App\Dominio\Pedidos\CorreoPedido;
 use App\Dominio\Pedidos\EstadoPedido;
+use App\Dominio\Pedidos\GenerarMaquetas;
 use App\Filament\Resources\Pedidos\PedidoResource;
 use App\Models\Pedido;
 use App\Models\Transportista;
@@ -41,6 +42,15 @@ class ViewPedido extends ViewRecord
             // D241: ZIP con los diseños sin modificar y el PDF con el cliente y el manifiesto de prendas.
             Action::make('manifiesto')->label('Descargar manifiesto de pedido')->icon(Heroicon::OutlinedArrowDownTray)->color('success')
                 ->url(fn () => route('backend.pedidos.manifiesto', ['pedido' => $this->getRecord()->getAttribute('uuid')])),
+            // D244: rehace las maquetas con los diseños del pedido (p. ej., tras corregir cómo se componen).
+            Action::make('maquetas')->label('Rehacer maquetas')->icon(Heroicon::OutlinedPhoto)->color('gray')
+                ->requiresConfirmation()->modalDescription('Se vuelven a componer las maquetas de este pedido con sus diseños y las fotos actuales de las prendas.')
+                ->action(function () use ($pedido): void {
+                    $hechas = app(GenerarMaquetas::class)($pedido);
+                    $hechas > 0
+                        ? Notification::make()->success()->title($hechas === 1 ? '1 maqueta rehecha' : "{$hechas} maquetas rehechas")->send()
+                        : Notification::make()->warning()->title('No se ha podido rehacer ninguna maqueta')->body('Revisa que la prenda tenga foto de maqueta de ese color y cara, y que los diseños no se hayan borrado (90 días hábiles).')->send();
+                }),
             Action::make('estado')->label('Cambiar estado')->icon(Heroicon::OutlinedArrowPath)
                 ->visible(fn () => $pedido->estado->siguientes() !== [])
                 ->schema([
