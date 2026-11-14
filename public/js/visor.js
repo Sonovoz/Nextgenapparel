@@ -412,6 +412,22 @@
         datos.zonas.forEach(function (zona) {
             if (!disenoValido(estado.disenos[zona.id])) return;
             var activa = zona.id === estado.zonaId;
+            var ajZona = estado.ajustes[zona.id];
+            if (activa && opciones.movible && ajZona && ajZona.deseado) {
+                // D248: el contorno del tamaño que quería, para que se vea lo que se pierde al reducir.
+                var gq = conDiseno(zona.id, function () {
+                    var antes = ajZona.escala;
+                    ajZona.escala = ajZona.deseado;
+                    var r = geometria(disenoPara(color), zona);
+                    ajZona.escala = antes;
+                    return r;
+                });
+                var fantasma = el('div', 'diseno-fantasma');
+                fantasma.style.cssText = 'left:' + (zona.x + gq.x * zona.ancho) + '%;top:' + (zona.y + gq.y * zona.alto) + '%;width:' + (gq.w * zona.ancho) + '%;height:' + (gq.h * zona.alto) + '%';
+                var medidaQ = conDiseno(zona.id, function () { return medidaDeseada(zona); });
+                if (medidaQ) fantasma.appendChild(el('span', '', texto('deseado_fantasma', { medida: medidaQ })));
+                escena.appendChild(fantasma);
+            }
             if (activa && opciones.movible) {
                 var guia = el('div', 'zona-guia');
                 guia.style.cssText = 'left:' + zona.x + '%;top:' + zona.y + '%;width:' + zona.ancho + '%;height:' + zona.alto + '%';
@@ -1163,6 +1179,8 @@
         mostrarMejoraIa(null);
         avisoPixelado(null);
         botonNitido.hidden = true;
+        if (botonSubir) botonSubir.hidden = true;
+        limiteBarra(undefined);
         if (!zona) { actualizarGuia(null); return; }
 
         var color = colores[estado.color];
@@ -1197,7 +1215,8 @@
         var n = nivel(valor);
         document.getElementById('calidad-relleno').style.width = Math.min(100, Math.round(valor / calidad.umbrales.correcto * 100)) + '%';
         bloqueCalidad.dataset.nivel = n;
-        etiqueta.textContent = t['nivel_' + n];
+        // D248: la calidad siempre va con su tamaño («Nítido a 3 × 0,9 cm»), nunca «calidad excelente» a secas.
+        etiqueta.textContent = texto('calidad_a_' + n, { medida: cm(anchoMm) + ' × ' + cm(altoMm) + ' cm' });
         detalle.textContent = t.ppp.replace(':ppp', valor);
         mensaje.textContent = t['mensaje_' + n];
         var maximoMm = Math.min(estado.logoPx.w * 25.4 / calidad.umbrales.correcto, zona.ancho_mm);
@@ -1217,10 +1236,15 @@
         // D229: aviso sobre la prenda y botón para dejarlo al mayor tamaño nítido.
         avisoPixelado(n);
         var nitida = escalaNitida(zona, disenoPara(color));
-        if ((n === 'justa' || n === 'baja') && nitida !== null) {
-            botonNitido.hidden = false;
-            botonNitido.textContent = texto('ajustar_nitido', { medida: cm(nitida.anchoMm) + ' cm' });
+        // D248: la solución es un archivo mejor; reducir, la alternativa (enlace discreto).
+        if (n === 'justa' || n === 'baja') {
+            if (botonSubir) botonSubir.hidden = false;
+            if (nitida !== null) {
+                botonNitido.hidden = false;
+                botonNitido.textContent = texto('reducir_secundario', { medida: cm(nitida.anchoMm) + ' cm' });
+            }
         }
+        limiteBarra(nitida);
         if (estado.logoTipo === 'fondo') fondo.textContent = t.fondo;
         if (estado.logoTipo === 'fondo_blanco') fondo.textContent = t.fondo_blanco;
         actualizarGuia(n, anchoMm, altoMm, null, (n === 'justa' || n === 'baja') ? nitida : null);
@@ -1253,15 +1277,19 @@
         document.getElementById('guia-necesitas').textContent = medida + ' · ' + u + ' ppp';
         document.getElementById('guia-tienes').textContent = n === null ? textos.guia_sin_subir : (conPixeles ? maximo : '✓');
         guia.querySelector('.guia-tuya').hidden = n === null; // antes de subir, solo cómo prepararlo
-        document.getElementById('guia-estado').textContent = n === null ? '' : t['nivel_' + n];
+        document.getElementById('guia-estado').textContent = n === null ? '' : texto('calidad_a_' + n, { medida: medida });
+        var deseado = n !== null && conPixeles ? medidaDeseada(zona) : null;
+        document.getElementById('guia-deseado').textContent = deseado ? texto('guia_reducido', { medida: medida, deseado: deseado }) : '';
         var consejos = { baja: 'guia_pequeno', justa: 'guia_justo', buena: 'guia_buena' };
         document.getElementById('guia-consejo').textContent = n === null ? texto('guia_antes', { medida: medida, ppp: u })
             : (mensajeFijo || (consejos[n] && conPixeles ? texto(consejos[n], { medida: medida, maximo: maximo }) : t['mensaje_' + n]));
         document.getElementById('guia-corto').textContent = n === 'baja' ? textos.guia_pequeno_corto : (n === 'justa' ? textos.guia_justo_corto : '');
         consejoIa(n === null ? null : zona, conPixeles);
         var reduce = document.getElementById('guia-reduce');
-        reduce.hidden = !nitida;
-        if (nitida) document.getElementById('guia-ajustar').textContent = texto('ajustar_nitido', { medida: cm(nitida.anchoMm) + ' cm' });
+        reduce.hidden = !(n === 'justa' || n === 'baja') || !conPixeles;
+        var enlaceReducir = document.getElementById('guia-ajustar');
+        enlaceReducir.hidden = !nitida;
+        if (nitida) enlaceReducir.textContent = texto('reducir_secundario', { medida: cm(nitida.anchoMm) + ' cm' });
     }
     /* D246: consejo de la IA sobre el diseño (una vez por diseño): la zona donde queda mejor y su calidad en cada zona,
        con las cifras que calcula la tienda. Sin IA, el servidor responde 204 y la guía sigue igual. */
@@ -1378,12 +1406,56 @@
         conDiseno(id, function () {
             var zona = zonaActual();
             var nitida = zona ? escalaNitida(zona, disenoPara(colores[estado.color])) : null;
-            if (nitida) ajusteDe(zona.id).escala = nitida.escala;
+            if (nitida) { var antes = ajusteDe(zona.id).escala; ajusteDe(zona.id).escala = nitida.escala; anotarCambio(zona, antes); }
         });
         actualizarAjustador();
         pintar(); refrescarColeccion();
     }
     if (botonNitido) botonNitido.addEventListener('click', function () { dejarNitido(); });
+
+    /* D248: la barra de tamaño orienta, no «arregla» la calidad.
+       - El tramo verde de la barra llega hasta donde sale nítido; el rojo, desde donde no.
+       - Si el cliente reduce el diseño para que salga nítido, se recuerda el tamaño que quería (aj.deseado) y se lo
+         decimos en la guía, con su contorno en la prenda: la solución es un archivo más grande. */
+    var botonSubir = document.getElementById('calidad-subir');
+    function subirOtra() { elegirHerramienta('diseno'); entrada.click(); }
+    if (botonSubir) botonSubir.addEventListener('click', subirOtra);
+    var guiaSubir = document.getElementById('guia-subir');
+    if (guiaSubir) guiaSubir.addEventListener('click', subirOtra);
+    function limiteBarra(nitida) {
+        if (!tamano) return;
+        var texto_ = document.getElementById('limite-nitido');
+        if (nitida === undefined) { tamano.style.removeProperty('--nitido'); if (texto_) { texto_.textContent = ''; texto_.classList.remove('nunca'); } return; }
+        var min = Number(tamano.min), max = Number(tamano.max);
+        var tope = nitida === null ? 0 : Math.max(0, Math.min(100, (nitida.escala * 100 - min) / (max - min) * 100));
+        tamano.style.setProperty('--nitido', tope + '%');
+        if (!texto_) return;
+        texto_.classList.toggle('nunca', nitida === null);
+        texto_.textContent = nitida === null ? textos.nitido_nunca : (nitida.escala >= 1 ? '' : texto('nitido_hasta', { medida: cm(nitida.anchoMm) + ' cm' }));
+    }
+    function nivelCon(zona, escala) {
+        if (!estado.logoPx || estado.modo !== 'logo' || estado.logoTipo === 'vectorial') return 'correcta';
+        var aj = ajusteDe(zona.id), antes = aj.escala;
+        aj.escala = escala;
+        var g = geometriaMm(disenoPara(colores[estado.color]), zona);
+        aj.escala = antes;
+        return nivel(Math.min(ppp(estado.logoPx.w, g.w), ppp(estado.logoPx.h, g.h)));
+    }
+    function anotarCambio(zona, antes) {
+        var aj = ajusteDe(zona.id);
+        var mala = function (n) { return n === 'justa' || n === 'baja'; };
+        if (aj.escala < antes && mala(nivelCon(zona, antes)) && !mala(nivelCon(zona, aj.escala))) aj.deseado = Math.max(aj.deseado || 0, antes);
+        if (aj.deseado && aj.escala >= aj.deseado - 0.001) delete aj.deseado;
+    }
+    function medidaDeseada(zona) {
+        var aj = estado.ajustes[zona.id];
+        if (!aj || !aj.deseado) return null;
+        var antes = aj.escala;
+        aj.escala = aj.deseado;
+        var g = geometriaMm(disenoPara(colores[estado.color]), zona);
+        aj.escala = antes;
+        return cm(g.w) + ' × ' + cm(g.h) + ' cm';
+    }
 
     /** Calidad de cada zona con diseño, para avisar antes de añadir al pedido (D229). */
     function zonasPixeladas() {
@@ -1436,7 +1508,9 @@
     tamano.addEventListener('input', function () {
         var zona = zonaActual();
         if (!zona) return;
+        var antes = ajusteDe(zona.id).escala;
         ajusteDe(zona.id).escala = Number(tamano.value) / 100;
+        anotarCambio(zona, antes);
         mostrarGuia();
         actualizarAjustador();
         clearTimeout(esperaTamano);
@@ -1650,6 +1724,7 @@
         var paso = e.shiftKey ? 0.1 : 0.025;
         var tecla = e.key.toLowerCase();
         var manejado = true;
+        var escalaTecla = aj ? aj.escala : null;
         if (aj && e.key === 'ArrowLeft') aj.cx = Math.max(0, aj.cx - paso);
         else if (aj && e.key === 'ArrowRight') aj.cx = Math.min(1, aj.cx + paso);
         else if (aj && e.key === 'ArrowUp') aj.cy = Math.max(0, aj.cy - paso);
@@ -1661,6 +1736,7 @@
         else if (tecla === 'l') { alternarLupa(); return e.preventDefault(); }
         else manejado = false;
         if (!manejado) return;
+        if (aj && escalaTecla !== aj.escala && zonaActual()) anotarCambio(zonaActual(), escalaTecla);
         e.preventDefault();
         mostrarGuia();
         pintar();
