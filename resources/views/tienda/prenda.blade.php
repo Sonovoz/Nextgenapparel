@@ -19,6 +19,9 @@
         'error_archivo' => __('tienda.error_archivo'),
         'error_grande' => __('tienda.error_grande'),
         'medida_impresion' => __('tienda.medida_impresion'),
+        'ficha_objetivo' => __('tienda.ficha_objetivo'),
+        'ficha_archivo' => __('tienda.ficha_archivo'),
+        'ficha_declara' => __('tienda.ficha_declara'),
         'medida_zona' => __('tienda.medida_zona'),
         'ajustar_nitido' => __('tienda.ajustar_nitido'),
         'pixelado_lienzo' => __('tienda.pixelado_lienzo'),
@@ -146,6 +149,7 @@
         .calidad-cabecera { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
         .calidad-cabecera strong { font-size: 15px; font-weight: 600; }
         .calidad > p:empty, .calidad-cabecera span:empty { display: none; }
+        .calidad-objetivo { margin: 4px 0 0; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,.06); font-size: 13px; line-height: 1.45; }
         /* D229: tamaño de impresión grande y aviso de pixelado. */
         .medida-impresion { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border-radius: 10px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); }
         .medida-etiqueta { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: #A9A6BA; }
