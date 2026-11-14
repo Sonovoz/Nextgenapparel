@@ -160,8 +160,8 @@ return [
     'ia_aviso' => 'La IA puede cambiar detalles: revisa que el resultado sea fiel a tu diseño. Solo puedes imprimir diseños sobre los que tengas derechos.',
     // Capa «Procesando» (toda la tienda): mientras algo tarda, el cliente ve que trabajamos.
     'procesando' => 'Procesando',
-    'procesando_diseno' => 'Preparando tu diseño',
-    'procesando_diseno_detalle' => 'Lo subimos y comprobamos su calidad de impresión. Un momento.',
+    'procesando_diseno' => 'Procesando',
+    'procesando_diseno_detalle' => 'Subiendo archivos y comprobando calidad de impresión',
     'procesando_pedido' => 'Añadiendo a tu pedido',
     'procesando_pedido_detalle' => 'Guardamos tus prendas, tallas y diseños.',
     'procesando_carrito' => 'Actualizando tu pedido',
