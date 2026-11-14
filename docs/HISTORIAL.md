@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 14/11 | **Guía de impresión en cm**: sin píxeles para el cliente; «Prepara tu diseño a 9 × 9 cm · 300 ppp» y «Tu imagen sale nítida hasta 3,1 × 3,1 cm». | `guia-en-cm` | D242 |
 | 14/11 | **Pedidos**: aviso de pedidos nuevos pagados arriba del panel; listado a todo el ancho con pestañas Pagados / Pendientes de pago / Cancelados. | `pedidos-pestanas` | D240 |
 | 14/11 | **Manifiesto de pedido**: ficha con prendas × color × talla y referencias de impresión; descarga ZIP con diseños sin modificar, maquetas y PDF con cliente y manifiesto. | `manifiesto-pedido` | D241 |
 | 14/11 | **Fotos del mismo tamaño**: cada maqueta se iguala al tamaño y encuadre de la del blanco, al subirla o con «Igualar tamaño al blanco», y toma sus zonas. | `fotos-mismo-tamano` | D239 |
