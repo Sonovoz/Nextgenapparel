@@ -298,6 +298,8 @@ class TiendaTest extends TestCase
         $this->assertSame(':zona · máx. :medida', $textos['zona_maximo'] ?? null);
         // D250: la posición del diseño en cm y los botones con nombres claros.
         $this->assertStringContainsString('id="posicion-diseno"', $html);
+        // La guía «Prepara tu imagen», a mano en el estudio, junto a la subida.
+        $this->assertStringContainsString('class="enlace-guia-soltar" href="'.url('/es/prepara-tu-imagen').'"', $html);
         $this->assertSame('Se imprime a :cuello cm del cuello · :lado', $textos['posicion'] ?? null);
         $this->assertStringContainsString('Lo más arriba de la zona', $html);
         // D248: la barra orienta, no «arregla»: archivo mejor como solución, reducir como alternativa y el tamaño que quería.

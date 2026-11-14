@@ -101,4 +101,5 @@ return [
     'final_boton' => 'Crear mi colección',
 
     'enlace_guia' => '¿Cómo mejorar tu imagen? Guía fácil',
+    'enlace_soltar' => '¿No sabes qué es un PNG o cómo preparar tu imagen? Guía fácil',
 ];

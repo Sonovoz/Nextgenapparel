@@ -45,6 +45,8 @@
             <span class="nombre-logo" id="nombre-logo"></span>
         </label>
         <input type="file" id="archivo-diseno" class="oculto" accept="image/png,.png">
+        {{-- La guía, a mano desde el estudio (el menú de la web no se ve aquí). --}}
+        <a class="enlace-guia-soltar" href="{{ route('guia-imagen', ['guia' => __('guia_imagen.ruta')]) }}" target="_blank" rel="noopener">{{ __('guia_imagen.enlace_soltar') }} ↗</a>
 
         {{-- Tus diseños subidos (fase 4): se rellena desde public/js/visor.js. --}}
         <div class="biblioteca" id="biblioteca" hidden>

@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 14/11 | **La guía, a mano en el estudio**: enlace bajo la caja de subida y en la guía de impresión antes de subir (en el estudio no se ve el menú de la web). | `guia-en-estudio` | D249 |
 | 14/11 | **Colocar sin confusión**: botones «Centrar de lado a lado» y «Lo más arriba de la zona» con la posición en cm; quitar/empezar de nuevo bajo la prenda; guía en el menú. | `posicion-clara` | D250 |
 | 14/11 | **Guía «Prepara tu imagen»**: página fácil (es/en) con el porqué, el PNG, errores, paso a paso, herramientas gratis y prompts para la IA; en el pie y en el configurador. | `guia-imagen` | D249 |
 | 14/11 | **Fotos idénticas en tamaño**: al igualar al blanco, la prenda se mide sin sombras ni halos, así todos los colores quedan del mismo tamaño. | `fotos-silueta` | D247 |
