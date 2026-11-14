@@ -91,10 +91,25 @@ class PedidoResource extends Resource
             ->whereIn('estado', array_map(fn (EstadoPedido $e) => $e->value, CancelarPorCliente::CON_PETICION));
     }
 
+    /** Orden de trabajo de los pedidos (D243): el estado según lo que queda por hacer y, dentro, del más nuevo al más antiguo. */
+    public const PRIORIDAD = [
+        EstadoPedido::Pagado, EstadoPedido::DisenoEnRevision, EstadoPedido::RequiereCambios, EstadoPedido::EnProduccion,
+        EstadoPedido::PendientePago, EstadoPedido::Enviado, EstadoPedido::Entregado, EstadoPedido::Cancelado, EstadoPedido::Reembolsado,
+    ];
+
+    public static function porPrioridad(Builder $query): Builder
+    {
+        $casos = collect(self::PRIORIDAD)->map(fn (EstadoPedido $e, int $i) => "WHEN '{$e->value}' THEN {$i}")->implode(' ');
+
+        return $query->orderByRaw("CASE estado {$casos} ELSE 99 END")->orderByDesc('id');
+    }
+
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('id', 'desc')
+            // D243: primero lo que hay que hacer (pagados sin empezar, en revisión, en producción) y al final lo enviado y
+            // entregado; dentro de cada estado, el más reciente arriba. Al ordenar por una columna, manda esa columna.
+            ->defaultSort(fn (Builder $query): Builder => self::porPrioridad($query))
             ->emptyStateHeading('Todavía no hay pedidos')
             ->columns([
                 TextColumn::make('numero')->label('Pedido')->searchable()->weight('bold')
