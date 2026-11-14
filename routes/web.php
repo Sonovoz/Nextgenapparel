@@ -58,6 +58,7 @@ Route::prefix('admin/archivos-disenos/{diseno}')->group(function () {
 // Backend: archivos privados de los pedidos (paso 6.3): maquetas y originales, solo con permiso.
 Route::prefix('admin/archivos-pedidos/{pedido}')->group(function () {
     Route::get('/maquetas/{maqueta}', [ArchivoPedidoController::class, 'maqueta'])->name('backend.pedidos.maqueta')->whereNumber('maqueta');
+    Route::get('/manifiesto', [ArchivoPedidoController::class, 'manifiesto'])->name('backend.pedidos.manifiesto');
     Route::get('/impresiones/{impresion}/original', [ArchivoPedidoController::class, 'original'])->name('backend.pedidos.original')->whereNumber('impresion');
     Route::get('/facturas/{factura:uuid}', [ArchivoPedidoController::class, 'factura'])->name('backend.pedidos.factura')->whereUuid('factura');
     Route::get('/incidencias/fotos/{foto}', [ArchivoPedidoController::class, 'fotoIncidencia'])->name('backend.pedidos.foto-incidencia')->whereNumber('foto');
