@@ -207,6 +207,8 @@ return [
     'guia_pequeno' => 'Haz más grande tu diseño en tu programa de edición: es muy pequeño para imprimir a :medida. Así solo sale nítido hasta :maximo.',
     'guia_justo' => 'Tu diseño se queda algo corto para :medida: sale nítido hasta :maximo. Si puedes, hazlo más grande en tu programa de edición.',
     'guia_buena' => 'Se imprimirá bien. Para la máxima nitidez, déjalo en :maximo o hazlo más grande en tu programa de edición.',
+    'zona_maximo' => ':zona · máx. :medida',
+    'zona_maximo_corto' => 'Máx. :medida',
     'guia_pequeno_corto' => 'Haz más grande tu diseño en tu programa de edición: es muy pequeño para imprimir.',
     'guia_justo_corto' => 'Tu diseño se queda algo corto: si puedes, hazlo más grande en tu programa de edición.',
     'guia_o_reduce' => 'O redúcelo aquí:',

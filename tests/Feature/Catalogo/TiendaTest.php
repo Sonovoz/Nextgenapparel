@@ -294,6 +294,8 @@ class TiendaTest extends TestCase
         // Guía de impresión al lado de la prenda, que habla claro si el diseño se queda pequeño.
         $this->assertStringContainsString('id="guia-impresion"', $html);
         $this->assertStringContainsString('Tu imagen sale nítida hasta', $html);
+        // D245: cada zona dice su tamaño máximo en cm.
+        $this->assertSame(':zona · máx. :medida', $textos['zona_maximo'] ?? null);
         $this->assertStringContainsString('Haz más grande tu diseño en tu programa de edición', (string) ($textos['guia_pequeno'] ?? ''));
         $this->assertStringContainsString(':medida a :ppp ppp', (string) ($textos['guia_antes'] ?? ''));
         // D242: al cliente se le habla en cm, nunca en píxeles.

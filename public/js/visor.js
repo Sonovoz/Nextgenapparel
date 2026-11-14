@@ -403,7 +403,8 @@
             datos.zonas.forEach(function (z) {
                 var marca = el('div', 'zona-marca' + (hayDiseno() ? ' con-diseno' : '') + (z.id === estado.zonaId && hayDiseno() ? ' elegida' : ''));
                 marca.style.cssText = 'left:' + z.x + '%;top:' + z.y + '%;width:' + z.ancho + '%;height:' + z.alto + '%;color:' + tinta;
-                marca.appendChild(el('span', '', z.nombre || ''));
+                // D245: el tamaño máximo de cada zona, en cm, junto a su nombre.
+                marca.appendChild(el('span', '', z.ancho_mm ? texto('zona_maximo', { zona: z.nombre || '', medida: cm(z.ancho_mm) + ' × ' + cm(z.alto_mm) + ' cm' }) : (z.nombre || '')));
                 escena.appendChild(marca);
             });
         }
@@ -636,7 +637,7 @@
 
             var info = el('span', 'zona-info');
             info.appendChild(el('strong', '', z.nombre));
-            var medida = z.rect.ancho_mm ? (z.rect.ancho_mm / 10) + ' × ' + (z.rect.alto_mm / 10) + ' cm' : '';
+            var medida = z.rect.ancho_mm ? texto('zona_maximo_corto', { medida: cm(z.rect.ancho_mm) + ' × ' + cm(z.rect.alto_mm) + ' cm' }) : '';
             info.appendChild(el('small', '', [medida, z.precio ? '+' + z.precio + ' ' + textos.por_prenda : ''].filter(Boolean).join(' · ')));
             info.appendChild(el('em', 'zona-estado', choca ? texto('solapa_corto', { otra: choca.nombre })
                 : (activa ? textos.zona_editando : (conDisenoAqui ? textos.zona_con_diseno : textos.zona_libre))));

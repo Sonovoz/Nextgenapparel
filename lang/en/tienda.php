@@ -207,6 +207,8 @@ return [
     'guia_pequeno' => 'Make your design bigger in your editing program: it is too small to print at :medida. As it is, it only prints sharp up to :maximo.',
     'guia_justo' => 'Your design is a bit short for :medida: it prints sharp up to :maximo. If you can, make it bigger in your editing program.',
     'guia_buena' => 'It will print well. For maximum sharpness, set it to :maximo or make it bigger in your editing program.',
+    'zona_maximo' => ':zona · max. :medida',
+    'zona_maximo_corto' => 'Max. :medida',
     'guia_pequeno_corto' => 'Make your design bigger in your editing program: it is too small to print.',
     'guia_justo_corto' => 'Your design is a bit short: if you can, make it bigger in your editing program.',
     'guia_o_reduce' => 'Or make it smaller here:',
