@@ -56,14 +56,14 @@
 
     // estado.modo, estado.logo, estado.texto… son los del diseño de la zona activa
     // (o un borrador mientras aún no hay zona). Así cada zona lleva su propio diseño.
-    function nuevoDiseno() { return { modo: 'logo', logo: null, texto: '', fuente: 0, tinta: 'auto', logoPx: null, logoTipo: null, nombre: '', archivo: null, uuid: null, avisos: null }; }
+    function nuevoDiseno() { return { modo: 'logo', logo: null, texto: '', fuente: 0, tinta: 'auto', logoPx: null, logoTipo: null, nombre: '', archivo: null, uuid: null, avisos: null, pppArchivo: null }; }
     var borrador = nuevoDiseno();
     function actual() {
         if (estado.zonaId === null) return borrador;
         if (!estado.disenos[estado.zonaId]) estado.disenos[estado.zonaId] = nuevoDiseno();
         return estado.disenos[estado.zonaId];
     }
-    ['modo', 'logo', 'texto', 'fuente', 'tinta', 'logoPx', 'logoTipo', 'nombre', 'archivo', 'uuid', 'avisos'].forEach(function (campo) {
+    ['modo', 'logo', 'texto', 'fuente', 'tinta', 'logoPx', 'logoTipo', 'nombre', 'archivo', 'uuid', 'avisos', 'pppArchivo'].forEach(function (campo) {
         Object.defineProperty(estado, campo, { get: function () { return actual()[campo]; }, set: function (v) { actual()[campo] = v; } });
     });
     function disenoValido(d) { return !!d && (d.modo === 'logo' ? !!d.logo : d.texto.trim() !== ''); }
@@ -859,7 +859,8 @@
             while (p + 8 <= v.byteLength) {
                 var largo = v.getUint32(p), tipo = String.fromCharCode(v.getUint8(p + 4), v.getUint8(p + 5), v.getUint8(p + 6), v.getUint8(p + 7));
                 if (tipo === 'IDAT' || tipo === 'IEND') return false;
-                if (tipo === 'pHYs') return largo === 9 && p + 17 <= v.byteLength ? v.getUint8(p + 16) === 1 && v.getUint32(p + 8) > 0 : null;
+                // D237: los ppp que declara el archivo (pHYs en píxeles por metro); false si no declara ninguno.
+                if (tipo === 'pHYs') return largo === 9 && p + 17 <= v.byteLength ? (v.getUint8(p + 16) === 1 && v.getUint32(p + 8) > 0 ? Math.round(v.getUint32(p + 8) * 0.0254) : false) : null;
                 p += 12 + largo;
             }
             return null;
@@ -878,14 +879,14 @@
         if (textos.exigir_ppp && aRevisar) {
             pppDeclarados(aRevisar).then(function (declara) {
                 if (declara === false) { mostrarError(textos.error_sin_ppp); return; }
-                cargarLogo(archivo, original);
+                cargarLogo(archivo, original, typeof declara === 'number' ? declara : null);
             });
             return;
         }
-        cargarLogo(archivo, original);
+        pppDeclarados(aRevisar).then(function (declara) { cargarLogo(archivo, original, typeof declara === 'number' ? declara : null); });
     }
 
-    function cargarLogo(archivo, original) {
+    function cargarLogo(archivo, original, pppArchivo) {
         abrirEstudio();
         mostrarCarga();
 
@@ -917,7 +918,8 @@
                 px: { w: Math.round(recortado.width / escala * factor), h: Math.round(recortado.height / escala * factor) },
                 nombre: original ? original.nombre : archivo.name,
                 archivo: original ? (original.archivo || null) : archivo,
-                uuid: null
+                uuid: null,
+                pppArchivo: pppArchivo || null
             });
         };
         img.onerror = function () { URL.revokeObjectURL(url); ocultarCarga(); mostrarError(textos.error_archivo); };
@@ -929,6 +931,7 @@
         estado.logo = logo.lienzo;
         estado.logoTipo = logo.tipo;
         estado.logoPx = logo.px;
+        estado.pppArchivo = logo.pppArchivo || null;
         estado.nombre = logo.nombre;
         estado.archivo = logo.archivo;
         estado.uuid = logo.uuid;
@@ -1152,7 +1155,7 @@
         if (!hayDiseno()) {
             bloqueCalidad.dataset.nivel = '';
             document.getElementById('calidad-etiqueta').textContent = textos.calidad_sin_diseno;
-            ['calidad-ppp', 'calidad-mensaje', 'calidad-consejo', 'calidad-fondo'].forEach(function (id) { document.getElementById(id).textContent = ''; });
+            ['calidad-ppp', 'calidad-mensaje', 'calidad-consejo', 'calidad-fondo', 'calidad-objetivo', 'calidad-archivo'].forEach(function (id) { document.getElementById(id).textContent = ''; });
             document.getElementById('calidad-relleno').style.width = '0';
         }
         mostrarMejoraIa(null);
@@ -1175,6 +1178,8 @@
         var consejo = document.getElementById('calidad-consejo');
         var fondo = document.getElementById('calidad-fondo');
         fondo.textContent = ''; consejo.textContent = ''; detalle.textContent = '';
+        var objetivo = document.getElementById('calidad-objetivo'), delArchivo = document.getElementById('calidad-archivo');
+        objetivo.textContent = ''; delArchivo.textContent = '';
 
         if (estado.modo === 'texto' || estado.logoTipo === 'vectorial') {
             bloqueCalidad.dataset.nivel = 'correcta';
@@ -1199,7 +1204,13 @@
         } else {
             consejo.textContent = t.consejo_mejorar.replace(':px', Math.ceil(anchoMm / 25.4 * calidad.umbrales.correcto));
         }
-        mostrarMejoraIa(n, cm(anchoMm) + ' × ' + cm(altoMm) + ' cm');
+        // D237: el objetivo para esta zona (en cm y en píxeles a la calidad excelente) y lo que dice el archivo.
+        var pxObjetivo = Math.ceil(anchoMm / 25.4 * calidad.umbrales.correcto) + ' × ' + Math.ceil(altoMm / 25.4 * calidad.umbrales.correcto) + ' px';
+        var infoZona = zonas.filter(function (z) { return z.id === estado.zonaId; })[0];
+        objetivo.textContent = texto('ficha_objetivo', { zona: infoZona ? infoZona.nombre : '', medida: cm(anchoMm) + ' × ' + cm(altoMm) + ' cm', px: pxObjetivo, ppp: calidad.umbrales.correcto });
+        delArchivo.textContent = texto('ficha_archivo', { px: estado.logoPx.w + ' × ' + estado.logoPx.h + ' px' })
+            + (estado.pppArchivo ? ' ' + texto('ficha_declara', { ppp: estado.pppArchivo, medida: cm(estado.logoPx.w / estado.pppArchivo * 25.4) + ' × ' + cm(estado.logoPx.h / estado.pppArchivo * 25.4) + ' cm' }) : '');
+        mostrarMejoraIa(n, cm(anchoMm) + ' × ' + cm(altoMm) + ' cm (' + pxObjetivo + ', ' + calidad.umbrales.correcto + ' ppp)');
         // D229: aviso sobre la prenda y botón para dejarlo al mayor tamaño nítido.
         avisoPixelado(n);
         var nitida = escalaNitida(zona, disenoPara(color));

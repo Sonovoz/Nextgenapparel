@@ -192,4 +192,8 @@ return [
     'pixelado_aviso' => ':zona: a :medida tu archivo solo da :ppp ppp y se verá pixelado o borroso. Redúcelo a :nitido para que salga nítido, o sube una versión más grande. Si quieres seguir igualmente, vuelve a pulsar «Añadir a mi pedido».',
     'pixelado_aviso_sin_nitido' => ':zona: a :medida tu archivo solo da :ppp ppp y se verá pixelado o borroso, incluso al tamaño más pequeño. Sube una versión más grande. Si quieres seguir igualmente, vuelve a pulsar «Añadir a mi pedido».',
     'pixelado_ajustar' => 'Ajustar el tamaño',
+    // D237: ficha de impresión.
+    'ficha_objetivo' => 'Vas a imprimir en :zona a :medida. Para un resultado óptimo, tu imagen debe tener al menos :px (:ppp ppp a ese tamaño).',
+    'ficha_archivo' => 'Tu imagen: :px.',
+    'ficha_declara' => 'Dice :ppp ppp, así que tu programa la pensaba para :medida; da igual: lo que cuenta son sus píxeles y el tamaño al que la imprimimos.',
 ];

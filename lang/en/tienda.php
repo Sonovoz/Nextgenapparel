@@ -192,4 +192,8 @@ return [
     'pixelado_aviso' => ':zona: at :medida your file only gives :ppp ppi and will look pixelated or blurry. Reduce it to :nitido to print sharp, or upload a bigger version. To continue anyway, press «Add to my order» again.',
     'pixelado_aviso_sin_nitido' => ':zona: at :medida your file only gives :ppp ppi and will look pixelated or blurry, even at the smallest size. Upload a bigger version. To continue anyway, press «Add to my order» again.',
     'pixelado_ajustar' => 'Adjust the size',
+    // D237: print sheet.
+    'ficha_objetivo' => 'You will print on :zona at :medida. For the best result, your image needs at least :px (:ppp ppi at that size).',
+    'ficha_archivo' => 'Your image: :px.',
+    'ficha_declara' => 'It says :ppp ppi, so your program meant it for :medida; that does not matter: what counts are its pixels and the size we print it at.',
 ];
