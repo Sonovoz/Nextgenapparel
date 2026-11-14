@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Dominio\Facturacion\PdfFactura;
+use App\Dominio\Produccion\ArchivoTamanoReal;
 use App\Dominio\Sistema\Actividad\Actividad;
 use App\Models\Factura;
 use App\Models\FotoIncidencia;
@@ -37,6 +38,25 @@ class ArchivoPedidoController
 
         return Storage::disk(Pedido::DISCO)->download($impresion->archivo, str_replace(['/', '\\'], '-', $nombre), [
             'Content-Type' => 'image/png',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    /** D238: el diseño recortado y a la medida exacta en cm del pedido, para imprimir sin escalar. */
+    public function tamanoReal(Pedido $pedido, ImpresionPedido $impresion): Response
+    {
+        $this->comprobarAcceso($pedido);
+        $linea = $impresion->linea;
+        abort_unless($linea !== null && $linea->pedido_id === $pedido->id, 404);
+        $png = ArchivoTamanoReal::png($impresion);
+        abort_if($png === null, 404);
+
+        Actividad::apuntar('pedidos', 'Diseño a tamaño real descargado', $pedido);
+        $numero = $pedido->lineas()->pluck('id')->search($linea->id);
+
+        return response($png, 200, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => 'attachment; filename="'.ArchivoTamanoReal::nombre($pedido, (int) $numero + 1, $impresion).'"',
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }

@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 14/11 | **Archivo a tamaño real**: diseño recortado y con resolución que mide los cm del pedido, en el paquete de producción, la ficha del pedido y la orden de trabajo. | `archivo-tamano-real` | D238 |
 | 13/11 | **Registro de correos**: cola, envío, error del SMTP y no enviados, en Herramientas; salud: correos atascados o fallidos. | `registro-correos` | D235 |
 | 13/11 | **Botón «Siguiente» destacado** en el configurador: degradado con brillo, halo que respira y flecha que avanza. | `boton-siguiente-vivo` | — |
 | 13/11 | **SMTP del panel**: manda aunque el `.env` diga «log»; el correo de prueba ya no dice «enviado» si no sale. | `smtp-panel-manda` | D234 |

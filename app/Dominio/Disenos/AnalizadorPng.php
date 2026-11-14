@@ -148,7 +148,7 @@ class AnalizadorPng
         };
     }
 
-    private static function limitarRecursos(): void
+    public static function limitarRecursos(): void
     {
         // Sin límite de tiempo: el «time» de ImageMagick cuenta desde que arranca el proceso,
         // no desde cada operación; en PHP-FPM (procesos largos) acabaría rechazando todas las imágenes.
