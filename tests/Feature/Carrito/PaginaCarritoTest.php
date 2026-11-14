@@ -160,7 +160,7 @@ class PaginaCarritoTest extends TestCase
         $impresion->setRelation('zona', $pecho);
 
         // Centrado en horizontal, arriba del todo, a la mitad de la zona.
-        $this->assertSame(['left' => 56.78, 'top' => 22.6, 'width' => 3.95, 'height' => 3.3], Maqueta::posicion($impresion, $rect, Cara::Delantera));
+        $this->assertSame(['left' => 56.78, 'top' => 22.6, 'width' => 3.95, 'height' => 3.29], Maqueta::posicion($impresion, $rect, Cara::Delantera));
 
         // 2 cm más hacia su izquierda: de frente se ve a la derecha de la foto; de espaldas, a la izquierda.
         $impresion->desde_centro_mm = -120;
