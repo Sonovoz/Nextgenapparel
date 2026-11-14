@@ -40,6 +40,7 @@
                                             {{ $impresion->nombre_original }}
                                             @if ($impresion->archivo)
                                                 · <a href="{{ route('backend.pedidos.original', ['pedido' => $pedido->uuid, 'impresion' => $impresion->id]) }}" style="text-decoration: underline;">descargar original</a>
+                                                · <a href="{{ route('backend.pedidos.tamano-real', ['pedido' => $pedido->uuid, 'impresion' => $impresion->id]) }}" style="text-decoration: underline;">descargar a tamaño real ({{ \App\Dominio\Produccion\ArchivoTamanoReal::medida($impresion) }})</a>
                                             @elseif ($pedido->archivos_borrados_en)
                                                 · <span style="opacity: .7;">original borrado el {{ $pedido->archivos_borrados_en->format('d/m/Y') }} (D230)</span>
                                             @endif

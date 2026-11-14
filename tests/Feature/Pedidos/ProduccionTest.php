@@ -3,6 +3,7 @@
 namespace Tests\Feature\Pedidos;
 
 use App\Dominio\Pedidos\EstadoPedido as E;
+use App\Dominio\Produccion\ArchivoTamanoReal;
 use App\Dominio\Produccion\HojaCompra;
 use App\Dominio\Produccion\OrdenTrabajo;
 use App\Dominio\Produccion\PaqueteProduccion;
@@ -21,6 +22,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Support\PngDePrueba;
 use Tests\TestCase;
 use ZipArchive;
 
@@ -53,8 +55,10 @@ class ProduccionTest extends TestCase
         Variante::factory()->create(['prenda_id' => $this->prenda->id, 'color_id' => $this->negro->id, 'talla_id' => $this->l->id, 'sku' => 'CAM-N-L', 'stock' => 0]);
 
         $this->pedido = $this->pedidoCon(E::Pagado, 'PED-0042', [$this->m->id => 15, $this->l->id => 5]);
-        Storage::disk(Pedido::DISCO)->put("{$this->pedido->uuid}/logo.png", 'PNG');
+        // Lienzo de 600 × 300 px con el dibujo en 500 × 240 px desde (10, 20), impreso a 25 × 12 cm.
+        Storage::disk(Pedido::DISCO)->put("{$this->pedido->uuid}/logo.png", (string) file_get_contents(PngDePrueba::crear(600, 300, 'transparent', [10, 20, 500, 240])));
         $this->pedido->lineas[0]->impresiones()->create(['zona_nombre' => ['es' => 'Frontal'], 'cara' => 'delantera', 'archivo' => "{$this->pedido->uuid}/logo.png",
+            'util_x' => 10, 'util_y' => 20, 'util_ancho_px' => 500, 'util_alto_px' => 240,
             'nombre_original' => 'mi logo.png', 'ancho_mm' => 250, 'alto_mm' => 120, 'desde_cuello_mm' => 75, 'desde_centro_mm' => 0, 'ppp' => 305, 'nivel_calidad' => 'correcta']);
         $this->pedido->lineas[0]->impresiones()->create(['zona_nombre' => ['es' => 'Espalda'], 'cara' => 'trasera', 'texto' => 'EQUIPO', 'fuente' => 2, 'tinta' => 'blanca',
             'ancho_mm' => 200, 'alto_mm' => 60, 'desde_cuello_mm' => 100, 'desde_centro_mm' => 0]);
@@ -76,9 +80,10 @@ class ProduccionTest extends TestCase
         $impresion = $this->pedido->lineas[0]->impresiones()->first();
 
         $this->assertSame('PED-0042_L1_frontal.png', OrdenTrabajo::nombreArchivo($this->pedido, 1, $impresion));
+        $this->assertSame('PED-0042_L1_frontal_25x12cm.png', ArchivoTamanoReal::nombre($this->pedido, 1, $impresion));
     }
 
-    public function test_el_paquete_lleva_los_disenos_renombrados_y_la_orden_de_trabajo(): void
+    public function test_el_paquete_lleva_los_disenos_a_tamano_real_los_originales_y_la_orden_de_trabajo(): void
     {
         $zip = new ZipArchive;
         $zip->open($ruta = PaqueteProduccion::crear($this->pedido->fresh()));
@@ -87,11 +92,47 @@ class ProduccionTest extends TestCase
             $archivos[] = $zip->getNameIndex($i);
         }
 
-        $this->assertEqualsCanonicalizing(['disenos/PED-0042_L1_frontal.png', 'PED-0042_orden-de-trabajo.pdf'], $archivos);
-        $this->assertSame('PNG', $zip->getFromName('disenos/PED-0042_L1_frontal.png'));
+        $this->assertEqualsCanonicalizing(['disenos/PED-0042_L1_frontal_25x12cm.png', 'originales/PED-0042_L1_frontal.png', 'PED-0042_orden-de-trabajo.pdf'], $archivos);
+        $this->assertSame(Storage::disk(Pedido::DISCO)->get("{$this->pedido->uuid}/logo.png"), $zip->getFromName('originales/PED-0042_L1_frontal.png'));
+        $this->assertMideEnCm(25.0, 12.0, (string) $zip->getFromName('disenos/PED-0042_L1_frontal_25x12cm.png'));
         $this->assertStringStartsWith('%PDF', (string) $zip->getFromName('PED-0042_orden-de-trabajo.pdf'));
         $zip->close();
         @unlink($ruta);
+    }
+
+    /** D238: el archivo para imprimir es solo el dibujo (sin el lienzo vacío) y mide exactamente los cm del pedido. */
+    public function test_el_archivo_a_tamano_real_se_recorta_y_mide_los_cm_del_pedido(): void
+    {
+        $impresion = $this->pedido->lineas[0]->impresiones()->whereNotNull('archivo')->sole();
+        $impresion->update(['ancho_mm' => 95, 'alto_mm' => 46]); // 9,5 × 4,6 cm (proporción del dibujo, redondeada)
+
+        $png = (string) ArchivoTamanoReal::png($impresion);
+        $this->assertSame([500, 240], array_slice((array) getimagesizefromstring($png), 0, 2));
+        $this->assertMideEnCm(9.5, 4.6, $png);
+        $this->assertSame('PED-0042_L1_frontal_9,5x4,6cm.png', ArchivoTamanoReal::nombre($this->pedido, 1, $impresion));
+        $this->assertSame(134, ArchivoTamanoReal::pppEquivalente($impresion)); // 500 px en 9,5 cm
+
+        $this->actingAs($this->usuarioConRol(Rol::GestorTienda)); // como «descargar original»: con permiso para ver el pedido
+        $descarga = $this->get(route('backend.pedidos.tamano-real', ['pedido' => $this->pedido->uuid, 'impresion' => $impresion->id]));
+        $descarga->assertOk()->assertHeader('Content-Type', 'image/png');
+        $this->assertStringContainsString('PED-0042_L1_frontal_9,5x4,6cm.png', (string) $descarga->headers->get('Content-Disposition'));
+
+        // Borrado tras los 90 días hábiles (D230): ya no hay archivo que dar.
+        $impresion->update(['archivo' => null]);
+        $this->assertNull(ArchivoTamanoReal::png($impresion));
+        $this->get(route('backend.pedidos.tamano-real', ['pedido' => $this->pedido->uuid, 'impresion' => $impresion->id]))->assertNotFound();
+    }
+
+    /** Lee el fragmento pHYs del PNG (píxeles por metro) y comprueba la medida a 0,1 mm. */
+    private function assertMideEnCm(float $anchoCm, float $altoCm, string $png): void
+    {
+        $p = strpos($png, 'pHYs');
+        $this->assertNotFalse($p, 'El PNG no declara su resolución');
+        $phys = unpack('Nx/Ny/Cunidad', substr($png, $p + 4, 9));
+        $this->assertSame(1, $phys['unidad']); // metros
+        [$w, $h] = (array) getimagesizefromstring($png);
+        $this->assertEqualsWithDelta($anchoCm, $w / $phys['x'] * 100, 0.01);
+        $this->assertEqualsWithDelta($altoCm, $h / $phys['y'] * 100, 0.01);
     }
 
     /**
