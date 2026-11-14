@@ -106,6 +106,30 @@ class IgualarEncuadreTest extends TestCase
         $this->assertSame(['igualadas' => 0, 'iguales' => 1, 'fallidas' => []], IgualarEncuadre::prenda($this->prenda));
     }
 
+    /** D247: una sombra suave bajo la prenda no cuenta: si contara, la prenda se vería más pequeña y se agrandaría. */
+    public function test_la_sombra_suave_no_cuenta_como_prenda(): void
+    {
+        $blanca = $this->foto($this->blanco, 'blanca', 1000, 1200, [250, 200, 500, 700]);
+        $azul = Color::factory()->create(['nombre' => ['es' => 'Azul marino'], 'codigo_hex' => '#1F2A44']);
+        // Misma prenda que la blanca, con una sombra al 25 % que sobresale 60 px por debajo y 30 px por los lados.
+        $imagen = new Imagick;
+        $imagen->newImage(1000, 1200, new ImagickPixel('transparent'));
+        $sombra = new ImagickDraw;
+        $sombra->setFillColor(new ImagickPixel('rgba(0,0,0,0.25)'));
+        $sombra->rectangle(220, 220, 779, 959);
+        $imagen->drawImage($sombra);
+        $prenda = new ImagickDraw;
+        $prenda->setFillColor('#1F2A44');
+        $prenda->rectangle(250, 200, 749, 899);
+        $imagen->drawImage($prenda);
+        $imagen->setImageFormat('png');
+        Storage::disk('public')->put('catalogo/azul.png', $imagen->getImageBlob());
+        $foto = Foto::factory()->create(['prenda_id' => $this->prenda->id, 'color_id' => $azul->id, 'cara' => Cara::Delantera, 'ruta' => 'catalogo/azul.png']);
+
+        $this->assertSame([1000, 1200, 250, 200, 500, 700], $this->medir($foto)); // ya era igual: no se agranda ni se mueve
+        $this->assertSame([1000, 1200, 250, 200, 500, 700], $this->medir($blanca));
+    }
+
     public function test_si_no_se_distingue_la_prenda_del_fondo_no_se_toca_y_se_dice(): void
     {
         $this->foto($this->blanco, 'blanca', 1000, 1200, [250, 200, 500, 700]);
