@@ -16,6 +16,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Width;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -43,6 +44,10 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Nextgenapparel')
             // Crédito del desarrollo (Minimedia) en el pie del backend, también en la pantalla de entrada.
             ->renderHook(PanelsRenderHook::FOOTER, fn () => view('filament.partials.credito'))
+            // D240: aviso de pedidos nuevos pagados arriba de todas las páginas.
+            ->renderHook(PanelsRenderHook::CONTENT_START, fn () => view('filament.partials.pedidos-nuevos'))
+            // D240: a todo el ancho (como WooCommerce): las tablas no se comprimen ni piden desplazarse.
+            ->maxContentWidth(Width::Full)
             ->defaultAvatarProvider(AvatarIniciales::class)
             ->colors([
                 // Gris neutro para todo el backend: sobrio y coherente con el frontend.
