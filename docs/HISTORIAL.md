@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 14/11 | **Pedidos**: aviso de pedidos nuevos pagados arriba del panel; listado a todo el ancho con pestañas Pagados / Pendientes de pago / Cancelados. | `pedidos-pestanas` | D240 |
 | 14/11 | **Fotos del mismo tamaño**: cada maqueta se iguala al tamaño y encuadre de la del blanco, al subirla o con «Igualar tamaño al blanco», y toma sus zonas. | `fotos-mismo-tamano` | D239 |
 | 14/11 | **Ficha de impresión**: objetivo de cada zona en cm y px a 300 ppp, píxeles y ppp declarados del archivo explicados, y el objetivo pasado a «Mejorar con IA»; guía de impresión al lado de la prenda que orienta antes de subir y habla claro si el diseño es pequeño. | `ficha-impresion` | D237 |
 | 13/11 | **Registro de correos**: cola, envío, error del SMTP y no enviados, en Herramientas; salud: correos atascados o fallidos. | `registro-correos` | D235 |
