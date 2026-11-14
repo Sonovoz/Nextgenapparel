@@ -296,6 +296,11 @@ class TiendaTest extends TestCase
         $this->assertStringContainsString('Tu imagen sale nítida hasta', $html);
         // D245: cada zona dice su tamaño máximo en cm.
         $this->assertSame(':zona · máx. :medida', $textos['zona_maximo'] ?? null);
+        // D248: la barra orienta, no «arregla»: archivo mejor como solución, reducir como alternativa y el tamaño que quería.
+        $this->assertStringContainsString('id="calidad-subir"', $html);
+        $this->assertStringContainsString('id="limite-nitido"', $html);
+        $this->assertSame('Nítido a :medida', $textos['calidad_a_correcta'] ?? null);
+        $this->assertStringContainsString('haz tu diseño más grande', (string) ($textos['guia_reducido'] ?? ''));
         $this->assertStringContainsString('Haz más grande tu diseño en tu programa de edición', (string) ($textos['guia_pequeno'] ?? ''));
         $this->assertStringContainsString(':medida a :ppp ppp', (string) ($textos['guia_antes'] ?? ''));
         // D242: al cliente se le habla en cm, nunca en píxeles.

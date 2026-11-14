@@ -1375,6 +1375,10 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
 .guia-reduce { color: #C9C5D6; }
 .guia-boton { margin-top: 4px; display: inline-block; padding: 8px 14px; border-radius: 99px; border: 1px solid #fff; background: #fff; color: #111; font: 600 12px var(--sans); cursor: pointer; }
 .guia-boton:hover { background: #E8E6F2; }
+.guia-enlace { margin-left: 4px; padding: 4px 0; border: 0; background: none; color: #C9C5D6; font: 500 12px var(--sans); text-decoration: underline; cursor: pointer; }
+.guia-enlace:hover { color: #fff; }
+.guia-deseado { padding: 8px 10px; border-radius: 10px; background: rgba(242, 179, 61, .12); border: 1px solid rgba(242, 179, 61, .35); color: #F7D27E; font-size: 12.5px; }
+.guia-deseado:empty { display: none; }
 .guia-impresion[data-nivel="correcta"], .guia-impresion[data-nivel="buena"] { border-left-color: #3DBE7A; }
 .guia-impresion[data-nivel="correcta"] .guia-tuya dd, .guia-impresion[data-nivel="buena"] .guia-tuya dd, .guia-impresion[data-nivel="correcta"] .guia-estado, .guia-impresion[data-nivel="buena"] .guia-estado { color: #7BE3A8; }
 .guia-impresion[data-nivel="justa"] { border-left-color: #F2B33D; }

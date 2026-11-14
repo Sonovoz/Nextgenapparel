@@ -102,6 +102,7 @@
             <input type="range" id="tamano-diseno" min="20" max="100" step="1" value="100">
             <span class="fila-tamano-extremo" aria-hidden="true">{{ __('tienda.mas_grande') }}</span>
         </div>
+        <p class="limite-nitido" id="limite-nitido" aria-live="polite"></p>
         <p class="claro" style="font-size: 13px;">{{ __('tienda.arrastra') }}</p>
         <div class="opciones">
             <button type="button" class="boton-pildora borde" id="centrar-diseno">{{ __('tienda.centrar') }}</button>
@@ -120,7 +121,8 @@
         <p class="claro" id="calidad-archivo"></p>
         <p class="claro" id="calidad-consejo"></p>
         {{-- D229: si se va a ver pixelado, un botón lo deja al mayor tamaño que se imprime nítido. --}}
-        <button type="button" class="boton-pildora calidad-ajustar" id="calidad-ajustar" hidden></button>
+        <button type="button" class="boton-pildora calidad-subir" id="calidad-subir" hidden>{{ __('tienda.subir_mas_grande') }}</button>
+        <button type="button" class="calidad-ajustar" id="calidad-ajustar" hidden></button>
         <p id="calidad-fondo"></p>
     </div>
 
