@@ -196,4 +196,17 @@ return [
     'ficha_objetivo' => 'You will print on :zona at :medida. For the best result, your image needs at least :px (:ppp ppi at that size).',
     'ficha_archivo' => 'Your image: :px.',
     'ficha_declara' => 'It says :ppp ppi, so your program meant it for :medida; that does not matter: what counts are its pixels and the size we print it at.',
+    // D237: guía de impresión junto a la prenda.
+    'guia_titulo' => 'Print guide',
+    'guia_se_imprime' => 'Printed at',
+    'guia_maximo_zona' => 'Maximum size of this area',
+    'guia_necesitas' => 'For the best result',
+    'guia_tienes' => 'Your image',
+    'guia_sin_subir' => 'Not uploaded yet',
+    'guia_antes' => 'Prepare a PNG of at least :px (:ppp ppi at this size), ideally with a transparent background.',
+    'guia_pequeno' => 'Make your design bigger in your editing program: it is too small to print at this size. Export it again at least :px.',
+    'guia_justo' => 'Your design is a bit short for this size. If you can, export it again bigger in your editing program: at least :px.',
+    'guia_pequeno_corto' => 'Make your design bigger in your editing program: it is too small to print.',
+    'guia_justo_corto' => 'Your design is a bit short: if you can, make it bigger in your editing program.',
+    'guia_o_reduce' => 'Or make it smaller here:',
 ];

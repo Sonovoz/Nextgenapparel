@@ -6,7 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
-| 14/11 | **Ficha de impresión**: objetivo de cada zona en cm y px a 300 ppp, píxeles y ppp declarados del archivo explicados, y el objetivo pasado a «Mejorar con IA». | `ficha-impresion` | D237 |
+| 14/11 | **Ficha de impresión**: objetivo de cada zona en cm y px a 300 ppp, píxeles y ppp declarados del archivo explicados, y el objetivo pasado a «Mejorar con IA»; guía de impresión al lado de la prenda que orienta antes de subir y habla claro si el diseño es pequeño. | `ficha-impresion` | D237 |
 | 13/11 | **Registro de correos**: cola, envío, error del SMTP y no enviados, en Herramientas; salud: correos atascados o fallidos. | `registro-correos` | D235 |
 | 13/11 | **Botón «Siguiente» destacado** en el configurador: degradado con brillo, halo que respira y flecha que avanza. | `boton-siguiente-vivo` | — |
 | 13/11 | **SMTP del panel**: manda aunque el `.env` diga «log»; el correo de prueba ya no dice «enviado» si no sale. | `smtp-panel-manda` | D234 |
