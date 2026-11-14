@@ -1508,5 +1508,11 @@ h1.estudio-titulo { font-family: var(--display); font-size: 16px; font-weight: 8
     .estudio.activo .estudio-escena > .acciones-marca span { display: none; }
     .estudio.activo .guia-impresion .guia-enlace-guia, .estudio.activo .guia-impresion .guia-reduce, .estudio.activo .guia-impresion .guia-ia { display: none !important; }
 }
-.enlace-guia-soltar { display: inline-block; margin-top: 8px; color: #B9C4FF; font-size: 13px; text-decoration: underline; }
-.enlace-guia-soltar:hover { color: #fff; }
+.enlace-guia-soltar { display: flex; align-items: center; gap: 14px; margin-top: 10px; padding: 14px 16px; border-radius: 14px; text-decoration: none; color: #fff;
+    background: linear-gradient(135deg, rgba(242, 179, 61, .2), rgba(242, 179, 61, .06)); border: 1px solid rgba(242, 179, 61, .55); box-shadow: 0 8px 24px -14px rgba(242, 179, 61, .8); transition: transform .2s ease, border-color .2s ease, background .2s ease; }
+.enlace-guia-soltar:hover { transform: translateY(-1px); border-color: #F2B33D; background: linear-gradient(135deg, rgba(242, 179, 61, .3), rgba(242, 179, 61, .1)); }
+.enlace-guia-icono { flex-shrink: 0; display: inline-flex; width: 42px; height: 42px; border-radius: 50%; align-items: center; justify-content: center; background: #F2B33D; color: #1b1407; }
+.enlace-guia-textos { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.enlace-guia-textos strong { font-size: 15px; font-weight: 600; }
+.enlace-guia-textos small { font-size: 12.5px; color: #E4D9BE; line-height: 1.4; }
+.enlace-guia-flecha { margin-left: auto; font-size: 18px; color: #F7D27E; }

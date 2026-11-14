@@ -102,4 +102,6 @@ return [
 
     'enlace_guia' => '¿Cómo mejorar tu imagen? Guía fácil',
     'enlace_soltar' => '¿No sabes qué es un PNG o cómo preparar tu imagen? Guía fácil',
+    'enlace_soltar_titulo' => '¿Primera vez? Prepara bien tu imagen',
+    'enlace_soltar_texto' => 'Qué es un PNG, a qué tamaño, herramientas gratis y prompts para la IA. Guía fácil, en 5 minutos.',
 ];
