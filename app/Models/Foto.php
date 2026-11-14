@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Dominio\Catalogo\Cara;
 use App\Dominio\Catalogo\DatoCatalogoInvalido;
+use App\Dominio\Catalogo\IgualarEncuadre;
 use App\Dominio\Catalogo\OptimizarFoto;
 use App\Dominio\Catalogo\Origen;
 use App\Dominio\Catalogo\TipoFoto;
@@ -71,6 +72,8 @@ class Foto extends Model
             // Foto nueva o cambiada: en WebP y al tamaño máximo (D210). Si falla, se queda la original.
             if ($foto->wasRecentlyCreated || $foto->wasChanged('ruta')) {
                 rescue(fn () => OptimizarFoto::aplicar($foto));
+                // D239: la maqueta de otro color, al tamaño y encuadre de la del blanco.
+                rescue(fn () => IgualarEncuadre::alSubir($foto));
             }
         });
     }
