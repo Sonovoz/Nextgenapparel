@@ -46,7 +46,11 @@
         </label>
         <input type="file" id="archivo-diseno" class="oculto" accept="image/png,.png">
         {{-- La guía, a mano desde el estudio (el menú de la web no se ve aquí). --}}
-        <a class="enlace-guia-soltar" href="{{ route('guia-imagen', ['guia' => __('guia_imagen.ruta')]) }}" target="_blank" rel="noopener">{{ __('guia_imagen.enlace_soltar') }} ↗</a>
+        <a class="enlace-guia-soltar" href="{{ route('guia-imagen', ['guia' => __('guia_imagen.ruta')]) }}" target="_blank" rel="noopener" aria-label="{{ __('guia_imagen.enlace_soltar') }}">
+            <span class="enlace-guia-icono" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1.1 1.3 1.1 2.2h5c0-.9.5-1.7 1.1-2.2A6 6 0 0 0 12 3z"/></svg></span>
+            <span class="enlace-guia-textos"><strong>{{ __('guia_imagen.enlace_soltar_titulo') }}</strong><small>{{ __('guia_imagen.enlace_soltar_texto') }}</small></span>
+            <span class="enlace-guia-flecha" aria-hidden="true">↗</span>
+        </a>
 
         {{-- Tus diseños subidos (fase 4): se rellena desde public/js/visor.js. --}}
         <div class="biblioteca" id="biblioteca" hidden>

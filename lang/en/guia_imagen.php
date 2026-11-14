@@ -102,4 +102,6 @@ return [
 
     'enlace_guia' => 'How to improve your image? Easy guide',
     'enlace_soltar' => 'Not sure what a PNG is or how to prepare your image? Easy guide',
+    'enlace_soltar_titulo' => 'First time? Prepare your image properly',
+    'enlace_soltar_texto' => 'What a PNG is, what size, free tools and AI prompts. An easy 5-minute guide.',
 ];
