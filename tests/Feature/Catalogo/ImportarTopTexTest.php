@@ -112,6 +112,31 @@ class ImportarTopTexTest extends TestCase
         $this->assertSame(4, Variante::count());
     }
 
+    public function test_sin_tarifa_todavia_importa_la_prenda_con_las_variaciones_desactivadas_y_al_actualizar_se_activan(): void
+    {
+        Queue::fake();
+        Http::fake([
+            'api.toptex.io/v3/authenticate' => Http::response(['token' => 't']),
+            'api.toptex.io/v3/products/price*' => Http::response(['errorMessage' => 'Price grid not available. If you have just created an account, please note it may take up to 4 hours for the price grid to be available.'], 500),
+            'api.toptex.io/v3/products*' => Http::response($this->ficha()),
+        ]);
+
+        $r = app(ImportarTopTex::class)('GI6400B', $this->familia);
+
+        $this->assertTrue($r['sin_tarifa']);
+        $this->assertSame(4, $r['variantes_nuevas']);
+        $this->assertSame(0, Variante::where('activa', true)->count()); // nunca a la venta a 0 €
+        $this->assertSame(0, (int) Variante::max('precio_base'));
+
+        Http::swap(new HttpFactory);
+        $this->fingir($this->ficha(), self::COSTES);
+        $r = app(ImportarTopTex::class)('GI6400B');
+
+        $this->assertFalse($r['sin_tarifa']);
+        $this->assertSame(4, Variante::where('activa', true)->count());
+        $this->assertSame(1170, Variante::where('sku', 'GI6400BC_37609_37608')->value('precio_base'));
+    }
+
     public function test_trae_las_fotos_de_maniqui_invisible_en_la_cola_sin_pisar_las_reales(): void
     {
         Storage::fake(Foto::DISCO);

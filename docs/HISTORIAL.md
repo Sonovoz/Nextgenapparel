@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 19/11 | **Importar sin tarifa de TopTex**: si aún no da precios, la prenda se crea con sus fotos y las variaciones desactivadas; «Actualizar desde TopTex» las activa con precio. | `toptex-sin-tarifa` | D255 |
 | 19/11 | **Importar de TopTex**: prenda con colores, tallas, coste y precio con margen desde su referencia; «Actualizar desde TopTex»; fotos de maniquí invisible a la cola (cuando TopTex las libere). | `toptex-importar` | D254 |
 | 19/11 | **Conexión con TopTex y margen comercial**: Ajustes → Proveedores con margen general y «Probar conexión con TopTex»; margen propio en la ficha de la prenda. La importación de artículos llega en la siguiente entrega. | `toptex-conector` | D253 |
 | 14/11 | **Aviso de pedido nuevo**: se quita al abrir el pedido (sin cambiar su estado). | `aviso-pedido-visto` | D252 |

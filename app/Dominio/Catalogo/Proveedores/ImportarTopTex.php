@@ -21,7 +21,7 @@ use Illuminate\Support\Str;
  *   descripción, composición, gramaje y argumentos de venta. Después ya no toca esos textos: son del equipo.
  * - Cada vez crea los colores y tallas nuevos y pone en cada variación el SKU de TopTex, el coste (tramo de
  *   1 unidad), el precio de venta = coste + margen (PrecioConMargen) y el peso. Las que TopTex retira se
- *   desactivan; nunca se borran. Una variación sin precio o sin peso en TopTex no se crea (no se vende a 0 €).
+ *   desactivan; nunca se borran. Una variación sin precio en TopTex se crea desactivada (nunca se vende a 0 €).
  */
 final class ImportarTopTex
 {
@@ -30,7 +30,7 @@ final class ImportarTopTex
     public function __construct(private readonly ClienteTopTex $toptex) {}
 
     /**
-     * @return array{prenda: Prenda, creada: bool, colores: int, variantes_nuevas: int, variantes_actualizadas: int, desactivadas: int, sin_precio: int, fotos: int, fotos_bloqueadas: bool}
+     * @return array{prenda: Prenda, creada: bool, colores: int, variantes_nuevas: int, variantes_actualizadas: int, desactivadas: int, sin_precio: int, sin_tarifa: bool, fotos: int, fotos_bloqueadas: bool}
      */
     public function __invoke(string $referencia, ?Familia $familia = null): array
     {
@@ -39,9 +39,17 @@ final class ImportarTopTex
         if ($ficha === null) {
             throw new ProveedorNoDisponible("TopTex no tiene la referencia {$referencia}.");
         }
-        $costes = $this->toptex->costes($referencia);
+        // D255: si TopTex aún no da la tarifa (cuenta nueva: hasta 4 h), se importa igual, sin precios: las
+        // variaciones quedan desactivadas y «Actualizar desde TopTex» les pondrá precio y las activará.
+        $sinTarifa = false;
+        try {
+            $costes = $this->toptex->costes($referencia);
+        } catch (ProveedorNoDisponible) {
+            $costes = [];
+            $sinTarifa = true;
+        }
 
-        return DB::transaction(function () use ($referencia, $ficha, $costes, $familia): array {
+        return DB::transaction(function () use ($referencia, $ficha, $costes, $familia, $sinTarifa): array {
             $proveedor = Proveedor::firstOrCreate(['nombre' => self::PROVEEDOR], ['tipo_conector' => Origen::Api, 'activo' => true]);
             $prenda = Prenda::where('proveedor_id', $proveedor->getKey())->where('referencia_proveedor', $referencia)->first();
             $creada = $prenda === null;
@@ -58,7 +66,7 @@ final class ImportarTopTex
             }
 
             $margen = PrecioConMargen::margen($prenda);
-            $resumen = ['colores' => 0, 'variantes_nuevas' => 0, 'variantes_actualizadas' => 0, 'desactivadas' => 0, 'sin_precio' => 0, 'fotos' => 0, 'fotos_bloqueadas' => false];
+            $resumen = ['colores' => 0, 'variantes_nuevas' => 0, 'variantes_actualizadas' => 0, 'desactivadas' => 0, 'sin_precio' => 0, 'sin_tarifa' => $sinTarifa, 'fotos' => 0, 'fotos_bloqueadas' => false];
             $fotos = [];
             foreach ((array) ($ficha['colors'] ?? []) as $colorTopTex) {
                 if (! is_array($colorTopTex)) {
@@ -92,6 +100,11 @@ final class ImportarTopTex
                         if ($variante !== null && $variante->activa) {
                             $variante->update(['activa' => false]);
                             $resumen['desactivadas']++;
+                        } elseif ($variante === null && $gramos !== null) {
+                            // Sin precio todavía: la variación existe (para fotos y zonas) pero no se vende.
+                            $prenda->variantes()->create(['sku' => $sku, 'coste' => 0, 'precio_base' => 0, 'peso_gramos' => $gramos, 'activa' => false,
+                                'color_id' => $color->getKey(), 'talla_id' => $tallaModelo->getKey(), 'stock' => 0]);
+                            $resumen['variantes_nuevas']++;
                         }
 
                         continue;
