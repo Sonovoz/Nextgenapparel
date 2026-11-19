@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Catalogo\Prendas\Pages;
 
+use App\Filament\Acciones\ImportarTopTexAction;
 use App\Filament\Acciones\OptimizarFotosAction;
 use App\Filament\Resources\Catalogo\Prendas\PrendaResource;
 use Filament\Actions\CreateAction;
@@ -18,6 +19,6 @@ class ListPrendas extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [OptimizarFotosAction::make(), CreateAction::make()->label('Añadir prenda')];
+        return [OptimizarFotosAction::make(), ImportarTopTexAction::importar(), CreateAction::make()->label('Añadir prenda')];
     }
 }

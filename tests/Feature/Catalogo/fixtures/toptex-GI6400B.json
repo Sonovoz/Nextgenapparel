@@ -1,0 +1,620 @@
+{
+ "2in1": "0",
+ "3threads": "0",
+ "activity": [],
+ "alternatives": {
+  "bodywarmer": [],
+  "forAdults": [],
+  "forBabies": [],
+  "forKids": [
+   "GI6400B"
+  ],
+  "forLadies": [
+   "GI6400L"
+  ],
+  "forMen": [
+   "GI6400"
+  ],
+  "highSet": [],
+  "jacket": [],
+  "largeSize": [],
+  "longLength": [],
+  "longSleeves": [],
+  "lowSet": [],
+  "mediumSize": [],
+  "midLength": [],
+  "roundNeck": [],
+  "shortLength": [],
+  "shortSleeves": [],
+  "smallSize": [],
+  "vNeck": [],
+  "withZip": [],
+  "withoutZip": []
+ },
+ "antiStaticStandards": [
+  ""
+ ],
+ "antiTheft": [
+  {
+   "es": ""
+  }
+ ],
+ "ascending": "0",
+ "averageWeight": "109 g",
+ "brand": "Gildan",
+ "breathabilityLevel": [
+  ""
+ ],
+ "breathable": [
+  {
+   "es": ""
+  }
+ ],
+ "cabFormat": "0",
+ "catalogPages": "",
+ "catalogReference": "GI6400B",
+ "collection": "Softstyle",
+ "composition": {
+  "es": "100% Algodón"
+ },
+ "cooler": "0",
+ "createdDate": "2022-04-17 12:11:03",
+ "decorationArea": "",
+ "description": {
+  "es": "100% algodón preencogido Ring-Spun «SoftStyle» (RS Sport Grey: 90% algodón /10% poliéster). Tira cubrecosturas. Punto jersey. Doble pespunte en las mangas y en el bajo de la prenda. Diseño tubular para las tallas 7/8, 9/11 y 12/14 años y costuras en los lados para las tallas 3/4 y 5/6 años."
+ },
+ "designation": {
+  "es": "Camiseta SoftStyle niños"
+ },
+ "detachableHood": "0",
+ "family": {
+  "es": "Ropa"
+ },
+ "fireResistanceStandards": [
+  ""
+ ],
+ "fit": [
+  {
+   "es": "Regular"
+  }
+ ],
+ "fleeceJacket": "0",
+ "footwearStandards": [
+  ""
+ ],
+ "gender": [
+  {
+   "es": "Niños"
+  }
+ ],
+ "hiVizStandards": [
+  ""
+ ],
+ "hood": "",
+ "images": [
+  {
+   "error": "Please connect to Photo library to accept user charter from Toptex website."
+  }
+ ],
+ "labelType": "tear_away",
+ "largeSizes": "0",
+ "lastChange": "2026-11-19 11:21:10",
+ "lining": [
+  {
+   "es": ""
+  }
+ ],
+ "mainMaterials": [
+  {
+   "es": "100% Algodón"
+  }
+ ],
+ "moreThanTenColors": "1",
+ "neckType": [
+  {
+   "es": "Cuello redondo"
+  }
+ ],
+ "oekoTex": "1",
+ "opening": [
+  {
+   "es": ""
+  }
+ ],
+ "organic": [
+  {
+   "es": ""
+  }
+ ],
+ "panelsNumber": [
+  {
+   "es": ""
+  }
+ ],
+ "pictograms": {
+  "additionnalPictograms": [
+   {
+    "caption": {
+     "es": "Etiqueta de marca que puede retirarse fácilmente."
+    }
+   }
+  ],
+  "brand": [
+   {
+    "caption": {
+     "es": ""
+    }
+   }
+  ],
+  "collection": [
+   {
+    "caption": {
+     "es": ""
+    }
+   }
+  ],
+  "ethics": [
+   {
+    "caption": {
+     "es": ""
+    }
+   }
+  ],
+  "footWearProperties": [
+   {
+    "caption": {
+     "es": ""
+    }
+   }
+  ],
+  "highVisibility": [
+   {
+    "caption": {
+     "es": ""
+    }
+   }
+  ],
+  "technicalProperties": [
+   {
+    "caption": {
+     "es": ""
+    }
+   }
+  ]
+ },
+ "productFinish": [
+  {
+   "es": ""
+  }
+ ],
+ "recycled": [
+  ""
+ ],
+ "removableSleeves": "0",
+ "reversible": "0",
+ "saleState": "active",
+ "salesArguments": {
+  "es": "Algodón preencogido: resistencia lavado tras lavado."
+ },
+ "salesArguments2": {
+  "es": "Tacto suave y agradable de llevar."
+ },
+ "salesArguments3": {
+  "es": "Etiqueta extraíble, fácil de volver a etiquetar."
+ },
+ "softshell": [
+  {
+   "es": ""
+  }
+ ],
+ "style": [
+  {
+   "es": "Camiseta"
+  }
+ ],
+ "sub_family": {
+  "es": "Camisetas"
+ },
+ "supplierReference": "64000B",
+ "surfaceTreatments": [
+  {
+   "es": ""
+  }
+ ],
+ "technicalFiles": {
+  "es": ""
+ },
+ "technologies": [
+  ""
+ ],
+ "threadsFeature": [
+  {
+   "es": "Preencogido RingSpun"
+  }
+ ],
+ "transferredFrom": "",
+ "treatments": [
+  {
+   "es": ""
+  }
+ ],
+ "triblend": "0",
+ "typeFastening": [
+  {
+   "es": ""
+  }
+ ],
+ "typePockets": [
+  {
+   "es": ""
+  }
+ ],
+ "typeWeaving": [
+  {
+   "es": "Jersey"
+  }
+ ],
+ "vegan": [
+  ""
+ ],
+ "waterproof": [
+  {
+   "es": ""
+  }
+ ],
+ "waterproofnessLevel": [
+  ""
+ ],
+ "weatherStandards": [
+  ""
+ ],
+ "world": [],
+ "colors": [
+  {
+   "colors": {
+    "es": "Black"
+   },
+   "colorsCMYK": [
+    "94,77,53,94"
+   ],
+   "colorsDominant": [
+    {
+     "es": "Negro"
+    }
+   ],
+   "colorsHexa": [
+    "25282A"
+   ],
+   "colorsPantone": [
+    "426C"
+   ],
+   "colorsPantoneTCX": [
+    "19-4005TCX"
+   ],
+   "colorsRGB": [
+    "37,40,42"
+   ],
+   "createdDate": "2022-04-17 13:56:33",
+   "lastChange": "2026-11-08 19:34:35",
+   "packshots": {
+    "FACE": {
+     "error": "Please connect to Photo library to accept user charter from Toptex website."
+    }
+   },
+   "saleState": "active",
+   "sizes": [
+    {
+     "barCode": "00821780091459",
+     "boxHeight": "26,37 cm",
+     "boxLength": "50,8 cm",
+     "boxWidth": "40,01 cm",
+     "capacity": "",
+     "chestCircumferenceCm": "",
+     "chestCircumferenceInch": "",
+     "coatingWeight_en": "150 gsm",
+     "coatingWeight_fr": "150 g/m²",
+     "collarSizeCm": "",
+     "collarSizeInch": "",
+     "colorCode": "37609",
+     "countryOfOrigin": [
+      "BD"
+     ],
+     "createdDate": "2022-04-17 13:41:05",
+     "crotchSizeCm": "",
+     "crotchSizeInch": "",
+     "customsCode": "61091000",
+     "customsWeight": "0,167 kg",
+     "diameter": "",
+     "dimensions": "",
+     "ean": "1200103087468",
+     "footCm": "",
+     "footInch": "",
+     "grossBoxWeight": "0.167 kg",
+     "headCircumferenceCm": "",
+     "headCircumferenceInch": "",
+     "height": "",
+     "hipCircumferenceCm": "",
+     "hipCircumferenceInch": "",
+     "isDiscontinued": 0,
+     "isNew": 0,
+     "legLengthCm": "",
+     "legLengthInch": "",
+     "length": "",
+     "orderMode": [
+      "unite"
+     ],
+     "productReference": "GI6400BC",
+     "publicUnitPrice": "5,86 €",
+     "saleState": "active",
+     "size": "XS",
+     "sizeAge": "",
+     "sizeCode": "37608",
+     "sizeCountry": {
+      "be": "3/4 years (XS)",
+      "de": "3/4 years (XS)",
+      "dk": "3/4 years (XS)",
+      "es": "3/4 years (XS)",
+      "fr": "3/4 ans (XS)",
+      "it": "3/4 years (XS)",
+      "nl": "3/4 years (XS)",
+      "pt": "3/4 years (XS)",
+      "swe": "3/4 years (XS)",
+      "uk": "3/4 years (XS)"
+     },
+     "sku": "GI6400BC_37609_37608",
+     "sortOrder": 36,
+     "statureSizeCm": "",
+     "statureSizeInch": "",
+     "unitsPerBox": 72,
+     "unitsPerBundle": 0,
+     "unitsPerPack": 0,
+     "waistSizeCm": "",
+     "waistSizeInch": "",
+     "width": ""
+    },
+    {
+     "barCode": "00821780091460",
+     "boxHeight": "26,37 cm",
+     "boxLength": "50,8 cm",
+     "boxWidth": "40,01 cm",
+     "capacity": "",
+     "chestCircumferenceCm": "",
+     "chestCircumferenceInch": "",
+     "coatingWeight_en": "150 gsm",
+     "coatingWeight_fr": "150 g/m²",
+     "collarSizeCm": "",
+     "collarSizeInch": "",
+     "colorCode": "37609",
+     "countryOfOrigin": [
+      "BD"
+     ],
+     "createdDate": "2022-04-17 13:41:05",
+     "crotchSizeCm": "",
+     "crotchSizeInch": "",
+     "customsCode": "61091000",
+     "customsWeight": "0,188 kg",
+     "diameter": "",
+     "dimensions": "",
+     "ean": "1200103087444",
+     "footCm": "",
+     "footInch": "",
+     "grossBoxWeight": "0.188 kg",
+     "headCircumferenceCm": "",
+     "headCircumferenceInch": "",
+     "height": "",
+     "hipCircumferenceCm": "",
+     "hipCircumferenceInch": "",
+     "isDiscontinued": 0,
+     "isNew": 0,
+     "legLengthCm": "",
+     "legLengthInch": "",
+     "length": "",
+     "orderMode": [
+      "unite"
+     ],
+     "productReference": "GI6400BC",
+     "publicUnitPrice": "5,86 €",
+     "saleState": "active",
+     "size": "S",
+     "sizeAge": "",
+     "sizeCode": "37621",
+     "sizeCountry": {
+      "be": "5/6 years (S)",
+      "de": "5/6 years (S)",
+      "dk": "5/6 years (S)",
+      "es": "5/6 years (S)",
+      "fr": "5/6 ans (S)",
+      "it": "5/6 years (S)",
+      "nl": "5/6 years (S)",
+      "pt": "5/6 years (S)",
+      "swe": "5/6 years (S)",
+      "uk": "5/6 years (S)"
+     },
+     "sku": "GI6400BC_37609_37621",
+     "sortOrder": 44,
+     "statureSizeCm": "",
+     "statureSizeInch": "",
+     "unitsPerBox": 72,
+     "unitsPerBundle": 0,
+     "unitsPerPack": 0,
+     "waistSizeCm": "",
+     "waistSizeInch": "",
+     "width": ""
+    }
+   ]
+  },
+  {
+   "colors": {
+    "es": "White"
+   },
+   "colorsCMYK": [
+    "0,0,0,0"
+   ],
+   "colorsDominant": [
+    {
+     "es": "Blanco"
+    }
+   ],
+   "colorsHexa": [
+    "FFFFFF"
+   ],
+   "colorsPantone": [
+    "000C"
+   ],
+   "colorsPantoneTCX": [
+    "11-0601TCX"
+   ],
+   "colorsRGB": [
+    "255,255,255"
+   ],
+   "createdDate": "2022-04-17 13:56:33",
+   "lastChange": "2026-11-08 19:34:35",
+   "packshots": {
+    "FACE": {
+     "error": "Please connect to Photo library to accept user charter from Toptex website."
+    }
+   },
+   "saleState": "active",
+   "sizes": [
+    {
+     "barCode": "00821780091569",
+     "boxHeight": "26,37 cm",
+     "boxLength": "50,8 cm",
+     "boxWidth": "40,01 cm",
+     "capacity": "",
+     "chestCircumferenceCm": "",
+     "chestCircumferenceInch": "",
+     "coatingWeight_en": "144 gsm",
+     "coatingWeight_fr": "144 g/m²",
+     "collarSizeCm": "",
+     "collarSizeInch": "",
+     "colorCode": "37597",
+     "countryOfOrigin": [
+      "BD"
+     ],
+     "createdDate": "2022-04-17 13:41:05",
+     "crotchSizeCm": "",
+     "crotchSizeInch": "",
+     "customsCode": "61091000",
+     "customsWeight": "0,164 kg",
+     "diameter": "",
+     "dimensions": "",
+     "ean": "1200103087048",
+     "footCm": "",
+     "footInch": "",
+     "grossBoxWeight": "0.164 kg",
+     "headCircumferenceCm": "",
+     "headCircumferenceInch": "",
+     "height": "",
+     "hipCircumferenceCm": "",
+     "hipCircumferenceInch": "",
+     "isDiscontinued": 0,
+     "isNew": 0,
+     "legLengthCm": "",
+     "legLengthInch": "",
+     "length": "",
+     "orderMode": [
+      "unite"
+     ],
+     "productReference": "GI6400B",
+     "publicUnitPrice": "4,42 €",
+     "saleState": "active",
+     "size": "XS",
+     "sizeAge": "",
+     "sizeCode": "37596",
+     "sizeCountry": {
+      "be": "3/4 years (XS)",
+      "de": "3/4 years (XS)",
+      "dk": "3/4 years (XS)",
+      "es": "3/4 years (XS)",
+      "fr": "3/4 ans (XS)",
+      "it": "3/4 years (XS)",
+      "nl": "3/4 years (XS)",
+      "pt": "3/4 years (XS)",
+      "swe": "3/4 years (XS)",
+      "uk": "3/4 years (XS)"
+     },
+     "sku": "GI6400B_37597_37596",
+     "sortOrder": 36,
+     "statureSizeCm": "",
+     "statureSizeInch": "",
+     "unitsPerBox": 72,
+     "unitsPerBundle": 0,
+     "unitsPerPack": 0,
+     "waistSizeCm": "",
+     "waistSizeInch": "",
+     "width": ""
+    },
+    {
+     "barCode": "00821780091570",
+     "boxHeight": "26,37 cm",
+     "boxLength": "50,8 cm",
+     "boxWidth": "40,01 cm",
+     "capacity": "",
+     "chestCircumferenceCm": "",
+     "chestCircumferenceInch": "",
+     "coatingWeight_en": "144 gsm",
+     "coatingWeight_fr": "144 g/m²",
+     "collarSizeCm": "",
+     "collarSizeInch": "",
+     "colorCode": "37597",
+     "countryOfOrigin": [
+      "BD"
+     ],
+     "createdDate": "2022-04-17 13:41:05",
+     "crotchSizeCm": "",
+     "crotchSizeInch": "",
+     "customsCode": "61091000",
+     "customsWeight": "0,184 kg",
+     "diameter": "",
+     "dimensions": "",
+     "ean": "1200103087024",
+     "footCm": "",
+     "footInch": "",
+     "grossBoxWeight": "0.184 kg",
+     "headCircumferenceCm": "",
+     "headCircumferenceInch": "",
+     "height": "",
+     "hipCircumferenceCm": "",
+     "hipCircumferenceInch": "",
+     "isDiscontinued": 0,
+     "isNew": 0,
+     "legLengthCm": "",
+     "legLengthInch": "",
+     "length": "",
+     "orderMode": [
+      "unite"
+     ],
+     "productReference": "GI6400B",
+     "publicUnitPrice": "4,42 €",
+     "saleState": "active",
+     "size": "S",
+     "sizeAge": "",
+     "sizeCode": "37598",
+     "sizeCountry": {
+      "be": "5/6 years (S)",
+      "de": "5/6 years (S)",
+      "dk": "5/6 years (S)",
+      "es": "5/6 years (S)",
+      "fr": "5/6 ans (S)",
+      "it": "5/6 years (S)",
+      "nl": "5/6 years (S)",
+      "pt": "5/6 years (S)",
+      "swe": "5/6 years (S)",
+      "uk": "5/6 years (S)"
+     },
+     "sku": "GI6400B_37597_37598",
+     "sortOrder": 44,
+     "statureSizeCm": "",
+     "statureSizeInch": "",
+     "unitsPerBox": 72,
+     "unitsPerBundle": 0,
+     "unitsPerPack": 0,
+     "waistSizeCm": "",
+     "waistSizeInch": "",
+     "width": ""
+    }
+   ]
+  }
+ ]
+}

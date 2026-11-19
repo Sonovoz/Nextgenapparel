@@ -36,7 +36,7 @@ class ProveedorResource extends RecursoCatalogo
         return $schema->columns(3)->components([
             TextInput::make('nombre')->label('Nombre')->required()->maxLength(255),
             Select::make('tipo_conector')->label('Catálogo')->options(Origen::class)->default(Origen::Manual)->required()->native(false)
-                ->helperText('La conexión por API se configurará cuando tengamos la documentación del proveedor.'),
+                ->helperText('TopTex ya va por API: «Importar de TopTex» en Productos; sus credenciales, en el .env.'),
             Toggle::make('activo')->label('Activo')->default(true)->inline(false),
         ]);
     }
