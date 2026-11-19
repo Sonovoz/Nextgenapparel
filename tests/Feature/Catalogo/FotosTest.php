@@ -40,9 +40,9 @@ class FotosTest extends TestCase
 
         $this->prenda = Prenda::factory()->create();
         $this->negro = Color::factory()->create(['nombre' => ['es' => 'Negro']]);
-        $this->prenda->zonas()->attach(ZonaImpresion::factory()->create(['clave' => 'frontal', 'cara' => Cara::Delantera]), ['precio' => 300]);
-        $this->prenda->zonas()->attach(ZonaImpresion::factory()->create(['clave' => 'pecho', 'cara' => Cara::Delantera]), ['precio' => 180]);
-        $this->prenda->zonas()->attach(ZonaImpresion::factory()->create(['clave' => 'espalda', 'cara' => Cara::Trasera]), ['precio' => 350]);
+        $this->permitirZona($this->prenda, ZonaImpresion::factory()->create(['clave' => 'frontal', 'cara' => Cara::Delantera]), 300);
+        $this->permitirZona($this->prenda, ZonaImpresion::factory()->create(['clave' => 'pecho', 'cara' => Cara::Delantera]), 180);
+        $this->permitirZona($this->prenda, ZonaImpresion::factory()->create(['clave' => 'espalda', 'cara' => Cara::Trasera]), 350);
     }
 
     private function tabla()

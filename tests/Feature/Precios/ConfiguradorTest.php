@@ -58,7 +58,7 @@ class ConfiguradorTest extends TestCase
         foreach (['frontal' => [Cara::Delantera, 300], 'espalda' => [Cara::Trasera, 400], 'manga' => [Cara::Delantera, 150]] as $clave => [$cara, $precio]) {
             $this->zonas[$clave] = ZonaImpresion::factory()->create(['clave' => $clave, 'cara' => $cara])->id;
             if ($clave !== 'manga') { // la manga existe, pero esta prenda no la ofrece
-                $this->camiseta->zonas()->attach($this->zonas[$clave], ['precio' => $precio, 'coste' => 100]);
+                $this->permitirZona($this->camiseta, $this->zonas[$clave], $precio, 100);
             }
         }
         ReglaMinimo::create(['nombre' => ['es' => 'Mínimo general'], 'tipo' => 'unidades_total', 'valor' => 15, 'ambito' => 'catalogo']);

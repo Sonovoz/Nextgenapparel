@@ -12,7 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * Frontal, pecho, espalda grande… con su medida máxima de impresión.
  *
  * @property ?Cara $cara
- * @property-read PrendaZona $pivot al cargarla desde una prenda (precio y coste de la zona en esa prenda)
+ * @property int $precio céntimos por prenda, sin IVA (D256: igual en todas las prendas que la permiten)
+ * @property int $coste
  */
 class ZonaImpresion extends Model
 {
@@ -27,14 +28,14 @@ class ZonaImpresion extends Model
 
     protected function casts(): array
     {
-        return ['cara' => Cara::class, 'activa' => 'boolean'];
+        return ['cara' => Cara::class, 'activa' => 'boolean', 'precio' => 'integer', 'coste' => 'integer'];
     }
 
     public function prendas(): BelongsToMany
     {
         return $this->belongsToMany(Prenda::class, 'prenda_zona')
             ->using(PrendaZona::class)
-            ->withPivot(['id', 'precio', 'coste'])
+            ->withPivot(['id'])
             ->withTimestamps();
     }
 }

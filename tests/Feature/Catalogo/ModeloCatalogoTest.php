@@ -35,7 +35,7 @@ class ModeloCatalogoTest extends TestCase
 
         Variante::factory()->for($prenda)->for($negro)->for($m)->create(['precio_base' => 450]);
         Variante::factory()->for($prenda)->for($negro)->for($l)->create(['precio_base' => 400]);
-        $prenda->zonas()->attach($frontal, ['precio' => 300, 'coste' => 120]);
+        $this->permitirZona($prenda, $frontal, 300, 120);
         MedidaTalla::create(['prenda_id' => $prenda->id, 'talla_id' => $m->id, 'largo_mm' => 720, 'ancho_mm' => 520]);
         $foto = Foto::factory()->for($prenda)->for($negro)->create();
         FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $frontal->id, 'x' => 3200, 'y' => 2700, 'ancho' => 3600, 'alto' => 4300]);

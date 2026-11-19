@@ -90,7 +90,7 @@ class Escaparate
     /** @return list<int> precio de cada zona activa de la prenda */
     private static function preciosZonas(Prenda $prenda): array
     {
-        return $prenda->zonas()->where('zonas_impresion.activa', true)->pluck('prenda_zona.precio')->map(fn ($p) => (int) $p)->all();
+        return $prenda->zonas()->where('zonas_impresion.activa', true)->get()->map(fn ($z) => $z->precio)->values()->all();
     }
 
     /** «Desde 7,26 €» con IVA (prenda + impresión más barata), o null si no se vende. */
@@ -125,7 +125,7 @@ class Escaparate
         $zonasOfrecidas = $ofrecidas->pluck('id')->all();
         $tipo = Impuestos::tipoIva($prenda->clase_impuesto_id);
         // Lo que suma cada zona por prenda, con IVA (calculado aquí, nunca en el navegador).
-        $precioZona = $ofrecidas->mapWithKeys(fn ($z) => [$z->id => Formato::euros(Iva::conIva((int) $z->pivot->precio, $tipo))]);
+        $precioZona = $ofrecidas->mapWithKeys(fn ($z) => [$z->id => Formato::euros(Iva::conIva($z->precio, $tipo))]);
         $maquetas = $prenda->fotos()->where('tipo', TipoFoto::Maqueta->value)
             ->with(['zonas' => fn ($q) => $q->whereIn('zona_impresion_id', $zonasOfrecidas), 'zonas.zona'])->get();
 

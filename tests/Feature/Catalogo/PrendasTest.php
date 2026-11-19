@@ -258,7 +258,7 @@ class PrendasTest extends TestCase
     public function test_quitar_una_zona_la_quita_tambien_de_las_maquetas(): void
     {
         $zona = ZonaImpresion::factory()->create();
-        $this->prenda->zonas()->attach($zona, ['precio' => 300]);
+        $this->permitirZona($this->prenda, $zona, 300);
         $foto = Foto::create(['prenda_id' => $this->prenda->id, 'color_id' => $this->negro->id, 'tipo' => TipoFoto::Maqueta, 'cara' => $zona->cara, 'ruta' => 'catalogo/x.webp']);
         FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $zona->id, 'x' => 3000, 'y' => 2000, 'ancho' => 2000, 'alto' => 2000]);
 

@@ -47,7 +47,7 @@ class PaginaCarritoTest extends TestCase
         $this->frontal = ZonaImpresion::factory()->create(['clave' => 'frontal', 'nombre' => ['es' => 'Frontal'], 'ancho_max_mm' => 280, 'alto_max_mm' => 380, 'desde_cuello_mm' => 75, 'desde_centro_mm' => 0]);
         $this->camiseta = Prenda::factory()->for(Familia::factory()->create())->create(['nombre' => ['es' => 'Camiseta']]);
         Variante::factory()->for($this->camiseta)->create(['color_id' => $this->negro->id, 'talla_id' => $this->m->id, 'precio_base' => 400]);
-        $this->camiseta->zonas()->attach($this->frontal->id, ['precio' => 300, 'coste' => 100]);
+        $this->permitirZona($this->camiseta, $this->frontal->id, 300, 100);
     }
 
     public function test_el_configurador_anade_una_linea_por_color_y_el_invitado_recibe_su_cookie(): void

@@ -23,14 +23,18 @@ class ZonasPorDefecto
     /** @var array<string, array{0: int, 1: int, 2: int, 3: int}> */
     public const POSICIONES = [
         'frontal' => [3770, 2260, 2460, 2790],
-        'pecho' => [5480, 2260, 790, 660],
-        'espalda' => [3680, 2070, 2640, 2930],
+        // D256: las zonas con las que se vende.
+        'pecho' => [3860, 2260, 2280, 2200],
+        'bolsillo' => [5480, 2260, 880, 730],
+        'espalda' => [3680, 2070, 2640, 2560],
+        'espalda_xl' => [3460, 2070, 3080, 3080],
+        'cuello' => [4740, 1450, 510, 370],
     ];
 
     /** Posiciones de partida de la primera versión (demasiado bajas y grandes). */
     public const ANTERIORES = [
         'frontal' => [3000, 2600, 4000, 4200],
-        'pecho' => [5400, 2400, 1400, 1300],
+        'bolsillo' => [5400, 2400, 1400, 1300], // antes «pecho» (D256)
         'espalda' => [2800, 2200, 4400, 5000],
     ];
 

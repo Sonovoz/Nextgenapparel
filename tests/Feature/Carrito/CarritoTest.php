@@ -76,8 +76,8 @@ class CarritoTest extends TestCase
         foreach ($this->tallas as $talla) {
             Variante::factory()->for($this->camiseta)->create(['color_id' => $this->negro->id, 'talla_id' => $talla, 'precio_base' => 400, 'peso_gramos' => 150]);
         }
-        $this->camiseta->zonas()->attach($this->zonas['frontal'], ['precio' => 300, 'coste' => 100]);
-        $this->camiseta->zonas()->attach($this->zonas['espalda'], ['precio' => 400, 'coste' => 100]);
+        $this->permitirZona($this->camiseta, $this->zonas['frontal'], 300, 100);
+        $this->permitirZona($this->camiseta, $this->zonas['espalda'], 400, 100);
         // Talla M: 700 mm de largo y 500 de ancho; L y XL, más grandes.
         foreach (['M' => [700, 500], 'L' => [740, 540], 'XL' => [760, 560]] as $talla => [$largo, $ancho]) {
             $this->camiseta->medidas()->create(['talla_id' => $this->tallas[$talla], 'largo_mm' => $largo, 'ancho_mm' => $ancho]);
@@ -516,7 +516,7 @@ class CarritoTest extends TestCase
         $blanco = Color::factory()->create(['nombre' => ['es' => 'Blanco']]);
         $polo = Prenda::factory()->for(Familia::factory()->create(['nombre' => ['es' => 'Polos']]))->create(['nombre' => ['es' => 'Polo']]);
         Variante::factory()->for($polo)->create(['color_id' => $blanco->id, 'talla_id' => $this->tallas['M'], 'precio_base' => 700, 'peso_gramos' => 210]);
-        $polo->zonas()->attach($this->zonas['espalda'], ['precio' => 400, 'coste' => 100]);
+        $this->permitirZona($polo, $this->zonas['espalda'], 400, 100);
 
         return [$polo, $blanco];
     }

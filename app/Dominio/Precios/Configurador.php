@@ -75,7 +75,7 @@ class Configurador
         if ($precios->isEmpty() || $ofrecidas->count() !== count($zonas)) {
             return [null, false];
         }
-        $sinIva = $precios->min() + (int) $ofrecidas->sum(fn ($z) => $z->pivot->precio);
+        $sinIva = $precios->min() + (int) $ofrecidas->sum(fn ($z) => $z->precio);
 
         return [Iva::conIva($sinIva, Impuestos::tipoIva($prenda->clase_impuesto_id)), $precios->unique()->count() > 1];
     }

@@ -45,7 +45,7 @@ class AsistenteIaTest extends TestCase
         $frontal = ZonaImpresion::factory()->create(['nombre' => ['es' => 'Frontal'], 'ancho_max_mm' => 280, 'alto_max_mm' => 380, 'desde_cuello_mm' => 75]);
         $prenda = Prenda::factory()->for(Familia::factory()->create())->create(['nombre' => ['es' => 'Camiseta Essential']]);
         Variante::factory()->for($prenda)->create(['color_id' => $negro->id, 'talla_id' => $m->id, 'precio_base' => 400]);
-        $prenda->zonas()->attach($frontal->id, ['precio' => 300, 'coste' => 100]);
+        $this->permitirZona($prenda, $frontal->id, 300, 100);
         $this->ids = ['prenda' => $prenda->id, 'color' => $negro->id, 'talla' => $m->id, 'zona' => $frontal->id];
         $this->usuario = User::factory()->create(['email_verified_at' => now()]);
         Cliente::factory()->create(['user_id' => $this->usuario->id, 'correo' => $this->usuario->email]);

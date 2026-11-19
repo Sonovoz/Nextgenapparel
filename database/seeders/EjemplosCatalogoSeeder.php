@@ -53,7 +53,8 @@ class EjemplosCatalogoSeeder extends Seeder
             app(GenerarVariantes::class)($prenda, $colores, $tallasPrenda, $datos['precio'], $datos['coste'], $datos['peso'], 50, $pesos);
 
             foreach ($datos['zonas'] as $clave => [$precio, $coste]) {
-                $prenda->zonas()->attach($zonas[$clave], ['precio' => $precio, 'coste' => $coste]);
+                $prenda->zonas()->syncWithoutDetaching([$zonas[$clave]]);
+                ZonaImpresion::whereKey($zonas[$clave])->update(['precio' => $precio, 'coste' => $coste]); // D256: precio de la zona
             }
 
             foreach ($datos['medidas'] as $talla => [$largo, $ancho, $manga]) {
@@ -79,7 +80,7 @@ class EjemplosCatalogoSeeder extends Seeder
                 'detalles' => ['es' => 'Corte unisex. Lavar del revés en frío para alargar la vida de la impresión.', 'en' => 'Unisex fit. Wash inside out in cold water to extend the life of the print.'],
                 'tallas' => ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
                 'precio' => 420, 'coste' => 230, 'peso' => 150, 'peso_por_talla' => 12,
-                'zonas' => ['frontal' => [300, 120], 'pecho' => [180, 70], 'espalda' => [350, 140]],
+                'zonas' => ['pecho' => [300, 120], 'bolsillo' => [180, 70], 'espalda' => [350, 140]],
                 'medidas' => ['S' => [690, 480, 190], 'M' => [720, 510, 200], 'L' => [740, 540, 210], 'XL' => [760, 570, 220]],
             ],
             [
@@ -95,7 +96,7 @@ class EjemplosCatalogoSeeder extends Seeder
                 'detalles' => ['es' => 'Cuello y puños de canalé. Aberturas laterales.', 'en' => 'Ribbed collar and cuffs. Side vents.'],
                 'tallas' => ['S', 'M', 'L', 'XL', 'XXL'],
                 'precio' => 750, 'coste' => 410, 'peso' => 210, 'peso_por_talla' => 15,
-                'zonas' => ['pecho' => [180, 70], 'espalda' => [350, 140]],
+                'zonas' => ['bolsillo' => [180, 70], 'espalda' => [350, 140]],
                 'medidas' => ['S' => [700, 500, 210], 'M' => [720, 530, 220], 'L' => [740, 560, 230], 'XL' => [760, 590, 240]],
             ],
             [
@@ -111,7 +112,7 @@ class EjemplosCatalogoSeeder extends Seeder
                 'detalles' => ['es' => 'Puños y cintura de canalé. Hombro caído.', 'en' => 'Ribbed cuffs and waistband. Dropped shoulder.'],
                 'tallas' => ['S', 'M', 'L', 'XL', 'XXL', '3XL'],
                 'precio' => 1390, 'coste' => 820, 'peso' => 480, 'peso_por_talla' => 30,
-                'zonas' => ['frontal' => [320, 130], 'pecho' => [190, 75], 'espalda' => [380, 150]],
+                'zonas' => ['pecho' => [300, 120], 'bolsillo' => [180, 70], 'espalda' => [350, 140]],
                 'medidas' => ['S' => [660, 540, 610], 'M' => [690, 570, 620], 'L' => [710, 600, 630], 'XL' => [730, 630, 640]],
             ],
         ];

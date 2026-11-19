@@ -41,10 +41,13 @@ class CatalogoInicialSeeder extends Seeder
             Color::firstOrCreate(['codigo_hex' => $hex], ['nombre' => ['es' => $es, 'en' => $en], 'orden' => $orden]);
         }
 
+        // D256: las zonas con las que se vende; el precio se pone en Productos → Zonas de impresión.
         foreach ([
-            ['frontal', 'Frontal', 'Front', Cara::Delantera, 280, 380, 75, 0],
-            ['pecho', 'Pecho', 'Chest', Cara::Delantera, 90, 90, 75, -100],
-            ['espalda', 'Espalda grande', 'Large back', Cara::Trasera, 300, 400, 100, 0],
+            ['pecho', 'Pecho', 'Chest', Cara::Delantera, 260, 300, 75, 0],
+            ['bolsillo', 'Bolsillo', 'Pocket', Cara::Delantera, 100, 100, 75, -100],
+            ['espalda', 'Espalda', 'Back', Cara::Trasera, 300, 350, 100, 0],
+            ['espalda_xl', 'Espalda XL', 'Back XL', Cara::Trasera, 350, 420, 100, 0],
+            ['cuello', 'Cuello interno (etiqueta)', 'Inside neck (label)', Cara::Delantera, 70, 50, 15, 0],
         ] as $orden => [$clave, $es, $en, $cara, $ancho, $alto, $cuello, $centro]) {
             ZonaImpresion::firstOrCreate(['clave' => $clave], [
                 'nombre' => ['es' => $es, 'en' => $en], 'cara' => $cara,

@@ -75,7 +75,7 @@ class MotorPreciosTest extends TestCase
                 Variante::factory()->for($prenda)->create(['color_id' => $this->negro->id, 'talla_id' => $talla, 'precio_base' => $precio, 'peso_gramos' => $peso]);
             }
             foreach ($zonas as $zona => $precioZona) {
-                $prenda->zonas()->attach($this->zonas[$zona], ['precio' => $precioZona, 'coste' => 100]);
+                $this->permitirZona($prenda, $this->zonas[$zona], $precioZona, 100);
             }
             $this->prendas[$clave] = $prenda;
         }

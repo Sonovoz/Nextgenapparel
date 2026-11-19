@@ -15,9 +15,4 @@ class PrendaZona extends Pivot
     protected $table = 'prenda_zona';
 
     public $incrementing = true;
-
-    protected function casts(): array
-    {
-        return ['precio' => 'integer', 'coste' => 'integer'];
-    }
 }
