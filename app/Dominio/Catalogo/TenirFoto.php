@@ -92,7 +92,9 @@ final class TenirFoto
         foreach (Cara::cases() as $cara) {
             $base = self::base($prenda, $cara);
             if ($base === null) {
-                $r['sin_base'][] = $cara->value;
+                if (in_array($cara, [Cara::Delantera, Cara::Trasera], true)) {
+                    $r['sin_base'][] = $cara->value; // los laterales son opcionales (D257): no se avisa
+                }
 
                 continue;
             }
