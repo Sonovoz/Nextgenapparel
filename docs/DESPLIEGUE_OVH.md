@@ -150,7 +150,7 @@ En el backend: **Herramientas → Estado del sistema**.
 Antes de abrir la tienda, en este orden. *Herramientas → Puesta en marcha* muestra esta lista comprobada con los datos reales y enlaza a cada ajuste (D196).
 
 1. **Correo**: SMTP real en *Ajustes → Correos* (o `MAIL_*` en `produccion.env`), con «Enviar correo de prueba». También `ALERTAS_EMAIL`, para recibir los errores y los avisos de salud.
-2. **Equipo**: cada persona entra al panel y configura la **verificación en dos pasos** con una app autenticadora. Guarda sus códigos de recuperación. Si alguien pierde el móvil: `php artisan usuarios:quitar-dos-pasos <correo>`. Si alguien olvida la contraseña: `php artisan usuarios:cambiar-contrasena <correo>`.
+2. **Equipo** (desactivado por ahora, D197; se activa con `DOS_PASOS_OBLIGATORIOS=true`): cada persona entra al panel y configura la **verificación en dos pasos** con una app autenticadora. Guarda sus códigos de recuperación. Si alguien pierde el móvil: `php artisan usuarios:quitar-dos-pasos <correo>`. Si alguien olvida la contraseña: `php artisan usuarios:cambiar-contrasena <correo>`.
 3. **Datos fiscales** en *Ajustes → Facturación*, y **textos legales** revisados por la asesoría en *Ajustes → Textos legales*.
 4. **Redsys**: el TPV real y su prueba (ver «Pagos con Redsys»).
 5. **Copias fuera del servidor**: contrata OVH Object Storage y rellena `COPIAS_EXTERNAS_*` con `COPIAS_EXTERNAS_ACTIVAS=true`. Comprueba en *Herramientas → Copias de seguridad* que se suben, y haz una prueba de restauración.
