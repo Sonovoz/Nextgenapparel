@@ -65,7 +65,7 @@ class ZonaImpresionResource extends RecursoCatalogo
                 TextInput::make('desde_cuello_mm')->label('Borde de arriba bajo el cuello')->numeric()->minValue(0)->maxValue(80)->step(0.1)->suffix('cm')->required()->default(0)
                     ->formatStateUsing(fn ($state) => $state === null ? null : $state / 10)
                     ->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 10))
-                    ->helperText('Frontal y pecho, 7,5 cm bajo el cuello delantero; espalda, 10 cm bajo el trasero.'),
+                    ->helperText('Pecho y bolsillo, 7,5 cm bajo el cuello delantero; espalda, 10 cm bajo el trasero; mangas, bajo la costura del hombro.'),
                 TextInput::make('desde_centro_mm')->label('Centro de la zona desde el centro de la prenda')->numeric()->minValue(-40)->maxValue(40)->step(0.1)->suffix('cm')->required()->default(0)
                     ->formatStateUsing(fn ($state) => $state === null ? null : $state / 10)
                     ->dehydrateStateUsing(fn ($state) => (int) round(((float) $state) * 10))

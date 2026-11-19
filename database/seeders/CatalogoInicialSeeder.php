@@ -48,6 +48,9 @@ class CatalogoInicialSeeder extends Seeder
             ['espalda', 'Espalda', 'Back', Cara::Trasera, 300, 350, 100, 0],
             ['espalda_xl', 'Espalda XL', 'Back XL', Cara::Trasera, 350, 420, 100, 0],
             ['cuello', 'Cuello interno (etiqueta)', 'Inside neck (label)', Cara::Delantera, 70, 50, 15, 0],
+            // D257: las mangas, en las vistas laterales.
+            ['manga_derecha', 'Manga derecha', 'Right sleeve', Cara::Derecha, 100, 100, 80, 0],
+            ['manga_izquierda', 'Manga izquierda', 'Left sleeve', Cara::Izquierda, 100, 100, 80, 0],
         ] as $orden => [$clave, $es, $en, $cara, $ancho, $alto, $cuello, $centro]) {
             ZonaImpresion::firstOrCreate(['clave' => $clave], [
                 'nombre' => ['es' => $es, 'en' => $en], 'cara' => $cara,

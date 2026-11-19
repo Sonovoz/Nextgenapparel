@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 19/11 | **Mangas en vista lateral**: caras «Lateral derecho/izquierdo» para las fotos, zonas Manga derecha e izquierda y botones de lateral en el configurador. | `mangas-lateral` | D257 |
 | 19/11 | **Zonas con precio único**: el precio de impresión se pone en la zona y vale para todas las prendas; zonas Pecho, Bolsillo, Espalda, Espalda XL y Cuello interno. | `zonas-precio-unico` | D256 |
 | 19/11 | **Importar de TopTex**: prenda con colores, tallas, coste y precio con margen desde su referencia; «Actualizar desde TopTex»; fotos de maniquí invisible a la cola (cuando TopTex las libere). | `toptex-importar` | D254 |
 | 19/11 | **Conexión con TopTex y margen comercial**: Ajustes → Proveedores con margen general y «Probar conexión con TopTex»; margen propio en la ficha de la prenda. La importación de artículos llega en la siguiente entrega. | `toptex-conector` | D253 |

@@ -125,11 +125,19 @@
         return cacheFotos[url];
     }
 
+    /** Vistas de la prenda, en orden (D257: los laterales, para las mangas). */
+    var CARAS = ['delantera', 'trasera', 'izquierda', 'derecha'];
+
+    /** Las vistas con foto en un color. */
+    function carasDe(color) {
+        return CARAS.filter(function (c) { return color && color.caras[c]; });
+    }
+
     /** Todas las zonas de la prenda (sin repetir), primero las delanteras. */
     function todasLasZonas() {
         var vistas = {};
         var lista = [];
-        ['delantera', 'trasera'].forEach(function (cara) {
+        CARAS.forEach(function (cara) {
             colores.forEach(function (color) {
                 var datos = color.caras[cara];
                 (datos ? datos.zonas : []).forEach(function (z) {
@@ -457,6 +465,8 @@
     function pintar(transicion) {
         var color = colores[estado.color];
         if (!color) return;
+        // D257: si este color no tiene foto lateral, se vuelve a la delantera.
+        if (!color.caras[estado.cara] && (estado.cara === 'izquierda' || estado.cara === 'derecha')) estado.cara = 'delantera';
 
         var nueva = construirEscena(estado.color, estado.cara, { marcas: estado.zonas, estampar: estampar, movible: true });
         estampar = false;
@@ -490,7 +500,12 @@
         document.getElementById('nombre-color').textContent = color.nombre;
         document.querySelectorAll('.piel').forEach(function (b) { b.setAttribute('aria-pressed', String(Number(b.dataset.color) === estado.color)); });
         document.querySelectorAll('.muestra').forEach(function (b) { b.setAttribute('aria-checked', String(Number(b.dataset.color) === estado.color)); });
-        document.querySelectorAll('[data-cara]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cara === estado.cara)); });
+        var disponibles = carasDe(color);
+        document.querySelectorAll('[data-cara]').forEach(function (b) {
+            b.setAttribute('aria-pressed', String(b.dataset.cara === estado.cara));
+            // Delantera y trasera siempre; los laterales, solo si este color tiene su foto (D257).
+            if (b.dataset.cara === 'izquierda' || b.dataset.cara === 'derecha') b.hidden = disponibles.indexOf(b.dataset.cara) === -1;
+        });
         document.getElementById('ver-zonas').setAttribute('aria-pressed', String(estado.zonas));
         if (!hayDiseno()) actualizarGuia(null); // D237: orienta antes de subir el diseño
     }
@@ -499,6 +514,14 @@
         if (cara === estado.cara) return;
         estado.cara = cara;
         pintar('giro');
+    }
+
+    /** Gira a la vista siguiente (o anterior) que tiene el color: delantera, lateral, trasera, otro lateral (D257). */
+    function girar(sentido) {
+        var giro = ['delantera', 'izquierda', 'trasera', 'derecha'].filter(function (c) { return colores[estado.color].caras[c]; });
+        if (giro.length < 2) return;
+        var i = Math.max(0, giro.indexOf(estado.cara));
+        cambiarCara(giro[(i + (sentido < 0 ? giro.length - 1 : 1)) % giro.length]);
     }
 
     /* ---------- Controles básicos ---------- */
@@ -520,7 +543,7 @@
         if (!inicio) return;
         var dx = e.clientX - inicio.x, dy = e.clientY - inicio.y;
         inicio = null;
-        if (Math.abs(dx) > 50 && Math.abs(dy) < 40) cambiarCara(estado.cara === 'delantera' ? 'trasera' : 'delantera');
+        if (Math.abs(dx) > 50 && Math.abs(dy) < 40) girar(dx < 0 ? 1 : -1);
     });
     lienzo.addEventListener('pointercancel', function () { inicio = null; });
 
@@ -1146,8 +1169,7 @@
         var color = colores[estado.color];
         var z = zonaEn(color, estado.cara);
         if (z) return z;
-        var caras = ['delantera', 'trasera'];
-        for (var i = 0; i < caras.length; i++) { z = zonaEn(color, caras[i]); if (z) return z; }
+        for (var i = 0; i < CARAS.length; i++) { z = zonaEn(color, CARAS[i]); if (z) return z; }
         return null;
     }
 
@@ -1687,7 +1709,7 @@
     cerrarBoton.addEventListener('click', cerrarEstudio);
     window.addEventListener('popstate', function () { if (enEstudio()) { desdeHistorial = true; cerrarEstudio(); } });
     document.querySelectorAll('[data-girar]').forEach(function (b) {
-        b.addEventListener('click', function () { cambiarCara(estado.cara === 'delantera' ? 'trasera' : 'delantera'); });
+        b.addEventListener('click', function () { girar(1); });
     });
     function alternarLupa() {
         estado.lupa = !estado.lupa;
@@ -1738,7 +1760,7 @@
         else if (aj && e.key === 'ArrowDown') aj.cy = Math.min(1, aj.cy + paso);
         else if (aj && (e.key === '+' || e.key === '=')) aj.escala = Math.min(1, Math.round((aj.escala + 0.05) * 100) / 100);
         else if (aj && (e.key === '-' || e.key === '_')) aj.escala = Math.max(0.2, Math.round((aj.escala - 0.05) * 100) / 100);
-        else if (tecla === 'f') { cambiarCara(estado.cara === 'delantera' ? 'trasera' : 'delantera'); return e.preventDefault(); }
+        else if (tecla === 'f') { girar(1); return e.preventDefault(); }
         else if (tecla === 'c') { estado.color = (estado.color + 1) % colores.length; pintar('fundido'); avisarListo(); return e.preventDefault(); }
         else if (tecla === 'l') { alternarLupa(); return e.preventDefault(); }
         else manejado = false;
@@ -2294,7 +2316,8 @@
 
     function tarjetaOtra(p, linea) {
         var conDiseno = zonasConDiseno().map(function (id) { return zonas.filter(function (z) { return z.id === id; })[0]; }).filter(Boolean);
-        var cara = conDiseno.some(function (z) { return z.cara === 'delantera'; }) || !p.caras.trasera ? 'delantera' : 'trasera';
+        // La primera vista con foto y diseño (delantera, trasera, laterales); si no, la delantera (D257).
+        var cara = CARAS.filter(function (c) { return p.caras[c] && conDiseno.some(function (z) { return z.cara === c; }); })[0] || 'delantera';
         var datos = p.caras[cara] || p.caras.delantera || p.caras.trasera;
         var li = el('li');
         var a = el('a', 'anadido-otra');
