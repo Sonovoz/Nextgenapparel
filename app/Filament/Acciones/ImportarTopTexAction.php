@@ -67,7 +67,8 @@ final class ImportarTopTexAction
         Actividad::apuntar('catalogo', ($r['creada'] ? 'Prenda importada de TopTex: ' : 'Prenda actualizada desde TopTex: ').$prenda->referencia_proveedor);
 
         $avisos = array_filter([
-            $r['sin_precio'] > 0 ? "{$r['sin_precio']} variaciones sin precio o sin peso en TopTex no se han creado (o se han desactivado)." : null,
+            $r['sin_tarifa'] ? 'TopTex aún no da vuestra tarifa de precios (en una cuenta nueva tarda hasta 4 horas): las variaciones se han creado desactivadas y sin precio. Cuando la dé, pulsa «Actualizar desde TopTex» en la ficha y se activarán con su precio.' : null,
+            ! $r['sin_tarifa'] && $r['sin_precio'] > 0 ? "{$r['sin_precio']} variaciones sin precio o sin peso en TopTex están desactivadas: no se venden." : null,
             $r['desactivadas'] > 0 ? "{$r['desactivadas']} variaciones desactivadas porque TopTex ya no las vende." : null,
             $r['fotos'] > 0 ? "{$r['fotos']} fotos de TopTex en camino: se descargan en segundo plano en unos minutos (las fotos que ya tengáis no se tocan)." : null,
             $r['fotos_bloqueadas'] ? 'Fotos: TopTex no las da hasta que aceptéis su carta de uso de fotos en su web (Photo library). Mientras, súbelas a mano.' : null,
