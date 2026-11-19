@@ -42,7 +42,7 @@ class ModeloCatalogoTest extends TestCase
 
         $prenda->refresh();
         $this->assertCount(2, $prenda->variantes);
-        $this->assertSame(300, $prenda->zonas->first()->pivot->precio);
+        $this->assertSame(300, $prenda->zonas->first()->precio); // D256: el de la zona
         $this->assertSame(720, $prenda->medidas->first()->largo_mm);
         $this->assertSame('#1C1C1F', $negro->fresh()->codigo_hex);
         $this->assertSame(3600, $prenda->fotos->first()->zonas->first()->ancho);

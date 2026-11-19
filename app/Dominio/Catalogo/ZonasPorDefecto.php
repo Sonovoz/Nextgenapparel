@@ -28,7 +28,7 @@ class ZonasPorDefecto
         'bolsillo' => [5480, 2260, 880, 730],
         'espalda' => [3680, 2070, 2640, 2560],
         'espalda_xl' => [3460, 2070, 3080, 3080],
-        'cuello' => [4740, 1450, 510, 370],
+        'cuello' => [4690, 1450, 620, 370],
     ];
 
     /** Posiciones de partida de la primera versión (demasiado bajas y grandes). */

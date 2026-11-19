@@ -161,6 +161,6 @@ class BackendCatalogoTest extends TestCase
 
         $this->assertSame(3, Familia::count());
         $this->assertSame(7, Talla::count());
-        $this->assertSame(3, ZonaImpresion::count());
+        $this->assertSame(5, ZonaImpresion::count()); // D256: pecho, bolsillo, espalda, espalda XL y cuello
     }
 }

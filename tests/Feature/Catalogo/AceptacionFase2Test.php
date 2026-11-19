@@ -89,10 +89,11 @@ class AceptacionFase2Test extends TestCase
             ->assertHasNoTableActionErrors();
         $retirado->update(['activo' => false]);
 
-        // 4. Zona frontal a 3,00 €
-        $frontal = ZonaImpresion::where('clave', 'frontal')->sole();
+        // 4. Zona del pecho a 3,00 € (D256: el precio es de la zona)
+        $frontal = ZonaImpresion::where('clave', 'pecho')->sole();
+        $frontal->update(['precio' => 300, 'coste' => 100]);
         $relacion(ZonasRelationManager::class)
-            ->callTableAction('attach', data: ['recordId' => $frontal->id, 'precio' => '3,00', 'coste' => '1,00'])
+            ->callTableAction('attach', data: ['recordId' => $frontal->id])
             ->assertHasNoTableActionErrors();
 
         // 5. Maqueta negra delantera (las zonas se colocan solas)
@@ -123,7 +124,7 @@ class AceptacionFase2Test extends TestCase
 
         preg_match("/data-colores='([^']+)'/", $es, $visor);
         $negroVisor = collect(json_decode(html_entity_decode($visor[1]), true))->firstWhere('nombre', 'Negro');
-        $this->assertSame(['Frontal'], array_column($negroVisor['caras']['delantera']['zonas'], 'nombre')); // solo la zona que tiene la prenda
+        $this->assertSame(['Pecho'], array_column($negroVisor['caras']['delantera']['zonas'], 'nombre')); // solo la zona que tiene la prenda
         $this->assertSame(['Blanco', 'Negro'], array_column(json_decode(html_entity_decode($visor[1]), true), 'nombre')); // en el orden del backend, sin el retirado
 
         // ── Tienda en inglés ──

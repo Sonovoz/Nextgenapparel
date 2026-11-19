@@ -69,17 +69,18 @@ class FotosTest extends TestCase
     public function test_las_zonas_de_partida_guardan_la_proporcion_real_y_empiezan_bajo_el_cuello(): void
     {
         // Foto de 1000 × 1200 a ≈ 8,8 px/cm: ancho% = cm × 0,88 y alto% = cm × 0,733.
-        foreach (['frontal' => [28, 38], 'pecho' => [9, 9], 'espalda' => [30, 40]] as $clave => [$anchoCm, $altoCm]) {
+        foreach (['frontal' => [28, 38], 'pecho' => [26, 30], 'bolsillo' => [10, 10], 'espalda' => [30, 35], 'espalda_xl' => [35, 42], 'cuello' => [7, 5]] as $clave => [$anchoCm, $altoCm]) {
             [$x, $y, $ancho, $alto] = ZonasPorDefecto::POSICIONES[$clave];
             $this->assertEqualsWithDelta($anchoCm * 88, $ancho, 30, "Ancho de {$clave}");
             $this->assertEqualsWithDelta($altoCm * 73.3, $alto, 30, "Alto de {$clave}");
             $this->assertLessThanOrEqual(2300, $y, "{$clave} empieza demasiado abajo");
         }
 
-        // El frontal y la espalda, centrados; el pecho, a la derecha de la foto (izquierda de quien la lleva).
-        $this->assertEqualsWithDelta(5000, ZonasPorDefecto::POSICIONES['frontal'][0] + ZonasPorDefecto::POSICIONES['frontal'][2] / 2, 10);
-        $this->assertEqualsWithDelta(5000, ZonasPorDefecto::POSICIONES['espalda'][0] + ZonasPorDefecto::POSICIONES['espalda'][2] / 2, 10);
-        $this->assertGreaterThan(5000, ZonasPorDefecto::POSICIONES['pecho'][0]);
+        // Pecho, espaldas y cuello, centrados; el bolsillo, a la derecha de la foto (izquierda de quien la lleva).
+        foreach (['frontal', 'pecho', 'espalda', 'espalda_xl', 'cuello'] as $clave) {
+            $this->assertEqualsWithDelta(5000, ZonasPorDefecto::POSICIONES[$clave][0] + ZonasPorDefecto::POSICIONES[$clave][2] / 2, 10, "{$clave} centrada");
+        }
+        $this->assertGreaterThan(5000, ZonasPorDefecto::POSICIONES['bolsillo'][0]);
     }
 
     public function test_recolocar_mueve_solo_las_zonas_que_siguen_en_la_posicion_anterior(): void
