@@ -6,6 +6,7 @@ Qué se ha construido, entrega a entrega, de la más reciente a la más antigua 
 
 | Fecha | Entrega | PR / rama | Decisión |
 | --- | --- | --- | --- |
+| 19/11 | **Conexión con TopTex y margen comercial**: Ajustes → Proveedores con margen general y «Probar conexión con TopTex»; margen propio en la ficha de la prenda. La importación de artículos llega en la siguiente entrega. | `toptex-conector` | D253 |
 | 14/11 | **Aviso de pedido nuevo**: se quita al abrir el pedido (sin cambiar su estado). | `aviso-pedido-visto` | D252 |
 | 14/11 | **Colores desde la blanca**: botón en Fotos que crea las maquetas de otros colores tiñendo la blanca, con vista previa y sus zonas. | `colores-desde-blanca` | D251 |
 | 14/11 | **Guía bien visible en el estudio**: el enlace bajo la subida pasa a tarjeta destacada («¿Primera vez? Prepara bien tu imagen»). | `guia-enlace-destacado` | D249 |

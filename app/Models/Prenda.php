@@ -17,6 +17,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  *
  * @property bool $activa
  * @property ?string $referencia_proveedor
+ * @property ?int $margen
  * @property-read ?Proveedor $proveedor
  */
 class Prenda extends Model
@@ -32,7 +33,7 @@ class Prenda extends Model
 
     protected function casts(): array
     {
-        return ['activa' => 'boolean'];
+        return ['activa' => 'boolean', 'margen' => 'integer'];
     }
 
     /** @return BelongsTo<Familia, $this> */
