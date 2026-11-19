@@ -47,11 +47,28 @@ class ClienteTopTex
             return [];
         }
         if (! $respuesta->successful()) {
-            throw new ProveedorNoDisponible('TopTex ha respondido con un error ('.$respuesta->status().') en '.$ruta.'.');
+            $motivo = $respuesta->json('errorMessage') ?? $respuesta->json('message');
+            throw new ProveedorNoDisponible('TopTex ha respondido con un error ('.$respuesta->status().') en '.$ruta.(is_string($motivo) && $motivo !== '' ? ': '.$motivo : '').'.');
         }
         $datos = $respuesta->json();
 
         return is_array($datos) ? $datos : [];
+    }
+
+    /**
+     * Ficha de una referencia del catálogo (colores con sus tallas), o null si TopTex no la tiene.
+     *
+     * @return ?array<string, mixed>
+     */
+    public function producto(string $referencia): ?array
+    {
+        foreach ($this->lista($this->get('/v3/products', ['catalog_reference' => $referencia, 'usage_right' => 'b2b_uniquement'])) as $ficha) {
+            if (is_array($ficha) && strcasecmp((string) ($ficha['catalogReference'] ?? ''), $referencia) === 0) {
+                return $ficha;
+            }
+        }
+
+        return null;
     }
 
     /**

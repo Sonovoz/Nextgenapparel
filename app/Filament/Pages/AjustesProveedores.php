@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Dominio\Catalogo\Proveedores\ClienteTopTex;
+use App\Dominio\Catalogo\Proveedores\ImportarTopTex;
 use App\Dominio\Catalogo\Proveedores\ProveedorNoDisponible;
 use App\Dominio\Precios\PrecioConMargen;
 use App\Dominio\Sistema\Actividad\Actividad;
@@ -99,8 +100,9 @@ class AjustesProveedores extends Page implements HasSchemas
             Action::make('guardar')->label('Guardar cambios')->action(function (): void {
                 $estado = $this->form->getState();
                 Ajuste::guardar('proveedores.margen', (int) $estado['margen']);
+                $cambiadas = ImportarTopTex::recalcular(); // D254: los precios de las prendas de proveedor siguen al margen
                 Actividad::apuntar('ajustes', 'Margen general de proveedores: '.(int) $estado['margen'].' %');
-                Notification::make()->title('Ajustes guardados')->success()->send();
+                Notification::make()->title('Ajustes guardados')->body($cambiadas > 0 ? "{$cambiadas} precios de prendas de proveedor recalculados." : null)->success()->send();
             }),
         ];
     }

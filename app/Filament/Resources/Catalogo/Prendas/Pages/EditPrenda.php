@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Catalogo\Prendas\Pages;
 
 use App\Dominio\Catalogo\Escaparate;
+use App\Dominio\Catalogo\Proveedores\ImportarTopTex;
+use App\Filament\Acciones\ImportarTopTexAction;
 use App\Filament\Concerns\AccionSeoIa;
 use App\Filament\Concerns\CamposTraducibles;
 use App\Filament\Resources\Catalogo\Prendas\PrendaResource;
@@ -32,6 +34,15 @@ class EditPrenda extends EditRecord
         return CamposTraducibles::limpiar($data, $this->getRecord()->translatable);
     }
 
+    /** D254: si cambia el margen propio de una prenda de proveedor, sus precios se recalculan con él. */
+    protected function afterSave(): void
+    {
+        $prenda = $this->getRecord();
+        if ($prenda instanceof Prenda && $prenda->wasChanged('margen')) {
+            ImportarTopTex::recalcular($prenda);
+        }
+    }
+
     /** Al guardar: ya está en la tienda (no hay caché), con un enlace para verlo. */
     protected function getSavedNotification(): ?Notification
     {
@@ -48,6 +59,7 @@ class EditPrenda extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            ImportarTopTexAction::actualizar(),
             AccionSeoIa::make('una prenda', ['nombre', 'descripcion', 'composicion', 'detalles'], ['nombre', 'descripcion', 'composicion', 'detalles']),
             DeleteAction::make()->label('Mover a la papelera'),
             RestoreAction::make(),
