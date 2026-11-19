@@ -41,6 +41,8 @@ class Ajuste extends Model
         // Fotos del catálogo (D210): al subirlas se pasan a WebP con este lado mayor y esta calidad (1-100).
         'catalogo.foto_max_px' => 2000,
         'catalogo.foto_calidad' => 82,
+        // D253: margen comercial general (%, sobre el coste) para las prendas de proveedor (TopTex).
+        'proveedores.margen' => 80,
         // Frenos al abuso: subidas por hora e IP y diseños nuevos por visitante y día.
         'disenos.subidas_hora' => 60,
         'disenos.max_dia' => 40,

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Catalogo\Prendas;
 
+use App\Dominio\Precios\PrecioConMargen;
 use App\Filament\Concerns\BusquedaTraducible;
 use App\Filament\Concerns\CampoDinero;
 use App\Filament\Concerns\CamposTraducibles;
@@ -50,11 +51,15 @@ class PrendaResource extends Resource
     {
         return $schema->columns(1)->components([
             Section::make('Prenda')->schema([
-                Grid::make(3)->schema([
+                Grid::make(4)->schema([
                     Select::make('familia_id')->label('Familia')->relationship('familia', 'id')
                         ->getOptionLabelFromRecordUsing(fn ($record) => $record->nombre)->required()->native(false)->preload(),
                     Select::make('proveedor_id')->label('Proveedor')->relationship('proveedor', 'nombre')->native(false)->preload(),
                     TextInput::make('referencia_proveedor')->label('Referencia del proveedor')->maxLength(100),
+                    // D253: margen comercial propio sobre el coste; vacío, el general de Ajustes → Proveedores.
+                    TextInput::make('margen')->label('Margen propio')->integer()->minValue(0)->maxValue(1000)->suffix('%')
+                        ->placeholder(fn () => 'General: '.PrecioConMargen::margen().' %')
+                        ->helperText('Sobre el coste del proveedor. Vacío = el general.'),
                 ]),
                 CamposTraducibles::texto('nombre', 'Nombre', obligatorio: true, slugDe: 'slug'),
                 CamposTraducibles::urls(Prenda::class, 160),
