@@ -175,7 +175,7 @@ final class ImportarTopTex
     }
 
     /**
-     * Foto delantera y trasera de un color, de sus «packshots» (FACE/FRONT y BACK). Si TopTex da varias para una
+     * Fotos de un color, de sus «packshots»: delantera (FACE/FRONT), trasera (BACK) y laterales (RIGHT/SIDE y LEFT, D257). Si TopTex da varias para una
      * cara, se prefiere la de maniquí invisible (GHOST). La URL es la primera dirección http de cada entrada.
      *
      * @param  array<mixed>  $packshots
@@ -188,6 +188,8 @@ final class ImportarTopTex
             $clave = Str::upper((string) $clave);
             $cara = match (true) {
                 str_contains($clave, 'BACK') => Cara::Trasera->value,
+                str_contains($clave, 'LEFT') => Cara::Izquierda->value,
+                str_contains($clave, 'RIGHT'), str_contains($clave, 'SIDE') => Cara::Derecha->value,
                 str_contains($clave, 'FACE'), str_contains($clave, 'FRONT') => Cara::Delantera->value,
                 default => null,
             };

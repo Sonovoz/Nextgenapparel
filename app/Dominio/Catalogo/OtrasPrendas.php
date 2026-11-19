@@ -53,7 +53,7 @@ final class OtrasPrendas
 
     /**
      * Vista previa de una prenda de para() con los diseños de una línea (DisenosDeLinea): la cara con diseño
-     * (delantera si hay alguno delante) y cada diseño en la zona de la misma clave o, si no la tiene, en la
+     * (la primera con foto y diseño: delantera, trasera o un lateral) y cada diseño en la zona de la misma clave o, si no la tiene, en la
      * primera libre de esa cara. El mismo criterio que la hoja del configurador.
      *
      * @param  array{caras: array<string, array{url: string, zonas: list<array{clave: ?string, x: float, y: float, ancho: float, alto: float}>}|null>}  $prenda
@@ -62,8 +62,10 @@ final class OtrasPrendas
      */
     public static function previa(array $prenda, array $disenos): array
     {
-        $delante = collect($disenos)->contains(fn ($d) => ($d['cara'] ?? null) === Cara::Delantera->value);
-        $cara = $delante || ($prenda['caras'][Cara::Trasera->value] ?? null) === null ? Cara::Delantera->value : Cara::Trasera->value;
+        // La primera cara (delantera, trasera, laterales) que tiene foto y algún diseño; si no, la delantera.
+        $cara = collect(Cara::cases())->map(fn (Cara $c) => $c->value)
+            ->first(fn (string $c) => ($prenda['caras'][$c] ?? null) !== null && collect($disenos)->contains(fn ($d) => ($d['cara'] ?? null) === $c))
+            ?? Cara::Delantera->value;
         $datos = $prenda['caras'][$cara] ?? null;
         if ($datos === null) {
             return ['foto' => null, 'capas' => []];

@@ -29,6 +29,9 @@ class ZonasPorDefecto
         'espalda' => [3680, 2070, 2640, 2560],
         'espalda_xl' => [3460, 2070, 3080, 3080],
         'cuello' => [4690, 1450, 620, 370],
+        // D257: en la foto lateral, la manga arriba y centrada.
+        'manga_derecha' => [4560, 2300, 880, 730],
+        'manga_izquierda' => [4560, 2300, 880, 730],
     ];
 
     /** Posiciones de partida de la primera versión (demasiado bajas y grandes). */

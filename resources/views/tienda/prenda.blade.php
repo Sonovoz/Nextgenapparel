@@ -375,9 +375,12 @@
                 </aside>
                 <div class="visor" id="visor" data-llevar='@json($llevar)' data-otras='@json($otras)' data-subida="{{ route('disenos.subir') }}" data-biblioteca="{{ route('disenos.lista') }}" data-borrar="{{ route('disenos.borrar', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-max-bytes="{{ \App\Dominio\Disenos\AnalizadorPng::maxMbEfectivo() * 1024 * 1024 }}" data-prenda="{{ $prenda->id }}" data-consejo="{{ route('disenos.consejo', ['diseno' => '00000000-0000-0000-0000-000000000000']) }}" data-anadir="{{ \App\Http\Controllers\CarritoController::url('anadir') }}" data-precio="{{ route('tienda.precio', ['familia' => Escaparate::slug($familia, $idioma), 'prenda' => Escaparate::slug($prenda, $idioma)]) }}" data-colores='@json($colores)' data-textos='@json($textosVisor)' data-calidad='@json($calidadVisor)'>
                     <div class="visor-controles">
-                        <div class="segmento" role="group" aria-label="{{ __('tienda.delantera') }} / {{ __('tienda.trasera') }}">
+                        <div class="segmento" role="group" aria-label="{{ __('tienda.vistas') }}">
                             <button type="button" class="boton-pildora" data-cara="delantera" aria-pressed="true">{{ __('tienda.delantera') }}</button>
                             <button type="button" class="boton-pildora" data-cara="trasera" aria-pressed="false">{{ __('tienda.trasera') }}</button>
+                            {{-- D257: los laterales (mangas), solo si el color tiene su foto. --}}
+                            <button type="button" class="boton-pildora" data-cara="izquierda" aria-pressed="false" hidden>{{ __('tienda.lateral_izquierdo') }}</button>
+                            <button type="button" class="boton-pildora" data-cara="derecha" aria-pressed="false" hidden>{{ __('tienda.lateral_derecho') }}</button>
                         </div>
                         <button type="button" class="boton-borde" id="ver-zonas" aria-pressed="false">{{ __('tienda.ver_zonas') }}</button>
                     </div>
