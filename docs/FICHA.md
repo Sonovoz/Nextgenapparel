@@ -90,8 +90,8 @@ Importes en céntimos (enteros). Campos traducibles marcados con *(es/en)*.
 - **prendas**: id, familia_id, proveedor_id, nombre *(es/en)*, descripcion *(es/en)*, composicion *(es/en)*, gramaje, detalles_tecnicos *(es/en)*, activa, campos SEO *(es/en)*.
 - **atributos / valores_atributo**: color (con código hex), talla.
 - **variantes**: id, prenda_id, color_id, talla_id, sku, precio_base, coste, peso_gramos, stock, stock_minimo, activa.
-- **zonas_impresion**: id, nombre *(es/en)* (frontal, pecho, espalda grande), ancho_max_cm, alto_max_cm, cara (delantera/trasera).
-- **prenda_zona**: prenda_id, zona_id, precio_zona, coste_zona — zonas disponibles por prenda.
+- **zonas_impresion**: id, nombre *(es/en)* (pecho, bolsillo, espalda, espalda XL, cuello interno; mangas con la vista lateral), ancho_max_cm, alto_max_cm, cara (delantera/trasera), precio y coste por prenda (D256: iguales para todas las prendas).
+- **prenda_zona**: prenda_id, zona_id — zonas que permite cada prenda (el precio es el de la zona, D256).
 - **fotos_maqueta**: prenda_id, color_id, cara, imagen, rectangulo_zona (x, y, ancho, alto por zona).
 - **fotos_galeria**: prenda_id, color_id (opcional), tipo (modelo / detalle / plana), imagen, orden, origen (manual / api).
 - **tabla_medidas**: prenda_id, talla_id, largo_cm, ancho_cm, manga_cm (para la guía de tallas).

@@ -54,7 +54,7 @@ class AsistentePacksTest extends TestCase
 
         return [
             'nombre' => ['es' => 'Pack Festival', 'en' => 'Festival Pack'], 'descripcion' => ['es' => 'Para tu evento.', 'en' => 'For your event.'],
-            'modos' => ['eventos', 'inventado'], 'reparto' => 'libre', 'max_disenos' => 2, 'zonas' => [$this->zona('frontal'), $this->zona('espalda'), 9999],
+            'modos' => ['eventos', 'inventado'], 'reparto' => 'libre', 'max_disenos' => 2, 'zonas' => [$this->zona('pecho'), $this->zona('espalda'), 9999],
             'lineas' => [
                 ['prenda_id' => $this->camiseta->id, 'unidades' => 30, 'colores' => [$negro, 9999], 'tallas' => Talla::whereIn('nombre', ['M', 'L'])->pluck('id')->all()],
                 ['prenda_id' => $this->polo->id, 'unidades' => 10, 'colores' => [$negro], 'tallas' => []], // el polo no tiene frontal: lleva la espalda
@@ -71,7 +71,7 @@ class AsistentePacksTest extends TestCase
         $p = app(AsistentePacks::class)->proponer('Pack para festivales con camisetas y polos negros, delante y detrás.');
 
         $this->assertSame(['eventos'], $p['modos']);
-        $this->assertSame([$this->zona('frontal'), $this->zona('espalda')], $p['zonas']);
+        $this->assertSame([$this->zona('pecho'), $this->zona('espalda')], $p['zonas']);
         $this->assertCount(2, $p['lineas']); // la prenda inventada se descarta
         $this->assertSame([(int) Color::where('nombre->es', 'Negro')->value('id')], $p['lineas'][0]['colores']);
         $this->assertNotEmpty($p['lineas'][1]['tallas']); // sin tallas: todas las del polo
@@ -91,7 +91,7 @@ class AsistentePacksTest extends TestCase
         [$m, $l] = [Talla::where('nombre', 'M')->value('id'), Talla::where('nombre', 'L')->value('id')];
         $tallasPolo = $p['lineas'][1]['tallas'];
         $esperado = app(MotorPrecios::class)->calcular(new Cesta([
-            new LineaCesta($this->camiseta->id, $negro, [$m => 15, $l => 15], [$this->zona('frontal'), $this->zona('espalda')]),
+            new LineaCesta($this->camiseta->id, $negro, [$m => 15, $l => 15], [$this->zona('pecho'), $this->zona('espalda')]),
             new LineaCesta($this->polo->id, $negro, array_fill_keys($tallasPolo, 2), [$this->zona('espalda')]), // 10 polos en 5 tallas
         ]))->subtotal();
         $this->assertSame($esperado, $v['catalogo']);

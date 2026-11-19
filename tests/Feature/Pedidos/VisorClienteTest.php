@@ -59,7 +59,7 @@ class VisorClienteTest extends TestCase
         $this->frontal = ZonaImpresion::factory()->create(['nombre' => ['es' => 'Frontal'], 'ancho_max_mm' => 280, 'alto_max_mm' => 380, 'desde_cuello_mm' => 75]);
         $this->prenda = Prenda::factory()->for(Familia::factory()->create())->create(['nombre' => ['es' => 'Camiseta Essential']]);
         Variante::factory()->for($this->prenda)->create(['color_id' => $this->negro->id, 'talla_id' => $this->m->id]);
-        $this->prenda->zonas()->attach($this->frontal->id, ['precio' => 300, 'coste' => 100]);
+        $this->permitirZona($this->prenda, $this->frontal->id, 300, 100);
 
         $this->pedido = Pedido::factory()->create(['estado' => E::PendientePago, 'numero' => 'PED-0007', 'cupon' => null]);
         $this->pedido->historial()->create(['estado' => E::PendientePago]);

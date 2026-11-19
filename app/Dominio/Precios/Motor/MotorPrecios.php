@@ -138,7 +138,7 @@ final class MotorPrecios
 
             return null;
         }
-        $impresion = (int) $zonas->sum(fn ($z) => $z->pivot->precio) * $unidades;
+        $impresion = (int) $zonas->sum(fn ($z) => $z->precio) * $unidades;
         [$tipoIva, $recargo] = Impuestos::tipos($prenda->clase_impuesto_id);
 
         return new LineaCalculada('prenda', $prenda->id, $prenda->nombre, $prenda->familia_id, $unidades, $tallas,
@@ -205,9 +205,9 @@ final class MotorPrecios
                 $tallasTotales[$tallaId] = ($tallasTotales[$tallaId] ?? 0) + $unidades;
             }
 
-            // Zonas extra: se cobran con la tarifa de la prenda (D106).
+            // Zonas extra: se cobran con la tarifa de la zona (D106, D256).
             foreach (array_diff(array_unique($elegido->zonasExtra), $pack->zonas->pluck('id')->all()) as $zonaId) {
-                $precioZona = $lineaPack->prenda->zonas()->where('zonas_impresion.activa', true)->where('zonas_impresion.id', $zonaId)->first()?->pivot->precio;
+                $precioZona = $lineaPack->prenda->zonas()->where('zonas_impresion.activa', true)->where('zonas_impresion.id', $zonaId)->first()?->precio;
                 if ($precioZona === null) {
                     $this->impedimentos[] = new Mensaje('linea_sin_impresion', ['prenda' => ['modelo' => 'prenda', 'id' => $lineaPack->prenda_id]]);
 

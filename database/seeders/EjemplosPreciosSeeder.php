@@ -61,7 +61,7 @@ class EjemplosPreciosSeeder extends Seeder
 
         $camiseta = Prenda::where('slug->es', 'camiseta-essential')->first();
         $negro = Color::where('nombre->es', 'Negro')->first();
-        $frontal = ZonaImpresion::where('clave', 'frontal')->first();
+        $frontal = ZonaImpresion::where('clave', 'pecho')->first(); // D256: la frontal pasó a «Pecho»
         if ($camiseta && $negro && $frontal) {
             $tallas = Talla::pluck('id', 'nombre');
             $pack = Pack::withTrashed()->updateOrCreate(['slug->es' => 'pack-joven'], [

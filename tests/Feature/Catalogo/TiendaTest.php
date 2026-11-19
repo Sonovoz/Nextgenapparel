@@ -87,7 +87,7 @@ class TiendaTest extends TestCase
 
         $this->assertSame([1000, 140], [$general->fresh()->tipo_iva, $general->fresh()->recargo]);
         $this->assertSame('Impuestos cambiados', Activity::latest('id')->value('description'));
-        $this->get('/es/camisetas')->assertSee('6,60 €'); // (4,20 + pecho 1,80) + 10 %
+        $this->get('/es/camisetas')->assertSee('6,60 €'); // (4,20 + bolsillo 1,80) + 10 %
     }
 
     public function test_los_umbrales_de_calidad_se_cambian_en_ajustes_y_deben_ir_en_orden(): void
@@ -179,10 +179,10 @@ class TiendaTest extends TestCase
     {
         $this->get('/es/camisetas/camiseta-essential')->assertOk()
             ->assertSee('<h1>Camiseta Essential</h1>', false)
-            ->assertSee('7,26 €') // 4,20 + pecho 1,80 + 21 %
+            ->assertSee('7,26 €') // 4,20 + bolsillo 1,80 + 21 %
             ->assertSee('aria-label="Blanco"', false)->assertSee('aria-label="Negro"', false)
             ->assertSeeInOrder(['XS', 'S', 'M', 'L', 'XL', 'XXL'])
-            ->assertSee('Hasta 28 × 38 cm')
+            ->assertSee('Hasta 26 × 30 cm')
             ->assertSee('Guía de tallas')->assertSee('72 cm')
             ->assertSee('100 % algodón peinado')
             ->assertSee('Producción: 2 días laborables');
@@ -191,7 +191,7 @@ class TiendaTest extends TestCase
     public function test_la_ficha_en_ingles_usa_su_url_y_textos(): void
     {
         $this->get('/en/t-shirts/essential-t-shirt')->assertOk()
-            ->assertSee('Essential T-shirt')->assertSee('100% combed cotton')->assertSee('Size guide')->assertSee('Up to 28 × 38 cm');
+            ->assertSee('Essential T-shirt')->assertSee('100% combed cotton')->assertSee('Size guide')->assertSee('Up to 26 × 30 cm');
     }
 
     public function test_el_selector_de_idioma_lleva_a_la_misma_prenda_traducida(): void
@@ -213,7 +213,7 @@ class TiendaTest extends TestCase
         $camiseta = $this->camiseta();
         $negro = $camiseta->variantes()->with('color')->get()->firstWhere('color.codigo_hex', '#1C1C1F')->color;
         $foto = Foto::create(['prenda_id' => $camiseta->id, 'color_id' => $negro->id, 'tipo' => TipoFoto::Maqueta, 'cara' => Cara::Delantera, 'ruta' => 'catalogo/1/negro.webp']);
-        FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $camiseta->zonas()->where('clave', 'frontal')->value('zonas_impresion.id'), 'x' => 3000, 'y' => 2600, 'ancho' => 4000, 'alto' => 4200]);
+        FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $camiseta->zonas()->where('clave', 'pecho')->value('zonas_impresion.id'), 'x' => 3000, 'y' => 2600, 'ancho' => 4000, 'alto' => 4200]);
 
         $html = $this->get('/es/camisetas/camiseta-essential')->assertOk()->getContent();
         preg_match("/data-colores='([^']+)'/", $html, $coincidencia);
@@ -221,8 +221,8 @@ class TiendaTest extends TestCase
 
         $negroEnVisor = collect($colores)->firstWhere('nombre', 'Negro');
         $this->assertStringEndsWith('catalogo/1/negro.webp', $negroEnVisor['caras']['delantera']['url']);
-        $zonaFrontal = $camiseta->zonas()->where('clave', 'frontal')->value('zonas_impresion.id');
-        $this->assertSame(['precio' => '3,63 €', 'id' => $zonaFrontal, 'nombre' => 'Frontal', 'clave' => 'frontal', 'ancho_mm' => 280, 'alto_mm' => 380, 'cuello_mm' => 75, 'centro_mm' => 0, 'x' => 30, 'y' => 26, 'ancho' => 40, 'alto' => 42], $negroEnVisor['caras']['delantera']['zonas'][0]);
+        $zonaFrontal = $camiseta->zonas()->where('clave', 'pecho')->value('zonas_impresion.id');
+        $this->assertSame(['precio' => '3,63 €', 'id' => $zonaFrontal, 'nombre' => 'Pecho', 'clave' => 'pecho', 'ancho_mm' => 260, 'alto_mm' => 300, 'cuello_mm' => 75, 'centro_mm' => 0, 'x' => 30, 'y' => 26, 'ancho' => 40, 'alto' => 42], $negroEnVisor['caras']['delantera']['zonas'][0]);
         $this->assertNull($negroEnVisor['caras']['trasera']);
     }
 
@@ -330,10 +330,10 @@ class TiendaTest extends TestCase
     public function test_el_desde_incluye_la_impresion_mas_barata_activa(): void
     {
         $camiseta = $this->camiseta();
-        $this->assertSame(600, Escaparate::desdeSinIva($camiseta)); // 4,20 + pecho 1,80
+        $this->assertSame(600, Escaparate::desdeSinIva($camiseta)); // 4,20 + bolsillo 1,80
 
-        $camiseta->zonas()->where('clave', 'pecho')->first()->update(['activa' => false]);
-        $this->assertSame(720, Escaparate::desdeSinIva($camiseta)); // 4,20 + frontal 3,00
+        $camiseta->zonas()->where('clave', 'bolsillo')->first()->update(['activa' => false]);
+        $this->assertSame(720, Escaparate::desdeSinIva($camiseta)); // 4,20 + pecho 3,00
         $this->get('/es/camisetas/camiseta-essential')->assertSee('8,71 €');
     }
 
@@ -371,13 +371,13 @@ class TiendaTest extends TestCase
         foreach ($camiseta->zonas()->where('cara', 'delantera')->get() as $zona) {
             FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $zona->id, 'x' => 3000, 'y' => 2600, 'ancho' => 2000, 'alto' => 2000]);
         }
-        $camiseta->zonas()->where('clave', 'pecho')->first()->update(['activa' => false]);
+        $camiseta->zonas()->where('clave', 'bolsillo')->first()->update(['activa' => false]);
 
         $html = $this->get('/es/camisetas/camiseta-essential')->getContent();
         preg_match("/data-colores='([^']+)'/", $html, $coincidencia);
         $zonas = collect(json_decode(html_entity_decode($coincidencia[1]), true))->pluck('caras.delantera.zonas')->filter()->flatten(1);
 
-        $this->assertSame(['Frontal'], $zonas->pluck('nombre')->unique()->values()->all());
+        $this->assertSame(['Pecho'], $zonas->pluck('nombre')->unique()->values()->all());
     }
 
     public function test_familias_y_prendas_inexistentes_dan_404(): void

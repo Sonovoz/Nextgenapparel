@@ -65,7 +65,7 @@ class Prenda extends Model
     {
         return $this->belongsToMany(ZonaImpresion::class, 'prenda_zona')
             ->using(PrendaZona::class)
-            ->withPivot(['id', 'precio', 'coste'])
+            ->withPivot(['id'])
             ->withTimestamps();
     }
 

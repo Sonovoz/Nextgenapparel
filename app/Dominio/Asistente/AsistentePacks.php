@@ -169,7 +169,7 @@ final class AsistentePacks
             foreach ($tallas as $talla => $unidades) {
                 $coste += (int) ($variantes->get($talla)->coste ?? 0) * $unidades;
             }
-            $coste += (int) DB::table('prenda_zona')->where('prenda_id', $l['prenda_id'])->whereIn('zona_impresion_id', $zonas)->sum('coste') * $l['unidades'];
+            $coste += (int) Prenda::find($l['prenda_id'])?->zonas()->whereIn('zonas_impresion.id', $zonas)->get()->sum(fn ($z) => $z->coste) * $l['unidades'];
             $unidadesTotal += $l['unidades'];
         }
         $catalogo = $cesta === [] ? 0 : app(MotorPrecios::class)->calcular(new Cesta($cesta))->subtotal();

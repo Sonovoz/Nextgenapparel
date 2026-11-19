@@ -210,7 +210,7 @@ class BackendPreciosTest extends TestCase
 
         return array_replace_recursive([
             'nombre' => ['es' => 'Pack joven'], 'slug' => ['es' => 'pack-joven'], 'precio' => '81,82', 'reparto' => 'fijo',
-            'zonas' => [$camiseta->zonas()->where('clave', 'frontal')->value('zonas_impresion.id')], 'activo' => true,
+            'zonas' => [$camiseta->zonas()->where('clave', 'pecho')->value('zonas_impresion.id')], 'activo' => true,
             'lineas' => [[
                 'prenda_id' => $camiseta->id, 'unidades' => 10, 'colores' => [$negro->id],
                 'reparto_tallas' => [['talla_id' => $tallas['L'], 'unidades' => 2], ['talla_id' => $tallas['XL'], 'unidades' => 5], ['talla_id' => $tallas['XXL'], 'unidades' => 3]],
@@ -276,10 +276,10 @@ class BackendPreciosTest extends TestCase
         Livewire::test(ManagePacks::class)->callAction('create', $datos)->assertHasFormErrors(['zonas']);
 
         // Frontal y espalda: el polo lleva la espalda y se guarda sin error.
-        $datos['zonas'] = [$zona('frontal'), $zona('espalda')];
+        $datos['zonas'] = [$zona('pecho'), $zona('espalda')];
         Livewire::test(ManagePacks::class)->callAction('create', $datos)->assertHasNoFormErrors();
         $this->assertSame([$zona('espalda')], ZonasPack::dePrenda($datos['zonas'], $polo->id));
-        $this->assertSame([['prenda' => (string) $polo->nombre, 'si' => ['Espalda grande'], 'no' => ['Frontal']]],
+        $this->assertSame([['prenda' => (string) $polo->nombre, 'si' => ['Espalda'], 'no' => ['Pecho']]],
             ZonasPack::resumen($datos['zonas'], [$polo->id]));
     }
 
@@ -293,7 +293,7 @@ class BackendPreciosTest extends TestCase
             ->fillForm([
                 'lineas' => [[
                     'prenda_id' => $camiseta->id, 'color_id' => Color::where('nombre->es', 'Negro')->value('id'),
-                    'zonas' => [$camiseta->zonas()->where('clave', 'frontal')->value('zonas_impresion.id')],
+                    'zonas' => [$camiseta->zonas()->where('clave', 'pecho')->value('zonas_impresion.id')],
                     'tallas' => [['talla_id' => Talla::where('nombre', 'M')->value('id'), 'unidades' => 14]],
                 ]],
                 'cp' => '28001',

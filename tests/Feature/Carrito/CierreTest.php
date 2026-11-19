@@ -38,7 +38,7 @@ class CierreTest extends TestCase
         $zona = ZonaImpresion::factory()->create(['ancho_max_mm' => 280, 'alto_max_mm' => 380, 'desde_cuello_mm' => 75]);
         $prenda = Prenda::factory()->for(Familia::factory()->create())->create();
         Variante::factory()->for($prenda)->create(['color_id' => $negro->id, 'talla_id' => $m->id, 'precio_base' => 400, 'peso_gramos' => 150]);
-        $prenda->zonas()->attach($zona->id, ['precio' => 300, 'coste' => 100]);
+        $this->permitirZona($prenda, $zona->id, 300, 100);
         // Península: 4,90 € hasta 2 kg (caso E de la ficha).
         $peninsula = ZonaEnvio::create(['nombre' => ['es' => 'Península'], 'paises' => ['ES'], 'metodo' => 'por_kilo', 'precio_kg_extra' => 80, 'plazo_dias' => 2]);
         TarifaEnvio::create(['zona_envio_id' => $peninsula->id, 'hasta_gramos' => 5000, 'precio' => 490]);

@@ -38,7 +38,7 @@ class PresupuestosTest extends TestCase
         $frontal = ZonaImpresion::factory()->create(['nombre' => ['es' => 'Frontal'], 'ancho_max_mm' => 280, 'alto_max_mm' => 380, 'desde_cuello_mm' => 75]);
         $this->prenda = Prenda::factory()->for(Familia::factory()->create())->create(['nombre' => ['es' => 'Camiseta Essential']]);
         Variante::factory()->for($this->prenda)->create(['color_id' => $negro->id, 'talla_id' => $m->id, 'precio_base' => 400]);
-        $this->prenda->zonas()->attach($frontal->id, ['precio' => 300, 'coste' => 100]);
+        $this->permitirZona($this->prenda, $frontal->id, 300, 100);
 
         $this->carrito = Carrito::create(['token' => hash('sha256', str_repeat('p', 40))]);
         $linea = $this->carrito->lineas()->create(['tipo' => 'prenda', 'prenda_id' => $this->prenda->id, 'color_id' => $negro->id, 'tallas' => [$m->id => 15]]);

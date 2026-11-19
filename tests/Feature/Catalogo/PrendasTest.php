@@ -243,22 +243,22 @@ class PrendasTest extends TestCase
         $this->assertSame([600, 600, 600], $this->prenda->variantes()->pluck('precio_base')->all());
     }
 
-    public function test_anadir_una_zona_con_su_precio(): void
+    public function test_anadir_una_zona_la_permite_con_el_precio_de_la_zona(): void
     {
-        $zona = ZonaImpresion::factory()->create(['nombre' => ['es' => 'Frontal']]);
+        $zona = ZonaImpresion::factory()->create(['nombre' => ['es' => 'Pecho'], 'precio' => 300, 'coste' => 120]);
 
         Livewire::test(ZonasRelationManager::class, ['ownerRecord' => $this->prenda, 'pageClass' => EditPrenda::class])
-            ->callTableAction('attach', data: ['recordId' => $zona->id, 'precio' => '3,00', 'coste' => '1.20'])
-            ->assertHasNoTableActionErrors();
+            ->callTableAction('attach', data: ['recordId' => $zona->id])
+            ->assertHasNoTableActionErrors()
+            ->assertSee('3,00 €');
 
-        $pivote = $this->prenda->zonas()->sole()->pivot;
-        $this->assertSame([300, 120], [$pivote->precio, $pivote->coste]);
+        $this->assertSame([300, 120], [$this->prenda->zonas()->sole()->precio, $this->prenda->zonas()->sole()->coste]); // D256
     }
 
     public function test_quitar_una_zona_la_quita_tambien_de_las_maquetas(): void
     {
         $zona = ZonaImpresion::factory()->create();
-        $this->prenda->zonas()->attach($zona, ['precio' => 300]);
+        $this->permitirZona($this->prenda, $zona, 300);
         $foto = Foto::create(['prenda_id' => $this->prenda->id, 'color_id' => $this->negro->id, 'tipo' => TipoFoto::Maqueta, 'cara' => $zona->cara, 'ruta' => 'catalogo/x.webp']);
         FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $zona->id, 'x' => 3000, 'y' => 2000, 'ancho' => 2000, 'alto' => 2000]);
 

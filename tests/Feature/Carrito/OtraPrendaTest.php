@@ -46,7 +46,7 @@ class OtraPrendaTest extends TestCase
         foreach (['camiseta' => 'Camisetas', 'sudadera' => 'Sudaderas'] as $clave => $familia) {
             $prenda = Prenda::factory()->for(Familia::factory()->create(['nombre' => ['es' => $familia]]))->create(['nombre' => ['es' => ucfirst($clave).' prueba']]);
             Variante::factory()->for($prenda)->create(['color_id' => $negro->id, 'talla_id' => $m->id, 'precio_base' => 400]);
-            $prenda->zonas()->attach($frontal->id, ['precio' => 300, 'coste' => 100]);
+            $this->permitirZona($prenda, $frontal->id, 300, 100);
             $foto = Foto::factory()->create(['prenda_id' => $prenda->id, 'color_id' => $negro->id, 'tipo' => TipoFoto::Maqueta, 'cara' => Cara::Delantera]);
             FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => $frontal->id, 'x' => 3770, 'y' => 2260, 'ancho' => 2460, 'alto' => 2790]);
             $this->{$clave} = $prenda;
@@ -102,7 +102,7 @@ class OtraPrendaTest extends TestCase
         Variante::factory()->for($otraCamiseta)->create(['color_id' => Color::first()->id, 'talla_id' => Talla::first()->id, 'precio_base' => 500]);
         $foto = Foto::factory()->create(['prenda_id' => $otraCamiseta->id, 'color_id' => Color::first()->id, 'tipo' => TipoFoto::Maqueta, 'cara' => Cara::Delantera]);
         FotoZona::create(['foto_id' => $foto->id, 'zona_impresion_id' => ZonaImpresion::first()->id, 'x' => 3770, 'y' => 2260, 'ancho' => 2460, 'alto' => 2790]);
-        $otraCamiseta->zonas()->attach(ZonaImpresion::first()->id, ['precio' => 300, 'coste' => 100]);
+        $this->permitirZona($otraCamiseta, ZonaImpresion::first()->id, 300, 100);
 
         $nombres = array_column(OtrasPrendas::para([$this->camiseta->id]), 'nombre');
 

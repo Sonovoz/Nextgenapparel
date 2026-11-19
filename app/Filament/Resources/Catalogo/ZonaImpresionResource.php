@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Catalogo;
 
 use App\Dominio\Catalogo\Cara;
 use App\Filament\Concerns\BusquedaTraducible;
+use App\Filament\Concerns\CampoDinero;
 use App\Filament\Concerns\CamposTraducibles;
 use App\Models\ZonaImpresion;
 use BackedEnum;
@@ -53,6 +54,12 @@ class ZonaImpresionResource extends RecursoCatalogo
                 $cm('alto_max_mm', 'Alto máximo'),
                 TextInput::make('orden')->label('Orden')->numeric()->integer()->minValue(0)->default(0),
             ]),
+            // D256: el precio es de la zona y vale para todas las prendas que la permiten (cada una puede tener el suyo).
+            Grid::make(2)->schema([
+                CampoDinero::make('precio', 'Precio de impresión por prenda, sin IVA')->required()->default('0')
+                    ->helperText('Se aplica en todas las prendas con esta zona. En la ficha de una prenda se le puede poner otro.'),
+                CampoDinero::make('coste', 'Coste de impresión por prenda')->required()->default('0')->helperText('Para el panel de márgenes.'),
+            ]),
             // Dónde está la zona en la prenda (D99): con esto el pedido guarda la posición en mm.
             Grid::make(2)->schema([
                 TextInput::make('desde_cuello_mm')->label('Borde de arriba bajo el cuello')->numeric()->minValue(0)->maxValue(80)->step(0.1)->suffix('cm')->required()->default(0)
@@ -77,6 +84,7 @@ class ZonaImpresionResource extends RecursoCatalogo
                 TextColumn::make('cara')->label('Cara')->badge(),
                 TextColumn::make('medida')->label('Medida máxima')
                     ->state(fn (ZonaImpresion $r) => str_replace('.', ',', ($r->ancho_max_mm / 10).' × '.($r->alto_max_mm / 10)).' cm'),
+                TextColumn::make('precio')->label('Precio sin IVA')->formatStateUsing(fn ($state) => CampoDinero::formatear((int) $state)),
                 IconColumn::make('activa')->label('Activa')->boolean(),
             ])
             ->recordActions([static::accionEditar(), static::accionBorrar()]);

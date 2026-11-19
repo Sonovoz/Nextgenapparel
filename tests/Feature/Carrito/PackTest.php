@@ -46,7 +46,7 @@ class PackTest extends TestCase
         foreach ($this->tallas as $t) {
             Variante::factory()->for($camiseta)->create(['color_id' => $this->negro->id, 'talla_id' => $t, 'precio_base' => 400]);
         }
-        $camiseta->zonas()->attach($this->frontal->id, ['precio' => 300, 'coste' => 100]);
+        $this->permitirZona($camiseta, $this->frontal->id, 300, 100);
         $this->pack = Pack::create(['nombre' => ['es' => 'Pack joven'], 'slug' => ['es' => 'pack-joven', 'en' => 'young-pack'], 'precio' => 8182, 'reparto' => 'libre']);
         $this->pack->lineas()->create(['prenda_id' => $camiseta->id, 'unidades' => 10, 'colores' => [$this->negro->id], 'tallas_permitidas' => array_values($this->tallas)]);
         $this->pack->zonas()->attach($this->frontal->id);
@@ -104,7 +104,7 @@ class PackTest extends TestCase
     {
         $espalda = ZonaImpresion::factory()->create(['nombre' => ['es' => 'Espalda'], 'ancho_max_mm' => 300, 'alto_max_mm' => 400, 'desde_cuello_mm' => 100, 'desde_centro_mm' => 0]);
         $lineaPack = $this->pack->lineas()->sole();
-        $lineaPack->prenda->zonas()->attach($espalda->id, ['precio' => 350, 'coste' => 140]);
+        $this->permitirZona($lineaPack->prenda, $espalda->id, 350, 140);
         $this->pack->zonas()->attach($espalda->id);
         $this->pack->update(['max_disenos' => 2]);
         $uno = $this->diseno([]);
